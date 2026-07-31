@@ -53,9 +53,13 @@ is explicitly wide, and bounded list overflow keeps the frontmost entries.
 
 The ignored `roms/` folder currently contains 18 user-supplied sets. Run
 `python tools/gen_mra.py` to validate those archives and regenerate one MRA per
-set. `python tools/gen_sim_media.py --all` prepares ignored real-ROM media for
-the complete simulation matrix. ROM, floppy, and key payloads are never tracked
-by this repository.
+set. Every generated external ROM region declares
+`type="merged|nonmerged|split"` and retains its CRC, so the same MRA accepts
+full non-merged sets, split parent/clone sets, and merged parent archives with
+clone-prefixed members. The validator follows MiSTer's CRC-first archive lookup.
+`python tools/gen_sim_media.py --all` prepares ignored real-ROM media for the
+complete simulation matrix. ROM, floppy, and key payloads are never tracked by
+this repository.
 
 MiSTer's 16-bit HPS download path now captures both bytes of each MRA switch
 payload at address zero, preserving the per-game `FF ED` and `FF FB` defaults

@@ -31,7 +31,23 @@ module s24_tile (
 );
     import s24_pkg::*;
 
-    (* ramstyle = "M10K, no_rw_check" *) logic [15:0] tile_ram [0:32767];
+    // The CPU-visible 32K-word RAM has a synchronous video read port. Keep
+    // byte lanes separate so Quartus infers byte-enabled true dual-port M10Ks.
+    (* ramstyle = "M10K, no_rw_check" *) logic [7:0] tile_ram_lo [0:32767];
+    (* ramstyle = "M10K, no_rw_check" *) logic [7:0] tile_ram_hi [0:32767];
+    // Replicate only the small video-facing upper regions. Both copies use
+    // synchronous video reads so their paths terminate in M10K output
+    // registers instead of long asynchronous MLAB muxes.
+    (* ramstyle = "M10K, no_rw_check" *) logic [7:0] line_scroll_issue_lo [0:2047];
+    (* ramstyle = "M10K, no_rw_check" *) logic [7:0] line_scroll_issue_hi [0:2047];
+    (* ramstyle = "M10K, no_rw_check" *) logic [7:0] mask_ram_lo [0:4095];
+    (* ramstyle = "M10K, no_rw_check" *) logic [7:0] mask_ram_hi [0:4095];
+    logic [15:0] control_regs [0:7];
+    // Preserve the verification bench's diagnostic hierarchy without putting
+    // this redundant array into the synthesized design.
+    // synthesis translate_off
+    logic [15:0] tile_ram [0:32767];
+    // synthesis translate_on
     // A line entry retains validity separately from its raw palette/pen value.
     // Pen zero is transparent to the normal priority pass, but MAME's opaque
     // backdrop pass still needs color zero from the selected tile's palette.
@@ -45,25 +61,118 @@ module s24_tile (
     // loader; give the local tile/control RAM and scanline stores the same
     // deterministic power-on contents. An initial image maps to M10K startup
     // data and avoids a 32K-cycle reset scrub or reset mux on every RAM bit.
-    integer ram_init;
+    integer ram_init0,ram_init1,ram_init2,ram_init3;
+    integer ram_init4,ram_init5,ram_init6,ram_init7;
+    initial for (ram_init0=0; ram_init0<4096; ram_init0=ram_init0+1) begin
+        tile_ram_lo[ram_init0] = 8'h00;
+        tile_ram_hi[ram_init0] = 8'h00;
+    end
+    initial for (ram_init1=4096; ram_init1<8192; ram_init1=ram_init1+1) begin
+        tile_ram_lo[ram_init1] = 8'h00;
+        tile_ram_hi[ram_init1] = 8'h00;
+    end
+    initial for (ram_init2=8192; ram_init2<12288; ram_init2=ram_init2+1) begin
+        tile_ram_lo[ram_init2] = 8'h00;
+        tile_ram_hi[ram_init2] = 8'h00;
+    end
+    initial for (ram_init3=12288; ram_init3<16384; ram_init3=ram_init3+1) begin
+        tile_ram_lo[ram_init3] = 8'h00;
+        tile_ram_hi[ram_init3] = 8'h00;
+    end
+    initial for (ram_init4=16384; ram_init4<20480; ram_init4=ram_init4+1) begin
+        tile_ram_lo[ram_init4] = 8'h00;
+        tile_ram_hi[ram_init4] = 8'h00;
+    end
+    initial for (ram_init5=20480; ram_init5<24576; ram_init5=ram_init5+1) begin
+        tile_ram_lo[ram_init5] = 8'h00;
+        tile_ram_hi[ram_init5] = 8'h00;
+    end
+    initial for (ram_init6=24576; ram_init6<28672; ram_init6=ram_init6+1) begin
+        tile_ram_lo[ram_init6] = 8'h00;
+        tile_ram_hi[ram_init6] = 8'h00;
+    end
+    initial for (ram_init7=28672; ram_init7<32768; ram_init7=ram_init7+1) begin
+        tile_ram_lo[ram_init7] = 8'h00;
+        tile_ram_hi[ram_init7] = 8'h00;
+    end
+
+    integer small_ram_init;
     initial begin
-        for (ram_init=0; ram_init<32768; ram_init=ram_init+1)
-            tile_ram[ram_init] = 16'h0000;
-        for (ram_init=0; ram_init<1024; ram_init=ram_init+1) begin
-            line0[ram_init] = 14'h0000;
-            line1[ram_init] = 14'h0000;
-            line2[ram_init] = 14'h0000;
-            line3[ram_init] = 14'h0000;
+        for (small_ram_init=0; small_ram_init<2048;
+             small_ram_init=small_ram_init+1) begin
+            line_scroll_issue_lo[small_ram_init] = 8'h00;
+            line_scroll_issue_hi[small_ram_init] = 8'h00;
+        end
+        for (small_ram_init=0; small_ram_init<4096;
+             small_ram_init=small_ram_init+1) begin
+            mask_ram_lo[small_ram_init] = 8'h00;
+            mask_ram_hi[small_ram_init] = 8'h00;
+        end
+        for (small_ram_init=0; small_ram_init<1024;
+             small_ram_init=small_ram_init+1) begin
+            line0[small_ram_init] = 14'h0000;
+            line1[small_ram_init] = 14'h0000;
+            line2[small_ram_init] = 14'h0000;
+            line3[small_ram_init] = 14'h0000;
         end
     end
 
-    assign cpu_dout = tile_ram[cpu_addr];
+    integer shadow_init;
+    // synthesis translate_off
+    initial begin
+        for (shadow_init=0; shadow_init<32768; shadow_init=shadow_init+1)
+            tile_ram[shadow_init] = 16'h0000;
+    end
+    // synthesis translate_on
+
+    integer control_init;
+    initial begin
+        for (control_init=0; control_init<8; control_init=control_init+1)
+            control_regs[control_init] = 16'h0000;
+    end
+
+    logic [15:0] tile_word, mask_word, line_scroll_word;
+    logic [14:0] tile_addr, mask_addr;
     always_ff @(posedge clk) begin
-        if (cpu_wr)
-            tile_ram[cpu_addr] <= merge16(tile_ram[cpu_addr], cpu_din, cpu_be);
+        cpu_dout <= {tile_ram_hi[cpu_addr],tile_ram_lo[cpu_addr]};
+        if (pipeline_advance) begin
+            line_scroll_word <= {
+                line_scroll_issue_hi[{issue_line_layer,render_y}],
+                line_scroll_issue_lo[{issue_line_layer,render_y}]
+            };
+            if (line_stage_valid) begin
+                tile_word <= {tile_ram_hi[tile_addr],tile_ram_lo[tile_addr]};
+                mask_word <= {mask_ram_hi[mask_addr[11:0]],
+                              mask_ram_lo[mask_addr[11:0]]};
+            end
+        end
+        if (cpu_wr) begin
+            if (cpu_be[0]) tile_ram_lo[cpu_addr] <= cpu_din[7:0];
+            if (cpu_be[1]) tile_ram_hi[cpu_addr] <= cpu_din[15:8];
+            if (cpu_addr >= 15'h4000 && cpu_addr < 15'h4800) begin
+                if (cpu_be[0]) begin
+                    line_scroll_issue_lo[cpu_addr[10:0]] <= cpu_din[7:0];
+                end
+                if (cpu_be[1]) begin
+                    line_scroll_issue_hi[cpu_addr[10:0]] <= cpu_din[15:8];
+                end
+            end
+            if (cpu_addr >= 15'h6000 && cpu_addr < 15'h7000) begin
+                if (cpu_be[0]) mask_ram_lo[cpu_addr[11:0]] <= cpu_din[7:0];
+                if (cpu_be[1]) mask_ram_hi[cpu_addr[11:0]] <= cpu_din[15:8];
+            end
+            if (cpu_addr >= 15'h5000 && cpu_addr < 15'h5008)
+                control_regs[cpu_addr[2:0]]
+                    <= merge16(control_regs[cpu_addr[2:0]],cpu_din,cpu_be);
+            // synthesis translate_off
+            tile_ram[cpu_addr] <= merge16(tile_ram[cpu_addr],cpu_din,cpu_be);
+            // synthesis translate_on
+        end
     end
 
     logic display_bank, fill_bank;
+    logic [9:0] line_read_addr;
+    logic [13:0] line0_q,line1_q,line2_q,line3_q;
     logic render_active;
     logic [1:0] render_layer;
     logic [8:0] render_x, render_y;
@@ -75,22 +184,44 @@ module s24_tile (
     logic [2:0] request_row;
     logic request_row_odd;
 
+    assign line_read_addr = (hcount == 10'd655)
+                            ? {~display_bank,9'd0}
+                            : {display_bank,hcount[8:0]+1'd1};
+
     logic [15:0] hscr_word, vscr_word, ctrl_word, line_hscr_word;
-    logic [15:0] mask_word, tile_word;
     logic [8:0] source_x, source_y;
     logic selected, disabled;
     logic chosen_odd, mask_bit;
     logic [1:0] pair_even_layer;
-    logic [1:0] fetch_layer;
     logic [1:0] ctrl_mode;
     logic [9:0] neg_vscroll;
     logic [8:0] horizontal_value;
-    logic [14:0] mask_addr, scroll_addr, tile_addr;
     logic [11:0] wanted_char;
     logic [2:0] wanted_row;
     logic [3:0] wanted_pen;
     logic [11:0] wanted_pixel;
     logic [9:0] line_index;
+    logic lookup_valid;
+    logic renderer_can_advance, pipeline_advance;
+    logic [1:0] lookup_layer_q;
+    logic [8:0] lookup_x_q;
+    logic [8:0] lookup_source_x_q,lookup_source_y_q;
+    logic [1:0] lookup_ctrl_mode_q;
+    logic lookup_disabled_q,lookup_chosen_odd_q;
+    logic [14:0] lookup_tile_addr_q,lookup_mask_addr_q;
+    logic [1:0] current_line_layer, issue_line_layer;
+    logic [1:0] issue_layer, issue_pair_even_layer, issue_fetch_layer;
+    logic [8:0] issue_x;
+    logic [15:0] issue_hscr_word, issue_vscr_word, issue_ctrl_word;
+    logic [1:0] issue_ctrl_mode;
+    logic [8:0] issue_source_x, issue_source_y;
+    logic [9:0] issue_neg_vscroll;
+    logic issue_chosen_odd;
+    logic line_stage_valid;
+    logic [1:0] line_layer_q;
+    logic [8:0] line_x_q, line_render_y_q;
+    logic [15:0] line_hscr_q, line_vscr_q;
+    logic [1:0] line_ctrl_mode_q;
 
     function automatic logic [26:3] character_line_address(
         input logic [11:0] character,
@@ -108,68 +239,114 @@ module s24_tile (
     // Coordinate and window selection are a direct streaming form of MAME's
     // draw_common(). A mask bit of one selects the odd layer in each pair.
     always_comb begin
-        pair_even_layer = {render_layer[1],1'b0};
-        hscr_word = tile_ram[15'h5000 + render_layer];
-        vscr_word = tile_ram[15'h5004 + render_layer];
-        ctrl_word = tile_ram[15'h5004 + {13'd0,render_layer[1],1'b0}];
-        ctrl_mode = ctrl_word[14:13];
+        // tile_word and mask_word are synchronous RAM outputs. Consume them
+        // only with metadata registered on the same edge as their addresses;
+        // live render/control signals may already describe the next pixel.
+        pair_even_layer = {lookup_layer_q[1],1'b0};
+        hscr_word = 0;
+        vscr_word = 0;
+        ctrl_word = 0;
+        ctrl_mode = lookup_ctrl_mode_q;
+        current_line_layer = lookup_layer_q;
+        line_hscr_word = 0;
+        mask_bit = mask_word[15-lookup_x_q[6:3]];
 
-        scroll_addr = 15'h4000 + {render_layer,9'd0} + render_y;
-        line_hscr_word = tile_ram[scroll_addr];
-        mask_addr = (render_layer[1] ? 15'h6800 : 15'h6000)
-                    + {render_y,2'b00} + {13'd0,render_x[8:7]};
-        mask_word = tile_ram[mask_addr];
-        mask_bit = mask_word[15-render_x[6:3]];
-
-        selected = 1'b1;
-        disabled = vscr_word[15];
-        fetch_layer = render_layer;
+        selected = (lookup_ctrl_mode_q == 0)
+                   ? (mask_bit == lookup_layer_q[0])
+                   : !lookup_layer_q[0];
+        disabled = lookup_disabled_q;
         horizontal_value = 0;
         neg_vscroll = 0;
-        chosen_odd = 0;
-        source_x = render_x - hscr_word[8:0];
-        source_y = render_y + vscr_word[8:0];
+        chosen_odd = lookup_chosen_odd_q;
+        source_x = lookup_source_x_q;
+        source_y = lookup_source_y_q;
 
-        if (ctrl_mode == 0) begin
-            if (hscr_word[15])
-                source_x = render_x - line_hscr_word[8:0];
-            selected = (mask_bit == render_layer[0]);
-        end else begin
-            // Special modes are controlled by the even layer and select one
-            // physical layer from the pair rather than using mask RAM.
-            hscr_word = tile_ram[15'h5000 + pair_even_layer];
-            vscr_word = tile_ram[15'h5004 + pair_even_layer];
-            disabled = vscr_word[15];
-            line_hscr_word = tile_ram[15'h4000 + {pair_even_layer,9'd0} + render_y];
-            horizontal_value = hscr_word[15] ? line_hscr_word[8:0]
-                                             : hscr_word[8:0];
-            source_x = render_x - horizontal_value;
-            source_y = render_y + vscr_word[8:0];
-            neg_vscroll = 10'd0 - {1'b0,vscr_word[8:0]};
-            if (ctrl_mode == 1)
-                chosen_odd = !neg_vscroll[9] ^ (render_y >= neg_vscroll[8:0]);
-            else
-                chosen_odd = !(hscr_word[15] ? line_hscr_word[9] : hscr_word[9])
-                             ^ (render_x >= horizontal_value);
-            // MAME suppresses the odd physical layer's draw pass in special
-            // modes. Route the selected pair member through the even logical
-            // stream so it inherits the pair's even-layer mixer priority.
-            selected = !render_layer[0];
-            fetch_layer = {render_layer[1],chosen_odd};
-        end
-
-        tile_addr = {fetch_layer,source_y[8:3],source_x[8:3]};
-        tile_word = tile_ram[tile_addr];
         wanted_char = tile_word[11:0];
         wanted_row = source_y[2:0];
         wanted_pen = cache_bits[{source_x[2:0],2'b00} +: 4];
         wanted_pixel = {tile_word[14:7],wanted_pen};
-        line_index = {fill_bank,render_x};
+        line_index = {fill_bank,lookup_x_q};
+
+        renderer_can_advance = lookup_valid && render_active && !mem_req
+                               && (disabled || !selected
+                                   || (cache_valid
+                                       && cache_char == wanted_char
+                                       && cache_row == wanted_row));
+        pipeline_advance = render_active && !mem_req
+                           && (!lookup_valid || renderer_can_advance);
+
+        // The line-scroll stage is the tail of the two-entry lookup pipeline.
+        // Advance from that tail, rather than from the renderer head, so the
+        // synchronous line-scroll and tile/mask stages remain one pixel apart.
+        issue_layer = line_stage_valid ? line_layer_q : render_layer;
+        issue_x = line_stage_valid ? line_x_q : render_x;
+        if (line_stage_valid && line_x_q == 9'd495
+            && line_layer_q != 2'd3) begin
+            issue_layer = line_layer_q + 1'd1;
+            issue_x = 0;
+        end else if (line_stage_valid && line_x_q != 9'd495) begin
+            issue_x = line_x_q + 1'd1;
+        end
+
+        // Form the line-scroll request while the current pixel is consumed.
+        // The matching control metadata is registered with the synchronous
+        // RAM result below.
+        issue_pair_even_layer = {issue_layer[1],1'b0};
+        issue_hscr_word = control_regs[{1'b0,issue_layer}];
+        issue_vscr_word = control_regs[3'd4 + issue_layer];
+        issue_ctrl_word = control_regs[3'd4 + {issue_layer[1],1'b0}];
+        issue_ctrl_mode = issue_ctrl_word[14:13];
+        issue_line_layer = (issue_ctrl_mode == 0) ? issue_layer
+                                                  : issue_pair_even_layer;
+        if (issue_ctrl_mode != 0) begin
+            issue_hscr_word =
+                control_regs[{1'b0,issue_pair_even_layer}];
+            issue_vscr_word =
+                control_regs[3'd4 + issue_pair_even_layer];
+        end
+
+        // Consume the preceding line-scroll result and its registered
+        // metadata to form the synchronous tile and mask requests.
+        issue_fetch_layer = line_layer_q;
+        issue_source_x = line_x_q - line_hscr_q[8:0];
+        issue_source_y = line_render_y_q + line_vscr_q[8:0];
+        issue_neg_vscroll = 0;
+        issue_chosen_odd = 0;
+
+        if (line_ctrl_mode_q == 0) begin
+            if (line_hscr_q[15])
+                issue_source_x = line_x_q - line_scroll_word[8:0];
+        end else begin
+            issue_source_x = line_x_q
+                             - (line_hscr_q[15]
+                                ? line_scroll_word[8:0]
+                                : line_hscr_q[8:0]);
+            issue_source_y = line_render_y_q + line_vscr_q[8:0];
+            issue_neg_vscroll = 10'd0 - {1'b0,line_vscr_q[8:0]};
+            if (line_ctrl_mode_q == 1)
+                issue_chosen_odd = !issue_neg_vscroll[9]
+                                   ^ (line_render_y_q
+                                      >= issue_neg_vscroll[8:0]);
+            else
+                issue_chosen_odd =
+                    !(line_hscr_q[15] ? line_scroll_word[9]
+                                      : line_hscr_q[9])
+                    ^ (line_x_q >= (line_hscr_q[15]
+                                    ? line_scroll_word[8:0]
+                                    : line_hscr_q[8:0]));
+            issue_fetch_layer = {line_layer_q[1],issue_chosen_odd};
+        end
+
+        tile_addr = {1'b0,issue_fetch_layer,
+                     issue_source_y[8:3],issue_source_x[8:3]};
+        mask_addr = (line_layer_q[1] ? 15'h6800 : 15'h6000)
+                    + {line_render_y_q,2'b00}
+                    + {13'd0,line_x_q[8:7]};
     end
 
     task automatic write_line_pixel(input logic [13:0] value);
         begin
-            case (render_layer)
+            case (lookup_layer_q)
                 2'd0: line0[line_index] <= value;
                 2'd1: line1[line_index] <= value;
                 2'd2: line2[line_index] <= value;
@@ -180,16 +357,41 @@ module s24_tile (
 
     task automatic advance_renderer;
         begin
-            if (render_x == 9'd495) begin
+            if (lookup_x_q == 9'd495) begin
                 render_x <= 0;
                 cache_valid <= 1'b0;
-                if (render_layer == 2'd3) render_active <= 1'b0;
-                else render_layer <= render_layer + 1'd1;
-            end else render_x <= render_x + 1'd1;
+                if (lookup_layer_q == 2'd3) render_active <= 1'b0;
+                else render_layer <= lookup_layer_q + 1'd1;
+            end else render_x <= lookup_x_q + 1'd1;
         end
     endtask
 
     always_ff @(posedge clk) begin
+        if (pipeline_advance) begin
+            line_stage_valid <= 1'b1;
+            line_layer_q <= issue_layer;
+            line_x_q <= issue_x;
+            line_render_y_q <= render_y;
+            line_hscr_q <= issue_hscr_word;
+            line_vscr_q <= issue_vscr_word;
+            line_ctrl_mode_q <= issue_ctrl_mode;
+            lookup_valid <= line_stage_valid;
+            if (line_stage_valid) begin
+                lookup_layer_q <= line_layer_q;
+                lookup_x_q <= line_x_q;
+                lookup_source_x_q <= issue_source_x;
+                lookup_source_y_q <= issue_source_y;
+                lookup_ctrl_mode_q <= line_ctrl_mode_q;
+                lookup_disabled_q <= line_vscr_q[15];
+                lookup_chosen_odd_q <= issue_chosen_odd;
+                lookup_tile_addr_q <= tile_addr;
+                lookup_mask_addr_q <= mask_addr;
+            end
+        end
+        line0_q <= line0[line_read_addr];
+        line1_q <= line1[line_read_addr];
+        line2_q <= line2[line_read_addr];
+        line3_q <= line3[line_read_addr];
         if (reset) begin
             display_bank <= 0;
             fill_bank <= 1;
@@ -197,6 +399,23 @@ module s24_tile (
             render_layer <= 0;
             render_x <= 0;
             render_y <= 0;
+            lookup_valid <= 0;
+            line_stage_valid <= 0;
+            line_layer_q <= 0;
+            line_x_q <= 0;
+            line_render_y_q <= 0;
+            line_hscr_q <= 0;
+            line_vscr_q <= 0;
+            line_ctrl_mode_q <= 0;
+            lookup_layer_q <= 0;
+            lookup_x_q <= 0;
+            lookup_source_x_q <= 0;
+            lookup_source_y_q <= 0;
+            lookup_ctrl_mode_q <= 0;
+            lookup_disabled_q <= 0;
+            lookup_chosen_odd_q <= 0;
+            lookup_tile_addr_q <= 0;
+            lookup_mask_addr_q <= 0;
             cache_valid <= 0;
             cache_char <= 0;
             cache_row <= 0;
@@ -218,10 +437,10 @@ module s24_tile (
             if (ce_pixel) begin
                 if (hcount == 10'd655) begin
                     display_bank <= ~display_bank;
-                    {layer0_valid,layer0_cat,layer0_pixel} <= line0[{~display_bank,9'd0}];
-                    {layer1_valid,layer1_cat,layer1_pixel} <= line1[{~display_bank,9'd0}];
-                    {layer2_valid,layer2_cat,layer2_pixel} <= line2[{~display_bank,9'd0}];
-                    {layer3_valid,layer3_cat,layer3_pixel} <= line3[{~display_bank,9'd0}];
+                    {layer0_valid,layer0_cat,layer0_pixel} <= line0_q;
+                    {layer1_valid,layer1_cat,layer1_pixel} <= line1_q;
+                    {layer2_valid,layer2_cat,layer2_pixel} <= line2_q;
+                    {layer3_valid,layer3_cat,layer3_pixel} <= line3_q;
 
                     // At the line boundary vcount still names the old line.
                     // Render the line after the one about to be displayed.
@@ -232,13 +451,15 @@ module s24_tile (
                         render_y <= (vcount >= 10'd422) ? vcount - 10'd422
                                                        : vcount[8:0] + 9'd2;
                         render_active <= (vcount >= 10'd422) || (vcount < 10'd382);
+                        lookup_valid <= 0;
+                        line_stage_valid <= 0;
                         cache_valid <= 0;
                     end
                 end else if (hcount < 10'd495) begin
-                    {layer0_valid,layer0_cat,layer0_pixel} <= line0[{display_bank,hcount[8:0]+1'd1}];
-                    {layer1_valid,layer1_cat,layer1_pixel} <= line1[{display_bank,hcount[8:0]+1'd1}];
-                    {layer2_valid,layer2_cat,layer2_pixel} <= line2[{display_bank,hcount[8:0]+1'd1}];
-                    {layer3_valid,layer3_cat,layer3_pixel} <= line3[{display_bank,hcount[8:0]+1'd1}];
+                    {layer0_valid,layer0_cat,layer0_pixel} <= line0_q;
+                    {layer1_valid,layer1_cat,layer1_pixel} <= line1_q;
+                    {layer2_valid,layer2_cat,layer2_pixel} <= line2_q;
+                    {layer3_valid,layer3_cat,layer3_pixel} <= line3_q;
                 end else begin
                     layer0_pixel <= 0; layer1_pixel <= 0;
                     layer2_pixel <= 0; layer3_pixel <= 0;
@@ -259,14 +480,24 @@ module s24_tile (
                     cache_valid <= 1'b1;
                 end
             end else if (render_active) begin
-                if (disabled || !selected) begin
+                // synthesis translate_off
+                if (lookup_valid &&
+                    (lookup_layer_q != render_layer ||
+                     lookup_x_q != render_x))
+                    $fatal(1,
+                        "tile lookup metadata drift layer/x %0d/%0d state %0d/%0d addr %h mask %h",
+                        lookup_layer_q,lookup_x_q,render_layer,render_x,
+                        lookup_tile_addr_q,lookup_mask_addr_q);
+                // synthesis translate_on
+                if (lookup_valid && (disabled || !selected)) begin
                     write_line_pixel(14'd0);
                     advance_renderer();
-                end else if (cache_valid && cache_char == wanted_char
+                end else if (lookup_valid && cache_valid
+                             && cache_char == wanted_char
                              && cache_row == wanted_row) begin
                     write_line_pixel({1'b1,tile_word[15],wanted_pixel});
                     advance_renderer();
-                end else begin
+                end else if (lookup_valid) begin
                     mem_addr <= character_line_address(wanted_char,wanted_row);
                     request_char <= wanted_char;
                     request_row <= wanted_row;

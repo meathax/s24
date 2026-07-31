@@ -56,6 +56,15 @@ module tb_gground_boot;
     integer visible_pixels=0,video_frames=0;
     integer tile_pixels=0,sprite_pixels=0,mixed_pixels=0,blanked_pixels=0;
     integer unknown_video_pixels=0;
+    integer fdc_media_requests=0,fdc_media_acks=0;
+    integer p4_requests=0,p4_acks=0,fdc_read_bytes=0;
+    integer fdc_track_bytes=0,fdc_complete_tracks=0;
+    logic [31:0] fdc_checksum=32'h811c9dc5;
+    logic [31:0] fdc_track_checksum=32'h811c9dc5;
+    logic [31:0] fdc_last_track_checksum=0;
+    logic fdc_media_req_d=0,p4_req_d=0;
+    logic p4_outstanding=0,fdc_media_read_serviced=0;
+    logic [26:0] p4_byte_addr_latched=0;
     integer frame_fd=0,frame_pixels=0;
     integer frame_requested=0;
     logic frame_capture_active=0,frame_capture_done=0;
@@ -66,6 +75,13 @@ module tb_gground_boot;
     logic [15:0] last_a_opcode,last_b_opcode;
 
     always #5 clk=~clk;
+
+    function automatic [31:0] checksum_byte(
+        input logic [31:0] checksum,
+        input logic [7:0] value
+    );
+        checksum_byte=(checksum^value)*32'h01000193;
+    endfunction
 
     function automatic [15:0] resident_word(input logic [26:1] a);
         if(a < 26'h0020000) resident_word=boot_mem[a[17:1]];
@@ -115,7 +131,65 @@ module tb_gground_boot;
     integer floppy_track_reads=0;
     integer floppy_byte_offset,floppy_write_offset;
     logic [7:0] floppy_lo,floppy_hi;
+    logic [7:0] fdc_delivered_byte;
     always @(posedge clk) begin
+        fdc_media_req_d<=dut.fdc_media_req;
+        p4_req_d<=p4_req;
+        if(!dut.fdc_media_req)
+            fdc_media_read_serviced<=0;
+        if(dut.fdc_media_req && !fdc_media_req_d &&
+                !dut.fdc_media_wr)
+            fdc_media_requests<=fdc_media_requests+1;
+        if(dut.fdc_media_ack && !dut.fdc_media_wr)
+            fdc_media_acks<=fdc_media_acks+1;
+
+        if(p4_req && !p4_req_d) begin
+            if(p4_outstanding)
+                $fatal(1,"%s overlapping p4 floppy requests",game_name);
+            if(!dut.fdc_media_req || dut.fdc_media_wr)
+                $fatal(1,"%s p4 read without active FDC media read",game_name);
+            if(fdc_media_read_serviced)
+                $fatal(1,"%s duplicate p4 read for one held FDC request addr=%h",
+                       game_name,dut.fdc_media_addr);
+            p4_requests<=p4_requests+1;
+            p4_outstanding<=1;
+            fdc_media_read_serviced<=1;
+            p4_byte_addr_latched<=dut.fdc_media_addr;
+        end
+        if(p4_outstanding && p4_req &&
+                p4_addr!=word_address(SDR_FLOPPY_BASE+p4_byte_addr_latched))
+            $fatal(1,"%s p4 address changed while outstanding: %h -> %h",
+                   game_name,p4_byte_addr_latched,p4_addr);
+        if(p4_ack && p4_req) begin
+            if(!p4_outstanding)
+                $fatal(1,"%s p4 acknowledged without an outstanding read",
+                       game_name);
+            if(dut.fdc_read_odd!=p4_byte_addr_latched[0])
+                $fatal(1,"%s p4 byte lane changed while outstanding addr=%h",
+                       game_name,p4_byte_addr_latched);
+            fdc_delivered_byte=dut.fdc_read_odd ? p4_data[15:8] :
+                                                     p4_data[7:0];
+            p4_acks<=p4_acks+1;
+            fdc_read_bytes<=fdc_read_bytes+1;
+            fdc_checksum<=checksum_byte(fdc_checksum,fdc_delivered_byte);
+            if(fdc_track_bytes==track_bytes-1) begin
+                fdc_last_track_checksum<=checksum_byte(
+                    fdc_track_checksum,fdc_delivered_byte);
+                fdc_complete_tracks<=fdc_complete_tracks+1;
+                fdc_track_bytes<=0;
+                fdc_track_checksum<=32'h811c9dc5;
+                $display("%s FDC transfer=%0d bytes=%0d checksum=%08h side/track=%0d/%0d",
+                    game_name,fdc_complete_tracks+1,track_bytes,
+                    checksum_byte(fdc_track_checksum,fdc_delivered_byte),
+                    dut.fdc.side,dut.fdc.physical_track);
+            end else begin
+                fdc_track_bytes<=fdc_track_bytes+1;
+                fdc_track_checksum<=checksum_byte(
+                    fdc_track_checksum,fdc_delivered_byte);
+            end
+            p4_outstanding<=0;
+        end
+
         if(!p0_req) p0_ack<=0;
         else if(!p0_ack) begin p0_data<=resident_word(p0_addr);p0_ack<=1;end
         if(!p3_req) p3_ack<=0;
@@ -272,12 +346,12 @@ module tb_gground_boot;
         vsync_d<=vsync;
         if(dut.io_cnt[1] && cnt1_d && vsync && !vsync_d)
             video_frames<=video_frames+1;
-        // Begin after nine complete post-release frames. The following active
-        // frame is written in raw RGB order, producing a complete P6 PPM before
-        // target 3 can pass at the tenth frame boundary.
+        // Begin immediately before the requested post-release frame. The
+        // following active frame is written in raw RGB order, producing a
+        // complete P6 PPM before target 3 can pass its frame boundary.
         if(frame_requested && !frame_capture_active && !frame_capture_done &&
                 dut.io_cnt[1] && cnt1_d && vsync && !vsync_d &&
-                video_frames>=8)
+                (frame_target<=1 || video_frames>=frame_target-2))
             frame_capture_active<=1;
         if(frame_capture_active && ce_pixel && !hblank && !vblank) begin
             $fwrite(frame_fd,"%c%c%c",red,green,blue);
@@ -321,7 +395,8 @@ module tb_gground_boot;
     // TARGET 0: first game-media access; 1: CNT1 release and CPU-B read;
     // 2: CPU-B instruction (plus decrypt for FD1094); 3: sustained visible
     // game video after CPU-B release; 4: first write to any video memory.
-    integer i,max_clocks,target;
+    integer i,max_clocks,target,frame_target;
+    integer progress_clocks,next_progress;
     integer board_flags,track_bytes,input_profile,magic_table;
     integer dsw_arg,coinage_arg;
     string game_name,boot_file,romboard_file,key_file,floppy_file;
@@ -337,7 +412,7 @@ module tb_gground_boot;
                                sprite_writes!=0);
             default: reached_target=(cpu_b_instructions!=0 &&
                                      (!board.has_fd1094 || decrypt_done!=0) &&
-                                     video_frames>=10 &&
+                                     video_frames>=frame_target &&
                                      visible_pixels>=10000);
         endcase
     end
@@ -423,19 +498,42 @@ module tb_gground_boot;
 
         max_clocks=300000000;
         target=0;
+        frame_target=10;
+        progress_clocks=25000000;
         void'($value$plusargs("MAX_CLOCKS=%d",max_clocks));
         void'($value$plusargs("TARGET=%d",target));
+        void'($value$plusargs("FRAME_TARGET=%d",frame_target));
+        void'($value$plusargs("PROGRESS_CLOCKS=%d",progress_clocks));
+        if(frame_target<1)
+            $fatal(1,"FRAME_TARGET must be at least 1");
+        if(progress_clocks<0)
+            $fatal(1,"PROGRESS_CLOCKS cannot be negative");
         i=0;
-        while(!reached_target && i<max_clocks) begin @(posedge clk);i=i+1;end
+        next_progress=progress_clocks;
+        while(!reached_target && i<max_clocks) begin
+            @(posedge clk);
+            i=i+1;
+            if(progress_clocks!=0 && i>=next_progress) begin
+                $display("%s progress clocks=%0d/%0d target=%0d Ainsn=%0d Binsn=%0d media=%0d/%0d p4=%0d/%0d bytes=%0d tracks=%0d checksum=%08h release=%0d frames=%0d raster=%0d,%0d",
+                    game_name,i,max_clocks,target,cpu_a_instructions,
+                    cpu_b_instructions,fdc_media_acks,fdc_media_requests,
+                    p4_acks,p4_requests,fdc_read_bytes,fdc_complete_tracks,
+                    fdc_checksum,cnt_releases,video_frames,dut.hcount,dut.vcount);
+                next_progress=next_progress+progress_clocks;
+            end
+        end
 
-        $display("%s milestone target=%0d clocks=%0d Ainsn=%0d Binsn=%0d boot=%0d rom=%0d floppy=%0d writes=%0d fwwrites=%0d palette=%0d tilewr=%0d mixerwr=%0d charwr=%0d spritewr=%0d tilereq=%0d spritereq=%0d cpuB=%0d release=%0d dec=%0d/%0d visible=%0d tilepx=%0d spritepx=%0d mixedpx=%0d blankpx=%0d unknownpx=%0d frames=%0d A=%h:%h B=%h:%h fdstate=%h slow=%0d raster=%0d,%0d",
+        $display("%s milestone target=%0d clocks=%0d Ainsn=%0d Binsn=%0d boot=%0d rom=%0d floppy=%0d media=%0d/%0d p4=%0d/%0d fdcbytes=%0d tracks=%0d checksum=%08h lasttrack=%08h writes=%0d fwwrites=%0d palette=%0d tilewr=%0d mixerwr=%0d charwr=%0d spritewr=%0d tilereq=%0d spritereq=%0d cpuB=%0d release=%0d dec=%0d/%0d visible=%0d tilepx=%0d spritepx=%0d mixedpx=%0d blankpx=%0d unknownpx=%0d frames=%0d/%0d A=%h:%h B=%h:%h fdstate=%h slow=%0d raster=%0d,%0d",
             game_name,target,i,cpu_a_instructions,cpu_b_instructions,boot_reads,
-            romboard_reads,floppy_reads,memory_writes,floppy_writes,palette_writes,
+            romboard_reads,floppy_reads,fdc_media_acks,fdc_media_requests,
+            p4_acks,p4_requests,fdc_read_bytes,fdc_complete_tracks,
+            fdc_checksum,fdc_last_track_checksum,
+            memory_writes,floppy_writes,palette_writes,
             tile_writes,mixer_writes,char_writes,sprite_writes,
             tile_requests,sprite_requests,
             cpu_b_reads,cnt_releases,decrypt_done,decrypt_starts,
             visible_pixels,tile_pixels,sprite_pixels,mixed_pixels,
-            blanked_pixels,unknown_video_pixels,video_frames,
+            blanked_pixels,unknown_video_pixels,video_frames,frame_target,
             {last_a_address,1'b0},last_a_opcode,
             {last_b_address,1'b0},last_b_opcode,dut.fd_state,
             dut.gground_slow_count,dut.hcount,dut.vcount);

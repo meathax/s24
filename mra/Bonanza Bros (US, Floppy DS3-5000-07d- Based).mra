@@ -9,13 +9,13 @@
   <joystick>8-way</joystick>
   <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
   <switches default="FF FF"/>
-  <rom index="1" zip="bnzabros.zip" md5="none">
+  <rom index="1" zip="bnzabros.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
       <part name="epr-12187.ic2" crc="e83783f3" map="01"/>
       <part name="epr-12186.ic1" crc="ce76319d" map="10"/>
     </interleave>
   </rom>
-  <rom index="2" zip="bnzabros.zip" md5="none">
+  <rom index="2" zip="bnzabros.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
       <part name="mpr-13188-h.2" crc="d3802294" map="01"/>
       <part name="mpr-13187-h.1" crc="e3d8c5f7" map="10"/>
@@ -29,7 +29,7 @@
       <part name="mpr-13189.3" crc="5ea5a2f3" map="10"/>
     </interleave>
   </rom>
-  <rom index="3" zip="bnzabros.zip" md5="none">
+  <rom index="3" zip="bnzabros.zip" md5="none" type="merged|nonmerged|split">
     <part name="ds3-5000-07d.img" crc="2e70251f"/>
     <part repeat="253952">00</part>
   </rom>

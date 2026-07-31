@@ -23,6 +23,7 @@ from html import escape
 
 MAME_VERSION = "0288"
 RBF = "s24"
+ROM_SET_TYPES = "merged|nonmerged|split"
 FLOPPY_BUFFER_BYTES = 0x200000
 FLOPPY_TRACK_SIDES = 160
 
@@ -171,31 +172,60 @@ def archive_names(game: Game) -> str:
 
 
 def validate_zip(game: Game, rom_dir: pathlib.Path) -> None:
-    candidates = [rom_dir / f"{game.setname}.zip"]
-    if game.parent:
-        candidates.append(rom_dir / f"{game.parent}.zip")
-    found: dict[str, tuple[int, str]] = {}
+    # Match MiSTer's MRA loader: try the archives in the order listed by the
+    # MRA and select a member by CRC before falling back to its filename. CRC
+    # lookup is what makes a single MRA work with all three MAME layouts:
+    #
+    # * non-merged: every file is in setname.zip
+    # * split:      clone files are in setname.zip, shared files in parent.zip
+    # * merged:     all files are in parent.zip, often below clone/ directories
+    candidates = [rom_dir / name for name in archive_names(game).split("|")]
+    archives: list[tuple[pathlib.Path, list[zipfile.ZipInfo]]] = []
     for path in candidates:
         if not path.exists():
             continue
         with zipfile.ZipFile(path) as archive:
-            for info in archive.infolist():
-                found[info.filename.lower()] = (info.file_size, f"{info.CRC:08x}")
+            archives.append((path, archive.infolist()))
+
+    def find_part(part: Part) -> tuple[pathlib.Path, zipfile.ZipInfo] | None:
+        expected_crc = int(part.crc, 16)
+        for path, entries in archives:
+            for info in entries:
+                if not info.is_dir() and info.CRC == expected_crc:
+                    return path, info
+        # This is the same fallback MiSTer uses when a CRC is absent or does
+        # not match. Compare both the full member name and its basename so the
+        # validator gives useful diagnostics for clone-prefixed merged sets.
+        expected_name = part.name.casefold()
+        for path, entries in archives:
+            for info in entries:
+                member_name = info.filename.replace("\\", "/").casefold()
+                if member_name == expected_name or member_name.rsplit("/", 1)[-1] == expected_name:
+                    return path, info
+        return None
+
     missing = []
     wrong = []
     for part in all_parts(game):
-        entry = found.get(part.name.lower())
-        if entry is None:
+        match = find_part(part)
+        if match is None:
             missing.append(part.name)
-        elif entry[1] != part.crc:
-            wrong.append(f"{part.name}: expected {part.crc}, got {entry[1]}")
+        else:
+            path, entry = match
+            actual_crc = f"{entry.CRC:08x}"
+            if actual_crc != part.crc:
+                wrong.append(
+                    f"{part.name} in {path.name}:{entry.filename}: "
+                    f"expected {part.crc}, got {actual_crc}"
+                )
     if game.floppy:
-        entry = found.get(game.floppy.name.lower())
+        match = find_part(game.floppy)
         expected_size = game.track_bytes * FLOPPY_TRACK_SIDES
-        if entry is not None and entry[0] != expected_size:
+        if match is not None and match[1].file_size != expected_size:
+            path, entry = match
             wrong.append(
-                f"{game.floppy.name}: expected {expected_size:#x} bytes, "
-                f"got {entry[0]:#x}"
+                f"{game.floppy.name} in {path.name}:{entry.filename}: "
+                f"expected {expected_size:#x} bytes, got {entry.file_size:#x}"
             )
     if missing or wrong:
         detail = "; ".join((["missing " + ", ".join(missing)] if missing else []) + wrong)
@@ -228,12 +258,14 @@ def generate(game: Game, out_dir: pathlib.Path) -> pathlib.Path:
         "  <joystick>8-way</joystick>",
         '  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>',
         f'  <switches default="{game.dsw}"/>',
-        f'  <rom index="1" zip="{zips}" md5="none">',
+        f'  <rom index="1" zip="{zips}" md5="none" type="{ROM_SET_TYPES}">',
     ))
     emit_pair(lines, game.boot)
     lines.append("  </rom>")
     if game.romboard:
-        lines.append(f'  <rom index="2" zip="{zips}" md5="none">')
+        lines.append(
+            f'  <rom index="2" zip="{zips}" md5="none" type="{ROM_SET_TYPES}">'
+        )
         for pair in game.romboard:
             emit_pair(lines, pair)
         lines.append("  </rom>")
@@ -246,14 +278,14 @@ def generate(game: Game, out_dir: pathlib.Path) -> pathlib.Path:
                 f"{FLOPPY_BUFFER_BYTES:#x}-byte buffer"
             )
         lines.extend((
-            f'  <rom index="3" zip="{zips}" md5="none">',
+            f'  <rom index="3" zip="{zips}" md5="none" type="{ROM_SET_TYPES}">',
             f'    <part name="{escape(game.floppy.name)}" crc="{game.floppy.crc}"/>',
             f'    <part repeat="{padding_bytes}">00</part>',
             "  </rom>",
         ))
     if game.key:
         lines.extend((
-            f'  <rom index="4" zip="{zips}" md5="none">',
+            f'  <rom index="4" zip="{zips}" md5="none" type="{ROM_SET_TYPES}">',
             f'    <part name="{escape(game.key.name)}" crc="{game.key.crc}"/>',
             "  </rom>",
         ))

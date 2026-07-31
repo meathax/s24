@@ -102,9 +102,21 @@ module emu (
         .wr_req(lwr_req),.wr_addr(lwr_addr),.wr_data(lwr_data),.wr_be(lwr_be),.wr_ack(lwr_ack),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata));
 
-    logic core_reset;
-    assign core_reset=RESET|status[0]|buttons[1]|~pll_locked|~sdram_ready_s|
-                      ~rom_loaded|ioctl_download|wrong_sdram_size;
+    logic core_reset,core_reset_async;
+    (* ASYNC_REG = "TRUE",
+       altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
+    logic [1:0] core_reset_sync;
+    assign core_reset_async=RESET|status[0]|buttons[1]|~pll_locked|
+                            ~sdram_ready_s|~rom_loaded|ioctl_download|
+                            wrong_sdram_size;
+    // All reset causes assert immediately, but release only on clk_sys edges.
+    // This removes recovery-time failures across the high-fanout core reset
+    // network without delaying a requested reset.
+    always_ff @(posedge clk_sys or posedge core_reset_async) begin
+        if(core_reset_async) core_reset_sync<=2'b11;
+        else core_reset_sync<={core_reset_sync[0],1'b0};
+    end
+    assign core_reset=core_reset_sync[1];
 
     logic p0_req,p1_req,p2_req,p3_req,p4_req,p5_req;
     logic [26:1] p0_addr,p3_addr,p4_addr;
@@ -150,19 +162,85 @@ module emu (
     assign lwr_ack=swr_ack&&lwr_req;
     assign cwr_ack=swr_ack&&cwr_req&&!lwr_req;
 
+    // Every core/loader SDRAM port crosses from clk_sys to clk_ram.  Keep the
+    // request payload stable in a source-domain mailbox until a synchronized
+    // completion returns; likewise hold response data in clk_ram until its
+    // response toggle has crossed back.  The old direct buses could sample a
+    // new address with an old request (or partially settled burst data).
+    logic mwr_req,mwr_ack;
+    logic [26:1] mwr_addr;
+    logic [15:0] mwr_data;
+    logic [1:0]  mwr_be;
+    logic mp0_req,mp1_req,mp2_req,mp3_req,mp4_req,mp5_req;
+    logic [26:1] mp0_addr,mp3_addr,mp4_addr;
+    logic [26:3] mp1_addr,mp5_addr;
+    logic [26:4] mp2_addr;
+    logic [15:0] mp0_data,mp3_data,mp4_data;
+    logic [63:0] mp1_data,mp5_data;
+    logic [127:0] mp2_data;
+    logic mp0_ack,mp1_ack,mp2_ack,mp3_ack,mp4_ack,mp5_ack;
+    logic wr_rsp_unused_src,wr_rsp_unused_dst;
+
+    s24_sdram_cdc #(.REQ_WIDTH(44),.RSP_WIDTH(1)) cdc_wr(
+        .reset(~pll_locked),
+        .src_clk(clk_sys),.src_req(swr_req),
+        .src_payload({swr_addr,swr_data,swr_be}),
+        .src_ack(swr_ack),.src_response(wr_rsp_unused_src),
+        .dst_clk(clk_ram),.dst_req(mwr_req),
+        .dst_payload({mwr_addr,mwr_data,mwr_be}),
+        .dst_ack(mwr_ack),.dst_response(wr_rsp_unused_dst));
+    assign wr_rsp_unused_dst=1'b0;
+
+    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16)) cdc_p0(
+        .reset(~pll_locked),
+        .src_clk(clk_sys),.src_req(p0_req),.src_payload(p0_addr),
+        .src_ack(p0_ack),.src_response(p0_data),
+        .dst_clk(clk_ram),.dst_req(mp0_req),.dst_payload(mp0_addr),
+        .dst_ack(mp0_ack),.dst_response(mp0_data));
+    s24_sdram_cdc #(.REQ_WIDTH(24),.RSP_WIDTH(64)) cdc_p1(
+        .reset(~pll_locked),
+        .src_clk(clk_sys),.src_req(p1_req),.src_payload(p1_addr),
+        .src_ack(p1_ack),.src_response(p1_data),
+        .dst_clk(clk_ram),.dst_req(mp1_req),.dst_payload(mp1_addr),
+        .dst_ack(mp1_ack),.dst_response(mp1_data));
+    s24_sdram_cdc #(.REQ_WIDTH(23),.RSP_WIDTH(128)) cdc_p2(
+        .reset(~pll_locked),
+        .src_clk(clk_sys),.src_req(p2_req),.src_payload(p2_addr),
+        .src_ack(p2_ack),.src_response(p2_data),
+        .dst_clk(clk_ram),.dst_req(mp2_req),.dst_payload(mp2_addr),
+        .dst_ack(mp2_ack),.dst_response(mp2_data));
+    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16)) cdc_p3(
+        .reset(~pll_locked),
+        .src_clk(clk_sys),.src_req(p3_req),.src_payload(p3_addr),
+        .src_ack(p3_ack),.src_response(p3_data),
+        .dst_clk(clk_ram),.dst_req(mp3_req),.dst_payload(mp3_addr),
+        .dst_ack(mp3_ack),.dst_response(mp3_data));
+    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16)) cdc_p4(
+        .reset(~pll_locked),
+        .src_clk(clk_sys),.src_req(p4_req),.src_payload(p4_addr),
+        .src_ack(p4_ack),.src_response(p4_data),
+        .dst_clk(clk_ram),.dst_req(mp4_req),.dst_payload(mp4_addr),
+        .dst_ack(mp4_ack),.dst_response(mp4_data));
+    s24_sdram_cdc #(.REQ_WIDTH(24),.RSP_WIDTH(64)) cdc_p5(
+        .reset(~pll_locked),
+        .src_clk(clk_sys),.src_req(p5_req),.src_payload(p5_addr),
+        .src_ack(p5_ack),.src_response(p5_data),
+        .dst_clk(clk_ram),.dst_req(mp5_req),.dst_payload(mp5_addr),
+        .dst_ack(mp5_ack),.dst_response(mp5_data));
+
     sdram memory(
         .clk(clk_ram),.init(~pll_locked),.ready(sdram_ready),
         .SDRAM_DQ(SDRAM_DQ),.SDRAM_A(SDRAM_A),.SDRAM_BA(SDRAM_BA),
         .SDRAM_DQML(SDRAM_DQML),.SDRAM_DQMH(SDRAM_DQMH),.SDRAM_nCS(SDRAM_nCS),
         .SDRAM_nCAS(SDRAM_nCAS),.SDRAM_nRAS(SDRAM_nRAS),.SDRAM_nWE(SDRAM_nWE),
-        .SDRAM_CKE(SDRAM_CKE),.wr_req(swr_req),.wr_addr(swr_addr),
-        .wr_din(swr_data),.wr_be(swr_be),.wr_ack(swr_ack),
-        .p0_req(p0_req),.p0_addr(p0_addr),.p0_dout(p0_data),.p0_ack(p0_ack),
-        .p1_req(p1_req),.p1_addr(p1_addr),.p1_dout(p1_data),.p1_ack(p1_ack),
-        .p2_req(p2_req),.p2_addr(p2_addr),.p2_dout(p2_data),.p2_ack(p2_ack),
-        .p3_req(p3_req),.p3_addr(p3_addr),.p3_dout(p3_data),.p3_ack(p3_ack),
-        .p4_req(p4_req),.p4_addr(p4_addr),.p4_dout(p4_data),.p4_ack(p4_ack),
-        .p5_req(p5_req),.p5_addr(p5_addr),.p5_dout(p5_data),.p5_ack(p5_ack));
+        .SDRAM_CKE(SDRAM_CKE),.wr_req(mwr_req),.wr_addr(mwr_addr),
+        .wr_din(mwr_data),.wr_be(mwr_be),.wr_ack(mwr_ack),
+        .p0_req(mp0_req),.p0_addr(mp0_addr),.p0_dout(mp0_data),.p0_ack(mp0_ack),
+        .p1_req(mp1_req),.p1_addr(mp1_addr),.p1_dout(mp1_data),.p1_ack(mp1_ack),
+        .p2_req(mp2_req),.p2_addr(mp2_addr),.p2_dout(mp2_data),.p2_ack(mp2_ack),
+        .p3_req(mp3_req),.p3_addr(mp3_addr),.p3_dout(mp3_data),.p3_ack(mp3_ack),
+        .p4_req(mp4_req),.p4_addr(mp4_addr),.p4_dout(mp4_data),.p4_ack(mp4_ack),
+        .p5_req(mp5_req),.p5_addr(mp5_addr),.p5_dout(mp5_data),.p5_ack(mp5_ack));
 
     video_mixer #(.LINE_LENGTH(500),.HALF_DEPTH(0),.GAMMA(1)) video(
         .CLK_VIDEO(clk_sys),.CE_PIXEL(CE_PIXEL),.ce_pix(core_ce),

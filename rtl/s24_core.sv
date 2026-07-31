@@ -232,14 +232,15 @@ module s24_core (
         .din(bus_dout[7:0]),.an0(8'hff),.an1(8'hff),
         .an2(8'hff),.an3(8'hff),.dout(adc1_dout));
 
-    logic ym_wr;
+    logic ym_wr, ym_write_pending, ym_addr_q;
+    logic [7:0] ym_data_q;
     logic [7:0] ym_dout;
     logic ym_irq_n,ym_half;
     logic signed [15:0] ym_l,ym_r;
     always_ff @(posedge clk) if (reset) ym_half<=0; else if (ce4) ym_half<=~ym_half;
     jt51 ym(
         .rst(reset | ~io_cnt[2]),.clk(clk),.cen(ce4),.cen_p1(ce4 & ym_half),
-        .cs_n(~ym_wr),.wr_n(~ym_wr),.a0(bus_addr[1]),.din(bus_dout[7:0]),
+        .cs_n(~ym_wr),.wr_n(~ym_wr),.a0(ym_addr_q),.din(ym_data_q),
         .dout(ym_dout),.ct1(),.ct2(),.irq_n(ym_irq_n),.sample(),
         .left(),.right(),.xleft(ym_l),.xright(ym_r));
 
@@ -342,19 +343,35 @@ module s24_core (
         .mixed_pixel(mixed),
         .display_blank(display_blank));
 
-    (* ramstyle="M10K, no_rw_check" *) logic [15:0] palette_ram [0:8191];
+    // Keep the byte lanes separate so Quartus can infer byte-enabled true
+    // dual-port M10Ks: port A supplies the pixel stream while port B serves
+    // CPU reads and writes.
+    (* ramstyle="M10K, no_rw_check" *) logic [7:0] palette_ram_lo [0:8191];
+    (* ramstyle="M10K, no_rw_check" *) logic [7:0] palette_ram_hi [0:8191];
     logic palette_wr;
-    logic [15:0] palette_word;
+    logic [15:0] palette_word, palette_cpu_word;
+    logic palette_shadow_bank;
     integer palette_init;
     initial begin
-        for (palette_init=0; palette_init<8192; palette_init=palette_init+1)
-            palette_ram[palette_init] = 16'h0000;
+        // Quartus 17 rejects a single elaboration loop above 5000 iterations.
+        for (palette_init=0; palette_init<4096; palette_init=palette_init+1)
+            {palette_ram_hi[palette_init],palette_ram_lo[palette_init]} = 16'h0000;
+        for (palette_init=4096; palette_init<8192; palette_init=palette_init+1)
+            {palette_ram_hi[palette_init],palette_ram_lo[palette_init]} = 16'h0000;
     end
-    assign palette_word=palette_ram[mixed[12:0]];
-    s24_palette pal(.palette_word(palette_word),.shadow_bank(mixed[13]),
+    always_ff @(posedge clk) begin
+        palette_word <= {palette_ram_hi[mixed[12:0]],
+                         palette_ram_lo[mixed[12:0]]};
+        palette_shadow_bank <= mixed[13];
+        palette_cpu_word <= {palette_ram_hi[bus_addr[13:1]],
+                             palette_ram_lo[bus_addr[13:1]]};
+        if(palette_wr && bus_be[0])
+            palette_ram_lo[bus_addr[13:1]] <= bus_dout[7:0];
+        if(palette_wr && bus_be[1])
+            palette_ram_hi[bus_addr[13:1]] <= bus_dout[15:8];
+    end
+    s24_palette pal(.palette_word(palette_word),.shadow_bank(palette_shadow_bank),
                     .red(red),.green(green),.blue(blue));
-    always_ff @(posedge clk) if(palette_wr)
-        palette_ram[bus_addr[13:1]]<=merge16(palette_ram[bus_addr[13:1]],bus_dout,bus_be);
 
     // --------------------------- board interconnect ------------------------
     function automatic logic is_tile_window(input logic [23:0] a);
@@ -423,26 +440,42 @@ module s24_core (
         else physical=SDR_ROMBOARD_BASE+{5'd0,bank,a[17:0]};
     endfunction
 
-    typedef enum logic [2:0] {X_IDLE,X_READ,X_WRITE,X_LOCAL,X_FDC,X_FDKEY,
-                              X_WAIT} xstate_t;
+    typedef enum logic [3:0] {X_IDLE,X_READ,X_WRITE,X_LOCAL,X_TILE,
+                              X_PALETTE,X_YM,X_FDC,X_FDKEY,X_WAIT} xstate_t;
     xstate_t xs;
     logic [7:0] rom_bank;
     logic cpu_wr_pending;
     logic [26:0] cpu_phys;
+    logic fdc_read_busy;
+    logic fdc_read_odd;
 
     // FDC read service uses p4; write service shares the SDRAM write port.
     always_ff @(posedge clk) begin
         fdc_read_ack<=0;
-        if(reset) begin p4_req<=0;p4_addr<=0;fdc_media_rdata<=0; end
+        if(reset) begin
+            p4_req<=0;
+            p4_addr<=0;
+            fdc_media_rdata<=0;
+            fdc_read_busy<=0;
+            fdc_read_odd<=0;
+        end
         else begin
-            if(fdc_media_req && !fdc_media_wr && !p4_req) begin
+            // The FDC holds media_req through the cycle in which it observes
+            // media_ack. Keep a separate transaction guard so the still-high
+            // request cannot be mistaken for the following byte after p4_req
+            // drops. Also retain the requested byte lane with the address.
+            if(fdc_media_req && !fdc_media_wr && !fdc_read_busy) begin
                 p4_req<=1;
                 p4_addr<=word_address(SDR_FLOPPY_BASE+fdc_media_addr);
+                fdc_read_odd<=fdc_media_addr[0];
+                fdc_read_busy<=1;
             end
             if(p4_ack&&p4_req) begin
                 p4_req<=0;fdc_read_ack<=1;
-                fdc_media_rdata<=fdc_media_addr[0]?p4_data[15:8]:p4_data[7:0];
+                fdc_media_rdata<=fdc_read_odd?p4_data[15:8]:p4_data[7:0];
             end
+            if(fdc_read_busy && !fdc_media_req)
+                fdc_read_busy<=0;
         end
     end
 
@@ -457,8 +490,13 @@ module s24_core (
         end
     end
 
+    // JT51 samples writes only on cen_p1. Hold the CPU payload until that
+    // exact enable instead of presenting a one-clk pulse that is usually
+    // invisible to the chip.
+    assign ym_wr = ym_write_pending && ce4 && ym_half;
+
     always_ff @(posedge clk) begin
-        bus_ack<=0;io_rd<=0;io_wr<=0;ym_wr<=0;irq_rd_a<=0;irq_rd_b<=0;irq_wr<=0;
+        bus_ack<=0;io_rd<=0;io_wr<=0;irq_rd_a<=0;irq_rd_b<=0;irq_wr<=0;
         magic_wr<=0;tile_wr<=0;mixer_wr<=0;palette_wr<=0;fdc_rd<=0;fdc_wr<=0;
         adc0_select<=0;adc1_select<=0;adc0_shift<=0;adc1_shift<=0;
         frc_mode_write<=0;frc_ack_write<=0;fd_start<=0;
@@ -467,7 +505,11 @@ module s24_core (
             p0_addr<=0;p3_addr<=0;cpu_wr_pending<=0;cpu_phys<=0;rom_bank<=0;
             p5_req<=0;p5_addr<=0;fdc_addr<=0;fd_ciphertext<=0;
             tile_absel<=0;tile_xhout<=0;tile_xvout<=0;tile_syncmode<=0;
-        end else case(xs)
+            ym_write_pending<=0;ym_addr_q<=0;ym_data_q<=0;
+        end else begin
+            if (ym_wr)
+                ym_write_pending <= 1'b0;
+            case(xs)
             X_IDLE: if(bus_req) begin
                 if(is_memory(bus_cpu,bus_addr)) begin
                     cpu_phys<=physical(bus_cpu,bus_addr,rom_bank[3:0]);
@@ -479,7 +521,8 @@ module s24_core (
                         cpu_wr_pending<=1;xs<=X_WRITE;
                     end else begin bus_din<=16'hffff;xs<=X_LOCAL; end
                 end else if(is_tile_window(bus_addr)) begin
-                    bus_din<=tile_dout;if(!bus_rnw)tile_wr<=1;xs<=X_LOCAL;
+                    if(bus_rnw) xs<=X_TILE;
+                    else begin tile_wr<=1;xs<=X_LOCAL; end
                 end else if(is_tile_absel(bus_addr)) begin
                     bus_din<=16'hffff;
                     if(!bus_rnw)tile_absel<=merge16(tile_absel,bus_dout,bus_be);
@@ -497,14 +540,22 @@ module s24_core (
                     if(!bus_rnw)tile_syncmode<=merge16(tile_syncmode,bus_dout,bus_be);
                     xs<=X_LOCAL;
                 end else if(bus_addr[23:21]==3'b010 && !bus_addr[14]) begin
-                    bus_din<=palette_ram[bus_addr[13:1]];if(!bus_rnw)palette_wr<=1;xs<=X_LOCAL;
+                    if(bus_rnw) xs<=X_PALETTE;
+                    else begin palette_wr<=1;xs<=X_LOCAL; end
                 end else if(bus_addr[23:21]==3'b010 && bus_addr[14]) begin
                     bus_din<=mixer_dout;if(!bus_rnw)mixer_wr<=1;xs<=X_LOCAL;
                 end else if((bus_addr[23:21]==3'b100)&&bus_addr[8:6]==0&&bus_be[0]) begin
                     bus_din<={8'hff,io_dout};io_rd<=bus_rnw;io_wr<=~bus_rnw;xs<=X_LOCAL;
                 end else if((bus_addr[23:21]==3'b100)&&
                             bus_addr[8:2]==7'b1000000&&bus_be[0]) begin
-                    bus_din<={8'hff,ym_dout};ym_wr<=~bus_rnw;xs<=X_LOCAL;
+                    bus_din<={8'hff,ym_dout};
+                    if(bus_rnw) xs<=X_LOCAL;
+                    else begin
+                        ym_addr_q<=bus_addr[1];
+                        ym_data_q<=bus_dout[7:0];
+                        ym_write_pending<=1'b1;
+                        xs<=X_YM;
+                    end
                 end else if(bus_addr[23:19]==5'b11000 && !bus_addr[4] &&
                             board.has_upd4701 && bus_be[0] &&
                             (board.hotrod_io || !bus_addr[3])) begin
@@ -575,6 +626,9 @@ module s24_core (
             end
             X_WRITE: if(wr_ack) begin cpu_wr_pending<=0;bus_ack<=1;xs<=X_WAIT;end
             X_LOCAL: begin bus_ack<=1;xs<=X_WAIT;end
+            X_TILE: begin bus_din<=tile_dout;bus_ack<=1;xs<=X_WAIT;end
+            X_PALETTE: begin bus_din<=palette_cpu_word;bus_ack<=1;xs<=X_WAIT;end
+            X_YM: if(!ym_write_pending) begin bus_ack<=1;xs<=X_WAIT;end
             X_FDC: if(!fdc_wait) begin bus_din<={8'hff,fdc_dout};bus_ack<=1;xs<=X_WAIT;end
             X_FDKEY: if(fd_done) begin bus_din<=fd_plaintext;bus_ack<=1;xs<=X_WAIT;end
             // bus_ack is registered in this clock domain.  The arbiter drops
@@ -582,7 +636,8 @@ module s24_core (
             // as a new transaction on the intervening edge.
             X_WAIT: if(!bus_req) xs<=X_IDLE;
             default: xs<=X_IDLE;
-        endcase
+            endcase
+        end
     end
 
     // Complete a floppy write byte after SDRAM accepts it.

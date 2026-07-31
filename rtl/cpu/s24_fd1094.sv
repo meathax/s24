@@ -18,7 +18,10 @@ module s24_fd1094 #(
     output logic [15:0] plaintext,
     output logic [7:0]  current_state
 );
-    (* ramstyle="M10K, no_rw_check" *) logic [7:0] key_ram [0:8191];
+    // The HPS writes both bytes of a key word in one cycle. Banking even and
+    // odd bytes gives each M10K one write port and one decrypt read port.
+    (* ramstyle="M10K, no_rw_check" *) logic [7:0] key_ram_even [0:4095];
+    (* ramstyle="M10K, no_rw_check" *) logic [7:0] key_ram_odd [0:4095];
     (* romstyle="M10K" *) logic [7:0] mask_rom [0:8191];
     initial $readmemh(MASK_FILE,mask_rom);
 
@@ -101,7 +104,12 @@ module s24_fd1094 #(
                     else key_address<=word_address[13:1];
                     fstate<=F_KEY;
                 end
-                F_KEY: begin mainkey<=key_ram[key_address];fstate<=F_DECRYPT;end
+                F_KEY: begin
+                    mainkey <= key_address[0]
+                               ? key_ram_odd[key_address[12:1]]
+                               : key_ram_even[key_address[12:1]];
+                    fstate<=F_DECRYPT;
+                end
                 F_DECRYPT: begin
                     preliminary<=dec_preliminary;
                     mask_address_l<=dec_mask_address;
@@ -177,8 +185,8 @@ module s24_fd1094 #(
         // Key download deliberately remains writable while the emulated CPU
         // is held in reset by ioctl_download.
         if(key_wr) begin
-            key_ram[{key_word_addr,1'b0}]<=key_wdata[7:0];
-            key_ram[{key_word_addr,1'b0}+1'b1]<=key_wdata[15:8];
+            key_ram_even[key_word_addr]<=key_wdata[7:0];
+            key_ram_odd[key_word_addr]<=key_wdata[15:8];
             case({key_word_addr,1'b0})
                 13'd0: begin irq_key<=key_wdata[7:0];global_key1<=key_wdata[15:8];end
                 13'd2: begin global_key2<=key_wdata[7:0];global_key3<=key_wdata[15:8];end

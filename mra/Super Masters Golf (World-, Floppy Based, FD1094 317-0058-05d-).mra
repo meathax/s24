@@ -9,17 +9,17 @@
   <joystick>8-way</joystick>
   <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
   <switches default="FF ED"/>
-  <rom index="1" zip="sgmast.zip" md5="none">
+  <rom index="1" zip="sgmast.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
       <part name="epr-12187.ic2" crc="e83783f3" map="01"/>
       <part name="epr-12186.ic1" crc="ce76319d" map="10"/>
     </interleave>
   </rom>
-  <rom index="3" zip="sgmast.zip" md5="none">
+  <rom index="3" zip="sgmast.zip" md5="none" type="merged|nonmerged|split">
     <part name="ds3-5000-05d.img" crc="e9a69f93"/>
     <part repeat="253952">00</part>
   </rom>
-  <rom index="4" zip="sgmast.zip" md5="none">
+  <rom index="4" zip="sgmast.zip" md5="none" type="merged|nonmerged|split">
     <part name="317-0058-05d.key" crc="c779738d"/>
   </rom>
   <rom index="0">

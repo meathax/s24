@@ -37,6 +37,8 @@ module s24_sprite (
     // {valid, reverse-list rank, 14-bit palette/shadow pixel}. Keeping one
     // candidate per priority group reproduces MAME's rule that a tile-blocked
     // front sprite leaves the priority bitmap unlocked for earlier sprites.
+    // Port A feeds the visible scanline while port B performs the renderer's
+    // read-before-write validity check and pixel update.
     (* ramstyle="M10K, no_rw_check" *) logic [25:0] line0 [0:1023];
     (* ramstyle="M10K, no_rw_check" *) logic [25:0] line1 [0:1023];
     (* ramstyle="M10K, no_rw_check" *) logic [25:0] line2 [0:1023];
@@ -69,13 +71,19 @@ module s24_sprite (
     endfunction
 
     typedef enum logic [4:0] {
-        S_IDLE,S_CLEAR,S_LIST_REQ,S_LIST_WAIT,S_RENDER_REQ,S_RENDER_WAIT,
-        S_YMAP,S_PALETTE_WAIT,S_X_SOURCE,S_DATA_WAIT,S_X_EMIT,S_NEXT_SPRITE
+        S_IDLE,S_CLEAR,S_LIST_REQ,S_LIST_WAIT,S_RENDER_PREFETCH,S_RENDER_REQ,
+        S_RENDER_WAIT,S_YMAP,S_PALETTE_WAIT,S_X_SOURCE,S_DATA_WAIT,S_X_EMIT,
+        S_NEXT_SPRITE
     } state_t;
     state_t state;
 
     logic display_bank,fill_bank;
     logic [1:0] line_valid;
+    logic [9:0] display_read_addr,render_read_addr;
+    logic [25:0] line0_display_q,line1_display_q;
+    logic [25:0] line2_display_q,line3_display_q;
+    logic [25:0] line0_render_q,line1_render_q;
+    logic [25:0] line2_render_q,line3_render_q;
     logic [8:0] clear_x,target_y;
     logic [12:0] list_index;
     logic [13:0] list_seen;
@@ -85,6 +93,8 @@ module s24_sprite (
     logic [STACK_BITS:0] stack_count,render_pos;
     logic [STACK_BITS-1:0] stack_head;
     logic [STACK_BITS-1:0] stack_write_slot,stack_render_slot;
+    logic [12:0] sprite_stack_q;
+    logic [80:0] clip_stack_q;
     logic [80:0] render_clip;
     logic [127:0] descriptor,palette_table,data_cache;
     logic [13:0] data_cache_tag;
@@ -125,6 +135,13 @@ module s24_sprite (
     assign stack_render_slot=stack_head+render_pos[STACK_BITS-1:0];
 
     always_comb begin
+        display_read_addr = (hcount==10'd655)
+                            ? {~display_bank,9'd0}
+                            : {display_bank,hcount[8:0]+1'b1};
+        render_read_addr = {fill_bank,dest_x[8:0]};
+        if(state==S_X_EMIT)
+            render_read_addr = {fill_bank,dest_x[8:0]+1'b1};
+
         mem_w0=burst_word(mem_data,0);mem_w1=burst_word(mem_data,1);
         mem_w2=burst_word(mem_data,2);mem_w3=burst_word(mem_data,3);
         mem_w4=burst_word(mem_data,4);mem_w5=burst_word(mem_data,5);
@@ -195,6 +212,16 @@ module s24_sprite (
     end
 
     always_ff @(posedge clk) begin
+        line0_display_q <= line0[display_read_addr];
+        line1_display_q <= line1[display_read_addr];
+        line2_display_q <= line2[display_read_addr];
+        line3_display_q <= line3[display_read_addr];
+        line0_render_q <= line0[render_read_addr];
+        line1_render_q <= line1[render_read_addr];
+        line2_render_q <= line2[render_read_addr];
+        line3_render_q <= line3[render_read_addr];
+        sprite_stack_q <= sprite_stack[stack_render_slot];
+        clip_stack_q <= clip_stack[stack_render_slot];
         if(reset) begin
             state<=S_IDLE;display_bank<=0;fill_bank<=1;line_valid<=0;
             clear_x<=0;target_y<=0;
@@ -216,21 +243,21 @@ module s24_sprite (
                 if(hcount==10'd655) begin
                     display_bank<=~display_bank;
                     if(line_valid[~display_bank]) begin
-                        if(line0[{~display_bank,9'd0}][25]) begin
-                            rank0<=line0[{~display_bank,9'd0}][24:14];
-                            pixel0<=line0[{~display_bank,9'd0}][13:0];
+                        if(line0_display_q[25]) begin
+                            rank0<=line0_display_q[24:14];
+                            pixel0<=line0_display_q[13:0];
                         end else begin rank0<=0;pixel0<=0;end
-                        if(line1[{~display_bank,9'd0}][25]) begin
-                            rank1<=line1[{~display_bank,9'd0}][24:14];
-                            pixel1<=line1[{~display_bank,9'd0}][13:0];
+                        if(line1_display_q[25]) begin
+                            rank1<=line1_display_q[24:14];
+                            pixel1<=line1_display_q[13:0];
                         end else begin rank1<=0;pixel1<=0;end
-                        if(line2[{~display_bank,9'd0}][25]) begin
-                            rank2<=line2[{~display_bank,9'd0}][24:14];
-                            pixel2<=line2[{~display_bank,9'd0}][13:0];
+                        if(line2_display_q[25]) begin
+                            rank2<=line2_display_q[24:14];
+                            pixel2<=line2_display_q[13:0];
                         end else begin rank2<=0;pixel2<=0;end
-                        if(line3[{~display_bank,9'd0}][25]) begin
-                            rank3<=line3[{~display_bank,9'd0}][24:14];
-                            pixel3<=line3[{~display_bank,9'd0}][13:0];
+                        if(line3_display_q[25]) begin
+                            rank3<=line3_display_q[24:14];
+                            pixel3<=line3_display_q[13:0];
                         end else begin rank3<=0;pixel3<=0;end
                     end else begin
                         pixel0<=0;pixel1<=0;pixel2<=0;pixel3<=0;
@@ -244,21 +271,21 @@ module s24_sprite (
                         clear_x<=0;state<=S_CLEAR;
                     end
                 end else if(hcount<10'd495 && line_valid[display_bank]) begin
-                    if(line0[{display_bank,hcount[8:0]+1'b1}][25]) begin
-                        rank0<=line0[{display_bank,hcount[8:0]+1'b1}][24:14];
-                        pixel0<=line0[{display_bank,hcount[8:0]+1'b1}][13:0];
+                    if(line0_display_q[25]) begin
+                        rank0<=line0_display_q[24:14];
+                        pixel0<=line0_display_q[13:0];
                     end else begin rank0<=0;pixel0<=0;end
-                    if(line1[{display_bank,hcount[8:0]+1'b1}][25]) begin
-                        rank1<=line1[{display_bank,hcount[8:0]+1'b1}][24:14];
-                        pixel1<=line1[{display_bank,hcount[8:0]+1'b1}][13:0];
+                    if(line1_display_q[25]) begin
+                        rank1<=line1_display_q[24:14];
+                        pixel1<=line1_display_q[13:0];
                     end else begin rank1<=0;pixel1<=0;end
-                    if(line2[{display_bank,hcount[8:0]+1'b1}][25]) begin
-                        rank2<=line2[{display_bank,hcount[8:0]+1'b1}][24:14];
-                        pixel2<=line2[{display_bank,hcount[8:0]+1'b1}][13:0];
+                    if(line2_display_q[25]) begin
+                        rank2<=line2_display_q[24:14];
+                        pixel2<=line2_display_q[13:0];
                     end else begin rank2<=0;pixel2<=0;end
-                    if(line3[{display_bank,hcount[8:0]+1'b1}][25]) begin
-                        rank3<=line3[{display_bank,hcount[8:0]+1'b1}][24:14];
-                        pixel3<=line3[{display_bank,hcount[8:0]+1'b1}][13:0];
+                    if(line3_display_q[25]) begin
+                        rank3<=line3_display_q[24:14];
+                        pixel3<=line3_display_q[13:0];
                     end else begin rank3<=0;pixel3<=0;end
                 end else begin
                     pixel0<=0;pixel1<=0;pixel2<=0;pixel3<=0;
@@ -285,7 +312,7 @@ module s24_sprite (
                     // scanline renderer indefinitely.
                     if(list_seen==14'd8192) begin
                         if(stack_count==0) begin line_valid[fill_bank]<=1;state<=S_IDLE;end
-                        else begin render_pos<=stack_count-1'b1;state<=S_RENDER_REQ;end
+                        else begin render_pos<=stack_count-1'b1;state<=S_RENDER_PREFETCH;end
                     end else begin
                         mem_addr<=sprite_burst({1'b0,list_index,3'b0});mem_req<=1;
                         state<=S_LIST_WAIT;
@@ -296,7 +323,7 @@ module s24_sprite (
                     if((list_index==0 && mem_w0==0) ||
                        mem_w0[15:14]==2'b11) begin
                         if(stack_count==0) begin line_valid[fill_bank]<=1;state<=S_IDLE;end
-                        else begin render_pos<=stack_count-1'b1;state<=S_RENDER_REQ;end
+                        else begin render_pos<=stack_count-1'b1;state<=S_RENDER_PREFETCH;end
                     end else begin
                         list_index<=mem_w0[12:0];
                         case(mem_w0[15:14])
@@ -329,7 +356,7 @@ module s24_sprite (
                                 end
                                 if(mem_w0[12:0]==0) begin
                                     if(stack_count==0) begin
-                                        render_pos<=0;state<=S_RENDER_REQ;
+                                        render_pos<=0;state<=S_RENDER_PREFETCH;
                                     end else begin
                                         // The terminating normal entry was
                                         // just queued at stack_count. If the
@@ -338,17 +365,17 @@ module s24_sprite (
                                         render_pos <= (stack_count>=STACK_COUNT_LIMIT)
                                                       ? STACK_LAST
                                                       : stack_count;
-                                        state<=S_RENDER_REQ;
+                                        state<=S_RENDER_PREFETCH;
                                     end
                                 end else state<=S_LIST_REQ;
                             end
                         endcase
                     end
                 end
+                S_RENDER_PREFETCH: state<=S_RENDER_REQ;
                 S_RENDER_REQ: begin
-                    render_clip<=clip_stack[stack_render_slot];
-                    mem_addr<=sprite_burst(
-                        {1'b0,sprite_stack[stack_render_slot],3'b0});
+                    render_clip<=clip_stack_q;
+                    mem_addr<=sprite_burst({1'b0,sprite_stack_q,3'b0});
                     mem_req<=1;state<=S_RENDER_WAIT;
                 end
                 S_RENDER_WAIT: if(mem_ack) begin
@@ -409,18 +436,22 @@ module s24_sprite (
                     if(dest_x>=clip_min_x && dest_x<=clip_max_x &&
                        dest_x>=0 && dest_x<496 && line_value[16]) begin
                         case(line_value[15:14])
-                            2'd0: if(!line0[{fill_bank,dest_x[8:0]}][25])
+                            2'd0: if(!line0_render_q[25]) begin
                                 line0[{fill_bank,dest_x[8:0]}]
                                     <= {1'b1,render_pos,line_value[13:0]};
-                            2'd1: if(!line1[{fill_bank,dest_x[8:0]}][25])
+                            end
+                            2'd1: if(!line1_render_q[25]) begin
                                 line1[{fill_bank,dest_x[8:0]}]
                                     <= {1'b1,render_pos,line_value[13:0]};
-                            2'd2: if(!line2[{fill_bank,dest_x[8:0]}][25])
+                            end
+                            2'd2: if(!line2_render_q[25]) begin
                                 line2[{fill_bank,dest_x[8:0]}]
                                     <= {1'b1,render_pos,line_value[13:0]};
-                            default: if(!line3[{fill_bank,dest_x[8:0]}][25])
+                            end
+                            default: if(!line3_render_q[25]) begin
                                 line3[{fill_bank,dest_x[8:0]}]
                                     <= {1'b1,render_pos,line_value[13:0]};
+                            end
                         endcase
                     end
                     dest_x<=dest_x+1'b1;
@@ -431,7 +462,7 @@ module s24_sprite (
                 end
                 S_NEXT_SPRITE: begin
                     if(render_pos==0) begin line_valid[fill_bank]<=1;state<=S_IDLE;end
-                    else begin render_pos<=render_pos-1'b1;state<=S_RENDER_REQ;end
+                    else begin render_pos<=render_pos-1'b1;state<=S_RENDER_PREFETCH;end
                 end
                 default: state<=S_IDLE;
             endcase

@@ -9,13 +9,13 @@
   <joystick>8-way</joystick>
   <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
   <switches default="FF FB"/>
-  <rom index="1" zip="dcclub.zip" md5="none">
+  <rom index="1" zip="dcclub.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
       <part name="epr13948.bin" crc="d6a031c8" map="01"/>
       <part name="epr13947.bin" crc="7e3cff5e" map="10"/>
     </interleave>
   </rom>
-  <rom index="2" zip="dcclub.zip" md5="none">
+  <rom index="2" zip="dcclub.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
       <part name="epr-15345.2" crc="d9e120c2" map="01"/>
       <part name="epr-15344.1" crc="8f8b9f74" map="10"/>

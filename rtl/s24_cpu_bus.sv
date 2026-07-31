@@ -48,16 +48,6 @@ module s24_cpu_bus (
     assign bus_req = active;
     assign bus_cpu = selected;
 
-    always_comb begin
-        if (!selected) begin
-            bus_rnw = a_rnw_p; bus_be = a_be_p; bus_fc = a_fc_p;
-            bus_addr = a_addr_p; bus_dout = a_dout_p;
-        end else begin
-            bus_rnw = b_rnw_p; bus_be = b_be_p; bus_fc = b_fc_p;
-            bus_addr = b_addr_p; bus_dout = b_dout_p;
-        end
-    end
-
     always_ff @(posedge clk) begin
         if (reset) begin
             a_seen <= 0; b_seen <= 0; a_pending <= 0; b_pending <= 0;
@@ -66,6 +56,8 @@ module s24_cpu_bus (
             a_rnw_p <= 0; b_rnw_p <= 0; a_be_p <= 0; b_be_p <= 0;
             a_fc_p <= 0; b_fc_p <= 0; a_addr_p <= 0; b_addr_p <= 0;
             a_dout_p <= 0; b_dout_p <= 0;
+            bus_rnw <= 0; bus_be <= 0; bus_fc <= 0;
+            bus_addr <= 0; bus_dout <= 0;
         end else begin
             if (a_as_n) begin a_seen <= 0; a_ack <= 0; end
             if (b_as_n) begin b_seen <= 0; b_ack <= 0; end
@@ -95,13 +87,29 @@ module s24_cpu_bus (
             if (!active) begin
                 if (a_pending && b_pending) begin
                     selected <= rr;
-                    if (rr) b_pending <= 1'b0; else a_pending <= 1'b0;
+                    if (rr) begin
+                        b_pending <= 1'b0;
+                        bus_rnw <= b_rnw_p; bus_be <= b_be_p;
+                        bus_fc <= b_fc_p; bus_addr <= b_addr_p;
+                        bus_dout <= b_dout_p;
+                    end else begin
+                        a_pending <= 1'b0;
+                        bus_rnw <= a_rnw_p; bus_be <= a_be_p;
+                        bus_fc <= a_fc_p; bus_addr <= a_addr_p;
+                        bus_dout <= a_dout_p;
+                    end
                     rr <= ~rr;
                     active <= 1'b1;
                 end else if (a_pending) begin
                     selected <= 1'b0; a_pending <= 1'b0; active <= 1'b1;
+                    bus_rnw <= a_rnw_p; bus_be <= a_be_p;
+                    bus_fc <= a_fc_p; bus_addr <= a_addr_p;
+                    bus_dout <= a_dout_p;
                 end else if (b_pending) begin
                     selected <= 1'b1; b_pending <= 1'b0; active <= 1'b1;
+                    bus_rnw <= b_rnw_p; bus_be <= b_be_p;
+                    bus_fc <= b_fc_p; bus_addr <= b_addr_p;
+                    bus_dout <= b_dout_p;
                 end
             end else if (bus_ack) begin
                 active <= 1'b0;

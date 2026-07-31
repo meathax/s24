@@ -13,6 +13,7 @@
 __pycache__/
 *.pyc
 /*.rpt
+**/*.rpt
 /*.summary
 /*.smsg
 /*.jdi

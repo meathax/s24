@@ -9,13 +9,13 @@
   <joystick>8-way</joystick>
   <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
   <switches default="FF FF"/>
-  <rom index="1" zip="qgh.zip" md5="none">
+  <rom index="1" zip="qgh.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
       <part name="16900b" crc="20d7b7d1" map="01"/>
       <part name="16899b" crc="397b3ba9" map="10"/>
     </interleave>
   </rom>
-  <rom index="2" zip="qgh.zip" md5="none">
+  <rom index="2" zip="qgh.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
       <part name="16902a" crc="d35b7706" map="01"/>
       <part name="16901a" crc="ab4bcb33" map="10"/>
