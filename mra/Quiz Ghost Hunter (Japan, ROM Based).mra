@@ -1,0 +1,39 @@
+<misterromdescription>
+  <name>Quiz Ghost Hunter (Japan, ROM Based)</name>
+  <mameversion>0288</mameversion>
+  <setname>qgh</setname>
+  <year>1994</year>
+  <manufacturer>Sega</manufacturer>
+  <rbf>s24</rbf>
+  <rotation>horizontal</rotation>
+  <joystick>8-way</joystick>
+  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
+  <switches default="FF FF"/>
+  <rom index="1" zip="qgh.zip" md5="none">
+    <interleave output="16">
+      <part name="16900b" crc="20d7b7d1" map="01"/>
+      <part name="16899b" crc="397b3ba9" map="10"/>
+    </interleave>
+  </rom>
+  <rom index="2" zip="qgh.zip" md5="none">
+    <interleave output="16">
+      <part name="16902a" crc="d35b7706" map="01"/>
+      <part name="16901a" crc="ab4bcb33" map="10"/>
+    </interleave>
+    <interleave output="16">
+      <part name="16904" crc="10987c88" map="01"/>
+      <part name="16903" crc="c19f9e46" map="10"/>
+    </interleave>
+    <interleave output="16">
+      <part name="16906" crc="99c6773e" map="01"/>
+      <part name="16905" crc="3922bbe3" map="10"/>
+    </interleave>
+    <interleave output="16">
+      <part name="16908" crc="407ec20f" map="01"/>
+      <part name="16907" crc="734b0a82" map="10"/>
+    </interleave>
+  </rom>
+  <rom index="0">
+    <part>0201000000000000</part>
+  </rom>
+</misterromdescription>

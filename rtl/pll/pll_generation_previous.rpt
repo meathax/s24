@@ -1,0 +1,17 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate D:\Arcade\AI\s32\rtl\pll\pll.qsys --synthesis=VERILOG --output-directory=D:\Arcade\AI\s32\rtl\pll\synthesis --family="Cyclone V" --part=5CSEBA6U23I7
+Progress: Loading pll/pll.qsys
+Progress: Reading input file
+Progress: Adding pll_inst [altera_pll 17.0]
+Progress: Parameterizing module pll_inst
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: pll.pll_inst: The legal reference clock frequency is 5.0 MHz..700.0 MHz
+Info: pll.pll_inst: Able to implement PLL with user settings
+Info: pll: Generating pll "pll" for QUARTUS_SYNTH
+Info: pll_inst: "pll" instantiated altera_pll "pll_inst"
+Info: pll: Done "pll" with 2 modules, 3 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

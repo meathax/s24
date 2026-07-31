@@ -1,0 +1,29 @@
+<misterromdescription>
+  <name>Crack Down (Japan, Floppy Based, FD1094 317-0058-04b Rev A)</name>
+  <mameversion>0288</mameversion>
+  <setname>crkdownj</setname>
+  <parent>crkdown</parent>
+  <year>1989</year>
+  <manufacturer>Sega</manufacturer>
+  <rbf>s24</rbf>
+  <rotation>horizontal</rotation>
+  <joystick>8-way</joystick>
+  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
+  <switches default="FF FF"/>
+  <rom index="1" zip="crkdown.zip|crkdownj.zip" md5="none">
+    <interleave output="16">
+      <part name="epr-12187.ic2" crc="e83783f3" map="01"/>
+      <part name="epr-12186.ic1" crc="ce76319d" map="10"/>
+    </interleave>
+  </rom>
+  <rom index="3" zip="crkdown.zip|crkdownj.zip" md5="none">
+    <part name="ds3-5000-04b-rev-a.img" crc="5daa1a9a"/>
+    <part repeat="253952">00</part>
+  </rom>
+  <rom index="4" zip="crkdown.zip|crkdownj.zip" md5="none">
+    <part name="317-0058-04b.key" crc="4a99a202"/>
+  </rom>
+  <rom index="0">
+    <part>0500002D00000000</part>
+  </rom>
+</misterromdescription>

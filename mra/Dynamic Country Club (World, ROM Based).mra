@@ -1,0 +1,31 @@
+<misterromdescription>
+  <name>Dynamic Country Club (World, ROM Based)</name>
+  <mameversion>0288</mameversion>
+  <setname>dcclub</setname>
+  <year>1991</year>
+  <manufacturer>Sega</manufacturer>
+  <rbf>s24</rbf>
+  <rotation>horizontal</rotation>
+  <joystick>8-way</joystick>
+  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
+  <switches default="FF FB"/>
+  <rom index="1" zip="dcclub.zip" md5="none">
+    <interleave output="16">
+      <part name="epr13948.bin" crc="d6a031c8" map="01"/>
+      <part name="epr13947.bin" crc="7e3cff5e" map="10"/>
+    </interleave>
+  </rom>
+  <rom index="2" zip="dcclub.zip" md5="none">
+    <interleave output="16">
+      <part name="epr-15345.2" crc="d9e120c2" map="01"/>
+      <part name="epr-15344.1" crc="8f8b9f74" map="10"/>
+    </interleave>
+    <interleave output="16">
+      <part name="mpr-14097-t.4" crc="4bd74cae" map="01"/>
+      <part name="mpr-14096-t.3" crc="38d96502" map="10"/>
+    </interleave>
+  </rom>
+  <rom index="0">
+    <part>2202000000000000</part>
+  </rom>
+</misterromdescription>

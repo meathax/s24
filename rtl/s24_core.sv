@@ -1,0 +1,615 @@
+import s24_pkg::*;
+
+module s24_core (
+    input  logic        clk,
+    input  logic        reset,
+    input  logic        pause,
+    input  board_desc_t board,
+    input  logic        key_wr,
+    input  logic [11:0] key_word_addr,
+    input  logic [15:0] key_wdata,
+    input  logic [63:0] input_ports,
+    input  logic [8:0]  spinner0,
+    input  logic [8:0]  spinner1,
+    input  logic [8:0]  spinner2,
+    input  logic [8:0]  spinner3,
+    input  logic [7:0]  paddle0,
+    input  logic [7:0]  paddle1,
+    input  logic [7:0]  paddle2,
+    input  logic [7:0]  paddle3,
+
+    output logic        ce_pixel,
+    output logic        hblank,
+    output logic        vblank,
+    output logic        hsync,
+    output logic        vsync,
+    output logic [7:0]  red,
+    output logic [7:0]  green,
+    output logic [7:0]  blue,
+    output logic [15:0] audio_l,
+    output logic [15:0] audio_r,
+
+    output logic        p0_req,
+    output logic [26:1] p0_addr,
+    input  logic [15:0] p0_data,
+    input  logic        p0_ack,
+    output logic        p1_req,
+    output logic [26:3] p1_addr,
+    input  logic [63:0] p1_data,
+    input  logic        p1_ack,
+    output logic        p2_req,
+    output logic [26:4] p2_addr,
+    input  logic [127:0] p2_data,
+    input  logic        p2_ack,
+    output logic        p3_req,
+    output logic [26:1] p3_addr,
+    input  logic [15:0] p3_data,
+    input  logic        p3_ack,
+    output logic        p4_req,
+    output logic [26:1] p4_addr,
+    input  logic [15:0] p4_data,
+    input  logic        p4_ack,
+    output logic        p5_req,
+    output logic [26:3] p5_addr,
+    input  logic [63:0] p5_data,
+    input  logic        p5_ack,
+    output logic        wr_req,
+    output logic [26:1] wr_addr,
+    output logic [15:0] wr_data,
+    output logic [1:0]  wr_be,
+    input  logic        wr_ack
+);
+    logic phi1, phi2, ce16, ce8, ce4;
+    s24_clock_enables clocks(
+        .clk(clk),.reset(reset),.pause(pause),.phi1(phi1),.phi2(phi2),
+        .ce_16m(ce16),.ce_8m(ce8),.ce_4m(ce4));
+    assign ce_pixel = ce16;
+
+    logic [9:0] hcount, vcount;
+    logic hsync_tick;
+    s24_video_timing timing(
+        .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
+        .hblank(hblank),.vblank(vblank),.hsync(hsync),.vsync(vsync),
+        .hsync_tick(hsync_tick));
+
+    // ------------------------------- CPUs ---------------------------------
+    logic a_rw_n,a_as_n,a_lds_n,a_uds_n,b_rw_n,b_as_n,b_lds_n,b_uds_n;
+    logic a_dtack_n,b_dtack_n;
+    logic [2:0] a_fc,b_fc,a_ipl_n,b_ipl_n;
+    logic [15:0] a_din,a_dout,b_din,b_dout;
+    logic [23:1] a_word_addr,b_word_addr;
+    logic b_instr_start;
+    logic [15:0] b_instr_opcode;
+    logic [23:1] b_instr_address;
+    logic [2:0] io_cnt;
+    logic io_cnt1_d;
+    logic [3:0] sub_reset_count;
+    logic sub_reset;
+    logic b_phi1,b_phi2;
+    logic [26:0] gground_slow_count;
+    logic [3:0] gground_pair_index;
+    logic gground_pair_enable;
+    logic gground_slow;
+
+    // On real System 24/MAME, raising 315-5296 CNT1 releases CPU B from HALT
+    // and pulses its RESET input. Preserve state on later CNT1-low halts, but
+    // provide a bounded reset pulse on every low-to-high transition.
+    assign sub_reset = reset | (io_cnt[1] && !io_cnt1_d) |
+                       (sub_reset_count != 0);
+    assign gground_slow = (gground_slow_count != 0);
+
+    // Gain Ground measures the shared timer immediately after CPU B is
+    // released. MAME models the otherwise-unrepresented bus contention by
+    // scaling CPU B to 0.7 for two seconds. Keep complete phi1/phi2 pairs and
+    // pass seven of every ten pairs so fx68k sees the same temporary rate.
+    assign b_phi1 = phi1 && (!gground_slow || (gground_pair_index < 4'd7));
+    assign b_phi2 = phi2 && (!gground_slow || gground_pair_enable);
+    always_ff @(posedge clk) begin
+        if(reset) begin
+            io_cnt1_d<=0;
+            sub_reset_count<=0;
+            gground_slow_count<=0;
+            gground_pair_index<=0;
+            gground_pair_enable<=1'b1;
+        end else begin
+            io_cnt1_d<=io_cnt[1];
+            if(io_cnt[1] && !io_cnt1_d) sub_reset_count<=4'd8;
+            else if(sub_reset_count!=0) sub_reset_count<=sub_reset_count-1'b1;
+
+            if(io_cnt[1] && !io_cnt1_d &&
+               board.input_profile==INPUT_GGROUND) begin
+                // clk is 48 MHz: 96,000,000 clocks is exactly two seconds.
+                gground_slow_count<=27'd96000000;
+                gground_pair_index<=0;
+                gground_pair_enable<=1'b1;
+            end else begin
+                if(!pause && gground_slow_count!=0)
+                    gground_slow_count<=gground_slow_count-1'b1;
+                if(phi1) begin
+                    gground_pair_enable<=!gground_slow ||
+                                         (gground_pair_index < 4'd7);
+                    if(gground_slow)
+                        gground_pair_index<=(gground_pair_index==4'd9) ?
+                                             4'd0 : gground_pair_index+1'b1;
+                    else
+                        gground_pair_index<=0;
+                end
+            end
+        end
+    end
+
+    fx68k cpu_a(
+        .clk(clk),.HALTn(1'b1),.extReset(reset),.pwrUp(reset),
+        .enPhi1(phi1),.enPhi2(phi2),.eRWn(a_rw_n),.ASn(a_as_n),
+        .LDSn(a_lds_n),.UDSn(a_uds_n),.E(),.VMAn(),
+        .FC0(a_fc[0]),.FC1(a_fc[1]),.FC2(a_fc[2]),.BGn(),.oRESETn(),.oHALTEDn(),
+        .DTACKn(a_dtack_n),.VPAn(~(&a_fc)),.BERRn(1'b1),.BRn(1'b1),.BGACKn(1'b1),
+        .IPL0n(a_ipl_n[0]),.IPL1n(a_ipl_n[1]),.IPL2n(a_ipl_n[2]),
+        .iEdb(a_din),.oEdb(a_dout),.eab(a_word_addr),
+        .instr_start(),.instr_opcode(),.instr_address());
+    fx68k cpu_b(
+        .clk(clk),.HALTn(io_cnt[1]),.extReset(sub_reset),.pwrUp(reset),
+        .enPhi1(b_phi1),.enPhi2(b_phi2),.eRWn(b_rw_n),.ASn(b_as_n),
+        .LDSn(b_lds_n),.UDSn(b_uds_n),.E(),.VMAn(),
+        .FC0(b_fc[0]),.FC1(b_fc[1]),.FC2(b_fc[2]),.BGn(),.oRESETn(),.oHALTEDn(),
+        .DTACKn(b_dtack_n),.VPAn(~(&b_fc)),.BERRn(1'b1),.BRn(1'b1),.BGACKn(1'b1),
+        .IPL0n(b_ipl_n[0]),.IPL1n(b_ipl_n[1]),.IPL2n(b_ipl_n[2]),
+        .iEdb(b_din),.oEdb(b_dout),.eab(b_word_addr),
+        .instr_start(b_instr_start),.instr_opcode(b_instr_opcode),
+        .instr_address(b_instr_address));
+
+    logic bus_req,bus_cpu,bus_rnw,bus_ack;
+    logic [1:0] bus_be;
+    logic [2:0] bus_fc;
+    logic [23:0] bus_addr;
+    logic [15:0] bus_dout,bus_din;
+    s24_cpu_bus cpu_bus(
+        .clk(clk),.reset(reset),
+        .a_as_n(a_as_n),.a_rw_n(a_rw_n),.a_uds_n(a_uds_n),.a_lds_n(a_lds_n),
+        .a_fc(a_fc),.a_addr(a_word_addr),.a_dout(a_dout),.a_din(a_din),.a_dtack_n(a_dtack_n),
+        .b_as_n(b_as_n),.b_rw_n(b_rw_n),.b_uds_n(b_uds_n),.b_lds_n(b_lds_n),
+        .b_fc(b_fc),.b_addr(b_word_addr),.b_dout(b_dout),.b_din(b_din),.b_dtack_n(b_dtack_n),
+        .bus_req(bus_req),.bus_cpu(bus_cpu),.bus_rnw(bus_rnw),.bus_be(bus_be),
+        .bus_fc(bus_fc),.bus_addr(bus_addr),.bus_dout(bus_dout),
+        .bus_din(bus_din),.bus_ack(bus_ack));
+
+    logic fd_start,fd_busy,fd_done,fd_irq_enter,b_iack_seen;
+    logic [15:0] fd_ciphertext,fd_plaintext;
+    logic [7:0] fd_state;
+    s24_fd1094 fd1094(
+        .clk(clk),.reset(sub_reset),.key_wr(key_wr),.key_word_addr(key_word_addr),
+        .key_wdata(key_wdata),.start(fd_start),.word_address(bus_addr[23:1]),
+        .encrypted(fd_ciphertext),.irq_enter(fd_irq_enter),.busy(fd_busy),
+        .instruction_start(b_instr_start),.instruction_opcode(b_instr_opcode),
+        .instruction_address(b_instr_address),
+        .done(fd_done),.plaintext(fd_plaintext),.current_state(fd_state));
+
+    always_ff @(posedge clk) begin
+        fd_irq_enter<=1'b0;
+        if(reset) b_iack_seen<=1'b0;
+        else begin
+            if(b_as_n) b_iack_seen<=1'b0;
+            else if(!b_iack_seen && b_fc==3'b111) begin
+                b_iack_seen<=1'b1;
+                fd_irq_enter<=board.has_fd1094;
+            end
+        end
+    end
+
+    // ------------------------------ devices -------------------------------
+    logic io_rd,io_wr;
+    logic [7:0] io_dout;
+    logic [63:0] io_port_out;
+    logic [7:0] io_dir;
+    s24_io_5296 io(
+        .clk(clk),.reset(reset),.rd(io_rd),.wr(io_wr),
+        .addr({1'b0,bus_addr[5:1]}),
+        .din(bus_dout[7:0]),.dout(io_dout),.port_in(input_ports),
+        .port_out(io_port_out),.port_dir(io_dir),.cnt(io_cnt));
+
+    // Optional 834-6510 daughterboard. Hot Rod uses both encoder counters and
+    // both ADCs; golf cabinets use the first counter when the descriptor says
+    // the analog angle control is fitted.
+    logic [7:0] upd0_dout,upd1_dout,adc0_dout,adc1_dout;
+    logic adc0_select,adc1_select,adc0_shift,adc1_shift;
+    logic [7:0] pedal0,pedal1,pedal2,pedal3;
+    assign pedal0=(paddle0==0)?8'h01:paddle0;
+    assign pedal1=(paddle1==0)?8'h01:paddle1;
+    assign pedal2=(paddle2==0)?8'h01:paddle2;
+    assign pedal3=(paddle3==0)?8'h01:paddle3;
+    s24_upd4701 upd0(
+        .clk(clk),.reset(reset),.spinner_x(spinner0),.spinner_y(spinner1),
+        .addr(bus_addr[2:1]),.dout(upd0_dout));
+    s24_upd4701 upd1(
+        .clk(clk),.reset(reset),.spinner_x(spinner2),.spinner_y(spinner3),
+        .addr(bus_addr[2:1]),.dout(upd1_dout));
+    s24_msm6253 adc0(
+        .clk(clk),.reset(reset),.select(adc0_select),.shift(adc0_shift),
+        .din(bus_dout[7:0]),.an0(pedal0),.an1(pedal1),
+        .an2(pedal2),.an3(pedal3),.dout(adc0_dout));
+    s24_msm6253 adc1(
+        .clk(clk),.reset(reset),.select(adc1_select),.shift(adc1_shift),
+        .din(bus_dout[7:0]),.an0(8'hff),.an1(8'hff),
+        .an2(8'hff),.an3(8'hff),.dout(adc1_dout));
+
+    logic ym_wr;
+    logic [7:0] ym_dout;
+    logic ym_irq_n,ym_half;
+    logic signed [15:0] ym_l,ym_r;
+    always_ff @(posedge clk) if (reset) ym_half<=0; else if (ce4) ym_half<=~ym_half;
+    jt51 ym(
+        .rst(reset | ~io_cnt[2]),.clk(clk),.cen(ce4),.cen_p1(ce4 & ym_half),
+        .cs_n(~ym_wr),.wr_n(~ym_wr),.a0(bus_addr[1]),.din(bus_dout[7:0]),
+        .dout(ym_dout),.ct1(),.ct2(),.irq_n(ym_irq_n),.sample(),
+        .left(),.right(),.xleft(ym_l),.xright(ym_r));
+
+    logic irq_rd_a,irq_rd_b,irq_wr;
+    logic [15:0] irq_dout;
+    logic frc_irq;
+    s24_irq irq(
+        .clk(clk),.reset(reset),.ce_8m(ce8),.hsync_tick(hsync_tick),.vcount(vcount),
+        .ym_irq(~ym_irq_n),.frc_irq(frc_irq),.rd_a(irq_rd_a),.rd_b(irq_rd_b),
+        .wr(irq_wr),.addr(bus_addr[2:1]),.din(bus_dout),.be(bus_be),
+        .dout(irq_dout),.ipl_a_n(a_ipl_n),.ipl_b_n(b_ipl_n));
+
+    logic magic_wr;
+    logic [7:0] magic_dout;
+    s24_magic_latch magic(
+        .clk(clk),.reset(reset),.wr(magic_wr),.din(bus_dout[7:0]),
+        .selector(magic_sel_t'(board.magic_table)),.dout(magic_dout));
+
+    logic [10:0] frc_div;
+    logic [7:0] frc_count;
+    logic frc_mode;
+    logic frc_mode_write,frc_ack_write;
+    always_ff @(posedge clk) begin
+        if (reset) begin frc_div<=0; frc_count<=0; frc_mode<=0; frc_irq<=0; end
+        else begin
+            if (phi1) begin
+                if ((!frc_mode && frc_div==23) || (frc_mode && frc_div==1535)) begin
+                    frc_div<=0;
+                    if (frc_mode) begin
+                        frc_count <= (frc_count==8'h66)?0:frc_count+1'd1;
+                        frc_irq <= 1'b1;
+                    end else frc_count <= frc_count + 1'd1;
+                end else frc_div<=frc_div+1'd1;
+            end
+            if (frc_mode_write) begin frc_mode<=bus_dout[0];frc_div<=0;frc_count<=0; end
+            if (frc_ack_write) frc_irq<=0;
+        end
+    end
+
+    logic [4:0] index_count;
+    always_ff @(posedge clk) begin
+        if(reset) index_count<=0;
+        // The registered line tick sees the old count. MAME advances the
+        // floppy index cadence at the start of scanline 384.
+        else if(hsync_tick && vcount==383) index_count <= index_count==19?0:index_count+1'd1;
+    end
+
+    logic fdc_rd,fdc_wr,fdc_wait,fdc_media_req,fdc_media_wr,fdc_media_ack;
+    logic fdc_read_ack,fdc_write_ack;
+    logic [2:0] fdc_addr;
+    logic [7:0] fdc_dout,fdc_media_wdata,fdc_media_rdata;
+    logic [26:0] fdc_media_addr;
+    s24_fdc fdc(
+        .clk(clk),.reset(reset),.track_size({board.track_bytes_hi,board.track_bytes_lo}),
+        .index_pulse(index_count!=0),.bus_rd(fdc_rd),.bus_wr(fdc_wr),.bus_addr(fdc_addr),
+        .bus_din(bus_dout[7:0]),.bus_dout(fdc_dout),.bus_wait(fdc_wait),
+        .media_req(fdc_media_req),.media_wr(fdc_media_wr),.media_addr(fdc_media_addr),
+        .media_wdata(fdc_media_wdata),.media_rdata(fdc_media_rdata),.media_ack(fdc_media_ack));
+    assign fdc_media_ack = fdc_read_ack | fdc_write_ack;
+
+    // ------------------------------- video --------------------------------
+    logic tile_wr;
+    logic [15:0] tile_dout;
+    // Write-only 315-5292 side registers. System 24 MAME currently models
+    // these as no-ops, but they must decode separately from tile-name RAM.
+    // Retaining the values gives later die/board work a safe integration point
+    // without changing the current video behavior.
+    logic [15:0] tile_absel, tile_xhout, tile_xvout, tile_syncmode;
+    logic [11:0] t0,t1,t2,t3;
+    logic tc0,tc1,tc2,tc3;
+    logic tv0,tv1,tv2,tv3;
+    s24_tile tile(
+        .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
+        .cpu_wr(tile_wr),.cpu_addr(bus_addr[15:1]),.cpu_din(bus_dout),.cpu_be(bus_be),
+        .cpu_dout(tile_dout),.layer0_pixel(t0),.layer1_pixel(t1),
+        .layer2_pixel(t2),.layer3_pixel(t3),.layer0_cat(tc0),.layer1_cat(tc1),
+        .layer2_cat(tc2),.layer3_cat(tc3),.layer0_valid(tv0),.layer1_valid(tv1),
+        .layer2_valid(tv2),.layer3_valid(tv3),.mem_req(p1_req),.mem_addr(p1_addr),
+        .mem_data(p1_data),.mem_ack(p1_ack));
+    logic [13:0] sp0,sp1,sp2,sp3,mixed;
+    logic [10:0] sr0,sr1,sr2,sr3;
+    s24_sprite sprite(
+        .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
+        .pixel0(sp0),.pixel1(sp1),.pixel2(sp2),.pixel3(sp3),
+        .rank0(sr0),.rank1(sr1),.rank2(sr2),.rank3(sr3),
+        .mem_req(p2_req),.mem_addr(p2_addr),
+        .mem_data(p2_data),.mem_ack(p2_ack));
+
+    logic mixer_wr;
+    logic [15:0] mixer_dout;
+    logic display_blank;
+    s24_mixer mixer(
+        .clk(clk),.reset(reset),.cpu_wr(mixer_wr),.cpu_addr(bus_addr[4:1]),
+        .cpu_din(bus_dout),.cpu_be(bus_be),.cpu_dout(mixer_dout),
+        .tile0_pixel(t0),.tile1_pixel(t1),.tile2_pixel(t2),.tile3_pixel(t3),
+        .tile0_cat(tc0),.tile1_cat(tc1),.tile2_cat(tc2),.tile3_cat(tc3),
+        .tile0_valid(tv0),.tile1_valid(tv1),.tile2_valid(tv2),.tile3_valid(tv3),
+        .sprite0_pixel(sp0),.sprite1_pixel(sp1),.sprite2_pixel(sp2),.sprite3_pixel(sp3),
+        .sprite0_rank(sr0),.sprite1_rank(sr1),.sprite2_rank(sr2),.sprite3_rank(sr3),
+        .mixed_pixel(mixed),
+        .display_blank(display_blank));
+
+    (* ramstyle="M10K, no_rw_check" *) logic [15:0] palette_ram [0:8191];
+    logic palette_wr;
+    logic [15:0] palette_word;
+    integer palette_init;
+    initial begin
+        for (palette_init=0; palette_init<8192; palette_init=palette_init+1)
+            palette_ram[palette_init] = 16'h0000;
+    end
+    assign palette_word=palette_ram[mixed[12:0]];
+    s24_palette pal(.palette_word(palette_word),.shadow_bank(mixed[13]),
+                    .red(red),.green(green),.blue(blue));
+    always_ff @(posedge clk) if(palette_wr)
+        palette_ram[bus_addr[13:1]]<=merge16(palette_ram[bus_addr[13:1]],bus_dout,bus_be);
+
+    // --------------------------- board interconnect ------------------------
+    function automatic logic is_tile_window(input logic [23:0] a);
+        // MAME: 200000-20ffff mirrored by 110000. A20 and A16 are mirror
+        // bits; A19:A17 must remain zero.
+        is_tile_window = (a[23:21] == 3'b001) && (a[19:17] == 3'b000);
+    endfunction
+    function automatic logic is_tile_absel(input logic [23:0] a);
+        // 220000-220001 mirrored by 11fffe.
+        is_tile_absel = ((a & 24'hee0000) == 24'h220000);
+    endfunction
+    function automatic logic is_tile_xhout(input logic [23:0] a);
+        // 240000-240001 mirrored by 11fffe.
+        is_tile_xhout = ((a & 24'hee0000) == 24'h240000);
+    endfunction
+    function automatic logic is_tile_xvout(input logic [23:0] a);
+        // 260000-260001 mirrored by 10fffe.
+        is_tile_xvout = ((a & 24'hef0000) == 24'h260000);
+    endfunction
+    function automatic logic is_tile_syncmode(input logic [23:0] a);
+        // 270000-270001 mirrored by 10fffe.
+        is_tile_syncmode = ((a & 24'hef0000) == 24'h270000);
+    endfunction
+    function automatic logic is_fdc_window(input logic [23:0] a);
+        // B00000-B0000f mirrored by 07fff0: the full B00000-B7ffff block.
+        is_fdc_window = (a[23:19] == 5'b10110);
+    endfunction
+    function automatic logic is_sprite_window(input logic [23:0] a);
+        // MAME: 600000-63ffff mirrored by 180000. A20 and A19 are mirror
+        // bits, while A18 remains decoded and must be zero.
+        is_sprite_window = ((a & 24'he40000) == 24'h600000);
+    endfunction
+    function automatic logic is_memory(input logic cpu,input logic [23:0] a);
+        if (a < 24'h200000) is_memory=1;
+        // Both CPUs can address both shared work-RAM banks through the common
+        // high mirrors.  MAME common_map installs these before the two
+        // CPU-specific low windows.
+        else if (a >= 24'hf00000) is_memory=1;
+        else if (a[23:21]==3'b001 && a[19]) is_memory=1; // character RAM
+        else if (is_sprite_window(a)) is_memory=1;       // sprite RAM
+        else if ((a>=24'hb80000&&a<=24'hbbffff)||(a>=24'hc80000&&a<=24'hcbffff))
+            is_memory=board.has_romboard;
+        else is_memory=0;
+    endfunction
+    function automatic logic is_writable(input logic cpu,input logic [23:0] a);
+        if (a>=24'hf00000) is_writable=1;
+        else if (!cpu && (a>=24'h080000&&a<24'h100000)) is_writable=1;
+        else if (cpu && a<24'h080000) is_writable=1;
+        else if (a[23:21]==3'b001 && a[19]) is_writable=1;
+        else if (is_sprite_window(a)) is_writable=1;
+        else is_writable=0;
+    endfunction
+    function automatic [26:0] physical(input logic cpu,input logic [23:0] a,input logic [3:0] bank);
+        if (a >= 24'hf80000)
+            physical=SDR_WORKA_BASE+{9'd0,a[17:0]};
+        else if (a >= 24'hf00000)
+            physical=SDR_WORKB_BASE+{9'd0,a[17:0]};
+        else if (a < 24'h080000)
+            physical=(cpu?SDR_WORKB_BASE:SDR_BOOT_BASE)+{9'd0,a[17:0]};
+        else if (a < 24'h100000) physical=SDR_WORKA_BASE+{9'd0,a[17:0]};
+        else if (a < 24'h200000) physical=SDR_BOOT_BASE+{9'd0,a[17:0]};
+        // System 24 populates 128 KB of character RAM. A18:A17 are ignored
+        // throughout the mirrored 512 KB CPU window (Model 1/2 populate more).
+        else if (a[23:21]==3'b001 && a[19]) physical=SDR_CHAR_BASE+{10'd0,a[16:0]};
+        else if (is_sprite_window(a)) physical=SDR_SPRITE_BASE+{9'd0,a[17:0]};
+        else physical=SDR_ROMBOARD_BASE+{5'd0,bank,a[17:0]};
+    endfunction
+
+    typedef enum logic [2:0] {X_IDLE,X_READ,X_WRITE,X_LOCAL,X_FDC,X_FDKEY,
+                              X_WAIT} xstate_t;
+    xstate_t xs;
+    logic [7:0] rom_bank;
+    logic cpu_wr_pending;
+    logic [26:0] cpu_phys;
+
+    // FDC read service uses p4; write service shares the SDRAM write port.
+    always_ff @(posedge clk) begin
+        fdc_read_ack<=0;
+        if(reset) begin p4_req<=0;p4_addr<=0;fdc_media_rdata<=0; end
+        else begin
+            if(fdc_media_req && !fdc_media_wr && !p4_req) begin
+                p4_req<=1;
+                p4_addr<=word_address(SDR_FLOPPY_BASE+fdc_media_addr);
+            end
+            if(p4_ack&&p4_req) begin
+                p4_req<=0;fdc_read_ack<=1;
+                fdc_media_rdata<=fdc_media_addr[0]?p4_data[15:8]:p4_data[7:0];
+            end
+        end
+    end
+
+    always_comb begin
+        wr_req=cpu_wr_pending | (fdc_media_req&&fdc_media_wr);
+        if(fdc_media_req&&fdc_media_wr) begin
+            wr_addr=word_address(SDR_FLOPPY_BASE+fdc_media_addr);
+            wr_data={fdc_media_wdata,fdc_media_wdata};
+            wr_be=fdc_media_addr[0]?2'b10:2'b01;
+        end else begin
+            wr_addr=cpu_phys[26:1];wr_data=bus_dout;wr_be=bus_be;
+        end
+    end
+
+    always_ff @(posedge clk) begin
+        bus_ack<=0;io_rd<=0;io_wr<=0;ym_wr<=0;irq_rd_a<=0;irq_rd_b<=0;irq_wr<=0;
+        magic_wr<=0;tile_wr<=0;mixer_wr<=0;palette_wr<=0;fdc_rd<=0;fdc_wr<=0;
+        adc0_select<=0;adc1_select<=0;adc0_shift<=0;adc1_shift<=0;
+        frc_mode_write<=0;frc_ack_write<=0;fd_start<=0;
+        if(reset) begin
+            xs<=X_IDLE;bus_din<=16'hffff;p0_req<=0;p3_req<=0;
+            p0_addr<=0;p3_addr<=0;cpu_wr_pending<=0;cpu_phys<=0;rom_bank<=0;
+            p5_req<=0;p5_addr<=0;fdc_addr<=0;fd_ciphertext<=0;
+            tile_absel<=0;tile_xhout<=0;tile_xvout<=0;tile_syncmode<=0;
+        end else case(xs)
+            X_IDLE: if(bus_req) begin
+                if(is_memory(bus_cpu,bus_addr)) begin
+                    cpu_phys<=physical(bus_cpu,bus_addr,rom_bank[3:0]);
+                    if(bus_rnw) begin
+                        if(!bus_cpu) begin p0_addr<=word_address(physical(0,bus_addr,rom_bank[3:0]));p0_req<=1; end
+                        else begin p3_addr<=word_address(physical(1,bus_addr,rom_bank[3:0]));p3_req<=1; end
+                        xs<=X_READ;
+                    end else if(is_writable(bus_cpu,bus_addr)) begin
+                        cpu_wr_pending<=1;xs<=X_WRITE;
+                    end else begin bus_din<=16'hffff;xs<=X_LOCAL; end
+                end else if(is_tile_window(bus_addr)) begin
+                    bus_din<=tile_dout;if(!bus_rnw)tile_wr<=1;xs<=X_LOCAL;
+                end else if(is_tile_absel(bus_addr)) begin
+                    bus_din<=16'hffff;
+                    if(!bus_rnw)tile_absel<=merge16(tile_absel,bus_dout,bus_be);
+                    xs<=X_LOCAL;
+                end else if(is_tile_xhout(bus_addr)) begin
+                    bus_din<=16'hffff;
+                    if(!bus_rnw)tile_xhout<=merge16(tile_xhout,bus_dout,bus_be);
+                    xs<=X_LOCAL;
+                end else if(is_tile_xvout(bus_addr)) begin
+                    bus_din<=16'hffff;
+                    if(!bus_rnw)tile_xvout<=merge16(tile_xvout,bus_dout,bus_be);
+                    xs<=X_LOCAL;
+                end else if(is_tile_syncmode(bus_addr)) begin
+                    bus_din<=16'hffff;
+                    if(!bus_rnw)tile_syncmode<=merge16(tile_syncmode,bus_dout,bus_be);
+                    xs<=X_LOCAL;
+                end else if(bus_addr[23:21]==3'b010 && !bus_addr[14]) begin
+                    bus_din<=palette_ram[bus_addr[13:1]];if(!bus_rnw)palette_wr<=1;xs<=X_LOCAL;
+                end else if(bus_addr[23:21]==3'b010 && bus_addr[14]) begin
+                    bus_din<=mixer_dout;if(!bus_rnw)mixer_wr<=1;xs<=X_LOCAL;
+                end else if((bus_addr[23:21]==3'b100)&&bus_addr[8:6]==0&&bus_be[0]) begin
+                    bus_din<={8'hff,io_dout};io_rd<=bus_rnw;io_wr<=~bus_rnw;xs<=X_LOCAL;
+                end else if((bus_addr[23:21]==3'b100)&&
+                            bus_addr[8:2]==7'b1000000&&bus_be[0]) begin
+                    bus_din<={8'hff,ym_dout};ym_wr<=~bus_rnw;xs<=X_LOCAL;
+                end else if(bus_addr[23:19]==5'b11000 && !bus_addr[4] &&
+                            board.has_upd4701 && bus_be[0] &&
+                            (board.hotrod_io || !bus_addr[3])) begin
+                    bus_din<={8'hff,bus_addr[3]?upd1_dout:upd0_dout};
+                    xs<=X_LOCAL;
+                end else if(bus_addr[23:19]==5'b11000 && bus_addr[4] &&
+                            board.has_adc && bus_be[0]) begin
+                    bus_din<={8'hff,bus_addr[1]?adc1_dout:adc0_dout};
+                    if(bus_addr[1]) begin
+                        adc1_shift<=bus_rnw;adc1_select<=~bus_rnw;
+                    end else begin
+                        adc0_shift<=bus_rnw;adc0_select<=~bus_rnw;
+                    end
+                    xs<=X_LOCAL;
+                end else if(bus_addr[23:20]==4'ha) begin
+                    bus_din<=irq_dout;irq_rd_a<=bus_rnw&&!bus_cpu;irq_rd_b<=bus_rnw&&bus_cpu;
+                    irq_wr<=~bus_rnw;xs<=X_LOCAL;
+                // MAME mirrors the two FDC blocks by 0x07fff0, covering the
+                // complete B00000-B7FFFF region. A3 selects data/status and
+                // A2:A1 select the four word registers in the data block.
+                end else if(is_fdc_window(bus_addr)) begin
+                    fdc_addr<=bus_addr[3] ? 3'd4 : {1'b0,bus_addr[2:1]};
+                    fdc_rd<=bus_rnw;
+                    // segas24.cpp accepts writes only through D7:D0.
+                    // A high-byte-only 68000 write must leave the FDC intact.
+                    fdc_wr<=~bus_rnw && bus_be[0];
+                    xs<=X_FDC;
+                end else if(((bus_addr[23:18]==6'b101111)||
+                             (bus_addr[23:18]==6'b110011))&&bus_be[0]) begin
+                    // The mapped registers live at odd byte addresses. The
+                    // shared bus carries the aligned word address, so A[2:1]
+                    // selects BC/CC0001,3,5,7 respectively.
+                    case(bus_addr[2:1])
+                        2'd0: begin
+                            // The BC/CC0001 bank latch is populated only on
+                            // ROM-board configurations. Floppy-only boards
+                            // leave this byte open, matching rombd_common_map.
+                            bus_din<=board.has_romboard?{8'hff,rom_bank}:16'hffff;
+                            if(!bus_rnw && board.has_romboard)
+                                rom_bank<=bus_dout[7:0];
+                        end
+                        2'd1: begin
+                            bus_din<={15'd0,frc_mode};
+                            if(!bus_rnw)frc_mode_write<=1;
+                        end
+                        2'd2: begin
+                            bus_din<={8'hff,frc_count};
+                            if(!bus_rnw)frc_ack_write<=1;
+                        end
+                        default: begin
+                            bus_din<={8'hff,magic_dout};
+                            if(!bus_rnw)magic_wr<=1;
+                        end
+                    endcase
+                    xs<=X_LOCAL;
+                end else begin bus_din<=16'hffff;xs<=X_LOCAL; end
+            end
+            X_READ: begin
+                if((!bus_cpu&&p0_ack)||(bus_cpu&&p3_ack)) begin
+                    p0_req<=0;p3_req<=0;
+                    if(bus_cpu && board.has_fd1094 && bus_fc[1]
+                       && bus_fc!=3'b111 && bus_addr<24'h100000) begin
+                        fd_ciphertext<=p3_data;fd_start<=1'b1;xs<=X_FDKEY;
+                    end else begin
+                        bus_din<=bus_cpu?p3_data:p0_data;bus_ack<=1;xs<=X_WAIT;
+                    end
+                end
+            end
+            X_WRITE: if(wr_ack) begin cpu_wr_pending<=0;bus_ack<=1;xs<=X_WAIT;end
+            X_LOCAL: begin bus_ack<=1;xs<=X_WAIT;end
+            X_FDC: if(!fdc_wait) begin bus_din<={8'hff,fdc_dout};bus_ack<=1;xs<=X_WAIT;end
+            X_FDKEY: if(fd_done) begin bus_din<=fd_plaintext;bus_ack<=1;xs<=X_WAIT;end
+            // bus_ack is registered in this clock domain.  The arbiter drops
+            // bus_req one edge later, so do not treat that still-high request
+            // as a new transaction on the intervening edge.
+            X_WAIT: if(!bus_req) xs<=X_IDLE;
+            default: xs<=X_IDLE;
+        endcase
+    end
+
+    // Complete a floppy write byte after SDRAM accepts it.
+    always_ff @(posedge clk) begin
+        fdc_write_ack <= 1'b0;
+        if (reset) fdc_write_ack <= 1'b0;
+        else if (fdc_media_req && fdc_media_wr && wr_ack)
+            fdc_write_ack <= 1'b1;
+    end
+
+    // DAC is port H. MAME configures the YM channel and unsigned R-2R DAC
+    // route at equal 0.50 gain into each corresponding stereo output.
+    logic signed [15:0] dac_sample;
+    assign dac_sample={~io_port_out[63],io_port_out[62:56],8'h00};
+    function automatic logic signed [15:0] mix_sat(
+        input logic signed [15:0] fm,
+        input logic signed [15:0] dac
+    );
+        logic signed [16:0] sum;
+        begin
+            sum = ($signed({fm[15],fm}) >>> 1) +
+                  ($signed({dac[15],dac}) >>> 1);
+            if (sum > 17'sd32767)       mix_sat = 16'sh7fff;
+            else if (sum < -17'sd32768) mix_sat = 16'sh8000;
+            else                        mix_sat = sum[15:0];
+        end
+    endfunction
+    assign audio_l=pause?16'sd0:mix_sat(ym_l,dac_sample);
+    assign audio_r=pause?16'sd0:mix_sat(ym_r,dac_sample);
+endmodule

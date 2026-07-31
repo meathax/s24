@@ -1,0 +1,76 @@
+`timescale 1ns/1ps
+
+module tb_fd1094;
+    logic clk=0;
+    always #10 clk=~clk;
+    logic reset=1,key_wr=0,start=0,irq_enter=0,instruction_start=0;
+    logic [11:0] key_word_addr=0;
+    logic [15:0] key_wdata=0,encrypted=0,plaintext;
+    logic [23:1] word_address=0;
+    logic busy,done;
+    logic [7:0] current_state;
+    logic [15:0] instruction_opcode=0;
+    logic [23:1] instruction_address=0;
+
+    s24_fd1094 #(.MASK_FILE("rtl/cpu/fd1094_masked.mem")) dut(
+        .clk(clk),.reset(reset),.key_wr(key_wr),.key_word_addr(key_word_addr),
+        .key_wdata(key_wdata),.start(start),.word_address(word_address),
+        .encrypted(encrypted),.irq_enter(irq_enter),.busy(busy),.done(done),
+        .instruction_start(instruction_start),.instruction_opcode(instruction_opcode),
+        .instruction_address(instruction_address),
+        .plaintext(plaintext),.current_state(current_state));
+
+    task automatic load_word(input logic [11:0] address,input logic [15:0] data);
+        begin
+            @(negedge clk);key_word_addr=address;key_wdata=data;key_wr=1;
+            @(negedge clk);key_wr=0;
+        end
+    endtask
+
+    task automatic check_decrypt(
+        input logic [22:0] address,
+        input logic [15:0] cipher,
+        input logic [15:0] expected
+    );
+        begin
+            @(negedge clk);word_address=address;encrypted=cipher;start=1;
+            @(negedge clk);start=0;
+            while(!done) @(negedge clk);
+            if(plaintext!==expected)
+                $fatal(1,"address=%h cipher=%h expected=%h got=%h state=%h",
+                       address,cipher,expected,plaintext,current_state);
+        end
+    endtask
+
+    initial begin
+        // 317-0058-04C key bytes used by the independent MAME-derived oracle.
+        // Download while reset is held, matching the MiSTer ioctl sequence.
+        load_word(12'h000,16'hfc19); // key[1], key[0]
+        load_word(12'h001,16'hfae4); // key[3], key[2]
+        load_word(12'h003,16'he200); // key[7]
+        load_word(12'h080,16'h0088); // key[0x100]
+        @(negedge clk);reset=0;
+
+        check_decrypt(23'h000000,16'h1234,16'hc2b4); // reset vector rules
+        check_decrypt(23'h000100,16'habcd,16'h176f); // normal state 00
+
+        @(negedge clk);irq_enter=1;
+        @(negedge clk);irq_enter=0;
+        check_decrypt(23'h000100,16'habcd,16'h4d14); // IRQ state key[0]=19
+
+        // A fetched-but-discarded RTE must not leave IRQ mode. Only fx68k's
+        // instruction boundary is allowed to perform MAME's RTE callback.
+        instruction_opcode=16'h4e73;
+        repeat(2) @(negedge clk);
+        if(current_state!==8'h19) $fatal(1,"prefetched RTE changed FD1094 state");
+        instruction_start=1;
+        @(negedge clk);instruction_start=0;
+        if(current_state!==8'h00) $fatal(1,"executed RTE did not leave IRQ mode");
+
+        @(negedge clk);reset=1;
+        @(negedge clk);reset=0;
+        check_decrypt(23'h000007,16'h013a,16'hffff); // aggressive mask ROM
+        $display("PASS FD1094 MAME vectors and mask ROM");
+        $finish;
+    end
+endmodule
