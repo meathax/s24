@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 
 module tb_fdc;
+    localparam integer MEDIA_BYTES = 16'h5a00;
     logic clk=0,reset=1,index_pulse=0;
     logic [15:0] track_size=0;
     logic bus_rd=0,bus_wr=0;
@@ -9,7 +10,7 @@ module tb_fdc;
     logic bus_wait,media_req,media_wr,media_ack=0,stretch_ack=0;
     logic [26:0] media_addr;
     logic [7:0] media_wdata,media_rdata=0;
-    logic [7:0] media [0:127];
+    logic [7:0] media [0:MEDIA_BYTES-1];
     integer i,requests=0;
 
     always #5 clk=~clk;
@@ -20,7 +21,7 @@ module tb_fdc;
     always @(posedge clk) begin
         if(!stretch_ack) media_ack<=0;
         if(media_req && !media_ack) begin
-            if(media_addr>=128) $fatal(1,"media address outside test image: %0d",media_addr);
+            if(media_addr>=MEDIA_BYTES) $fatal(1,"media address outside test image: %0d",media_addr);
             if(media_wr) media[media_addr]<=media_wdata;
             else media_rdata<=media[media_addr];
             media_ack<=1;
@@ -58,7 +59,7 @@ module tb_fdc;
 
     logic [7:0] value;
     initial begin
-        for(i=0;i<128;i++) media[i]=i[7:0]^8'h5a;
+        for(i=0;i<MEDIA_BYTES;i++) media[i]=i[7:0]^8'h5a;
         repeat(3) @(posedge clk);reset=0;@(posedge clk);#1;
 
         // A board without floppy media returns an open bus and never stalls.
@@ -129,7 +130,27 @@ module tb_fdc;
         read_reg(0,value);
         if(value!=8'h04) $fatal(1,"restore status %02h",value);
 
-        $display("PASS tb_fdc MAME-compatible commands, media sequencing, status and track offsets");
+        // Bonanza Bros. relies on a genuinely writable full 0x2d00-byte
+        // track. Prove a complete write/read round trip rather than only the
+        // four-byte command smoke test above.
+        track_size=16'h2d00;
+        requests=0;
+        write_reg(0,8'hb0);
+        for(i=0;i<16'h2d00;i++)
+            write_reg(3,(i[7:0]^8'ha5));
+        if(requests!=16'h2d00)
+            $fatal(1,"full-track write request count %0d",requests);
+        requests=0;
+        write_reg(0,8'h90);
+        for(i=0;i<16'h2d00;i++) begin
+            read_reg(3,value);
+            if(value!=(i[7:0]^8'ha5))
+                $fatal(1,"full-track round trip byte %0d got %02h",i,value);
+        end
+        if(requests!=16'h2d00)
+            $fatal(1,"full-track read request count %0d",requests);
+
+        $display("PASS tb_fdc MAME commands, sequencing, status and full 2d00-byte writable track");
         $finish;
     end
 endmodule

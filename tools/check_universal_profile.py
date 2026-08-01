@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 
 import check_mame_pin
 import gen_mra
+import run_game_matrix
 
 
 REQUIRED_RTL = frozenset((
@@ -87,6 +88,16 @@ def validate_mras(mra_dir: pathlib.Path) -> None:
         switches = root.find("switches")
         if switches is None or switches.attrib.get("default") != game.dsw:
             raise ValueError(f"{path}: stale DIP defaults")
+        controls = gen_mra.mra_controls_for(game)
+        if required_text(root.find("joystick"), "joystick", path) != controls.joystick:
+            raise ValueError(f"{path}: stale joystick metadata")
+        buttons = root.find("buttons")
+        expected_names = ",".join(controls.names)
+        expected_defaults = ",".join(controls.defaults)
+        if buttons is None or (
+                buttons.attrib.get("names") != expected_names or
+                buttons.attrib.get("default") != expected_defaults):
+            raise ValueError(f"{path}: stale button metadata")
 
 
 def validate_single_build(repo: pathlib.Path) -> None:
@@ -106,6 +117,33 @@ def validate_single_build(repo: pathlib.Path) -> None:
         raise ValueError(f"QSF policy mismatch: {missing_settings}")
 
 
+def validate_gameplay_profiles() -> None:
+    parents = {game.setname for game in gen_mra.GAMES if not game.parent}
+    misplaced = sorted(run_game_matrix.GAMEPLAY_PROFILES.keys() - parents)
+    if misplaced:
+        raise ValueError(
+            f"gameplay schedules must be owned by parent profiles: {misplaced}"
+        )
+    for parent, profile in run_game_matrix.GAMEPLAY_PROFILES.items():
+        if not (0 < profile.checkpoint_frame <= profile.coin_frame
+                < profile.start_frame < profile.capture_frame):
+            raise ValueError(f"{parent}: invalid gameplay frame ordering")
+        if profile.action_frame and not (
+                profile.start_frame <= profile.action_frame
+                < profile.capture_frame):
+            raise ValueError(f"{parent}: invalid gameplay action frame")
+        if profile.input_frames <= 0:
+            raise ValueError(f"{parent}: gameplay input pulse must be nonzero")
+    for game in gen_mra.GAMES:
+        parent = game.parent or game.setname
+        if parent in run_game_matrix.GAMEPLAY_PROFILES and (
+                run_game_matrix.gameplay_profile(game)
+                is not run_game_matrix.GAMEPLAY_PROFILES[parent]):
+            raise ValueError(
+                f"{game.setname}: does not inherit {parent}'s global gameplay profile"
+            )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=pathlib.Path,
@@ -114,7 +152,7 @@ def main() -> None:
                         default=pathlib.Path("mra"))
     parser.add_argument(
         "--mame-source", type=pathlib.Path,
-        default=pathlib.Path("D:/Arcade/AI/MAMESOURCE/mame"),
+        default=pathlib.Path("D:/Arcade/AI/mame289"),
     )
     parser.add_argument(
         "--mame-exe", type=pathlib.Path,
@@ -129,6 +167,7 @@ def main() -> None:
     gen_mra.validate_game_contracts()
     validate_mras(mra_dir)
     validate_single_build(repo)
+    validate_gameplay_profiles()
     mame_head = check_mame_pin.validate(
         args.mame_source.resolve(), args.mame_exe.resolve()
     )
@@ -140,7 +179,7 @@ def main() -> None:
         f"PASS universal {gen_mra.RBF}.rbf profile: "
         f"{len(gen_mra.GAMES)} local / {len(gen_mra.ALL_GAMES)} MAME sets, "
         f"{len(profiles)} runtime descriptors, "
-        f"feature mask {feature_union:#04x}, MAME HEAD {mame_head}"
+        f"feature mask {feature_union:#04x}, MAME source {mame_head}"
     )
 
 

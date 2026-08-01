@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import pathlib
 import subprocess
 
@@ -23,8 +24,39 @@ MAME_ATTRACT_B_PC_MIN = {
     "sgmast": 0x0092BA,
     "bnzabros": 0x0081CA,
     "dcclub": 0x00AEAE,
-    "qgh": 0x0081CA,
+    "qgh": 0x0100C4,
 }
+
+
+@dataclasses.dataclass(frozen=True)
+class GameplayProfile:
+    """Native-frame input/capture contract shared by RTL and MAME audits."""
+
+    coin_frame: int
+    start_frame: int
+    action_frame: int
+    capture_frame: int
+    checkpoint_frame: int = 0
+    input_frames: int = 4
+
+
+# Keep game-specific verification behaviour in the same global parent
+# profile layer as the MAME-derived attract PC.  Gain Ground starts from P1
+# Button 1 as well as Start 1; a Start-only run leaves CREDIT 1 intact and is
+# merely the attract demo, so action_frame is intentionally non-zero.  Crack
+# Down accepts Start 1 on its title screen and reaches live play by frame 2240.
+GAMEPLAY_PROFILES = {
+    "gground": GameplayProfile(1335, 1420, 1420, 1920, 1300),
+    "crkdown": GameplayProfile(1050, 1380, 0, 2260, 1000),
+}
+
+
+def gameplay_profile(game: gen_mra.Game) -> GameplayProfile:
+    parent = game.parent or game.setname
+    try:
+        return GAMEPLAY_PROFILES[parent]
+    except KeyError as error:
+        raise ValueError(f"{parent}: gameplay profile has not been audited") from error
 
 
 def default_attract_b_pc_min(game: gen_mra.Game) -> int:
@@ -99,6 +131,22 @@ def validate_media(game: gen_mra.Game, media: pathlib.Path) -> None:
                 f"{game.setname}: stale floppy.bin size {floppy_size:#x}; "
                 "regenerate simulation media"
             )
+
+    if game.romboard:
+        expected_rom_bytes = gen_mra.MAME_ROMBOARD_REGION_BYTES.get(
+            game.parent or game.setname
+        )
+        if expected_rom_bytes is not None:
+            expected_words = expected_rom_bytes // 2
+            with (game_dir / "romboard.mem").open(
+                    "r", encoding="ascii", newline=None) as stream:
+                actual_words = sum(1 for line in stream if line.strip())
+            if actual_words != expected_words:
+                raise ValueError(
+                    f"{game.setname}: stale/incomplete romboard.mem has "
+                    f"{actual_words:#x} words; expected full MAME region "
+                    f"{expected_rom_bytes:#x}, regenerate simulation media"
+                )
 
     expected = gen_mra.descriptor_bytes(game)
     actual = bytes.fromhex(

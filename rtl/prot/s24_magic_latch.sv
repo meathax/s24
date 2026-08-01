@@ -30,9 +30,12 @@ module s24_magic_latch (
 
     always_ff @(posedge clk) begin
         if (reset) dout <= 8'h00;
-        else if (wr) begin
+        // A null table represents an unpopulated protection daughterboard.
+        // MAME ignores all writes in that profile, including the otherwise
+        // special 0xff reset command.
+        else if (wr && selector != MAGIC_NONE) begin
             if (din == 8'hff) dout <= 8'h00;
-            else if (selector != MAGIC_NONE) dout <= din ^ feedback;
+            else dout <= din ^ feedback;
         end
     end
 endmodule

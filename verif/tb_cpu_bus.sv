@@ -128,7 +128,34 @@ module tb_cpu_bus;
         if(!a_dtack_n || !b_dtack_n || a_mem_req || b_mem_req)
             $fatal(1,"independent read handshake did not return idle");
 
-        $display("PASS tb_cpu_bus independent reads, serialized writes and IACK exclusion");
+        // fx68k holds AS low across TAS/read-modify-write and creates the
+        // inter-half boundary by releasing both data strobes. DCCLUB uses
+        // TAS.B on odd shared byte FFA003 while CPU B polls word FFA002.
+        // The front-end must retire the independent read and then capture the
+        // serialized low-byte write without waiting for AS to rise.
+        @(negedge clk);
+        a_addr=23'h7fd001;a_rw_n=1;a_as_n=0;a_uds_n=0;a_lds_n=0;
+        while(!a_mem_req) begin @(posedge clk); #1; end
+        if(a_mem_addr!=24'hffa002 || bus_req)
+            $fatal(1,"TAS read half did not use independent FFA002 path");
+        a_mem_din=16'h0012;a_mem_ack=1;
+        @(posedge clk);#1;a_mem_ack=0;
+        if(a_dtack_n || a_din!=16'h0012)
+            $fatal(1,"TAS read half did not complete");
+        // Keep AS asserted, release strobes for the RMW idle phase, then
+        // present the write half on the odd/low byte.
+        a_uds_n=1;a_lds_n=1;
+        @(posedge clk);#1;
+        if(!a_dtack_n || a_mem_req)
+            $fatal(1,"TAS inter-half boundary did not retire read");
+        a_rw_n=0;a_dout=16'h0092;a_uds_n=1;a_lds_n=0;
+        while(!bus_req) begin @(posedge clk); #1; end
+        if(bus_cpu || bus_rnw || bus_addr!=24'hffa002 ||
+                bus_be!=2'b01 || bus_dout!=16'h0092)
+            $fatal(1,"TAS write half was lost or mis-laned");
+        finish_a_cycle();
+
+        $display("PASS tb_cpu_bus independent reads, serialized writes, TAS RMW and IACK exclusion");
         $finish;
     end
 endmodule

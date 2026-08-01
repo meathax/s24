@@ -41,6 +41,28 @@ def pair_words(game: gen_mra.Game, pair: gen_mra.Pair,
     return words * pair.repeat
 
 
+def romboard_words(game: gen_mra.Game, item: gen_mra.Pair | gen_mra.SoloLane |
+                   gen_mra.FillPair, rom_dir: pathlib.Path) -> list[int]:
+    """Materialise every profile ROM-board item exactly as the MRA does."""
+    if isinstance(item, gen_mra.Pair):
+        return pair_words(game, item, rom_dir)
+    if isinstance(item, gen_mra.FillPair):
+        return [((item.value & 0xff) << 8) | (item.value & 0xff)] * item.size
+
+    data = read_part(game, item.part.name, rom_dir)
+    if len(data) != item.size:
+        raise ValueError(
+            f"{game.setname}: expected {item.size:#x} bytes for "
+            f"{item.part.name}, got {len(data):#x}"
+        )
+    fill = item.fill & 0xff
+    if item.lane == "01":
+        return [(value << 8) | fill for value in data]
+    if item.lane == "10":
+        return [(fill << 8) | value for value in data]
+    raise ValueError(f"{game.setname}: invalid ROM lane {item.lane}")
+
+
 def write_words(path: pathlib.Path, words: list[int]) -> None:
     path.write_text("".join(f"{word:04x}\n" for word in words), encoding="ascii")
 
@@ -58,9 +80,18 @@ def generate(game: gen_mra.Game, rom_dir: pathlib.Path,
     write_words(target / "boot.mem", pair_words(game, game.boot, rom_dir))
 
     rom_words: list[int] = []
-    for pair in game.romboard:
-        rom_words.extend(pair_words(game, pair, rom_dir))
+    for item in game.romboard:
+        rom_words.extend(romboard_words(game, item, rom_dir))
     if rom_words:
+        expected_rom_bytes = gen_mra.MAME_ROMBOARD_REGION_BYTES.get(
+            game.parent or game.setname
+        )
+        actual_rom_bytes = len(rom_words) * 2
+        if expected_rom_bytes is not None and actual_rom_bytes != expected_rom_bytes:
+            raise ValueError(
+                f"{game.setname}: expected complete {expected_rom_bytes:#x}-byte "
+                f"ROM-board region, got {actual_rom_bytes:#x} bytes"
+            )
         write_words(target / "romboard.mem", rom_words)
         write_word_binary(target / "romboard.bin", rom_words)
 

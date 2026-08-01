@@ -50,6 +50,10 @@ module tb_magic_latch;
         write_byte(8'h81);write_byte(8'h3c);
         if(dout!=8'h36) $fatal(1,"QGH permutation %02h",dout);
 
+        // With no table MAME returns before interpreting even 0xff.
+        selector=MAGIC_NONE;write_byte(8'hff);
+        if(dout!=8'h36) $fatal(1,"unpopulated magic reset was not ignored");
+
         reset_latch();selector=MAGIC_QROUKA;
         write_byte(8'h81);write_byte(8'h3c);
         if(dout!=8'h3a) $fatal(1,"Qrouka permutation %02h",dout);

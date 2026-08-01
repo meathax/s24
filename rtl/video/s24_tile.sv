@@ -251,6 +251,11 @@ module s24_tile (
         line_hscr_word = 0;
         mask_bit = mask_word[15-lookup_x_q[6:3]];
 
+        // In normal mode the window RAM selects the physical tilemap within
+        // each pair.  MAME draw_rect() inverts the mask for the odd physical
+        // map, so a zero chooses the even map and a one chooses the odd map.
+        // Tile-word bit 15 is an independent mixer category and must not take
+        // part in window selection (Crack Down's radar uses both values).
         selected = (lookup_ctrl_mode_q == 0)
                    ? (mask_bit == lookup_layer_q[0])
                    : !lookup_layer_q[0];

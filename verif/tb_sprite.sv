@@ -9,19 +9,28 @@ module tb_sprite;
     logic mem_req,mem_ack;
     logic [26:4] mem_addr;
     logic [127:0] mem_data;
+    integer list_collect_cycles=0;
+    integer first_list_collect_cycles;
+    integer stress_clocks;
+    logic first_cache_epoch;
     localparam logic [26:4] BASE=SDR_SPRITE_BASE[26:4];
 
     always #5 clk=~clk;
     assign mem_ack=mem_req;
 
+    always @(posedge clk)
+        if(!reset && dut.state==dut.S_LIST_REQ)
+            list_collect_cycles<=list_collect_cycles+1;
+
     always_comb begin
         mem_data=128'd0;
         case(mem_addr-BASE)
-            // Entry zero: normal sprite, next entry 1, 1:1 zoom, tile 0x10,
+            // Entry zero: normal sprite, next entry 1, near-1:1 zoom through
+            // the bounded arbitrary-zoom divider, tile 0x10,
             // indirect palette table 2, top=2, left=8 (visible X zero).
             0: begin
                 mem_data[0*16 +:16]=16'h0001;
-                mem_data[1*16 +:16]=16'h003f;
+                mem_data[1*16 +:16]=16'h003e;
                 mem_data[2*16 +:16]=16'h0010;
                 mem_data[3*16 +:16]=16'h0002;
                 mem_data[4*16 +:16]=16'h0002;
@@ -75,6 +84,10 @@ module tb_sprite;
     initial begin
         repeat(3) @(posedge clk);
         reset=0;
+        line_boundary(10'd383); // collect the next frame's list in vblank
+        repeat(40) @(posedge clk);
+        assert(dut.state==dut.S_IDLE && dut.list_cache_valid)
+            else $fatal(1,"sprite vblank list collection failed");
         line_boundary(0); // renders active line 2 into bank zero
         repeat(1200) @(posedge clk);
         assert(dut.state==dut.S_IDLE) else $fatal(1,"sprite renderer overrun state %0d",dut.state);
@@ -91,6 +104,61 @@ module tb_sprite;
         assert(pixel0==0 && pixel1==0 && pixel2==0 && pixel3==0)
             else $fatal(1,"indirect color-zero transparency %h/%h/%h/%h",
                         pixel0,pixel1,pixel2,pixel3);
+
+        // The pointer/clip list is collected once and reused on the next
+        // scanline. Palette and pixel bursts remain live.
+        first_list_collect_cycles=list_collect_cycles;
+        repeat(700) @(posedge clk);
+        assert(dut.state==dut.S_IDLE)
+            else $fatal(1,"cached-list scanline overrun state %0d",dut.state);
+        assert(list_collect_cycles==first_list_collect_cycles)
+            else $fatal(1,"sprite list was rescanned within one frame");
+
+        // Crossing the native frame boundary must invalidate the cached list
+        // even if line zero itself were unavailable. The next scheduled line
+        // recollects and stamps the new epoch.
+        first_cache_epoch=dut.cache_epoch;
+        line_boundary(10'd383);
+        repeat(40) @(posedge clk);
+        assert(dut.state==dut.S_IDLE)
+            else $fatal(1,"next-frame list refresh overrun state %0d",dut.state);
+        assert(list_collect_cycles>first_list_collect_cycles &&
+               dut.cache_epoch!=first_cache_epoch &&
+               dut.cache_epoch==dut.frame_epoch)
+            else $fatal(1,"sprite list did not refresh at frame epoch");
+
+        // SSpirits reaches 1002 normal descriptors behind a full 8192-entry
+        // linked list. Exercise the retained-cache worst case with 48 active
+        // one-tile sprites and prove one scanline still meets 656*3 clocks.
+        for(int s=0;s<1024;s++) begin
+            if(s[0]) begin
+                dut.descriptor_stack[s>>1][255:128]=128'd0;
+                dut.descriptor_stack[s>>1][128+1*16 +:16]=16'h003f;
+                dut.descriptor_stack[s>>1][128+2*16 +:16]=16'h0010;
+                dut.descriptor_stack[s>>1][128+3*16 +:16]=16'h0002;
+                dut.descriptor_stack[s>>1][128+4*16 +:16]=(s<48)?16'h0002:16'h01f4;
+                dut.descriptor_stack[s>>1][128+5*16 +:16]=16'(8+(s%48)*8);
+                dut.clip_stack[s>>1][161:81]=81'd0;
+            end else begin
+                dut.descriptor_stack[s>>1][127:0]=128'd0;
+                dut.descriptor_stack[s>>1][1*16 +:16]=16'h003f;
+                dut.descriptor_stack[s>>1][2*16 +:16]=16'h0010;
+                dut.descriptor_stack[s>>1][3*16 +:16]=16'h0002;
+                dut.descriptor_stack[s>>1][4*16 +:16]=(s<48)?16'h0002:16'h01f4;
+                dut.descriptor_stack[s>>1][5*16 +:16]=16'(8+(s%48)*8);
+                dut.clip_stack[s>>1][80:0]=81'd0;
+            end
+        end
+        dut.stack_head=0;dut.stack_count=11'd1024;
+        dut.list_cache_valid=1;
+        line_boundary(0);
+        stress_clocks=0;
+        while(dut.state!=dut.S_IDLE && stress_clocks<656*3) begin
+            @(posedge clk);stress_clocks++;
+        end
+        assert(dut.state==dut.S_IDLE)
+            else $fatal(1,"1024-descriptor scanline missed budget state=%0d",
+                        dut.state);
 
         // Source-level contracts for the Crack Down paths. These are kept in
         // the regression even when this bench is not being executed.
@@ -138,7 +206,8 @@ module tb_sprite;
         release dut.source_column;
         release dut.flipx;
         release dut.flipy;
-        $display("PASS sprite list, reverse buffer, zoom, palette and 4bpp fetch");
+        $display("PASS sprite list, reverse buffer, zoom, palette and 4bpp fetch stress_clocks=%0d",
+                 stress_clocks);
         $finish;
     end
 endmodule

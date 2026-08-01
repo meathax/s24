@@ -67,12 +67,28 @@ def sha256(path: pathlib.Path) -> str:
 
 
 def git_head(source: pathlib.Path) -> str:
+    # Git config values treat backslashes as escapes on Windows.  Use the
+    # canonical forward-slash spelling for the one-command safe-directory
+    # exception while retaining pathlib paths for file access.
+    safe_source = source.as_posix()
     result = subprocess.run(
-        ["git", "-c", f"safe.directory={source}", "-C", str(source),
+        ["git", "-c", f"safe.directory={safe_source}", "-C", str(source),
          "rev-parse", "HEAD"],
-        check=True, capture_output=True, text=True,
+        capture_output=True, text=True,
     )
-    return result.stdout.strip()
+    if result.returncode == 0:
+        return result.stdout.strip()
+
+    # The user-maintained mame289 tree may be a source snapshot without its
+    # .git directory. Do not weaken the pin: identify that snapshot by an
+    # aggregate of every individually validated behavioral file instead.
+    digest = hashlib.sha256()
+    for relative in sorted(PINNED_FILES):
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(sha256(source / relative).encode("ascii"))
+        digest.update(b"\n")
+    return f"snapshot:{digest.hexdigest()}"
 
 
 def executable_version(executable: pathlib.Path) -> str:
@@ -112,7 +128,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--mame-source", type=pathlib.Path,
-        default=pathlib.Path("D:/Arcade/AI/MAMESOURCE/mame"),
+        default=pathlib.Path("D:/Arcade/AI/mame289"),
     )
     parser.add_argument(
         "--mame-exe", type=pathlib.Path,
@@ -127,7 +143,7 @@ def main() -> None:
         "PASS MAME behavioral pin: executable 0.288, "
         f"{len(PINNED_FILES)} files match {PINNED_COMMIT}, "
         f"{len(DRIVER_SETS)} driver sets, "
-        f"checkout HEAD {head}"
+        f"source identity {head}"
     )
 
 

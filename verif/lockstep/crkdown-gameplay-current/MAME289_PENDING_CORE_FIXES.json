@@ -1,0 +1,29 @@
+{
+  "schema": "rtl-mame-source-audit-v1",
+  "reference": "D:/Arcade/AI/mame289",
+  "checkpoint_provenance_frozen_through_frame": 2260,
+  "diagnostic_note": "Historical ModelSim discriminator logs are source-audit breadcrumbs only; they are not acceptance evidence. All further regressions and every gameplay proof require Verilator.",
+  "verilator_reverification_required": true,
+  "fixes": [
+    {
+      "device": "315-5292 tile",
+      "rtl": "rtl/video/s24_tile.sv",
+      "mismatch": "special mode 1 negates only vertical-scroll bits 8:0; MAME negates the full 10-bit value before layer selection",
+      "discriminator": "S24_EXPOSE_MODE1_VSCROLL_BIT9 in verif/tb_tile.sv",
+      "evidence_log": "verif/lockstep/crkdown-gameplay-current/TILE_MODE1_VSCROLL_EXPECTED_FAIL.log",
+      "current_result": "expected failure: vscroll 0x0200 selects RTL layer 0 instead of MAME layer 1",
+      "deferred_fix": "issue_neg_vscroll = 10'd0 - line_vscr_q[9:0]",
+      "resource_impact": "no registers, RAM or DSP; operand-width-only combinational correction"
+    },
+    {
+      "device": "315-5293/5295 sprite",
+      "rtl": "rtl/video/s24_sprite.sv",
+      "mismatch": "overflow drops descriptors after the oldest 1024; MAME retains later/frontmost list entries",
+      "discriminator": "verif/tb_sprite_overflow.sv",
+      "evidence_log": "verif/lockstep/crkdown-gameplay-current/SPRITE_OVERFLOW_EXPECTED_FAIL.log",
+      "current_result": "expected failure: head=0 slot0=0 after descriptor 1024",
+      "deferred_fix": "bounded newest-entry ring with odd-head handling across packed descriptor pairs",
+      "resource_impact": "no additional RAM or DSP; approximately one 10-bit modular address adder/mux and about 10 state bits"
+    }
+  ]
+}

@@ -7,7 +7,7 @@
   <rbf>s24</rbf>
   <rotation>horizontal</rotation>
   <joystick>8-way</joystick>
-  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
+  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,-,Start,Coin,Service,Test"/>
   <switches default="FF FF"/>
   <rom index="1" zip="crkdown.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">

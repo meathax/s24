@@ -20,8 +20,21 @@ module tb_inputs;
         joy0=0;joy0[12]=1;joy1[12]=1;#1;
         if(ports[7:0]!==8'hf7 || ports[15:8]!==8'hf7)
             $fatal(1,"per-player service switch mapping mismatch");
+        joy0=0;joy0[11]=1;#1;
+        if(ports[39:32]!==8'hfe)
+            $fatal(1,"generic Coin 1 service-bit mapping mismatch %02h",ports[39:32]);
+        joy0=0;joy0[10]=1;#1;
+        if(ports[39:32]!==8'hef)
+            $fatal(1,"generic Start 1 service-bit mapping mismatch %02h",ports[39:32]);
+        joy0[11]=1;#1;
+        if(ports[39:32]!==8'hee)
+            $fatal(1,"generic Coin 1 + Start 1 mapping mismatch %02h",ports[39:32]);
         joy0=0;test_mode=1;#1;
         if(ports[39:32]!==8'hfb)$fatal(1,"test switch mapping mismatch");
+        joy2[4]=1;#1;
+        if(ports[23:16]!==8'hff || ports[31:24]!==8'hff)
+            $fatal(1,"generic unpopulated P3/port-D mismatch");
+        joy2=0;
 
         test_mode=0;golf_io=1;paddle=8'h20;#1;
         if(ports[7:0]!==8'hcf || ports[23:16]!==8'hff)
@@ -59,7 +72,7 @@ module tb_inputs;
             $fatal(1,"Mahjong matrix mapping mismatch %02h/%02h",
                    ports[7:0],ports[23:16]);
 
-        $display("PASS generic/service, golf, Hot Rod, Gain Ground, quiz and mahjong input mapping");
+        $display("PASS generic coin/start/service, golf, Hot Rod, Gain Ground, quiz and mahjong input mapping");
         $finish;
     end
 endmodule

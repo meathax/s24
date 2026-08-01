@@ -4,7 +4,7 @@ module tb_irq;
     import s24_pkg::*;
     logic clk=0,reset=1,ce_8m=0,hsync_tick=0;
     logic [9:0] vcount=0;
-    logic ym_irq=0,frc_irq=0,rd_a=0,rd_b=0,wr=0;
+    logic ym_irq=0,frc_tick=0,frc_mode=0,frc_ack=0,rd_a=0,rd_b=0,wr=0;
     logic [1:0] addr=0,be=2'b11;
     logic [15:0] din=0,dout;
     logic [2:0] ipl_a_n,ipl_b_n;
@@ -81,7 +81,31 @@ module tb_irq;
         if(dut.timer_value!==12'hfff)
             $fatal(1,"mode-0 timer continued counting");
 
-        $display("PASS System 24 raster IRQ phase, timer reload and per-CPU ack");
+        // The FRC source is sampled per CPU at the independent periodic tick.
+        // A masked tick is lost, later allow writes do not resurrect it, and
+        // the dedicated FRC write acknowledges both CPU latches.
+        frc_mode=1;
+        @(negedge clk);frc_tick=1;
+        @(negedge clk);frc_tick=0;#1;
+        write_irq(2,16'h0020);
+        if(ipl_a_n!=3'b111)
+            $fatal(1,"masked FRC tick resurrected after CPU A enable");
+        write_irq(3,16'h0020);
+        @(negedge clk);frc_tick=1;
+        @(negedge clk);frc_tick=0;#1;
+        if(ipl_a_n!=~3'd6 || ipl_b_n!=~3'd6)
+            $fatal(1,"per-CPU FRC tick latch mismatch A=%b B=%b",ipl_a_n,ipl_b_n);
+        @(negedge clk);frc_ack=1;
+        @(negedge clk);frc_ack=0;#1;
+        if(ipl_a_n!=3'b111 || ipl_b_n!=3'b111)
+            $fatal(1,"FRC acknowledge did not clear both CPUs");
+        frc_mode=0;
+        @(negedge clk);frc_tick=1;
+        @(negedge clk);frc_tick=0;#1;
+        if(ipl_a_n!=3'b111 || ipl_b_n!=3'b111)
+            $fatal(1,"mode-0 FRC tick asserted an interrupt");
+
+        $display("PASS System 24 raster/timer/FRC IRQ phase and per-CPU ack");
         $finish;
     end
 endmodule

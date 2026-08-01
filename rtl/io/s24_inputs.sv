@@ -67,8 +67,11 @@ module s24_inputs (
         ports = 64'hffff_ffff_ffff_ffff;
         ports[7:0]   = player(joy0);
         ports[15:8]  = player(joy1);
-        ports[23:16] = player(joy2);
-        ports[31:24] = player(joy3);
+        // Generic System 24 P3 is unpopulated and port D has no input
+        // callback in MAME. Games with real P3/4 wiring repack those players
+        // through their global cabinet profile below.
+        ports[23:16] = 8'hff;
+        ports[31:24] = 8'hff;
         // MAME SERVICE: coin4,coin3,start2,start1,service1,test,coin2,coin1.
         ports[39:32] = {~joy3[11],~joy2[11],~joy1[10],~joy0[10],
                         ~joy0[12],~(joy0[13]|test_mode),~joy1[11],~joy0[11]};

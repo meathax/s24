@@ -98,7 +98,19 @@ module s24_cpu_bus (
             bus_addr <= 0; bus_dout <= 0;
         end else begin
             if (a_as_n) begin a_seen <= 0; a_ack <= 0; end
+            else if (a_ack && a_uds_n && a_lds_n) begin
+                // fx68k keeps AS asserted between the read and write halves
+                // of TAS/read-modify-write, but releases both byte strobes.
+                // Retire the completed read here so the following write half
+                // is accepted as a new transaction under the same AS pulse.
+                a_seen <= 0;
+                a_ack <= 0;
+            end
             if (b_as_n) begin b_seen <= 0; b_ack <= 0; end
+            else if (b_ack && b_uds_n && b_lds_n) begin
+                b_seen <= 0;
+                b_ack <= 0;
+            end
 
             // fx68k asserts AS before the data strobes settle.  Capture only
             // once at least one active-low byte strobe is valid; sampling on

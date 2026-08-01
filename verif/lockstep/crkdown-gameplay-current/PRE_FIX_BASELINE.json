@@ -1,0 +1,28 @@
+{
+  "schema": "rtl-mame-regional-baseline-v1",
+  "game": "crkdown",
+  "purpose": "Causal acceptance baseline for the shared physical-window tile fix",
+  "rtl_frame": "verif/frames/current-parent-audit/crkdown-gameplay-verilator.png",
+  "mame_frame": "verif/frames/current-parent-audit/crkdown-gameplay-mame-best.png",
+  "mame_source_frame": 2254,
+  "mame_source_path": ".build/mame-gameplay/crkdown-match-band/snap/crkdown_002254",
+  "mame_raw_rgb_sha256": "d42fa663256ace727d2e7f501032cc84337185c739e27143a73d0daa7baad027",
+  "native_size": [496, 384],
+  "regions": {
+    "radar_inner": {
+      "box_xyxy": [118, 4, 376, 132],
+      "rtl_nonblack_pixels": 1100,
+      "mame_nonblack_pixels": 29165,
+      "rtl_unique_rgb_colors": 41,
+      "mame_unique_rgb_colors": 57
+    },
+    "playfield": {
+      "box_xyxy": [0, 136, 496, 384],
+      "rtl_nonblack_pixels": 119144,
+      "mame_nonblack_pixels": 119395,
+      "rtl_unique_rgb_colors": 91,
+      "mame_unique_rgb_colors": 91
+    }
+  },
+  "interpretation": "The pre-fix defect is concentrated in the radar tilemap: its inner non-black occupancy is only 3.8% of MAME, while the gameplay field has matching color cardinality and near-identical occupancy. The corrected Verilator gameplay capture must restore the radar without regressing the playfield."
+}

@@ -20,7 +20,18 @@ module tb_gground_boot(
     output logic [9:0]  host_y,
     output logic [7:0]  host_red,
     output logic [7:0]  host_green,
-    output logic [7:0]  host_blue
+    output logic [7:0]  host_blue,
+    output logic [23:0] host_main_pc,
+    output logic [23:0] host_sub_pc,
+    output logic [31:0] host_main_instructions,
+    output logic [31:0] host_sub_instructions,
+    output logic        host_sub_released,
+    output logic        host_trace_valid,
+    output logic        host_trace_cpu,
+    output logic        host_trace_rnw,
+    output logic [1:0]  host_trace_be,
+    output logic [23:0] host_trace_addr,
+    output logic [15:0] host_trace_data
 );
 `else
 module tb_gground_boot;
@@ -122,7 +133,7 @@ module tb_gground_boot;
     logic [23:1] last_a_address,last_b_address;
     logic [15:0] last_a_opcode,last_b_opcode;
     longint signed i,max_clocks,progress_clocks,next_progress;
-    integer target,frame_target;
+    integer target,frame_target,no_auto_finish=0;
     integer board_flags,track_bytes,input_profile,magic_table;
     integer dsw_arg,coinage_arg;
     string game_name,boot_file,romboard_file,key_file,floppy_file;
@@ -145,6 +156,17 @@ module tb_gground_boot;
         host_red=red;
         host_green=green;
         host_blue=blue;
+        host_main_pc={last_a_address,1'b0};
+        host_sub_pc={last_b_address,1'b0};
+        host_main_instructions=cpu_a_instructions;
+        host_sub_instructions=cpu_b_instructions;
+        host_sub_released=dut.io_cnt[1];
+        host_trace_valid=dut.bus_ack;
+        host_trace_cpu=dut.bus_cpu;
+        host_trace_rnw=dut.bus_rnw;
+        host_trace_be=dut.bus_be;
+        host_trace_addr=dut.bus_addr;
+        host_trace_data=dut.bus_rnw ? dut.bus_din : dut.bus_dout;
     end
 `endif
 
@@ -222,10 +244,18 @@ module tb_gground_boot;
             floppy_fd=0;
             floppy_file_bytes=0;
         end
-        // A host checkpoint never resumes a partially written PPM. The live
-        // SDL framebuffer is rebuilt from the next complete native frame.
+        // Never resume a partially written PPM or a process-local descriptor.
+        // If this fresh process was launched with FRAME_OUT, truncate it and
+        // request a new complete native frame from the restored machine.
         frame_fd=0;
-        frame_requested=0;
+        void'($value$plusargs("FRAME_OUT=%s",frame_file));
+        frame_requested=(frame_file!="");
+        if(frame_requested) begin
+            frame_fd=$fopen(frame_file,"wb");
+            if(!frame_fd)
+                $fatal(1,"cannot recreate restored frame capture %s",frame_file);
+            $fwrite(frame_fd,"P6\n496 384\n255\n");
+        end
         frame_capture_active=0;
         frame_capture_done=0;
     end
@@ -583,10 +613,21 @@ module tb_gground_boot;
                 frame_nonblack_pixels<=frame_nonblack_pixels+1;
             if(frame_pixels==496*384-1) begin
                 frame_capture_active<=0;
-                frame_capture_done<=1;
                 frame_pixels<=frame_pixels+1;
                 $fclose(frame_fd);
-                frame_fd=0;
+                if(frame_nonblack_pixels!=0 || red!=0 || green!=0 || blue!=0) begin
+                    frame_capture_done<=1;
+                    frame_fd=0;
+                end else begin
+                    // An attract scene can cut to black immediately after
+                    // the qualifying run. Discard that capture and allow a
+                    // later sustained scene to produce the proof frame.
+                    frame_capture_done<=0;
+                    frame_fd=$fopen(frame_file,"wb");
+                    if(!frame_fd)
+                        $fatal(1,"cannot recreate frame capture %s",frame_file);
+                    $fwrite(frame_fd,"P6\n496 384\n255\n");
+                end
             end else frame_pixels<=frame_pixels+1;
         end
     end
@@ -656,11 +697,15 @@ module tb_gground_boot;
             6: reached_target=(tile_writes!=0 && mixer_writes!=0 &&
                                palette_writes!=0 && char_writes!=0 &&
                                sprite_writes!=0);
-            7: reached_target=(attract_code_seen &&
-                               attract_frames>=attract_required_frames &&
-                               attract_changes!=0 &&
-                               (!frame_requested ||
-                                (frame_capture_done && capture_code_window_seen)));
+            // Capture starts only after the consecutive-frame code-window
+            // proof above.  Requiring another CPU-B crossing during the
+            // scanout itself makes completion depend on where the game's
+            // vblank-only work lands relative to the capture interval.
+            7: reached_target=(attract_code_seen && attract_changes!=0 &&
+                               ((!frame_requested &&
+                                 attract_frames>=attract_required_frames) ||
+                                (frame_requested && frame_capture_done &&
+                                 frame_nonblack_pixels!=0)));
             8: reached_target=(i>=max_clocks);
             default: reached_target=(cpu_b_instructions!=0 &&
                                      (!board.has_fd1094 || decrypt_done!=0) &&
@@ -747,6 +792,7 @@ module tb_gground_boot;
         void'($value$plusargs("ATTRACT_MIN_PIXELS=%d",attract_min_pixels));
         void'($value$plusargs("ATTRACT_FRAMES=%d",attract_required_frames));
         void'($value$plusargs("ATTRACT_B_PC_MIN=%d",attract_b_pc_min));
+        void'($value$plusargs("NO_AUTO_FINISH=%d",no_auto_finish));
         row_diag=$value$plusargs("ROW_DIAG=%d",row_diag);
         void'($value$plusargs("PROGRESS_CLOCKS=%d",progress_clocks));
         if(frame_target<1)
@@ -887,8 +933,16 @@ module tb_gground_boot;
                 i<=0;
             end else visual_reset_clocks<=visual_reset_clocks+1;
         end else begin
-            i<=i+1;
-            if(progress_clocks!=0 && i>=next_progress) begin
+            if(reached_target && !no_auto_finish) begin
+                $display("PASS tb_gground_boot %s game milestone %0d",
+                         game_name,target);
+                if(floppy_fd) begin $fclose(floppy_fd); floppy_fd=0; end
+                if(frame_fd) begin $fclose(frame_fd); frame_fd=0; end
+                $finish;
+            end else begin
+                i<=i+1;
+            end
+            if(!reached_target && progress_clocks!=0 && i>=next_progress) begin
                 $display("%s visual progress clocks=%0d Ainsn=%0d Binsn=%0d release=%0d frames=%0d raster=%0d,%0d",
                     game_name,i,cpu_a_instructions,cpu_b_instructions,
                     cnt_releases,video_frames,dut.hcount,dut.vcount);

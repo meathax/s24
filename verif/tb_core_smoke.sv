@@ -79,6 +79,7 @@ module tb_core_smoke;
     s24_core dut (
         .clk(clk), .reset(reset), .pause(pause), .board(board),
         .key_wr(1'b0), .key_word_addr('0), .key_wdata('0),
+        .mahjong_line(),
         .input_ports(64'hffff_ffff_ffff_ffff),
         .spinner0('0), .spinner1('0), .spinner2('0), .spinner3('0),
         .paddle0(8'h80), .paddle1(8'h80), .paddle2(8'h80), .paddle3(8'h80),
@@ -104,6 +105,10 @@ module tb_core_smoke;
         if (!dut.is_writable(1'b0,24'hf00000) ||
             !dut.is_writable(1'b1,24'hf80000))
             $fatal(1,"both CPUs must write both common high RAM mirrors");
+        if (!dut.is_writable(1'b0,24'h080000) ||
+            !dut.is_writable(1'b1,24'h080000) ||
+            !dut.is_writable(1'b1,24'h0ffffe))
+            $fatal(1,"both CPUs must write the common low Work-A window");
         if (dut.physical(1'b0,24'hf00000,4'd0) != SDR_WORKB_BASE ||
             dut.physical(1'b1,24'hf80000,4'd0) != SDR_WORKA_BASE)
             $fatal(1,"shared high work-RAM physical mapping mismatch");

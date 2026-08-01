@@ -269,10 +269,13 @@ module s24_core (
     logic irq_rd_a,irq_rd_b,irq_wr;
     logic irq_read_pending;
     logic [15:0] irq_dout;
-    logic frc_irq;
+    logic frc_tick;
+    logic frc_mode;
+    logic frc_mode_write,frc_ack_write;
     s24_irq irq(
         .clk(clk),.reset(reset),.ce_8m(ce8),.hsync_tick(line_wrap),.vcount(vcount),
-        .ym_irq(~ym_irq_n),.frc_irq(frc_irq),.rd_a(irq_rd_a),.rd_b(irq_rd_b),
+        .ym_irq(~ym_irq_n),.frc_tick(frc_tick),.frc_mode(frc_mode),
+        .frc_ack(frc_ack_write),.rd_a(irq_rd_a),.rd_b(irq_rd_b),
         .wr(irq_wr),.addr(bus_addr[2:1]),.din(bus_dout),.be(bus_be),
         .dout(irq_dout),.ipl_a_n(a_ipl_n),.ipl_b_n(b_ipl_n));
 
@@ -283,23 +286,28 @@ module s24_core (
         .selector(magic_sel_t'(board.magic_table)),.dout(magic_dout));
 
     logic [10:0] frc_div;
+    logic [10:0] frc_irq_div;
     logic [7:0] frc_count;
-    logic frc_mode;
-    logic frc_mode_write,frc_ack_write;
     always_ff @(posedge clk) begin
-        if (reset) begin frc_div<=0; frc_count<=0; frc_mode<=0; frc_irq<=0; end
+        if (reset) begin
+            frc_div<=0; frc_irq_div<=0; frc_count<=0; frc_mode<=0;
+            frc_tick<=0;
+        end
         else begin
+            frc_tick <= 1'b0;
             if (phi1) begin
+                if (frc_irq_div == 1535) begin
+                    frc_irq_div <= 0;
+                    frc_tick <= 1'b1;
+                end else frc_irq_div <= frc_irq_div + 1'd1;
                 if ((!frc_mode && frc_div==23) || (frc_mode && frc_div==1535)) begin
                     frc_div<=0;
                     if (frc_mode) begin
                         frc_count <= (frc_count==8'h66)?0:frc_count+1'd1;
-                        frc_irq <= 1'b1;
                     end else frc_count <= frc_count + 1'd1;
                 end else frc_div<=frc_div+1'd1;
             end
             if (frc_mode_write) begin frc_mode<=bus_dout[0];frc_div<=0;frc_count<=0; end
-            if (frc_ack_write) frc_irq<=0;
         end
     end
 
@@ -451,7 +459,9 @@ module s24_core (
     endfunction
     function automatic logic is_writable(input logic cpu,input logic [23:0] a);
         if (a>=24'hf00000) is_writable=1;
-        else if (!cpu && (a>=24'h080000&&a<24'h100000)) is_writable=1;
+        // MAME common_map() installs the 080000-0fffff Work-A window in
+        // both CPU maps. It is shared RAM, not CPU-A-private memory.
+        else if (a>=24'h080000&&a<24'h100000) is_writable=1;
         else if (cpu && a<24'h080000) is_writable=1;
         else if (a[23:21]==3'b001 && a[19]) is_writable=1;
         else if (is_sprite_window(a)) is_writable=1;

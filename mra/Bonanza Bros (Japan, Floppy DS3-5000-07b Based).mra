@@ -8,8 +8,8 @@
   <rbf>s24</rbf>
   <rotation>horizontal</rotation>
   <joystick>8-way</joystick>
-  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
-  <switches default="FF FF"/>
+  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,-,Start,Coin,Service,Test"/>
+  <switches default="FF FE"/>
   <rom index="1" zip="bnzabros.zip|bnzabrosj.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
       <part name="epr-12187.ic2" crc="e83783f3" map="01"/>
@@ -28,6 +28,10 @@
     <interleave output="16">
       <part name="mpr-13190.4" crc="0b4df388" map="01"/>
       <part name="mpr-13189.3" crc="5ea5a2f3" map="10"/>
+    </interleave>
+    <interleave output="16">
+      <part repeat="1048576" map="01">00</part>
+      <part repeat="1048576" map="10">00</part>
     </interleave>
   </rom>
   <rom index="3" zip="bnzabros.zip|bnzabrosj.zip" md5="none" type="merged|nonmerged|split">

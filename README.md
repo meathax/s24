@@ -72,7 +72,8 @@ hardware contract. See `docs/game-coverage.md` for the complete set matrix and
 latest fitted resource use.
 
 MiSTer's 16-bit HPS download path now captures both bytes of each MRA switch
-payload at address zero, preserving the per-game `FF ED` and `FF FB` defaults
+payload at address zero, preserving MAME-aligned per-game `FF FD`, `FF FE`,
+and `FF FB` defaults
 instead of silently leaving the second DIP bank at `FF`. A focused wide/byte
 download regression covers this hardware-facing path.
 
@@ -96,13 +97,27 @@ without depending on stale SDRAM contents.
 
 ## Live visual simulation
 
-`tools/build_gground_visual.ps1` builds the real-game Verilator model with an
-SDL2 496x384 window; `tools/run_gground_visual.ps1` launches it with the local
-Gain Ground media. Keyboard and game-controller input are live. F5 or Ctrl+S
-writes a binary `gground.vltsv` checkpoint on a native frame boundary, and
-`-Restore <path>` resumes it after reopening the process-local floppy handle.
+`tools/build_gground_visual.ps1` builds the reusable real-game Verilator model
+with an SDL2 496x384 window. `tools/run_game_visual.ps1 -Game <parent>` launches
+any validated local profile; `tools/run_gground_visual.ps1` remains the cached
+Gain Ground shortcut. Keyboard and game-controller input are live. F5 or
+Ctrl+S writes a binary `<game>.vltsv` checkpoint on a native frame boundary,
+with an atomic `.token` sidecar, and `-Restore <path>` resumes it after
+reopening process-local media handles. `-Target 7 -FrameOut <path>` runs the
+same visible window through the semantic no-input attract gate, writes its
+complete native proof frame, and closes the window after the gate passes.
 The window title and console report frame/checksum changes so a responsive
 window cannot be mistaken for changing core video.
+
+`tools/run_parent_lockstep.py <parent> --frames <count>` launches finite visible
+RTL and MAME windows, verifies isolated media/DIP provenance, compares native
+frames and normalized device transactions, and closes both windows when the
+requested adaptive budget completes. Successful long runs retain full metrics
+but compact raw screenshots to first/final, worst-diff, and 60-frame milestones
+by default; `--retain-stride 0` keeps every generated frame.
+MAME 0.288 marks System 24 save states unsupported, so long differential runs
+remain fresh-state runs; MAME checkpoint segmentation is not accepted as proof
+without an exact uninterrupted-versus-restored replay.
 
 The live model uses MAME's shared 315-5292 character-row order: the two 16-bit
 words remain left-to-right and each word emits its most-significant nibble

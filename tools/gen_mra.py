@@ -52,12 +52,38 @@ MAGIC_MAHMAJN = 5
 MAGIC_MAHMAJN2 = 6
 MAGIC_BNZABROS = 7
 
+# Effective MAME 0.288 default switch bytes for the locally audited parent
+# families.  Parent and clone descriptors must start from the same reference
+# configuration before a trace or framebuffer mismatch is attributed to RTL.
+MAME_PARENT_DIP_DEFAULTS = {
+    "hotrod": "FF FF",
+    "sspirits": "FF FD",
+    "gground": "FF FD",
+    "crkdown": "FF FF",
+    "sgmast": "FF FD",
+    "bnzabros": "FF FE",
+    "dcclub": "FF FB",
+    "qgh": "FF FD",
+}
+
+# MAME's declared ROM-board regions.  Simulation media must materialise the
+# complete hardware-visible address space, including explicit erased banks.
+MAME_ROMBOARD_REGION_BYTES = {
+    "bnzabros": 0x400000,
+    "dcclub": 0x400000,
+    "qgh": 0x400000,
+}
+
 INPUT_QUIZ4 = 2
 INPUT_QROUKA = 3
 INPUT_MAHJONG = 4
 SUPPORTED_INPUT_PROFILES = frozenset((
     INPUT_GENERIC, INPUT_GGROUND, INPUT_QUIZ4, INPUT_QROUKA, INPUT_MAHJONG,
 ))
+
+MRA_CONTROL_GENERIC = "generic"
+MRA_CONTROL_HOTROD = "hotrod"
+MRA_CONTROL_GOLF = "golf"
 
 
 @dataclass(frozen=True)
@@ -92,6 +118,36 @@ class FillPair:
 
 
 @dataclass(frozen=True)
+class MraControls:
+    joystick: str
+    names: tuple[str, ...]
+    defaults: tuple[str, ...]
+
+
+# Human-facing MiSTer metadata follows the MAME parent input definitions.  It
+# is deliberately separate from the eight-byte runtime hardware descriptor.
+MRA_CONTROL_PROFILES = {
+    MRA_CONTROL_GENERIC: MraControls(
+        "8-way",
+        ("Button 1", "Button 2", "Button 3", "-",
+         "Start", "Coin", "Service", "Test"),
+        ("A", "B", "X", "Start", "Select", "R", "L"),
+    ),
+    MRA_CONTROL_HOTROD: MraControls(
+        "Steering Wheel / Accelerator",
+        ("-", "-", "-", "-", "Start", "Coin", "Service", "Test"),
+        ("Start", "Select", "R", "L"),
+    ),
+    MRA_CONTROL_GOLF: MraControls(
+        "Swing / Angle",
+        ("Club", "Stance", "Angle Left", "Angle Right",
+         "Start", "Coin", "Service", "Test"),
+        ("A", "B", "X", "Y", "Start", "Select", "R", "L"),
+    ),
+}
+
+
+@dataclass(frozen=True)
 class Game:
     setname: str
     title: str
@@ -107,6 +163,7 @@ class Game:
     key: Part | None = None
     dsw: str = "FF FF"
     input_profile: int = 0
+    mra_controls: str | None = None
 
 
 def p(name: str, crc: str = "") -> Part:
@@ -121,6 +178,10 @@ BOOT_QGH = Pair(p("16900b", "20d7b7d1"), p("16899b", "397b3ba9"))
 BNZA_ROM = (
     Pair(p("mpr-13188-h.2", "d3802294"), p("mpr-13187-h.1", "e3d8c5f7")),
     Pair(p("mpr-13190.4", "0b4df388"), p("mpr-13189.3", "5ea5a2f3"), repeat=2),
+    # MAME declares a 4 MiB ROM-board region and leaves banks 8..15 zeroed.
+    # Make that game-family hardware state explicit in MRA and simulation
+    # media instead of allowing an uninitialised/ffff tail.
+    FillPair(0x100000),
 )
 DCCLUB_COMMON = Pair(p("mpr-14097-t.4", "4bd74cae"), p("mpr-14096-t.3", "38d96502"))
 
@@ -128,7 +189,8 @@ DCCLUB_COMMON = Pair(p("mpr-14097-t.4", "4bd74cae"), p("mpr-14096-t.3", "38d9650
 GAMES = (
     Game("hotrod", "Hot Rod (World, 3 Players, Turbo set 1, Floppy Based)", 1988,
          BOOT_HOTROD, FLOPPY | UPD4701 | ADC | HOTROD_IO, 0x2F00,
-         floppy=p("ds3-5000-01d_3p_turbo.img", "842006fd")),
+         floppy=p("ds3-5000-01d_3p_turbo.img", "842006fd"),
+         mra_controls=MRA_CONTROL_HOTROD),
     Game("hotroda", "Hot Rod (World, 3 Players, Turbo set 2, Floppy Based)", 1988,
          BOOT_HOTROD, FLOPPY | UPD4701 | ADC | HOTROD_IO, 0x2F00, parent="hotrod",
          floppy=p("ds3-5000-01d.img", "e25c6b63")),
@@ -139,17 +201,17 @@ GAMES = (
          BOOT_HOTROD, FLOPPY | UPD4701 | ADC | HOTROD_IO, 0x2F00, parent="hotrod",
          floppy=p("ds3-5000-01a-rev-b.img", "c18f6dca")),
     Game("sspirits", "Scramble Spirits (World, Floppy Based)", 1988,
-         BOOT_DISK, FLOPPY, 0x2D00, rotation="vertical (ccw)",
+         BOOT_DISK, FLOPPY, 0x2D00, rotation="vertical (ccw)", dsw="FF FD",
          floppy=p("ds3-5000-02-.img", "179b98e9")),
     Game("gground", "Gain Ground (World, 3 Players, Floppy Based, FD1094 317-0058-03d Rev A)", 1988,
          BOOT_DISK, FLOPPY | FD1094, 0x2D00, rotation="vertical (ccw)",
          floppy=p("ds3-5000-03d-rev-a.img", "5c5910f2"),
          key=p("317-0058-03d.key", "e1785bbd"),
-         input_profile=INPUT_GGROUND),
+         dsw="FF FD", input_profile=INPUT_GGROUND),
     Game("ggroundj", "Gain Ground (Japan, 2 Players, Floppy Based, FD1094 317-0058-03b)", 1988,
          BOOT_DISK, FLOPPY | FD1094, 0x2D00, parent="gground", rotation="vertical (ccw)",
          floppy=p("ds3-5000-03b.img", "7200dac9"), key=p("317-0058-03b.key", "84aecdba"),
-         input_profile=INPUT_GGROUND),
+         dsw="FF FD", input_profile=INPUT_GGROUND),
     Game("crkdown", "Crack Down (World, Floppy Based, FD1094 317-0058-04c)", 1989,
          BOOT_DISK, FLOPPY | FD1094, 0x2D00,
          floppy=p("ds3-5000-04c.img", "7d97ba5e"), key=p("317-0058-04c.key", "16e978cc")),
@@ -160,29 +222,33 @@ GAMES = (
          BOOT_DISK, FLOPPY | FD1094, 0x2D00, parent="crkdown",
          floppy=p("ds3-5000-04b-rev-a.img", "5daa1a9a"), key=p("317-0058-04b.key", "4a99a202")),
     Game("sgmast", "Super Masters Golf (World?, Floppy Based, FD1094 317-0058-05d?)", 1989,
-         BOOT_DISK, FLOPPY | FD1094 | GOLF_IO, 0x2D00, dsw="FF ED",
-         floppy=p("ds3-5000-05d.img", "e9a69f93"), key=p("317-0058-05d.key", "c779738d")),
+         BOOT_DISK, FLOPPY | FD1094 | GOLF_IO, 0x2D00, dsw="FF FD",
+         floppy=p("ds3-5000-05d.img", "e9a69f93"), key=p("317-0058-05d.key", "c779738d"),
+         mra_controls=MRA_CONTROL_GOLF),
     Game("sgmastc", "Jumbo Ozaki Super Masters Golf (World, Floppy Based, FD1094 317-0058-05c)", 1989,
-         BOOT_DISK, FLOPPY | FD1094 | GOLF_IO, 0x2D00, parent="sgmast", dsw="FF ED",
+         BOOT_DISK, FLOPPY | FD1094 | GOLF_IO, 0x2D00, parent="sgmast", dsw="FF FD",
          floppy=p("ds3-5000-05c.img", "63a6ef3a"), key=p("317-0058-05c.key", "ae0eabe5")),
     Game("sgmastj", "Jumbo Ozaki Super Masters Golf (Japan, Floppy Based, FD1094 317-0058-05b)", 1989,
-         BOOT_DISK, FLOPPY | FD1094 | UPD4701 | GOLF_IO, 0x2D00, parent="sgmast", dsw="FF ED",
+         BOOT_DISK, FLOPPY | FD1094 | UPD4701 | GOLF_IO, 0x2D00, parent="sgmast", dsw="FF FD",
          floppy=p("ds3-5000-05b.img", "a136668c"), key=p("317-0058-05b.key", "adc0c83b")),
     Game("bnzabros", "Bonanza Bros (US, Floppy DS3-5000-07d? Based)", 1990,
          BOOT_DISK, FLOPPY | ROMBOARD, 0x2D00, MAGIC_BNZABROS, romboard=BNZA_ROM,
-         floppy=p("ds3-5000-07d.img", "2e70251f")),
+         floppy=p("ds3-5000-07d.img", "2e70251f"), dsw="FF FE"),
     Game("bnzabrosj", "Bonanza Bros (Japan, Floppy DS3-5000-07b Based)", 1990,
          BOOT_DISK, FLOPPY | ROMBOARD, 0x2D00, MAGIC_BNZABROS, parent="bnzabros",
-         romboard=BNZA_ROM, floppy=p("ds3-5000-07b.img", "efa7f2a7")),
+         romboard=BNZA_ROM, floppy=p("ds3-5000-07b.img", "efa7f2a7"), dsw="FF FE"),
     Game("dcclub", "Dynamic Country Club (World, ROM Based)", 1991,
          BOOT_DCCLUB, ROMBOARD | GOLF_IO, magic=MAGIC_DCCLUB, dsw="FF FB",
-         romboard=(Pair(p("epr-15345.2", "d9e120c2"), p("epr-15344.1", "8f8b9f74")), DCCLUB_COMMON)),
+         romboard=(Pair(p("epr-15345.2", "d9e120c2"), p("epr-15344.1", "8f8b9f74")),
+                   DCCLUB_COMMON, FillPair(0x100000)),
+         mra_controls=MRA_CONTROL_GOLF),
     Game("dcclubj", "Dynamic Country Club (Japan, ROM Based)", 1991,
          BOOT_DCCLUB, ROMBOARD | UPD4701 | GOLF_IO, magic=MAGIC_DCCLUB,
          parent="dcclub", dsw="FF FB",
-         romboard=(Pair(p("epr-14095a.2", "88d184e9"), p("epr-14094a.1", "7dd2b7d4")), DCCLUB_COMMON)),
+         romboard=(Pair(p("epr-14095a.2", "88d184e9"), p("epr-14094a.1", "7dd2b7d4")),
+                   DCCLUB_COMMON, FillPair(0x100000))),
     Game("qgh", "Quiz Ghost Hunter (Japan, ROM Based)", 1994,
-         BOOT_QGH, ROMBOARD, magic=MAGIC_QGH,
+         BOOT_QGH, ROMBOARD, magic=MAGIC_QGH, dsw="FF FD",
          romboard=(
              Pair(p("16902a", "d35b7706"), p("16901a", "ab4bcb33")),
              Pair(p("16904", "10987c88"), p("16903", "c19f9e46")),
@@ -281,6 +347,22 @@ def descriptor_bytes(game: Game) -> bytes:
     ))
 
 
+def mra_controls_for(
+    game: Game, games: tuple[Game, ...] = ALL_GAMES
+) -> MraControls:
+    """Resolve parent-owned presentation metadata for a parent or clone."""
+    by_setname = {item.setname: item for item in games}
+    current = game
+    seen: set[str] = set()
+    while current.mra_controls is None and current.parent:
+        if current.setname in seen:
+            raise ValueError(f"{game.setname}: cyclic parent controls")
+        seen.add(current.setname)
+        current = by_setname[current.parent]
+    profile = current.mra_controls or MRA_CONTROL_GENERIC
+    return MRA_CONTROL_PROFILES[profile]
+
+
 def validate_game_contracts(games: tuple[Game, ...] = ALL_GAMES) -> None:
     """Reject descriptors that disagree with their media or feature family."""
     setnames = {game.setname for game in games}
@@ -302,6 +384,14 @@ def validate_game_contracts(games: tuple[Game, ...] = ALL_GAMES) -> None:
                 f"{game.setname}: unsupported input profile "
                 f"{game.input_profile}"
             )
+        if game.mra_controls not in (None, *MRA_CONTROL_PROFILES):
+            raise ValueError(
+                f"{game.setname}: unsupported MRA controls {game.mra_controls}"
+            )
+        if game.parent and game.mra_controls is not None:
+            raise ValueError(
+                f"{game.setname}: clone must inherit parent MRA controls"
+            )
         if bool(game.flags & FLOPPY) != (game.floppy is not None):
             raise ValueError(f"{game.setname}: floppy flag/media mismatch")
         if bool(game.flags & ROMBOARD) != bool(game.romboard):
@@ -320,6 +410,13 @@ def validate_game_contracts(games: tuple[Game, ...] = ALL_GAMES) -> None:
                 raise ValueError(
                     f"{game.setname}: Hot Rod profile lacks analog hardware"
                 )
+        controls = mra_controls_for(game, games)
+        if bool(game.flags & HOTROD_IO) != (
+                controls is MRA_CONTROL_PROFILES[MRA_CONTROL_HOTROD]):
+            raise ValueError(f"{game.setname}: Hot Rod MRA controls mismatch")
+        if bool(game.flags & GOLF_IO) != (
+                controls is MRA_CONTROL_PROFILES[MRA_CONTROL_GOLF]):
+            raise ValueError(f"{game.setname}: golf MRA controls mismatch")
         if game.input_profile == INPUT_GGROUND:
             required = FLOPPY | FD1094
             if game.flags & required != required:
@@ -345,6 +442,13 @@ def validate_game_contracts(games: tuple[Game, ...] = ALL_GAMES) -> None:
             raise ValueError(f"{game.setname}: invalid DIP bytes") from error
         if len(switch_bytes) != 2:
             raise ValueError(f"{game.setname}: expected exactly two DIP bytes")
+        family = game.parent or game.setname
+        expected_dsw = MAME_PARENT_DIP_DEFAULTS.get(family)
+        if expected_dsw is not None and game.dsw != expected_dsw:
+            raise ValueError(
+                f"{game.setname}: DIP default {game.dsw} does not match "
+                f"MAME parent profile {expected_dsw}"
+            )
         if len(descriptor_bytes(game)) != 8:
             raise AssertionError("universal descriptor must remain eight bytes")
 
@@ -474,6 +578,9 @@ def emit_romboard_item(lines: list[str], item: Pair | SoloLane | FillPair) -> No
 
 def generate(game: Game, out_dir: pathlib.Path) -> pathlib.Path:
     zips = archive_names(game)
+    controls = mra_controls_for(game)
+    button_names = ",".join(controls.names)
+    button_defaults = ",".join(controls.defaults)
     lines = [
         "<misterromdescription>",
         f"  <name>{escape(game.title)}</name>",
@@ -487,8 +594,8 @@ def generate(game: Game, out_dir: pathlib.Path) -> pathlib.Path:
         "  <manufacturer>Sega</manufacturer>",
         f"  <rbf>{RBF}</rbf>",
         f"  <rotation>{game.rotation}</rotation>",
-        "  <joystick>8-way</joystick>",
-        '  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>',
+        f"  <joystick>{escape(controls.joystick)}</joystick>",
+        f'  <buttons default="{button_defaults}" names="{button_names}"/>',
         f'  <switches default="{game.dsw}"/>',
         f'  <rom index="1" zip="{zips}" md5="none" type="{ROM_SET_TYPES}">',
     ))

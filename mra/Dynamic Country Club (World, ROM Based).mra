@@ -6,8 +6,8 @@
   <manufacturer>Sega</manufacturer>
   <rbf>s24</rbf>
   <rotation>horizontal</rotation>
-  <joystick>8-way</joystick>
-  <buttons default="A,B,X,Start,Select,R,L" names="Button 1,Button 2,Button 3,Button 4,Start,Coin,Service,Test"/>
+  <joystick>Swing / Angle</joystick>
+  <buttons default="A,B,X,Y,Start,Select,R,L" names="Club,Stance,Angle Left,Angle Right,Start,Coin,Service,Test"/>
   <switches default="FF FB"/>
   <rom index="1" zip="dcclub.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
@@ -23,6 +23,10 @@
     <interleave output="16">
       <part name="mpr-14097-t.4" crc="4bd74cae" map="01"/>
       <part name="mpr-14096-t.3" crc="38d96502" map="10"/>
+    </interleave>
+    <interleave output="16">
+      <part repeat="1048576" map="01">00</part>
+      <part repeat="1048576" map="10">00</part>
     </interleave>
   </rom>
   <rom index="0">

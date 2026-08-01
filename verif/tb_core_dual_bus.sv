@@ -8,7 +8,7 @@ import s24_pkg::*;
 module tb_core_dual_bus;
     logic clk=0,reset=1;
     board_desc_t board='0;
-    logic p0_req,p0_ack=0,p3_req,p3_ack=0,wr_req;
+    logic p0_req,p0_ack=0,p3_req,p3_ack=0,wr_req,wr_ack=0;
     logic [26:1] p0_addr,p3_addr,wr_addr;
     logic [15:0] p0_data=16'haaaa,p3_data=16'hbbbb,wr_data;
     logic [1:0] wr_be;
@@ -36,7 +36,7 @@ module tb_core_dual_bus;
         .p4_req(),.p4_addr(),.p4_data('0),.p4_ack(1'b0),
         .p5_req(),.p5_addr(),.p5_data('0),.p5_ack(1'b0),
         .wr_req(wr_req),.wr_addr(wr_addr),.wr_data(wr_data),
-        .wr_be(wr_be),.wr_ack(1'b0));
+        .wr_be(wr_be),.wr_ack(wr_ack));
 
     task automatic idle_cpu_cycles;
         begin
@@ -73,6 +73,23 @@ module tb_core_dual_bus;
         wait(!dut.a_dtack_n&&!dut.b_dtack_n);#1;
         if(dut.a_din!=16'haaaa || dut.b_din!=16'hbbbb)
             $fatal(1,"parallel read payload mismatch A=%h B=%h",dut.a_din,dut.b_din);
+        idle_cpu_cycles();
+
+        // MAME common_map() exposes Work-A at 080000-0fffff to both CPUs.
+        // Exercise the CPU-B write through the complete core write channel,
+        // not only through the address-decoder helper.
+        @(negedge clk);
+        b_addr=24'h080000>>1;b_dout=16'h5aa5;b_rw_n=0;
+        b_as_n=0;b_uds_n=0;b_lds_n=0;
+        wait(wr_req);#1;
+        if(wr_addr!=word_address(SDR_WORKA_BASE) ||
+           wr_data!=16'h5aa5 || wr_be!=2'b11)
+            $fatal(1,"CPU-B common Work-A write mismatch addr=%h data=%h be=%b",
+                   wr_addr,wr_data,wr_be);
+        @(negedge clk);wr_ack=1;
+        @(negedge clk);wr_ack=0;
+        wait(!dut.b_dtack_n);
+        b_rw_n=1;
         idle_cpu_cycles();
 
         // Protected CPU-B program reads retain the p3 -> FD1094 -> DTACK
