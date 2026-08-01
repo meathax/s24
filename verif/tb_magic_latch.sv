@@ -38,9 +38,25 @@ module tb_magic_latch;
         write_byte(8'h81);write_byte(8'h3c);
         if(dout!=8'h78) $fatal(1,"Bonanza permutation %02h",dout);
 
+        reset_latch();selector=MAGIC_MAHMAJN;
+        write_byte(8'h81);write_byte(8'h3c);
+        if(dout!=8'h1d) $fatal(1,"Mahjong permutation %02h",dout);
+
+        reset_latch();selector=MAGIC_MAHMAJN2;
+        write_byte(8'h81);write_byte(8'h3c);
+        if(dout!=8'hfc) $fatal(1,"Mahjong 2 permutation %02h",dout);
+
         reset_latch();selector=MAGIC_QGH;
         write_byte(8'h81);write_byte(8'h3c);
         if(dout!=8'h36) $fatal(1,"QGH permutation %02h",dout);
+
+        reset_latch();selector=MAGIC_QROUKA;
+        write_byte(8'h81);write_byte(8'h3c);
+        if(dout!=8'h3a) $fatal(1,"Qrouka permutation %02h",dout);
+
+        reset_latch();selector=MAGIC_QUIZMEKU;
+        write_byte(8'h81);write_byte(8'h3c);
+        if(dout!=8'h1d) $fatal(1,"Quizmeku permutation %02h",dout);
 
         reset_latch();selector=MAGIC_DCCLUB;
         write_byte(8'h81);write_byte(8'h3c);
@@ -50,7 +66,7 @@ module tb_magic_latch;
         write_byte(8'hff);
         if(dout!=0) $fatal(1,"magic command reset mismatch");
 
-        $display("PASS tb_magic_latch MAME game tables and reset semantics");
+        $display("PASS tb_magic_latch all MAME game tables and reset semantics");
         $finish;
     end
 endmodule

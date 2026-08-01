@@ -71,11 +71,27 @@ module emu (
         .ioctl_index(ioctl_index),.ioctl_addr(ioctl_addr),
         .ioctl_dout(ioctl_dout),.coinage(coinage),.dsw(dsw));
     logic [63:0] input_ports;
+    logic [63:0] mahjong_matrix;
+    logic [2:0] mahjong_line;
+    always_comb begin
+        // MahMahjan's six populated active-low matrix rows.  The four main
+        // A-N/Chi/Pon rows use buttons 1-4 on player slots 1-4; Kan, Reach
+        // and Ron use button 5 on slots 1-3.  The ordinary start/coin inputs
+        // remain available through the standard MiSTer mappings.
+        mahjong_matrix = 64'hffff_ffff_ffff_ffff;
+        mahjong_matrix[7:0]   = {4'hf,~joy0[7],~joy0[6],~joy0[5],~joy0[4]};
+        mahjong_matrix[15:8]  = {4'hf,~joy1[7],~joy1[6],~joy1[5],~joy1[4]};
+        mahjong_matrix[23:16] = {4'hf,~joy2[7],~joy2[6],~joy2[5],~joy2[4]};
+        mahjong_matrix[31:24] = {4'hf,~joy3[7],~joy3[6],~joy3[5],~joy3[4]};
+        mahjong_matrix[39:32] = {7'h7f,~joy0[10]};
+        mahjong_matrix[47:40] = {5'h1f,~joy2[8],~joy1[8],~joy0[8]};
+    end
     s24_inputs inputs(.joy0(joy0),.joy1(joy1),.joy2(joy2),.joy3(joy3),
         .dsw(dsw),.coinage(coinage),.paddle(paddle0),.test_mode(status[7]),
         .golf_io(descriptor.golf_io),.hotrod_io(descriptor.hotrod_io),
         .golf_angle(descriptor.golf_io&&descriptor.has_upd4701),
-        .gground_io(descriptor.input_profile==s24_pkg::INPUT_GGROUND),
+        .input_profile(descriptor.input_profile),.mahjong_line(mahjong_line),
+        .mahjong_matrix(mahjong_matrix),
         .ports(input_ports));
 
     logic sdram_ready,sdram_ready_m,sdram_ready_s;
@@ -103,8 +119,7 @@ module emu (
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata));
 
     logic core_reset,core_reset_async;
-    (* ASYNC_REG = "TRUE",
-       altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
+    (* altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
     logic [1:0] core_reset_sync;
     assign core_reset_async=RESET|status[0]|buttons[1]|~pll_locked|
                             ~sdram_ready_s|~rom_loaded|ioctl_download|
@@ -140,6 +155,7 @@ module emu (
         .spinner2(spinner2),.spinner3(spinner3),
         .paddle0(paddle0),.paddle1(paddle1),
         .paddle2(paddle2),.paddle3(paddle3),
+        .mahjong_line(mahjong_line),
         .ce_pixel(core_ce),.hblank(hblank),.vblank(vblank),
         .hsync(hsync),.vsync(vsync),.red(r),.green(g),.blue(b),
         .audio_l(AUDIO_L),.audio_r(AUDIO_R),

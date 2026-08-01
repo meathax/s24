@@ -118,6 +118,27 @@ module tb_core_smoke;
         if (hsync_edges < 4)
             $fatal(1, "Video timing made only %0d line ticks", hsync_edges);
 
+        // JTS16's final color stage exposed a useful cross-core invariant:
+        // display blanking must gate RGB after the palette lookup.  Palette
+        // entry zero is writable, so replacing the mixed index with zero is
+        // not itself a black-output guarantee.
+        @(negedge clk);
+        dut.palette_ram_lo[0] = 8'h0f;
+        dut.palette_ram_hi[0] = 8'h00;
+        dut.mixer.regs[13] = 16'h0001;
+        repeat (3) @(posedge clk);
+        #1;
+        if (dut.palette_red == 0)
+            $fatal(1, "display-blank regression did not exercise a lit palette entry");
+        if ({red,green,blue} !== 24'h000000)
+            $fatal(1, "display blank leaked palette entry zero: %h", {red,green,blue});
+        @(negedge clk);
+        dut.mixer.regs[13] = 16'h0000;
+        repeat (3) @(posedge clk);
+        #1;
+        if (red == 0)
+            $fatal(1, "unblanked palette entry zero did not reach RGB");
+
         $display("PASS tb_core_smoke reads=%0d instructions=%0d lines=%0d",
                  boot_reads, instruction_starts, hsync_edges);
         $finish;

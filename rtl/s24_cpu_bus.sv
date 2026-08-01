@@ -1,6 +1,7 @@
-// Arbitration front-end for the two physical 68000 buses. Each CPU keeps its
-// own AS cycle pending; transactions are serialized onto the shared board bus.
-// Interrupt acknowledge cycles are autovectored with VPA and never appear here.
+// Front-end for the two physical 68000 buses. Memory reads use independent
+// CPU-A/CPU-B channels; writes and device cycles are serialized onto the shared
+// board-device channel. Interrupt acknowledge cycles are autovectored with VPA
+// and never appear on either transaction interface.
 module s24_cpu_bus (
     input  logic        clk,
     input  logic        reset,
@@ -33,9 +34,22 @@ module s24_cpu_bus (
     output logic [23:0] bus_addr,
     output logic [15:0] bus_dout,
     input  logic [15:0] bus_din,
-    input  logic        bus_ack
+    input  logic        bus_ack,
+
+    input  logic        has_romboard,
+    output logic        a_mem_req,
+    output logic [2:0]  a_mem_fc,
+    output logic [23:0] a_mem_addr,
+    input  logic [15:0] a_mem_din,
+    input  logic        a_mem_ack,
+    output logic        b_mem_req,
+    output logic [2:0]  b_mem_fc,
+    output logic [23:0] b_mem_addr,
+    input  logic [15:0] b_mem_din,
+    input  logic        b_mem_ack
 );
     logic a_seen, b_seen, a_pending, b_pending;
+    logic a_mem_pending, b_mem_pending;
     logic a_ack, b_ack, active, selected, rr;
     logic a_rnw_p, b_rnw_p;
     logic [1:0] a_be_p, b_be_p;
@@ -47,10 +61,34 @@ module s24_cpu_bus (
     assign b_dtack_n = ~b_ack;
     assign bus_req = active;
     assign bus_cpu = selected;
+    assign a_mem_req = a_mem_pending;
+    assign b_mem_req = b_mem_pending;
+    assign a_mem_fc = a_fc_p;
+    assign b_mem_fc = b_fc_p;
+    assign a_mem_addr = a_addr_p;
+    assign b_mem_addr = b_addr_p;
+
+    function automatic logic is_independent_memory(input logic [23:0] addr);
+        if (addr < 24'h200000)
+            is_independent_memory = 1'b1;
+        else if (addr >= 24'hf00000)
+            is_independent_memory = 1'b1;
+        else if (addr[23:21] == 3'b001 && addr[19])
+            is_independent_memory = 1'b1; // character RAM
+        else if ((addr & 24'he40000) == 24'h600000)
+            is_independent_memory = 1'b1; // sprite RAM and mirrors
+        else if (((addr >= 24'hb80000 && addr <= 24'hbbffff) ||
+                  (addr >= 24'hc80000 && addr <= 24'hcbffff)) &&
+                 has_romboard)
+            is_independent_memory = 1'b1;
+        else
+            is_independent_memory = 1'b0;
+    endfunction
 
     always_ff @(posedge clk) begin
         if (reset) begin
             a_seen <= 0; b_seen <= 0; a_pending <= 0; b_pending <= 0;
+            a_mem_pending <= 0; b_mem_pending <= 0;
             a_ack <= 0; b_ack <= 0; active <= 0; selected <= 0; rr <= 0;
             a_din <= 16'hffff; b_din <= 16'hffff;
             a_rnw_p <= 0; b_rnw_p <= 0; a_be_p <= 0; b_be_p <= 0;
@@ -67,7 +105,11 @@ module s24_cpu_bus (
             // AS alone turns every write into a zero-byte transaction.
             if (!a_as_n && (!a_uds_n || !a_lds_n) && !a_seen
                     && a_fc != 3'b111) begin
-                a_seen <= 1'b1; a_pending <= 1'b1;
+                a_seen <= 1'b1;
+                if (a_rw_n && is_independent_memory({a_addr,1'b0}))
+                    a_mem_pending <= 1'b1;
+                else
+                    a_pending <= 1'b1;
                 a_rnw_p <= a_rw_n;
                 a_be_p <= {~a_uds_n,~a_lds_n};
                 a_fc_p <= a_fc;
@@ -76,7 +118,11 @@ module s24_cpu_bus (
             end
             if (!b_as_n && (!b_uds_n || !b_lds_n) && !b_seen
                     && b_fc != 3'b111) begin
-                b_seen <= 1'b1; b_pending <= 1'b1;
+                b_seen <= 1'b1;
+                if (b_rw_n && is_independent_memory({b_addr,1'b0}))
+                    b_mem_pending <= 1'b1;
+                else
+                    b_pending <= 1'b1;
                 b_rnw_p <= b_rw_n;
                 b_be_p <= {~b_uds_n,~b_lds_n};
                 b_fc_p <= b_fc;
@@ -115,6 +161,17 @@ module s24_cpu_bus (
                 active <= 1'b0;
                 if (!selected) begin a_din <= bus_din; a_ack <= 1'b1; end
                 else begin b_din <= bus_din; b_ack <= 1'b1; end
+            end
+
+            if (a_mem_pending && a_mem_ack) begin
+                a_mem_pending <= 1'b0;
+                a_din <= a_mem_din;
+                a_ack <= 1'b1;
+            end
+            if (b_mem_pending && b_mem_ack) begin
+                b_mem_pending <= 1'b0;
+                b_din <= b_mem_din;
+                b_ack <= 1'b1;
             end
         end
     end

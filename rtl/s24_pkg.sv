@@ -29,6 +29,12 @@ package s24_pkg;
 
     localparam logic [7:0] INPUT_GENERIC = 8'd0;
     localparam logic [7:0] INPUT_GGROUND = 8'd1;
+    // Additional MAME System 24 cabinet/input families.  Keep these as
+    // behavioural profiles rather than set-name checks so clones and future
+    // dumps select the same physical wiring.
+    localparam logic [7:0] INPUT_QUIZ4   = 8'd2;
+    localparam logic [7:0] INPUT_QROUKA  = 8'd3;
+    localparam logic [7:0] INPUT_MAHJONG = 8'd4;
 
     typedef enum logic [3:0] {
         MAGIC_NONE      = 4'd0,

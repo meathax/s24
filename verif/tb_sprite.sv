@@ -47,8 +47,28 @@ module tb_sprite;
 
     task automatic line_boundary(input [9:0] line);
         begin
-            vcount=line;hcount=10'd655;ce_pixel=1;
+            // The hardware holds hcount at 655 for several master clocks
+            // before ce_pixel advances the raster.  Give the synchronous
+            // display port one clock to prefetch pixel zero from the bank
+            // that will become visible at the boundary.
+            @(negedge clk);
+            vcount=line;hcount=10'd655;ce_pixel=0;
+            @(posedge clk);
+            @(negedge clk);
+            ce_pixel=1;
             @(posedge clk);#1;ce_pixel=0;hcount=0;
+        end
+    endtask
+
+    task automatic advance_pixel(input [9:0] count);
+        begin
+            hcount=count;ce_pixel=0;
+            // As above, allow the registered display read to fetch count+1
+            // before the pixel-enable edge consumes it.
+            @(posedge clk);
+            @(negedge clk);
+            ce_pixel=1;
+            @(posedge clk);#1;ce_pixel=0;
         end
     endtask
 
@@ -63,11 +83,11 @@ module tb_sprite;
                pixel0==0 && pixel2==0 && pixel3==0)
             else $fatal(1,"sprite group candidates %h/%h/%h/%h rank=%0d",
                         pixel0,pixel1,pixel2,pixel3,rank1);
-        ce_pixel=1;hcount=0;@(posedge clk);#1;
+        advance_pixel(0);
         assert(pixel0==14'h1026 && pixel1==0 && pixel2==0 && pixel3==0)
             else $fatal(1,"indirect pen-zero pixel %h/%h/%h/%h",
                         pixel0,pixel1,pixel2,pixel3);
-        hcount=1;@(posedge clk);#1;
+        advance_pixel(1);
         assert(pixel0==0 && pixel1==0 && pixel2==0 && pixel3==0)
             else $fatal(1,"indirect color-zero transparency %h/%h/%h/%h",
                         pixel0,pixel1,pixel2,pixel3);
@@ -88,6 +108,15 @@ module tb_sprite;
             else $fatal(1,"reverse-Y clip removed exterior");
         release dut.render_clip;
         release dut.target_y;
+
+        // With no descriptor MAME clips the destination after its -8 sprite
+        // origin to the full 0..495 visible width. The origin must not be
+        // subtracted a second time from the default screen rectangle.
+        force dut.render_clip=81'd0;#1;
+        assert(dut.clip_min_x==0 && dut.clip_max_x==495)
+            else $fatal(1,"default sprite clip mismatch %0d..%0d",
+                        dut.clip_min_x,dut.clip_max_x);
+        release dut.render_clip;
 
         force dut.size_x_tiles=8'd128;
         force dut.size_y_tiles=8'd128;

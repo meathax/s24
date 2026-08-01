@@ -50,9 +50,10 @@ module s24_msm6253 (
 );
     logic [7:0] shifter;
 
-    // System 24 wires the serial result to D7; the remaining low data lines
-    // are open bus and therefore read high in MAME.
-    assign dout={shifter[7],7'h7f};
+    // System 24 wires the serial result to D7.  Unlike Sega Y-board's map,
+    // segas24.cpp does not select a high unmapped-bus value, so MAME's d7_r
+    // supplies zero on D6:D0 for this board.
+    assign dout={shifter[7],7'h00};
 
     always_ff @(posedge clk) begin
         if (reset) shifter<=8'h00;

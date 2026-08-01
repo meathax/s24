@@ -18,10 +18,13 @@ module tb_tile;
     logic valid0,valid1,valid2,valid3;
     logic mem_req;
     logic [26:3] mem_addr;
-    logic [63:0] mem_data = 64'h11111111_11111111;
+    // Both adjacent character rows contain words 0x1234,0x5678. MAME's
+    // STEP8(0,4) layout must render them left-to-right as pens 1..8.
+    logic [63:0] mem_data = 64'h56781234_56781234;
     logic mem_ack = 0;
     logic mem_pending = 0;
     integer render_clocks;
+    localparam integer LINE_CLOCK_BUDGET = 656 * 3;
 
     s24_tile dut(
         .clk(clk),.reset(reset),.ce_pixel(ce_pixel),.hcount(hcount),.vcount(vcount),
@@ -56,6 +59,12 @@ module tb_tile;
             @(negedge clk);
             hcount = 10'd655;
             vcount = old_vcount;
+            ce_pixel = 0;
+            // Match the real clock-enable cadence: the terminal horizontal
+            // count is visible long enough for the synchronous line-RAM
+            // display port to prefetch pixel zero from the next bank.
+            @(posedge clk);
+            @(negedge clk);
             ce_pixel = 1;
             @(negedge clk);
             ce_pixel = 0;
@@ -79,11 +88,16 @@ module tb_tile;
         // At 423->0, the ahead renderer targets line 1 in the old bank.
         line_boundary(10'd423);
         render_clocks = 0;
-        while (dut.render_active && render_clocks < 3936) begin
+        while (dut.render_active && render_clocks < LINE_CLOCK_BUDGET) begin
             @(negedge clk);
             render_clocks++;
         end
         if (dut.render_active) $fatal(1,"tile render missed one-line budget");
+        for (int x=0; x<8; x++) begin
+            if (dut.line0[{dut.fill_bank,x[8:0]}][11:0] !== 12'(x+1))
+                $fatal(1,"character nibble order x=%0d pen=%h expected=%h",
+                       x,dut.line0[{dut.fill_bank,x[8:0]}][11:0],x+1);
+        end
 
         // 0->1 switches to the completed buffer and clocks out pixel zero.
         line_boundary(10'd0);
@@ -92,6 +106,8 @@ module tb_tile;
             $fatal(1,"layer 0 mismatch pixel=%h category=%b valid=%b",p0,c0,valid0);
         if (p1 !== 0 || p2 !== 0 || p3 !== 0 || valid1 || valid2 || valid3)
             $fatal(1,"disabled layers were not transparent");
+        if (dut.line0[{dut.display_bank,9'd0}] !== 14'd0)
+            $fatal(1,"display port did not erase consumed line pixel");
         $display("PASS tile pixel=%h category=%b clocks=%0d",p0,c0,render_clocks);
         $finish;
     end

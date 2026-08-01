@@ -5,7 +5,26 @@ import s24_pkg::*;
 // Real-ROM integration milestones shared by every local System 24 set.
 // Media is generated locally by tools/gen_sim_media.py; runtime plusargs select
 // the board population and game-specific inputs without recompiling the model.
+`ifdef S24_VISUAL
+module tb_gground_boot(
+    input  logic        clk,
+    input  logic        host_restore,
+    input  logic [31:0] host_joy0,
+    input  logic [31:0] host_joy1,
+    input  logic [31:0] host_joy2,
+    input  logic [31:0] host_joy3,
+    output logic        host_ce_pixel,
+    output logic        host_hblank,
+    output logic        host_vblank,
+    output logic [9:0]  host_x,
+    output logic [9:0]  host_y,
+    output logic [7:0]  host_red,
+    output logic [7:0]  host_green,
+    output logic [7:0]  host_blue
+);
+`else
 module tb_gground_boot;
+`endif
     localparam BOOT_WORDS = 131072;
     localparam ROMBOARD_WORDS = 2097152;
     // FBNeo allocates and zeroes a 2 MiB buffer before loading the raw
@@ -27,7 +46,11 @@ module tb_gground_boot;
     logic [7:0] floppy_overlay_data [0:FLOPPY_BYTES-1];
     logic       floppy_overlay_valid[0:FLOPPY_BYTES-1];
 
+`ifdef S24_VISUAL
+    logic reset=1,pause=0;
+`else
     logic clk=0,reset=1,pause=0;
+`endif
     board_desc_t board;
     logic key_wr=0;
     logic [11:0] key_word_addr='0;
@@ -51,6 +74,9 @@ module tb_gground_boot;
     integer boot_reads=0,romboard_reads=0,cpu_b_reads=0,floppy_reads=0;
     integer memory_writes=0,floppy_writes=0,palette_writes=0;
     integer tile_writes=0,mixer_writes=0,char_writes=0,sprite_writes=0;
+    integer mixer_log_count=0;
+    integer irq_log_count=0;
+    integer irq_b_read_log_count=0;
     integer tile_requests=0,sprite_requests=0;
     integer decrypt_starts=0,decrypt_done=0,cnt_releases=0;
     integer visible_pixels=0,video_frames=0;
@@ -64,17 +90,63 @@ module tb_gground_boot;
     logic [31:0] fdc_last_track_checksum=0;
     logic fdc_media_req_d=0,p4_req_d=0;
     logic p4_outstanding=0,fdc_media_read_serviced=0;
+    logic fdc_track_active=0;
     logic [26:0] p4_byte_addr_latched=0;
-    integer frame_fd=0,frame_pixels=0;
+    logic [26:0] fdc_track_base_latched=0;
+    logic [7:0] fdc_track_number_latched=0;
+    logic fdc_track_side_latched=0;
+    integer frame_fd=0,frame_pixels=0,frame_nonblack_pixels=0;
     integer frame_requested=0;
     logic frame_capture_active=0,frame_capture_done=0;
     string frame_file;
+    integer row_diag=0;
+    integer row_nonblack[0:383];
+    integer frame_nonblack_current=0,frame_unknown_current=0;
+    logic [31:0] frame_signature_current=0,last_frame_signature=0;
+    integer attract_frames=0,attract_changes=0,attract_min_pixels=1000;
+    integer attract_required_frames=120;
+    // MAME's lowest sampled game-owned secondary-PC address across the
+    // System 24 set sweep is Hot Rod's 0x006a5e. This keeps the universal
+    // fallback above the pre-release BIOS loop; the matrix runner supplies
+    // stricter parent-specific values when available.
+    integer attract_b_pc_min=16'h6a5e;
+    integer last_frame_nonblack=0;
+    logic attract_code_seen=0;
+    // Keep attract qualification tied to the current rendered frame. A
+    // sticky code-seen bit can otherwise let a later BIOS/diagnostic frame
+    // satisfy the target after the game has left its attract loop.
+    logic frame_code_window_current=0;
+    logic capture_code_window_seen=0;
     logic cnt1_d=0;
     logic vsync_d=0;
     logic [23:1] last_a_address,last_b_address;
     logic [15:0] last_a_opcode,last_b_opcode;
+    longint signed i,max_clocks,progress_clocks,next_progress;
+    integer target,frame_target;
+    integer board_flags,track_bytes,input_profile,magic_table;
+    integer dsw_arg,coinage_arg;
+    string game_name,boot_file,romboard_file,key_file,floppy_file;
+    logic reached_target;
+`ifdef S24_VISUAL
+    integer visual_reset_clocks=0;
+`endif
 
+`ifndef S24_VISUAL
     always #5 clk=~clk;
+`endif
+
+`ifdef S24_VISUAL
+    always_comb begin
+        host_ce_pixel=ce_pixel;
+        host_hblank=hblank;
+        host_vblank=vblank;
+        host_x=dut.hcount;
+        host_y=dut.vcount;
+        host_red=red;
+        host_green=green;
+        host_blue=blue;
+    end
+`endif
 
     function automatic [31:0] checksum_byte(
         input logic [31:0] checksum,
@@ -132,6 +204,32 @@ module tb_gground_boot;
     integer floppy_byte_offset,floppy_write_offset;
     logic [7:0] floppy_lo,floppy_hi;
     logic [7:0] fdc_delivered_byte;
+`ifdef S24_VISUAL
+    // The generated model serializes the SystemVerilog file descriptor value, but an OS
+    // descriptor is process-local.  The SDL host pulses host_restore before
+    // resuming clocks so the absolute-seek media path gets a fresh handle.
+    always @(posedge host_restore) begin
+        if(board.has_floppy) begin
+            floppy_fd=$fopen(floppy_file,"rb");
+            if(!floppy_fd)
+                $fatal(1,"cannot reopen restored floppy image %s",floppy_file);
+            if($fseek(floppy_fd,0,2)!=0)
+                $fatal(1,"cannot seek restored floppy image %s",floppy_file);
+            floppy_file_bytes=$ftell(floppy_fd);
+            if(floppy_file_bytes<=0 || $fseek(floppy_fd,0,0)!=0)
+                $fatal(1,"invalid restored floppy image %s",floppy_file);
+        end else begin
+            floppy_fd=0;
+            floppy_file_bytes=0;
+        end
+        // A host checkpoint never resumes a partially written PPM. The live
+        // SDL framebuffer is rebuilt from the next complete native frame.
+        frame_fd=0;
+        frame_requested=0;
+        frame_capture_active=0;
+        frame_capture_done=0;
+    end
+`endif
     always @(posedge clk) begin
         fdc_media_req_d<=dut.fdc_media_req;
         p4_req_d<=p4_req;
@@ -155,6 +253,37 @@ module tb_gground_boot;
             p4_outstanding<=1;
             fdc_media_read_serviced<=1;
             p4_byte_addr_latched<=dut.fdc_media_addr;
+            if(dut.fdc_media_addr !=
+                    dut.fdc.track_base+{11'd0,dut.fdc.position})
+                $fatal(1,"%s FDC media address mismatch base=%h position=%h addr=%h",
+                       game_name,dut.fdc.track_base,dut.fdc.position,
+                       dut.fdc_media_addr);
+            // A command can be force-interrupted and restarted. Only a
+            // position-zero request starts a candidate full-track transfer;
+            // bytes from separate commands must never be accumulated.
+            if(dut.fdc.position==0) begin
+                fdc_track_active<=1;
+                fdc_track_bytes<=0;
+                fdc_track_checksum<=32'h811c9dc5;
+                fdc_track_base_latched<=dut.fdc.track_base;
+                fdc_track_number_latched<=dut.fdc.physical_track;
+                fdc_track_side_latched<=dut.fdc.side;
+            end else if(fdc_track_active) begin
+                if(dut.fdc_media_addr !=
+                        fdc_track_base_latched+fdc_track_bytes)
+                    $fatal(1,"%s non-contiguous FDC transfer byte=%0d expected=%h got=%h",
+                           game_name,fdc_track_bytes,
+                           fdc_track_base_latched+fdc_track_bytes,
+                           dut.fdc_media_addr);
+                if(dut.fdc.position != fdc_track_bytes[15:0])
+                    $fatal(1,"%s FDC position skipped/duplicated expected=%h got=%h",
+                           game_name,fdc_track_bytes[15:0],
+                           dut.fdc.position);
+                if(dut.fdc.physical_track!=fdc_track_number_latched ||
+                        dut.fdc.side!=fdc_track_side_latched)
+                    $fatal(1,"%s FDC track/side changed within transfer",
+                           game_name);
+            end
         end
         if(p4_outstanding && p4_req &&
                 p4_addr!=word_address(SDR_FLOPPY_BASE+p4_byte_addr_latched))
@@ -172,17 +301,21 @@ module tb_gground_boot;
             p4_acks<=p4_acks+1;
             fdc_read_bytes<=fdc_read_bytes+1;
             fdc_checksum<=checksum_byte(fdc_checksum,fdc_delivered_byte);
-            if(fdc_track_bytes==track_bytes-1) begin
+            if(fdc_track_active && fdc_track_bytes==track_bytes-1) begin
+                if(dut.fdc.span!=16'd1)
+                    $fatal(1,"%s FDC completed %0d bytes with span=%h",
+                           game_name,track_bytes,dut.fdc.span);
                 fdc_last_track_checksum<=checksum_byte(
                     fdc_track_checksum,fdc_delivered_byte);
                 fdc_complete_tracks<=fdc_complete_tracks+1;
                 fdc_track_bytes<=0;
                 fdc_track_checksum<=32'h811c9dc5;
+                fdc_track_active<=0;
                 $display("%s FDC transfer=%0d bytes=%0d checksum=%08h side/track=%0d/%0d",
                     game_name,fdc_complete_tracks+1,track_bytes,
                     checksum_byte(fdc_track_checksum,fdc_delivered_byte),
                     dut.fdc.side,dut.fdc.physical_track);
-            end else begin
+            end else if(fdc_track_active) begin
                 fdc_track_bytes<=fdc_track_bytes+1;
                 fdc_track_checksum<=checksum_byte(
                     fdc_track_checksum,fdc_delivered_byte);
@@ -257,6 +390,11 @@ module tb_gground_boot;
             cpu_b_instructions<=cpu_b_instructions+1;
             last_b_address<=dut.b_instr_address;
             last_b_opcode<=dut.b_instr_opcode;
+            if({dut.b_instr_address,1'b0}>=attract_b_pc_min) begin
+                frame_code_window_current<=1;
+                if(frame_capture_active)
+                    capture_code_window_seen<=1;
+            end
         end
         if(p0_req && !p0_ack && p0_addr<26'h0020000)
             boot_reads<=boot_reads+1;
@@ -282,7 +420,18 @@ module tb_gground_boot;
             sprite_pixels<=0;
             mixed_pixels<=0;
             blanked_pixels<=0;
+            frame_nonblack_current<=0;
+            frame_unknown_current<=0;
+            frame_signature_current<=0;
+            attract_frames<=0;
+            attract_changes<=0;
+            last_frame_nonblack<=0;
+            last_frame_signature<=0;
+            attract_code_seen<=0;
+            frame_code_window_current<=0;
+            capture_code_window_seen<=0;
             frame_pixels<=0;
+            frame_nonblack_pixels<=0;
             frame_capture_active<=0;
             frame_capture_done<=0;
         end
@@ -306,14 +455,25 @@ module tb_gground_boot;
             else if(wr_addr>=26'h0820000 && wr_addr<26'h0840000)
                 work_b[wr_addr[17:1]]<=merge16(work_b[wr_addr[17:1]],wr_data,wr_be);
             else if(wr_addr>=26'h0880000 && wr_addr<26'h0890000) begin
+                if(char_writes==0)
+                    $display("%s first CHAR cpu=%0d addr=%h data=%h be=%b",
+                        game_name,dut.bus_cpu,dut.bus_addr,dut.bus_dout,dut.bus_be);
                 char_writes<=char_writes+1;
                 char_ram[wr_addr[16:1]]<=merge16(char_ram[wr_addr[16:1]],wr_data,wr_be);
             end else if(wr_addr>=26'h2000000 && wr_addr<26'h2020000) begin
+                if(sprite_writes==0)
+                    $display("%s first SPRITE cpu=%0d addr=%h data=%h be=%b",
+                        game_name,dut.bus_cpu,dut.bus_addr,dut.bus_dout,dut.bus_be);
                 sprite_writes<=sprite_writes+1;
                 sprite_ram[wr_addr[17:1]]<=merge16(sprite_ram[wr_addr[17:1]],wr_data,wr_be);
             end
         end
-        if(dut.palette_wr) palette_writes<=palette_writes+1;
+        if(dut.palette_wr) begin
+            if(palette_writes==0)
+                $display("%s first PALETTE cpu=%0d addr=%h data=%h be=%b",
+                    game_name,dut.bus_cpu,dut.bus_addr,dut.bus_dout,dut.bus_be);
+            palette_writes<=palette_writes+1;
+        end
         if(dut.tile_wr) begin
             if(tile_writes==0)
                 $display("%s first TILE cpu=%0d addr=%h data=%h be=%b",
@@ -322,10 +482,28 @@ module tb_gground_boot;
         end
         if(dut.mixer_wr) begin
             mixer_writes<=mixer_writes+1;
-            $display("%s MIXER write cpu=%0d addr=%h reg=%0d data=%h be=%b A=%h:%h B=%h:%h",
-                game_name,dut.bus_cpu,dut.bus_addr,dut.bus_addr[4:1],
-                dut.bus_dout,dut.bus_be,{last_a_address,1'b0},last_a_opcode,
-                {last_b_address,1'b0},last_b_opcode);
+            // Keep the first transactions as a useful MAME differential
+            // breadcrumb, but do not let a repetitive register stream turn
+            // the long attract regression into an I/O-bound simulation.
+            if(mixer_log_count<64)
+                $display("%s MIXER write cpu=%0d addr=%h reg=%0d data=%h be=%b A=%h:%h B=%h:%h",
+                    game_name,dut.bus_cpu,dut.bus_addr,dut.bus_addr[4:1],
+                    dut.bus_dout,dut.bus_be,{last_a_address,1'b0},last_a_opcode,
+                    {last_b_address,1'b0},last_b_opcode);
+            mixer_log_count<=mixer_log_count+1;
+        end
+        if((dut.irq_wr || dut.irq_rd_a || dut.irq_rd_b) && irq_log_count<96) begin
+            $display("%s IRQ %s cpu=%0d addr=%h reg=%0d data=%h be=%b timer=%h mode=%h allowb=%h",
+                game_name,dut.irq_wr?"write":"read",dut.bus_cpu,dut.bus_addr,
+                dut.bus_addr[2:1],dut.bus_dout,dut.bus_be,
+                dut.irq.timer_value,dut.irq.timer_mode,dut.irq.allow_b);
+            irq_log_count<=irq_log_count+1;
+        end
+        if(dut.irq_rd_b && irq_b_read_log_count<128) begin
+            $display("%s IRQ B read addr=%h reg=%0d data=%h timer=%h mode=%h allowb=%h",
+                game_name,dut.bus_addr,dut.bus_addr[2:1],dut.irq_dout,
+                dut.irq.timer_value,dut.irq.timer_mode,dut.irq.allow_b);
+            irq_b_read_log_count<=irq_b_read_log_count+1;
         end
         if(p1_req && !p1_ack) tile_requests<=tile_requests+1;
         if(p2_req && !p2_ack) sprite_requests<=sprite_requests+1;
@@ -333,6 +511,19 @@ module tb_gground_boot;
                 (red!=0 || green!=0 || blue!=0))
             visible_pixels<=visible_pixels+1;
         if(dut.io_cnt[1] && cnt1_d && ce_pixel && !hblank && !vblank) begin
+            if(row_diag)
+                row_nonblack[dut.vcount[8:0]] <=
+                    row_nonblack[dut.vcount[8:0]] +
+                    ((red!=0 || green!=0 || blue!=0) ? 1 : 0);
+            if(red!=0 || green!=0 || blue!=0)
+                frame_nonblack_current<=frame_nonblack_current+1;
+            // Track rendered content as well as occupancy.  Some attract
+            // animations change palette/shape without changing the number
+            // of nonblack pixels, so an occupancy-only gate can reject a
+            // genuine MAME-equivalent attract loop.
+            frame_signature_current<=
+                {frame_signature_current[26:0],frame_signature_current[31:27]} ^
+                {8'h00,red,green,blue};
             if(dut.tv0 || dut.tv1 || dut.tv2 || dut.tv3)
                 tile_pixels<=tile_pixels+1;
             if(dut.sp0!=0 || dut.sp1!=0 || dut.sp2!=0 || dut.sp3!=0)
@@ -341,20 +532,55 @@ module tb_gground_boot;
             if(dut.display_blank) blanked_pixels<=blanked_pixels+1;
             if($isunknown({dut.display_blank,dut.tv0,dut.tv1,dut.tv2,dut.tv3,
                            dut.sp0,dut.sp1,dut.sp2,dut.sp3,dut.mixed}))
+                frame_unknown_current<=frame_unknown_current+1;
+            if($isunknown({dut.display_blank,dut.tv0,dut.tv1,dut.tv2,dut.tv3,
+                           dut.sp0,dut.sp1,dut.sp2,dut.sp3,dut.mixed}))
                 unknown_video_pixels<=unknown_video_pixels+1;
         end
         vsync_d<=vsync;
-        if(dut.io_cnt[1] && cnt1_d && vsync && !vsync_d)
+        if(dut.io_cnt[1] && cnt1_d && vsync && !vsync_d) begin
             video_frames<=video_frames+1;
-        // Begin immediately before the requested post-release frame. The
-        // following active frame is written in raw RGB order, producing a
-        // complete P6 PPM before target 3 can pass its frame boundary.
+            // MAME's no-input attract screens are a sustained observable
+            // milestone, not merely the first game-owned write.  Require
+            // consecutive rendered frames with useful pixels, no unknown
+            // video state, and CPU-B executing from its loaded RAM program.
+            if(frame_nonblack_current>=attract_min_pixels &&
+                    frame_unknown_current==0 && cpu_b_instructions!=0 &&
+                    frame_code_window_current) begin
+                if(last_frame_nonblack!=0 &&
+                        (frame_nonblack_current!=last_frame_nonblack ||
+                         frame_signature_current!=last_frame_signature))
+                    attract_changes<=attract_changes+1;
+                attract_frames<=attract_frames+1;
+                attract_code_seen<=1;
+            end else begin
+                attract_frames<=0;
+            end
+            last_frame_nonblack<=frame_nonblack_current;
+            last_frame_signature<=frame_signature_current;
+            frame_nonblack_current<=0;
+            frame_signature_current<=0;
+            frame_unknown_current<=0;
+            frame_code_window_current<=0;
+        end
+        // Capture only after the semantic target is already visible. This
+        // avoids producing a structurally complete but black BIOS/game
+        // transition frame and then passing later on cumulative pixel counts.
         if(frame_requested && !frame_capture_active && !frame_capture_done &&
                 dut.io_cnt[1] && cnt1_d && vsync && !vsync_d &&
-                (frame_target<=1 || video_frames>=frame_target-2))
+                cpu_b_instructions!=0 &&
+                (!board.has_fd1094 || decrypt_done!=0) &&
+                ((target==7 && attract_frames>=attract_required_frames) ||
+                 (target!=7 && video_frames>=frame_target && visible_pixels>=10000))) begin
+            frame_pixels<=0;
+            frame_nonblack_pixels<=0;
+            capture_code_window_seen<=0;
             frame_capture_active<=1;
+        end
         if(frame_capture_active && ce_pixel && !hblank && !vblank) begin
             $fwrite(frame_fd,"%c%c%c",red,green,blue);
+            if(red!=0 || green!=0 || blue!=0)
+                frame_nonblack_pixels<=frame_nonblack_pixels+1;
             if(frame_pixels==496*384-1) begin
                 frame_capture_active<=0;
                 frame_capture_done<=1;
@@ -365,13 +591,23 @@ module tb_gground_boot;
         end
     end
 
+    logic [2:0] mahjong_line;
     s24_inputs simulated_input_mapper(
+`ifdef S24_VISUAL
+        .joy0(host_joy0),.joy1(host_joy1),
+        .joy2(host_joy2),.joy3(host_joy3),
+`else
         .joy0('0),.joy1('0),.joy2('0),.joy3('0),
-        .dsw(dsw_value),.coinage(coinage_value),.paddle(8'h80),
+`endif
+        // MAME's no-input Hot Rod pedals default to 0x01; golf's swing
+        // pedal defaults to 0x00. Do not use the midpoint 0x80 for both.
+        .dsw(dsw_value),.coinage(coinage_value),
+        .paddle(board.hotrod_io ? 8'h01 : 8'h00),
         .test_mode(1'b0),.golf_io(board.golf_io),
         .hotrod_io(board.hotrod_io),
         .golf_angle(board.golf_io&&board.has_upd4701),
-        .gground_io(board.input_profile==INPUT_GGROUND),
+        .input_profile(board.input_profile),.mahjong_line(mahjong_line),
+        .mahjong_matrix(64'hffff_ffff_ffff_ffff),
         .ports(simulated_inputs));
 
     s24_core dut(
@@ -379,7 +615,11 @@ module tb_gground_boot;
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),
         .input_ports(simulated_inputs),
         .spinner0('0),.spinner1('0),.spinner2('0),.spinner3('0),
-        .paddle0(8'h80),.paddle1(8'h80),.paddle2(8'h80),.paddle3(8'h80),
+        .paddle0(board.hotrod_io ? 8'h01 : 8'h00),
+        .paddle1(board.hotrod_io ? 8'h01 : 8'h00),
+        .paddle2(board.hotrod_io ? 8'h01 : 8'h00),
+        .paddle3(board.hotrod_io ? 8'h01 : 8'h00),
+        .mahjong_line(mahjong_line),
         .ce_pixel(ce_pixel),.hblank(hblank),.vblank(vblank),
         .hsync(hsync),.vsync(vsync),.red(red),.green(green),.blue(blue),
         .audio_l(audio_l),.audio_r(audio_r),
@@ -394,13 +634,11 @@ module tb_gground_boot;
 
     // TARGET 0: first game-media access; 1: CNT1 release and CPU-B read;
     // 2: CPU-B instruction (plus decrypt for FD1094); 3: sustained visible
-    // game video after CPU-B release; 4: first write to any video memory.
-    integer i,max_clocks,target,frame_target;
-    integer progress_clocks,next_progress;
-    integer board_flags,track_bytes,input_profile,magic_table;
-    integer dsw_arg,coinage_arg;
-    string game_name,boot_file,romboard_file,key_file,floppy_file;
-    logic reached_target;
+    // game video after CPU-B release; 4: first write to any video memory;
+    // 5: one complete, contiguous floppy side/track transfer; 6: at least one
+    // completed write to every common video-memory/register family; 7: a
+    // MAME-calibrated no-input attract-mode frame stream; 8: bounded
+    // instrumentation stop (diagnostic only, never a coverage pass).
     always_comb begin
         case(target)
             0: reached_target=(floppy_reads!=0 || romboard_reads!=0);
@@ -410,10 +648,27 @@ module tb_gground_boot;
             4: reached_target=(tile_writes!=0 || mixer_writes!=0 ||
                                palette_writes!=0 || char_writes!=0 ||
                                sprite_writes!=0);
+            5: reached_target=(fdc_complete_tracks!=0 &&
+                               !fdc_track_active && !p4_outstanding &&
+                               !p4_req && !dut.fdc_media_req &&
+                               fdc_media_acks==fdc_read_bytes &&
+                               dut.fdc.span==0 && !dut.fdc.drq);
+            6: reached_target=(tile_writes!=0 && mixer_writes!=0 &&
+                               palette_writes!=0 && char_writes!=0 &&
+                               sprite_writes!=0);
+            7: reached_target=(attract_code_seen &&
+                               attract_frames>=attract_required_frames &&
+                               attract_changes!=0 &&
+                               (!frame_requested ||
+                                (frame_capture_done && capture_code_window_seen)));
+            8: reached_target=(i>=max_clocks);
             default: reached_target=(cpu_b_instructions!=0 &&
                                      (!board.has_fd1094 || decrypt_done!=0) &&
                                      video_frames>=frame_target &&
-                                     visible_pixels>=10000);
+                                     visible_pixels>=10000 &&
+                                     (!frame_requested ||
+                                      (frame_capture_done &&
+                                       frame_nonblack_pixels!=0)));
         endcase
     end
 
@@ -482,8 +737,51 @@ module tb_gground_boot;
             $fwrite(frame_fd,"P6\n496 384\n255\n");
         end
 
+        max_clocks=300000000;
+        target=0;
+        frame_target=10;
+        progress_clocks=25000000;
+        void'($value$plusargs("MAX_CLOCKS=%d",max_clocks));
+        void'($value$plusargs("TARGET=%d",target));
+        void'($value$plusargs("FRAME_TARGET=%d",frame_target));
+        void'($value$plusargs("ATTRACT_MIN_PIXELS=%d",attract_min_pixels));
+        void'($value$plusargs("ATTRACT_FRAMES=%d",attract_required_frames));
+        void'($value$plusargs("ATTRACT_B_PC_MIN=%d",attract_b_pc_min));
+        row_diag=$value$plusargs("ROW_DIAG=%d",row_diag);
+        void'($value$plusargs("PROGRESS_CLOCKS=%d",progress_clocks));
+        if(frame_target<1)
+            $fatal(1,"FRAME_TARGET must be at least 1");
+        if(progress_clocks<0)
+            $fatal(1,"PROGRESS_CLOCKS cannot be negative");
+        for(i=0;i<384;i=i+1) row_nonblack[i]=0;
+        if(target==5 && (!board.has_floppy || track_bytes<=0 ||
+                         track_bytes>16'hffff))
+            $fatal(1,"TARGET 5 requires a valid floppy track size");
+        if(target==7 && (attract_min_pixels<=0 || attract_required_frames<=0 ||
+                         attract_b_pc_min<0))
+            $fatal(1,"TARGET 7 requires positive attract thresholds");
+        i=0;
+        next_progress=progress_clocks;
+
         // The real loader writes all 8 KB of key RAM while both CPUs are held
         // in reset. Preserve that ordering in the integration bench.
+`ifdef S24_VISUAL
+        // The externally clocked savable model cannot use procedural timing.
+        // Populate the same key RAM and cached global bytes before releasing
+        // reset; the ordinary timed regression continues through the loader
+        // interface below.
+        if(board.has_fd1094) begin
+            for(i=0;i<4096;i++) begin
+                dut.fd1094.key_ram_even[i]=key_mem[i][7:0];
+                dut.fd1094.key_ram_odd[i]=key_mem[i][15:8];
+            end
+            dut.fd1094.irq_key=key_mem[0][7:0];
+            dut.fd1094.global_key1=key_mem[0][15:8];
+            dut.fd1094.global_key2=key_mem[1][7:0];
+            dut.fd1094.global_key3=key_mem[1][15:8];
+        end
+        i=0;
+`else
         if(board.has_fd1094) begin
             for(i=0;i<4096;i++) begin
                 @(negedge clk);
@@ -495,35 +793,22 @@ module tb_gground_boot;
         end
         repeat(16) @(posedge clk);
         reset=0;
-
-        max_clocks=300000000;
-        target=0;
-        frame_target=10;
-        progress_clocks=25000000;
-        void'($value$plusargs("MAX_CLOCKS=%d",max_clocks));
-        void'($value$plusargs("TARGET=%d",target));
-        void'($value$plusargs("FRAME_TARGET=%d",frame_target));
-        void'($value$plusargs("PROGRESS_CLOCKS=%d",progress_clocks));
-        if(frame_target<1)
-            $fatal(1,"FRAME_TARGET must be at least 1");
-        if(progress_clocks<0)
-            $fatal(1,"PROGRESS_CLOCKS cannot be negative");
-        i=0;
-        next_progress=progress_clocks;
         while(!reached_target && i<max_clocks) begin
             @(posedge clk);
             i=i+1;
             if(progress_clocks!=0 && i>=next_progress) begin
-                $display("%s progress clocks=%0d/%0d target=%0d Ainsn=%0d Binsn=%0d media=%0d/%0d p4=%0d/%0d bytes=%0d tracks=%0d checksum=%08h release=%0d frames=%0d raster=%0d,%0d",
+                $display("%s progress clocks=%0d/%0d target=%0d Ainsn=%0d Binsn=%0d media=%0d/%0d p4=%0d/%0d bytes=%0d tracks=%0d checksum=%08h release=%0d frames=%0d attract=%0d/%0d changes=%0d last=%0d unknown=%0d cap=%0d raster=%0d,%0d",
                     game_name,i,max_clocks,target,cpu_a_instructions,
                     cpu_b_instructions,fdc_media_acks,fdc_media_requests,
                     p4_acks,p4_requests,fdc_read_bytes,fdc_complete_tracks,
-                    fdc_checksum,cnt_releases,video_frames,dut.hcount,dut.vcount);
+                    fdc_checksum,cnt_releases,video_frames,attract_frames,
+                    attract_required_frames,attract_changes,last_frame_nonblack,
+                    frame_unknown_current,frame_capture_done,dut.hcount,dut.vcount);
                 next_progress=next_progress+progress_clocks;
             end
         end
 
-        $display("%s milestone target=%0d clocks=%0d Ainsn=%0d Binsn=%0d boot=%0d rom=%0d floppy=%0d media=%0d/%0d p4=%0d/%0d fdcbytes=%0d tracks=%0d checksum=%08h lasttrack=%08h writes=%0d fwwrites=%0d palette=%0d tilewr=%0d mixerwr=%0d charwr=%0d spritewr=%0d tilereq=%0d spritereq=%0d cpuB=%0d release=%0d dec=%0d/%0d visible=%0d tilepx=%0d spritepx=%0d mixedpx=%0d blankpx=%0d unknownpx=%0d frames=%0d/%0d A=%h:%h B=%h:%h fdstate=%h slow=%0d raster=%0d,%0d",
+        $display("%s milestone target=%0d clocks=%0d Ainsn=%0d Binsn=%0d boot=%0d rom=%0d floppy=%0d media=%0d/%0d p4=%0d/%0d fdcbytes=%0d tracks=%0d checksum=%08h lasttrack=%08h writes=%0d fwwrites=%0d palette=%0d tilewr=%0d mixerwr=%0d charwr=%0d spritewr=%0d tilereq=%0d spritereq=%0d cpuB=%0d release=%0d dec=%0d/%0d visible=%0d tilepx=%0d spritepx=%0d mixedpx=%0d blankpx=%0d unknownpx=%0d frames=%0d/%0d attract=%0d/%0d changes=%0d framepx=%0d code=%0d A=%h:%h B=%h:%h fdstate=%h slow=%0d raster=%0d,%0d",
             game_name,target,i,cpu_a_instructions,cpu_b_instructions,boot_reads,
             romboard_reads,floppy_reads,fdc_media_acks,fdc_media_requests,
             p4_acks,p4_requests,fdc_read_bytes,fdc_complete_tracks,
@@ -534,6 +819,8 @@ module tb_gground_boot;
             cpu_b_reads,cnt_releases,decrypt_done,decrypt_starts,
             visible_pixels,tile_pixels,sprite_pixels,mixed_pixels,
             blanked_pixels,unknown_video_pixels,video_frames,frame_target,
+            attract_frames,attract_required_frames,attract_changes,
+            last_frame_nonblack,attract_code_seen,
             {last_a_address,1'b0},last_a_opcode,
             {last_b_address,1'b0},last_b_opcode,dut.fd_state,
             dut.gground_slow_count,dut.hcount,dut.vcount);
@@ -549,6 +836,27 @@ module tb_gground_boot;
             dut.tile.tile_ram[15'h5002],dut.tile.tile_ram[15'h5003],
             dut.tile.tile_ram[15'h5004],dut.tile.tile_ram[15'h5005],
             dut.tile.tile_ram[15'h5006],dut.tile.tile_ram[15'h5007]);
+        $display("%s irq timer: data=%h value=%h mode=%h allow_a=%h allow_b=%h pend_a=%b pend_b=%b vblank=%b sprite=%b reload=%b zero_read_a=%b zero_read_b=%b",
+            game_name,dut.irq.timer_data,dut.irq.timer_value,dut.irq.timer_mode,
+            dut.irq.allow_a,dut.irq.allow_b,dut.irq.timer_a,dut.irq.timer_b,
+            dut.irq.vblank_irq,dut.irq.sprite_irq,dut.irq.timer_reload_seen,
+            dut.irq.timer_zero_read_a,dut.irq.timer_zero_read_b);
+        if(row_diag) begin
+            $display("%s row-nonblack 0..15=%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                game_name,row_nonblack[0],row_nonblack[1],row_nonblack[2],
+                row_nonblack[3],row_nonblack[4],row_nonblack[5],row_nonblack[6],
+                row_nonblack[7],row_nonblack[8],row_nonblack[9],row_nonblack[10],
+                row_nonblack[11],row_nonblack[12],row_nonblack[13],row_nonblack[14],
+                row_nonblack[15]);
+            $display("%s tile-banks display=%b fill=%b active=%b layer=%0d x=%0d y=%0d",
+                game_name,dut.tile.display_bank,dut.tile.fill_bank,
+                dut.tile.render_active,dut.tile.render_layer,dut.tile.render_x,
+                dut.tile.render_y);
+            $display("%s sprite-banks display=%b fill=%b valid=%b state=%0d target_y=%0d x=%0d",
+                game_name,dut.sprite.display_bank,dut.sprite.fill_bank,
+                dut.sprite.line_valid,dut.sprite.state,dut.sprite.target_y,
+                dut.sprite.dest_x);
+        end
         // ROM-board BIOSes can touch game media very early (QGH currently
         // reaches target 0 after 82 instructions), while deeper milestones
         // should demonstrate sustained execution.
@@ -556,12 +864,37 @@ module tb_gground_boot;
             $fatal(1,"%s CPU A did not execute enough for target %0d",
                    game_name,target);
         if(memory_writes==0) $fatal(1,"%s made no memory writes",game_name);
-        if(!reached_target) $fatal(1,"%s target %0d not reached",game_name,target);
+        if(!reached_target && target!=8)
+            $fatal(1,"%s target %0d not reached",game_name,target);
         if(target==3 && frame_requested && !frame_capture_done)
             $fatal(1,"%s target 3 passed without complete frame capture",game_name);
+        if(target==3 && frame_requested && frame_nonblack_pixels==0)
+            $fatal(1,"%s target 3 captured an all-black frame",game_name);
         $display("PASS tb_gground_boot %s game milestone %0d",game_name,target);
         if(floppy_fd) $fclose(floppy_fd);
         if(frame_fd) $fclose(frame_fd);
         $finish;
+`endif
     end
+
+`ifdef S24_VISUAL
+    // Deterministic exported-clock sequencing used by the native SDL host and
+    // included in Verilator's full-state checkpoint.
+    always @(posedge clk) begin
+        if(reset) begin
+            if(visual_reset_clocks==15) begin
+                reset<=0;
+                i<=0;
+            end else visual_reset_clocks<=visual_reset_clocks+1;
+        end else begin
+            i<=i+1;
+            if(progress_clocks!=0 && i>=next_progress) begin
+                $display("%s visual progress clocks=%0d Ainsn=%0d Binsn=%0d release=%0d frames=%0d raster=%0d,%0d",
+                    game_name,i,cpu_a_instructions,cpu_b_instructions,
+                    cnt_releases,video_frames,dut.hcount,dut.vcount);
+                next_progress<=next_progress+progress_clocks;
+            end
+        end
+    end
+`endif
 endmodule

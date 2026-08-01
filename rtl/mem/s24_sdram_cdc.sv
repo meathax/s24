@@ -31,20 +31,16 @@ module s24_sdram_cdc #(
     logic                 src_busy;
     logic                 src_armed;
 
-    (* ASYNC_REG = "TRUE",
-       altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
+    (* altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
     logic rsp_sync_m;
-    (* ASYNC_REG = "TRUE",
-       altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
+    (* altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
     logic rsp_sync_s;
     logic                 rsp_seen;
     logic [RSP_WIDTH-1:0] rsp_hold;
 
-    (* ASYNC_REG = "TRUE",
-       altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
+    (* altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
     logic req_sync_m;
-    (* ASYNC_REG = "TRUE",
-       altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
+    (* altera_attribute = {"-name SYNCHRONIZER_IDENTIFICATION FORCED_IF_ASYNCHRONOUS"} *)
     logic req_sync_s;
     logic                 req_seen;
     logic                 dst_busy;

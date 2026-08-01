@@ -40,6 +40,39 @@ module tb_loader;
         end
     endtask
 
+    task automatic check_profile(
+        input [7:0] flags,
+        input [3:0] magic,
+        input [15:0] track_bytes,
+        input [7:0] input_profile,
+        input [127:0] profile_name
+    );
+        begin
+            begin_write(0,0,{4'h0,magic,flags});
+            begin_write(0,2,track_bytes);
+            begin_write(0,4,{8'h00,input_profile});
+            begin_write(0,6,16'h0000);
+            assert({
+                descriptor.mahjong,
+                descriptor.hotrod_io,
+                descriptor.golf_io,
+                descriptor.has_adc,
+                descriptor.has_upd4701,
+                descriptor.has_fd1094,
+                descriptor.has_romboard,
+                descriptor.has_floppy
+            }==flags) else $fatal(1,"%s flags",profile_name);
+            assert(descriptor.magic_table==magic && descriptor.reserved1==0)
+                else $fatal(1,"%s magic/reserved",profile_name);
+            assert({descriptor.track_bytes_hi,descriptor.track_bytes_lo}
+                   ==track_bytes)
+                else $fatal(1,"%s track bytes",profile_name);
+            assert(descriptor.input_profile==input_profile)
+                else $fatal(1,"%s input profile",profile_name);
+            assert(!rom_loaded) else $fatal(1,"%s early boot commit",profile_name);
+        end
+    endtask
+
     initial begin
         repeat(3) @(posedge clk);
         reset=0;
@@ -66,19 +99,32 @@ module tb_loader;
         begin_write(4,6,16'hf0de);
         assert(key_wr && key_word_addr==12'd3 && key_wdata==16'hf0de) else $fatal(1,"key path");
 
-        // Descriptor 03 07 00 2D: floppy+ROM board, Bonanza magic, 0x2d00 bytes/track.
-        begin_write(0,0,16'h0703);
-        begin_write(0,2,16'h2d00);
-        assert(descriptor.has_floppy && descriptor.has_romboard) else $fatal(1,"descriptor flags");
-        assert(descriptor.magic_table==MAGIC_BNZABROS) else $fatal(1,"descriptor magic");
-        assert({descriptor.track_bytes_hi,descriptor.track_bytes_lo}==16'h2d00)
-            else $fatal(1,"descriptor track bytes");
-        assert(!rom_loaded) else $fatal(1,"early boot commit");
+        // Exercise every descriptor used by the 18-set universal s24.rbf
+        // matrix. Repeated clone profiles are intentional: this list is the
+        // hardware-facing contract for every locally supported set.
+        check_profile(8'h59,MAGIC_NONE,16'h2f00,INPUT_GENERIC,"hotrod");
+        check_profile(8'h59,MAGIC_NONE,16'h2f00,INPUT_GENERIC,"hotroda");
+        check_profile(8'h59,MAGIC_NONE,16'h2f00,INPUT_GENERIC,"hotrodj");
+        check_profile(8'h59,MAGIC_NONE,16'h2f00,INPUT_GENERIC,"hotrodja");
+        check_profile(8'h01,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"sspirits");
+        check_profile(8'h05,MAGIC_NONE,16'h2d00,INPUT_GGROUND,"gground");
+        check_profile(8'h05,MAGIC_NONE,16'h2d00,INPUT_GGROUND,"ggroundj");
+        check_profile(8'h05,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"crkdown");
+        check_profile(8'h05,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"crkdownu");
+        check_profile(8'h05,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"crkdownj");
+        check_profile(8'h25,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"sgmast");
+        check_profile(8'h25,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"sgmastc");
+        check_profile(8'h2d,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"sgmastj");
+        check_profile(8'h03,MAGIC_BNZABROS,16'h2d00,INPUT_GENERIC,"bnzabros");
+        check_profile(8'h03,MAGIC_BNZABROS,16'h2d00,INPUT_GENERIC,"bnzabrosj");
+        check_profile(8'h22,MAGIC_DCCLUB,16'h0000,INPUT_GENERIC,"dcclub");
+        check_profile(8'h2a,MAGIC_DCCLUB,16'h0000,INPUT_GENERIC,"dcclubj");
+        check_profile(8'h02,MAGIC_QGH,16'h0000,INPUT_GENERIC,"qgh");
 
         ioctl_download=0;
         @(posedge clk);#1;
         assert(rom_loaded) else $fatal(1,"missing boot commit");
-        $display("PASS loader endian, raw media, key, descriptor, boot commit");
+        $display("PASS loader endian, raw media, key, 18 universal profiles, boot commit");
         $finish;
     end
 endmodule

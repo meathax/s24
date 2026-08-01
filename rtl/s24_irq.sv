@@ -23,6 +23,15 @@ module s24_irq (
     logic [1:0] timer_mode;
     logic [5:0] allow_a, allow_b;
     logic timer_a, timer_b, vblank_irq, sprite_irq;
+    // Sticky diagnostic breadcrumbs for the MAME dcclub timer polling loop.
+    // They do not participate in functional behavior and are observed only
+    // by the verification bench.
+    logic timer_reload_seen, timer_zero_read_a, timer_zero_read_b;
+    // MAME's continuously-synchronised timer can expose the zero value to a
+    // CPU read even when the other CPU's discrete bus phase misses the exact
+    // hsync edge. Retain one zero observation per CPU for zero-data reloads;
+    // the pending bit is consumed by that CPU's next IRQ-controller read.
+    logic timer_zero_pending_a, timer_zero_pending_b;
 
     function automatic logic [11:0] merge_timer(
         input logic [11:0] old_data,
@@ -45,6 +54,18 @@ module s24_irq (
         else           encoded_ipl = 3'd0;
     endfunction
 
+    // MAME's timer callback first reaches 0x1000, raises the pending flags,
+    // and only then reloads m_irq_tdata.  irq_r() returns the low 12 bits, so
+    // a read serviced on that callback boundary can observe zero even though
+    // the registered RTL counter reloads in the same edge.  Keep the state
+    // compact and expose that transient only through the read datapath.
+    wire timer_tick = (timer_mode == 2'd1 && hsync_tick) ||
+                      (timer_mode == 2'd3 && ce_8m);
+    wire timer_read_boundary = timer_tick && timer_value == 12'hfff;
+    wire timer_zero_visible = timer_read_boundary ||
+                              (rd_a && timer_zero_pending_a) ||
+                              (rd_b && timer_zero_pending_b);
+
     logic [5:0] pending_a, pending_b;
     always_comb begin
         pending_a = 6'b0;
@@ -61,11 +82,8 @@ module s24_irq (
         pending_b[IRQ_FRC]    = frc_irq;
         ipl_a_n = ~encoded_ipl(pending_a & allow_a);
         ipl_b_n = ~encoded_ipl(pending_b & allow_b);
-        dout = {4'h0, timer_value};
+        dout = {4'h0, timer_zero_visible ? 12'h000 : timer_value};
     end
-
-    wire timer_tick = (timer_mode == 2'd1 && hsync_tick) ||
-                      (timer_mode == 2'd3 && ce_8m);
 
     always_ff @(posedge clk) begin
         if (reset) begin
@@ -78,6 +96,11 @@ module s24_irq (
             timer_b <= 0;
             vblank_irq <= 0;
             sprite_irq <= 0;
+            timer_reload_seen <= 0;
+            timer_zero_read_a <= 0;
+            timer_zero_read_b <= 0;
+            timer_zero_pending_a <= 0;
+            timer_zero_pending_b <= 0;
         end else begin
             // hsync_tick is registered at the wrap edge, so vcount still
             // names the line that just ended. Assert at 423->0 and 383->384
@@ -92,8 +115,25 @@ module s24_irq (
                     timer_value <= timer_data;
                     timer_a <= 1'b1;
                     timer_b <= 1'b1;
+                    timer_reload_seen <= 1'b1;
+                    if (timer_data == 0) begin
+                        timer_zero_pending_a <= 1'b1;
+                        timer_zero_pending_b <= 1'b1;
+                    end
                 end else timer_value <= timer_value + 1'd1;
             end
+
+            // MAME returns the timer value for every IRQ-controller read;
+            // dcclub's wait loop polls A00002 (register 1), not register 2.
+            if (rd_a && (timer_value == 0 || timer_zero_pending_a ||
+                         timer_read_boundary))
+                timer_zero_read_a <= 1'b1;
+            if (rd_b && (timer_value == 0 || timer_zero_pending_b ||
+                         timer_read_boundary))
+                timer_zero_read_b <= 1'b1;
+
+            if (rd_a) timer_zero_pending_a <= 1'b0;
+            if (rd_b) timer_zero_pending_b <= 1'b0;
 
             if (rd_a && addr == 2) timer_a <= 1'b0;
             if (rd_b && addr == 3) timer_b <= 1'b0;
@@ -102,7 +142,7 @@ module s24_irq (
                 case (addr)
                     2'd0: timer_data <= merge_timer(timer_data, din, be);
                     2'd1: if (be[0]) begin
-                        // Changing from stopped mode advances once in MAME.
+                        // Changing to stopped mode advances once in MAME.
                         if (timer_mode != 0 && din[1:0] == 0) begin
                             if (timer_value == 12'hfff) begin
                                 timer_value <= timer_data;

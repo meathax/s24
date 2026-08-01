@@ -45,35 +45,41 @@ module s24_mixer (
     logic [2:0] backdrop_pri;
     logic backdrop_found;
     logic pixel_found;
-    logic sprite_found;
-    logic [10:0] best_sprite_rank;
-    logic [1:0] sprite_choice;
+    logic sprite0_ok,sprite1_ok,sprite2_ok,sprite3_ok;
+    logic left_sprite_valid,right_sprite_valid;
+    logic [10:0] left_sprite_rank,right_sprite_rank;
+    logic [1:0] left_sprite_choice,right_sprite_choice;
     logic [13:0] chosen_sprite_pixel;
     always_comb begin
         mixed_pixel = 14'h0000;
         backdrop_pri = 0;
         backdrop_found = 0;
 
-        // MAME first draws every category-zero tile pass opaquely in reverse
-        // priority order. The final fallback is therefore the lowest-priority
-        // selected physical layer; equal priorities leave the higher-numbered
+        // MAME first draws every category-zero tile pass with
+        // TILEMAP_DRAW_OPAQUE in reverse priority order. OPAQUE bypasses both
+        // pen transparency and category matching, so the final fallback is
+        // the lowest-priority selected physical layer regardless of the
+        // current tile's category. Equal priorities leave the higher-numbered
         // layer underneath. Raw tile pixels retain palette color zero here.
         if (tile0_valid) begin
             backdrop_pri = regs[0][2:0];
             mixed_pixel = {2'b00,tile0_pixel};
             backdrop_found = 1;
         end
-        if (tile1_valid && (!backdrop_found || regs[2][2:0] <= backdrop_pri)) begin
+        if (tile1_valid &&
+                (!backdrop_found || regs[2][2:0] <= backdrop_pri)) begin
             backdrop_pri = regs[2][2:0];
             mixed_pixel = {2'b00,tile1_pixel};
             backdrop_found = 1;
         end
-        if (tile2_valid && (!backdrop_found || regs[4][2:0] <= backdrop_pri)) begin
+        if (tile2_valid &&
+                (!backdrop_found || regs[4][2:0] <= backdrop_pri)) begin
             backdrop_pri = regs[4][2:0];
             mixed_pixel = {2'b00,tile2_pixel};
             backdrop_found = 1;
         end
-        if (tile3_valid && (!backdrop_found || regs[6][2:0] <= backdrop_pri)) begin
+        if (tile3_valid &&
+                (!backdrop_found || regs[6][2:0] <= backdrop_pri)) begin
             backdrop_pri = regs[6][2:0];
             mixed_pixel = {2'b00,tile3_pixel};
             backdrop_found = 1;
@@ -112,38 +118,51 @@ module s24_mixer (
         // the selected tile pass blocks, then choose the largest reverse-list
         // rank. This preserves MAME's ability to show an earlier sprite when a
         // later sprite from another group is hidden behind a tile.
-        sprite_found = 0;
-        best_sprite_rank = 0;
-        sprite_choice = 0;
-        chosen_sprite_pixel = 0;
         // segaic24.cpp uses spri[3-group]: indirect color bits 7:6 map to
         // mixer registers 11,10,9,8 for groups 0,1,2,3 respectively.
-        pri = {1'b0,regs[11][2:0]};
-        if (sprite0_pixel != 0 && (!pixel_found || pri >= best_pri)) begin
-            sprite_found=1;sprite_choice=0;best_sprite_rank=sprite0_rank;
+        sprite0_ok = sprite0_pixel != 0 &&
+                     (!pixel_found || {1'b0,regs[11][2:0]} >= best_pri);
+        sprite1_ok = sprite1_pixel != 0 &&
+                     (!pixel_found || {1'b0,regs[10][2:0]} >= best_pri);
+        sprite2_ok = sprite2_pixel != 0 &&
+                     (!pixel_found || {1'b0,regs[9][2:0]} >= best_pri);
+        sprite3_ok = sprite3_pixel != 0 &&
+                     (!pixel_found || {1'b0,regs[8][2:0]} >= best_pri);
+
+        // A balanced rank tree shortens the pixel-to-palette path. Strict
+        // greater-than comparisons preserve the old/MAME tie rule: the
+        // lower-numbered group wins equal ranks.
+        left_sprite_valid = sprite0_ok || sprite1_ok;
+        left_sprite_rank = sprite0_rank;
+        left_sprite_choice = 2'd0;
+        if (sprite1_ok && (!sprite0_ok || sprite1_rank > sprite0_rank)) begin
+            left_sprite_rank = sprite1_rank;
+            left_sprite_choice = 2'd1;
         end
-        pri = {1'b0,regs[10][2:0]};
-        if (sprite1_pixel != 0 && (!pixel_found || pri >= best_pri) &&
-            (!sprite_found || sprite1_rank > best_sprite_rank)) begin
-            sprite_found=1;sprite_choice=1;best_sprite_rank=sprite1_rank;
+
+        right_sprite_valid = sprite2_ok || sprite3_ok;
+        right_sprite_rank = sprite2_rank;
+        right_sprite_choice = 2'd2;
+        if (sprite3_ok && (!sprite2_ok || sprite3_rank > sprite2_rank)) begin
+            right_sprite_rank = sprite3_rank;
+            right_sprite_choice = 2'd3;
         end
-        pri = {1'b0,regs[9][2:0]};
-        if (sprite2_pixel != 0 && (!pixel_found || pri >= best_pri) &&
-            (!sprite_found || sprite2_rank > best_sprite_rank)) begin
-            sprite_found=1;sprite_choice=2;best_sprite_rank=sprite2_rank;
-        end
-        pri = {1'b0,regs[8][2:0]};
-        if (sprite3_pixel != 0 && (!pixel_found || pri >= best_pri) &&
-            (!sprite_found || sprite3_rank > best_sprite_rank)) begin
-            sprite_found=1;sprite_choice=3;best_sprite_rank=sprite3_rank;
-        end
-        if (sprite_found) begin
-            case(sprite_choice)
-                2'd0: chosen_sprite_pixel = sprite0_pixel;
-                2'd1: chosen_sprite_pixel = sprite1_pixel;
+
+        chosen_sprite_pixel = 0;
+        if (right_sprite_valid &&
+            (!left_sprite_valid || right_sprite_rank > left_sprite_rank)) begin
+            case(right_sprite_choice)
                 2'd2: chosen_sprite_pixel = sprite2_pixel;
                 default: chosen_sprite_pixel = sprite3_pixel;
             endcase
+        end else if (left_sprite_valid) begin
+            case(left_sprite_choice)
+                2'd0: chosen_sprite_pixel = sprite0_pixel;
+                default: chosen_sprite_pixel = sprite1_pixel;
+            endcase
+        end
+
+        if (left_sprite_valid || right_sprite_valid) begin
             // Indirect color 1 is the sprite shadow pen. MAME ORs the
             // shadow-bank bit into the already selected tile/background color.
             if (chosen_sprite_pixel == 14'h2000) mixed_pixel[13] = 1'b1;

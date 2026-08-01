@@ -6,7 +6,7 @@ module tb_fdc;
     logic bus_rd=0,bus_wr=0;
     logic [2:0] bus_addr=0;
     logic [7:0] bus_din=0,bus_dout;
-    logic bus_wait,media_req,media_wr,media_ack=0;
+    logic bus_wait,media_req,media_wr,media_ack=0,stretch_ack=0;
     logic [26:0] media_addr;
     logic [7:0] media_wdata,media_rdata=0;
     logic [7:0] media [0:127];
@@ -18,13 +18,15 @@ module tb_fdc;
 
     // A one-cycle-latency byte-addressed SDRAM model.
     always @(posedge clk) begin
-        media_ack<=0;
+        if(!stretch_ack) media_ack<=0;
         if(media_req && !media_ack) begin
             if(media_addr>=128) $fatal(1,"media address outside test image: %0d",media_addr);
             if(media_wr) media[media_addr]<=media_wdata;
             else media_rdata<=media[media_addr];
             media_ack<=1;
             requests<=requests+1;
+        end else if(media_ack && !stretch_ack) begin
+            media_ack<=0;
         end
     end
 
@@ -97,6 +99,18 @@ module tb_fdc;
         if(requests!=4) $fatal(1,"write request count %0d",requests);
         read_reg(4,value);
         if((value&8'h03)!=8'h02) $fatal(1,"write completion status %02h",value);
+
+        // A stretched bridge acknowledgement still completes one byte only.
+        requests=0;stretch_ack=1;
+        write_reg(0,8'h90);
+        read_reg(3,value);
+        if(value!=media[16]) $fatal(1,"stretched-ack read mismatch %02h",value);
+        repeat(2) @(posedge clk);
+        @(negedge clk);
+        media_ack=0;stretch_ack=0;
+        if(dut.position!=1 || dut.span!=3 || requests!=1)
+            $fatal(1,"stretched ack consumed multiple bytes pos=%0d span=%0d req=%0d",
+                   dut.position,dut.span,requests);
 
         write_reg(0,8'hd0);
         read_reg(4,value);

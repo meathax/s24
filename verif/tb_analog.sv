@@ -34,11 +34,11 @@ module tb_analog;
 
         // Select ADC channel 2 (0xa5), then verify MSB-first D7 shifting.
         din=8'h02;select=1;tick;select=0;#1;
-        if(adout!==8'hff)$fatal(1,"MSM6253 bit7 mismatch: %02x",adout);
+        if(adout!==8'h80)$fatal(1,"MSM6253 bit7 mismatch: %02x",adout);
         shift=1;tick;shift=0;#1;
-        if(adout!==8'h7f)$fatal(1,"MSM6253 bit6 mismatch: %02x",adout);
+        if(adout!==8'h00)$fatal(1,"MSM6253 bit6 mismatch: %02x",adout);
         shift=1;tick;shift=0;#1;
-        if(adout!==8'hff)$fatal(1,"MSM6253 bit5 mismatch: %02x",adout);
+        if(adout!==8'h80)$fatal(1,"MSM6253 bit5 mismatch: %02x",adout);
 
         $display("PASS System 24 uPD4701 and MSM6253 source model");
         $finish;

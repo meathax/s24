@@ -189,8 +189,12 @@ module s24_sprite (
         x_sum={3'd0,x_accum}+zoomx_step;
         y_sum={3'd0,y_accum}+zoomy_step;
 
-        clip_min_x=-13'sd8;
-        clip_max_x=13'sd487;
+        // With no clip descriptor MAME clips the already origin-adjusted
+        // destination coordinate to the complete 496-pixel visible area.
+        // The -8 offset belongs to the sprite X origin, not to this default
+        // screen rectangle; explicit clip descriptors apply it below.
+        clip_min_x=13'sd0;
+        clip_max_x=13'sd495;
         clip_first=13'sd383;
         clip_last=13'sd0;
         vertical_allowed=(target_y<9'd384);

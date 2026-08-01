@@ -54,6 +54,15 @@ module tb_mixer;
         write_reg(6,16'h0004);#1;
         assert(mixed==14'h0ab0) else $fatal(1,"higher-priority backdrop %h",mixed);
 
+        // TILEMAP_DRAW_OPAQUE bypasses both pen transparency and the category
+        // comparison. Category-one tiles therefore still supply the physical
+        // layer's color-zero backdrop through its category-zero mixer pass.
+        t3=0;v3=0;
+        t0=12'hab0;c0=1;v0=1;#1;
+        assert(mixed==14'h0ab0) else $fatal(1,"category-one backdrop %h",mixed);
+        c0=0;#1;
+        assert(mixed==14'h0ab0) else $fatal(1,"category-zero backdrop restore %h",mixed);
+
         // A front group-0 sprite is blocked by the tile. MAME then permits an
         // earlier group-1 sprite whose mixer priority clears the same tile.
         t3=0;v3=0;t0=12'h123;
@@ -64,7 +73,14 @@ module tb_mixer;
         write_reg(11,16'h0004);#1;
         assert(mixed==14'h1010) else $fatal(1,"front sprite ordering %h",mixed);
 
-        $display("PASS mixer priority, backdrop, and sprite shadow composition");
+        // Equal reverse-list ranks preserve the original sequential/MAME
+        // group order, including across the two branches of the rank tree.
+        sr0=11'd7;sr1=11'd7;sr2=11'd7;sr3=11'd7;
+        sp0=14'h1010;sp1=14'h1020;sp2=14'h1030;sp3=14'h1040;
+        write_reg(10,16'h0004);write_reg(9,16'h0004);write_reg(8,16'h0004);#1;
+        assert(mixed==14'h1010) else $fatal(1,"equal-rank sprite ordering %h",mixed);
+
+        $display("PASS mixer priority, equal-rank order, backdrop, and sprite shadow composition");
         $finish;
     end
 endmodule

@@ -35,6 +35,8 @@ module s24_fd1094_decrypt (
         if (state[6]) begin gkey1^=8'h10; gkey2^=8'h24; end
         if (state[7]) begin gkey2^=8'h01; gkey3^=8'h42; end
 
+        // word_address is [23:1], so packed bit 13 is numeric word-address
+        // bit 12, matching MAME's (address & 0x1000) test.
         key_f = word_address[13] ? mainkey[7] : mainkey[6];
         if (vector_fetch) begin
             if (word_address <= 3) gkey3 = 0;

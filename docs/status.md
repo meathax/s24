@@ -4,10 +4,18 @@ This core is not yet a deployable or MAME-exact release. The table below is
 the working contract used to prevent a successful FPGA build from being
 mistaken for successful emulation.
 
+Active game progress now tracks only the eight MAME parent sets: `hotrod`,
+`sspirits`, `gground`, `crkdown`, `sgmast`, `bnzabros`, `dcclub`, and `qgh`.
+Clone sets are ignored for individual bring-up and long Verilator regression
+runs unless a clone-specific fault appears. Their profiles remain supported
+and continue to participate in the inexpensive universal descriptor, MRA,
+loader, and media-contract checks. See `docs/game-coverage.md` for the exact
+scope and excluded clone list.
+
 | Area | Current state |
 | --- | --- |
 | MiSTer shell / 128 MB SDRAM | Integrated; full-core memory-port simulation passes; 16-bit MRA switch payloads preserve both DIP bytes; hardware synthesis pending |
-| Dual 68000 buses | Integrated with fx68k and shared arbitration; synthetic reset-vector/instruction trace passes; Gain Ground's MAME 0.70 CPU-B release interval is descriptor-gated; real-game boot trace pending |
+| Dual 68000 buses | Integrated with fx68k and shared arbitration; synthetic reset-vector/instruction trace passes; Gain Ground full-track and CNT1/CPU-B execution gates pass; MAME release timing and sustained post-release video remain |
 | FD1094 data transform | MAME-derived decrypt path and mask ROM are integrated; CPU reset/IRQ state handling, instruction-address tracking, and prefetch-safe execution-qualified CMPI/RTE transitions are source-integrated; broader protected-set comparison pending |
 | 315-5292 tiles | Four-layer double-buffer renderer; MAME address mirrors, 128 KB character store, measured sync windows, special-pair priority routing, and palette-aware pen-zero backdrop are source-integrated |
 | 315-5293/5295 sprites | MAME-audited linked list, inclusive/reverse-Y clipping, flips, widened large-sprite addressing, zoom, all-pen indirect colors, shadow pen, newest-entry overflow retention, and one candidate per priority group are source-integrated |
@@ -71,9 +79,19 @@ indirect result of zero is transparent. It also widened the tile-row multiply
 used by sprites up to 128x128 tiles and added normal/reverse Crack Down clipping
 contracts. See `docs/sprite-audit.md` for the exact source comparison.
 
-The sixteen focused regressions (`analog`, CPU bus, `inputs`, `315-5296 I/O`,
+A secondary audit against archived JTS16 commit `d80e197f` retained only
+cross-platform engineering contracts. In particular, 315-5294 display blanking
+now travels through the synchronous palette-read stage and gates final RGB;
+forcing only palette index zero was insufficient because software can rewrite
+that entry. The full-core synthetic smoke regression programs a lit entry zero
+and proves blanked RGB remains black. The audit also added an exact-rate,
+non-overlap, pause/resume regression for the 48 MHz clock-enable generator and
+expanded FD1094 state-command coverage. System 16-specific maps, raster,
+priority, sound, and cabinet logic were intentionally not imported.
+
+The nineteen focused regressions (`analog`, clock enables, CPU bus, `inputs`, `315-5296 I/O`,
 MRA switches, FDC, IRQ, loader, magic latch, mixer, palette, sprite, tile, video timing,
-FD1094, and 128 MB SDRAM)
+FD1094, 128 MB SDRAM, SDRAM CDC, and YM write-boundary)
 pass. The
 full-core smoke test completes 498 boot-memory reads, 248 CPU-A instruction
 starts, and six scanlines from a deterministic synthetic 68000 image. No
@@ -88,11 +106,35 @@ loop after valid RAM, tile, character, palette, and sprite transactions. At
 additional ROM checks and remains a hardware/extended-simulation milestone.
 
 The real-ROM Gain Ground integration bench loads all 8 KB of FD1094 key data
-and reaches the first floppy-media request at 210,451,455 clocks. The milestone
-records 5,248,303 CPU-A instructions, 8,009,666 BIOS reads, 662,837 memory
-writes, and 10,240 palette writes without premature CPU-B release or a floppy
-write. Full-track transfer, CNT1 release, and protected CPU-B execution remain
-the next extended milestones.
+and reaches the first floppy-media request at 210,451,455 clocks. The earlier
+milestone records 5,248,303 CPU-A instructions, 8,009,666 BIOS reads, 662,837
+memory writes, and 10,240 palette writes without premature CPU-B release or a
+floppy write. The longer MCP run now covers the full-track transfer and the
+protected CPU-B release/execution gate; sustained post-release video remains.
+
+The full-track target now accepts only a position-zero command start followed
+by one contiguous side/track transfer. It checks every media address and FDC
+position, rejects track/side changes within the command, requires exactly one
+remaining byte at the final acknowledgement, and waits for DRQ/request cleanup
+before passing. The generalized matrix runner exposes this as target 5.
+
+The MAME 0.288 Gain Ground CNT trace (`verif/mame/gground_cnt_trace.lua`)
+records the first CNT1-high write as `80001c=0006` at 14.344839700 seconds,
+approximately 688,552,306 48-MHz master clocks. Earlier writes at 7 microseconds,
+3.407566800 seconds, and 11.442192300 seconds leave CNT1 low. Therefore a
+260-million-clock target-1 run is intentionally before the MAME release event;
+the protected milestone therefore uses an approximately 720-million-clock bound.
+
+The current Gain Ground MCP run passes target 5 at clock 216,533,489:
+CPU-A instructions 5,340,341, one 11,520-byte track, 11,520 media and SDRAM
+acknowledgements, checksum `bfc224d8`, and no outstanding FDC request/DRQ.
+The same model passes target 1 with a 720-million-clock bound at clock
+703,835,797: CPU-A instructions 13,368,355, one accepted CPU-B instruction,
+`release=1`, 668,160 media bytes across 58 transfers, and no assertion. This
+is a functional protected-CPU gate, but it follows the MAME CNT1 reference by
+about 15.3 million clocks; release timing is the next MAME-equivalence target.
+The earlier 260-million-clock target-1 run correctly stopped before CNT1 after
+four tracks and 51,984 bytes, so that bounded failure was not an RTL regression.
 
 The real-ROM bench is now descriptor-driven for all 18 local sets. It supports
 floppy-only, ROM-board-only, combined floppy/ROM-board, and optional FD1094,
@@ -128,8 +170,11 @@ For QGH, MAME's first writes are tile `20c002=0000` at 0.1625734 s, sprite
 and Gain Ground share the disk BIOS clear sequence: their first tile, palette,
 and sprite writes occur at 1.4156424 s, 1.9023114 s, and 1.9258192 s.
 
-The corresponding QGH RTL run reaches its first video write at 8,482,266
-48-MHz master clocks with both CPUs executing and no unknown active pixels.
+The current-worktree QGH ModelSim baseline reaches its first video write at
+8,484,316 48-MHz master clocks with both CPUs executing and no unknown active
+pixels. The bounded target-4 rerun completed on 2026-07-31 with 114,550 CPU-A
+instructions, 49,375 CPU-B instructions, 230,197 boot reads, 98,304 ROM-board
+reads, and 133,240 completed memory writes.
 Its observed tuple is CPU 1, address `20c002`, data `0000`, byte enable `11`,
 an exact address/data/lane match to MAME's sub-CPU full-word tile write.
 This comparison found and fixed two video-path defects:
@@ -142,9 +187,179 @@ This comparison found and fixed two video-path defects:
   The old RTL incorrectly treated the full `600000-7fffff` range as sprite
   RAM. The decode now uses mask `e40000`, leaving the intervening ranges open.
 
-The updated Verilator model generates and compiles through `verilator-safe`.
-Game execution through both approved safe simulation entry points currently
-stalls in the Windows `LpcReply` state before consuming a meaningful CPU time,
-and the launcher then loses its reservation. MAME and ModelSim comparisons
-therefore provide the executable evidence for this milestone; no launcher
-bypass was used.
+The current Verilator model generates and compiles through `verilator-safe`
+with one simulation thread, one Verilator-generation job, and four bounded C++
+build jobs. Generated objects live in the preserved no-space path
+`C:/tmp/s24_obj_gground` because the prior visualizations path is no longer
+writable in this managed workspace and GNU Make rejects the repository path;
+the finished executable is copied into the ignored `verif/obj_gground`
+location. The approved safe simulation launcher
+reproduces target 4 at loop count 8,484,315 in 25 seconds with the same first
+write and counters as ModelSim. Target 6 also passes at loop count 12,476,974:
+tile, sprite, palette, character, and mixer writes are all observed, with zero
+unknown active pixels. No launcher bypass was used.
+
+The QGH visible-video target passes at loop count 56,662,177 with 63
+post-release frames, 15,630 non-black pixels, 25,008 mixed pixels, and zero
+unknown pixels. The strengthened target-7 attract gate now also passes QGH at
+loop count 154,290,721: 121/120 qualifying frames, 14 rendered-content
+changes, zero unknown active samples, CPU-B code-window execution, and a
+complete 496x384 native capture. This is recorded in
+`verif/captures/qgh-target7.log` with result `exit_code=0`; a rebuilt-model
+recorder is complete. Gain Ground World (`gground`) now also passes target 7
+at loop count 1,201,502,881 with 121/120 qualifying frames, 103 rendered-
+content changes, zero unknown active samples, CPU-B code-window execution,
+and a complete native capture. Gain Ground Japan (`ggroundj`) then passes at
+clock 893,597,473 with 121/120 qualifying frames, one rendered-content
+change, zero unknown active samples, CPU-B code-window execution, and a
+complete native capture. The authoritative results are
+`verif/captures/gground-target7.result` and
+`verif/captures/ggroundj-target7.result`, both with `exit_code=0`. The next
+candidate is `crkdown`; a bounded `dcclub` target-7 diagnostic run stopped at
+its 6,000,000,000-clock bound: CPU-B remains
+in the MAME-correlated `TST.W $a002` timer wait at `008058`, and the video
+remains black. A MAME 0.288 IRQ trace shows dcclub programming timer data `0x0f3d`,
+mode `1`, and CPU-B mask `0x1c`; bounded RTL IRQ-bus and timer-state logging
+then matched the MAME setup writes for the mode and masks, but no RTL
+`a00000=0x0f3d` timer-data write occurred. At the 700M-clock diagnostic stop,
+RTL reported `timer_data=0`, `timer_value=0xec1`, CPU-B at `00805c:66fa`, and
+pending timer IRQs; this isolates the next check to CPU-B timer-read payload
+and sampling rather than the register byte lanes. The patched observation
+model is queued through the machine-wide safe Verilator launcher. Audio and
+pixel-perfect MAME differential comparison remain separate obligations after
+complete set coverage.
+
+An isolated MAME 0.288 rerun records the main CPU polling `A00004` with zero
+data from 9.8916345 through 11.1780515 seconds, followed by the expected
+`0x0f3d` timer-data, mode-1, and CPU-B mask-`0x1c` writes beginning at
+12.7441422 seconds. The same bounded IRQ read tap did not observe a CPU-B
+read, so the CPU-B address/trace boundary remains an explicit unknown; no RTL
+timer payload change is accepted from this observation alone.
+The follow-up dual-alias probe tapped both `0x00a000-0x00a007` and
+`0xa00000-0xa00007`; it saw the CPU-B setup writes only and still no CPU-B
+reads, ruling out the narrow tap base as the sole explanation.
+
+The MAME 0.288 no-input probe now samples a coarse whole-screen grid, avoiding
+false negatives from fixed coordinates on rotated or text-only screens. Across
+all 18 profile sets, the first sampled game-owned screen with at least 1000
+non-black grid samples used a secondary-CPU PC of at least `0x006a5e`; the
+pre-release QGH baseline was `0x000f58`. Target 7 therefore uses an explicit
+MAME-derived default lower bound of `0x004000`, 120 consecutive qualifying
+frames, 1000 non-black pixels per frame, and at least one rendered-content or
+frame-occupancy change. The shared model was rebuilt with this gate on
+2026-07-31. QGH, `gground`, `ggroundj`, `crkdown`, and `crkdownu` have passed
+it; `crkdownj` is the active next candidate.
+
+A fresh pinned MAME 0.288 probe on 2026-08-01 reproduced the Crack Down
+reference for `crkdown`, `crkdownu`, and `crkdownj`: each reached its first
+game-owned screen at frame 961 with `grid_nonblack=2449`, and the secondary
+CPU settled at `0x008e94` during the visible attract interval. This is the
+reference milestone for the queued target-7 runs; it is not a Verilator pass.
+A follow-up fresh-state `crkdown` probe with narrow and broad
+`0xa00000`–`0xbfffff` taps reached the same visible high-score attract screen
+and CPU-B checkpoint, but captured no CPU-visible FDC command or data access.
+That negative observation is retained as an unresolved MAME-probe boundary;
+it is not being used to relax the RTL FDC gate or to claim equivalence.
+A 30-second pinned MAME probe also confirmed the next queued feature-family
+set, `sspirits`, at frame 1201 with `grid_nonblack=2914` and secondary CPU PC
+`0x0086b4`; this remains a reference baseline until its Verilator gate runs.
+A 30-second MAME sweep also measured the Hot Rod family: `hotrod`, `hotroda`,
+and `hotrodja` first crossed the grid gate at frame 1321, while `hotrodj`
+crossed at frame 1261; each reached `grid_nonblack=2854` with CPU-B in the
+`0x006a5e`–`0x006a7c` attract loop.
+The remaining 60-second MAME probes measured `sgmast`/`sgmastc` at frame 841,
+`sgmastj` at 1141, `bnzabros`/`bnzabrosj` at 781, `dcclub` at 781, and
+`dcclubj` at 1321. Their first-screen grid counts were respectively 2976,
+2976, 2976, 2976, 2823, and 2780; these are reference observations only.
+
+## Universal profile integration
+
+The project now treats the 18-set list in `tools/gen_mra.py` as a checked
+hardware contract rather than duplicated metadata. One canonical descriptor
+encoder is shared by MRA generation, simulation-media generation, and the game
+matrix. It rejects inconsistent feature/media combinations, unsupported input
+profiles, invalid track sizes, and malformed DIP defaults before a run.
+
+`tools/check_universal_profile.py` verifies that the generated MRA inventory is
+exactly those 18 sets, that every MRA names `s24`, and that descriptor bytes,
+media indexes, switch defaults, universal RTL sources, and required Fast Fit
+settings agree. It also invokes `tools/check_mame_pin.py`, so the profile gate
+requires the pinned MAME executable and behavioral source hashes. The RTL
+loader regression explicitly loads all 18 profiles and passes. The all-game
+media dry run passes all 18 contracts.
+
+The mixer sprite-rank selection is now a balanced comparator tree rather than
+a four-deep chain. Its focused regression passes tile blocking and fallback,
+shadow composition, backdrop ordering, normal reverse-list ordering, and the
+equal-rank lower-group tie rule. The last completed fit, before this comparator
+change, used 14,200 ALMs (34%), 1,582,668 RAM bits (28%), 221 RAM blocks (40%),
+28 DSPs (25%), and three PLLs. A new fit and timing inspection are required
+before replacing or distributing `s24.rbf`.
+
+The latest available `output_files/Arcade-SegaSystem24.sta.summary` is not
+timing-clean: slow-corner setup slack is `-10.034 ns` on the HDMI PLL clock
+and `-0.709 ns` on core PLL gen1; slow-corner core hold slack reaches
+`-0.510 ns`. These are the audit baselines for the eventual timing/resource
+optimization pass, not deployment evidence.
+
+## Live continuation checkpoint
+
+The shared 315-5292 character renderer now follows MAME's `STEP8(0,4)` layout
+exactly: each 16-bit character word emits its high nibble first while the two
+words in an eight-pixel row retain their left-to-right order. A synthetic row
+containing `0x1234,0x5678` renders pens 1 through 8 and passes the focused
+Verilator tile regression. The change is in `s24_tile` and therefore applies to
+all eighteen profiles in the universal core; the already MAME-matched sprite
+nibble and flip paths are unchanged.
+
+The native visual model now builds successfully with `--savable`. Packing
+fx68k's three logic-only structs makes their complete state serializable without
+changing field semantics. A binary 9,749,269-byte checkpoint was written at a
+native frame boundary, restored in a fresh process, advanced to a later frame,
+and saved again; both processes exited zero. SDL also enforces nearest-neighbour
+integer scaling independently of core rendering.
+
+Historical diagnostics from the earlier `crkdown` target-7 attempts recorded
+400,000,000 clocks and 24 complete floppy transfers, but CPU-B was
+still at `Binsn=0`, `release=0`, and `frames=0`; the model then returned
+`-1` while beginning the next side/track, and the wrapper recorded
+`exit_code=1 attempts=3`. This is a runtime/diagnostic failure, not an
+attract-gate pass or a proven RTL mismatch. The bounded target-8 reproduction
+completed with `exit_code=0` at 500,000,000 clocks: 33 complete 11,520-byte
+transfers, 381,339 media bytes and acknowledgements, no CPU-B release, and no
+assertion or runtime error. It is diagnostic evidence only. The follow-up
+bounded target-7 branch diagnostic without framebuffer capture also completed
+cleanly at 500,000,000 clocks with `exit_code=1`: it reached the same 33
+transfers, remained at `Binsn=0`, `release=0`, and `attract=0/120`, then stopped
+only because target 7 was not reached. This rules out the earlier `-1` as a
+frame-capture bookkeeping failure, but does not yet prove an RTL mismatch.
+The authoritative target-7 gate subsequently passed for `crkdown`: the log
+contains `PASS tb_gground_boot crkdown game milestone 7`, the result is
+`exit_code=0`, and the capture reached `frames=277/10` and `attract=121/120`
+at 906,948,385 clocks. At the time of this run, recorded universal-profile
+coverage was `5/18`: `qgh`, `gground`, `ggroundj`, `crkdown`, and `crkdownu`.
+`crkdownu` passed at 906,948,385 clocks with 121/120 qualifying attract frames,
+three content changes, zero unknown active samples, and a complete native
+capture; the supervised matrix had started `crkdownj`, but that run was
+stopped by the user before its target-7 result; no `crkdownj` pass is counted.
+
+The first `crkdownu` attempt was then interrupted by the safe simulator at the
+400,000,000-clock checkpoint with signed return `-1` (`exit_code=1` in the
+wrapper): it had executed `Ainsn=8,295,054`, completed 23 full 11,520-byte
+transfers, and had not yet released CPU-B. The log contains no Verilator
+assertion or `$fatal`; the last line is a truncated FDC transfer diagnostic.
+The matrix runner classifies only the exact safe-launcher return
+(`-1`/`0xffffffff`) as retryable, while preserving ordinary failures. The
+successful `crkdownu` retry completed after 94 attempts; its authoritative log
+contains the strict PASS line and its result reports `exit_code=0`. The
+`crkdownj` target-7 process was stopped by the user at
+2026-08-01 13:55:04 +10:00 before completion (`exit_code=130`). Coverage stays
+at that historical point. A later `sspirits` pass brought recorded all-set
+coverage to `6/18`. Under the current parent-only policy, active target-7
+coverage is `4/8`: `qgh`, `sspirits`, `gground`, and `crkdown`; clone results
+are retained as evidence but no longer counted or scheduled for rerun.
+
+The retry harness now preserves each future attempt as a numbered
+`*-target7-attempt-NNN.log` while retaining the latest attempt at the stable
+`*-target7.log` path used by coverage reporting. This keeps launcher
+interruptions and first-divergence evidence available across retries.

@@ -23,7 +23,7 @@ The core does not distribute commercial ROM, floppy, or FD1094 key data.
 
 The repository contains the MiSTer platform foundation, 128 MB SDRAM
 controller, dual-fx68k integration, JT51, MAME-derived device RTL, and
-verification scaffolding. All sixteen deterministic chip/module regressions
+verification scaffolding. All nineteen deterministic chip/module regressions
 pass. A full-core synthetic boot test also loads both fx68k control stores and
 proves CPU-A reset-vector fetch, instruction execution, shared memory traffic,
 and video line progress. A real DCCLUB boot now completes the BIOS RAM/device
@@ -32,10 +32,13 @@ and single-ack transactions. Attract mode and MAME frame/audio comparison remain
 incomplete, so no RBF is considered deployable. See `docs/status.md` for the
 exact implementation boundary.
 
-The real protected Gain Ground path also passes its first floppy milestone:
-after loading the complete 8 KB FD1094 key, CPU A completes the common BIOS
-diagnostic path and issues a valid disk read at 210,451,455 simulated clocks.
-CPU B remains correctly held until CNT1 release at that checkpoint.
+The real protected Gain Ground path now passes a complete contiguous 11,520-byte
+floppy track after loading the complete 8 KB FD1094 key. The deterministic MCP
+run reaches that gate at 216,533,489 simulated clocks with checksum `bfc224d8`.
+The same model also passes the CNT1/CPU-B execution gate at 703,835,797 clocks
+(`release=1`, first CPU-B instruction accepted). MAME's first CNT1-high write
+is about 688.6 million 48 MHz master clocks, so the remaining work is to tighten
+that 15.3-million-clock release skew before claiming cycle-level equivalence.
 
 The latest chip audit also corrects raster IRQ phase, full floppy-controller
 mirroring, CPU B reset-on-CNT1-release, exact palette highlight rounding, and
@@ -61,6 +64,13 @@ clone-prefixed members. The validator follows MiSTer's CRC-first archive lookup.
 complete simulation matrix. ROM, floppy, and key payloads are never tracked by
 this repository.
 
+All 18 MRAs select the same `s24.rbf`. Their eight-byte runtime descriptor
+enables only the applicable floppy, ROM-board, FD1094, analog, golf, Hot Rod,
+input-map, and magic-latch behavior without changing the synthesized image.
+`python tools/check_universal_profile.py` checks that inventory and the shared
+hardware contract. See `docs/game-coverage.md` for the complete set matrix and
+latest fitted resource use.
+
 MiSTer's 16-bit HPS download path now captures both bytes of each MRA switch
 payload at address zero, preserving the per-game `FF ED` and `FF FB` defaults
 instead of silently leaving the second DIP bank at `FF`. A focused wide/byte
@@ -69,8 +79,11 @@ download regression covers this hardware-facing path.
 `tools/run_game_matrix.py` reuses one safe compiled model and runs all 18 sets
 sequentially. Before a run it rejects missing media and stale board descriptors.
 Its target levels cover first floppy/ROM-board access, CNT1/CPU-B release,
-CPU-B instruction execution (including FD1094 decryption where populated), and
-sustained post-release visible video. `--dry-run` validates every media contract
+CPU-B instruction execution (including FD1094 decryption where populated),
+sustained post-release visible video, the first video-memory write, and one
+complete contiguous floppy track. A bounded intermediate target also requires
+initial writes across tile, character, sprite, palette, and mixer storage
+before attempting the longer visible-frame gate. `--dry-run` validates every media contract
 and prints the complete matrix without touching Verilator or its machine lock.
 For target 3, `--frame-dir verif/frames` writes one complete 496x384 RGB PPM per
 passing set so rendered output can be inspected and compared with MAME.
@@ -80,6 +93,24 @@ Floppy downloads are padded with zeroes to a deterministic 2 MiB buffer in
 both generated MRAs and simulation media. This matches FBNeo's System 24
 allocation and covers the BIOS's one-side-past-image seek on Gain Ground
 without depending on stale SDRAM contents.
+
+## Live visual simulation
+
+`tools/build_gground_visual.ps1` builds the real-game Verilator model with an
+SDL2 496x384 window; `tools/run_gground_visual.ps1` launches it with the local
+Gain Ground media. Keyboard and game-controller input are live. F5 or Ctrl+S
+writes a binary `gground.vltsv` checkpoint on a native frame boundary, and
+`-Restore <path>` resumes it after reopening the process-local floppy handle.
+The window title and console report frame/checksum changes so a responsive
+window cannot be mistaken for changing core video.
+
+The live model uses MAME's shared 315-5292 character-row order: the two 16-bit
+words remain left-to-right and each word emits its most-significant nibble
+first. This is a universal tile-path rule used by every game descriptor, not a
+Gain Ground-specific display adjustment. SDL uses nearest-neighbour integer
+scaling so Windows DPI scaling cannot introduce uneven source-pixel widths.
+fx68k's logic-only decode structs are packed bit vectors, allowing Verilator's
+full-state serializer to preserve the complete CPU state.
 
 ## Build policy
 

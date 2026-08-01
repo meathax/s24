@@ -18,6 +18,8 @@ module s24_core (
     input  logic [7:0]  paddle2,
     input  logic [7:0]  paddle3,
 
+    output logic [2:0]  mahjong_line,
+
     output logic        ce_pixel,
     output logic        hblank,
     output logic        vblank,
@@ -67,6 +69,10 @@ module s24_core (
 
     logic [9:0] hcount, vcount;
     logic hsync_tick;
+    // Same-cycle 655->0 raster boundary for consumers whose sequential logic
+    // must observe the pre-increment vcount.
+    logic line_wrap;
+    assign line_wrap = ce16 && (hcount == 10'd655);
     s24_video_timing timing(
         .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
         .hblank(hblank),.vblank(vblank),.hsync(hsync),.vsync(vsync),
@@ -163,6 +169,10 @@ module s24_core (
     logic [2:0] bus_fc;
     logic [23:0] bus_addr;
     logic [15:0] bus_dout,bus_din;
+    logic a_mem_req,b_mem_req,a_mem_ack,b_mem_ack;
+    logic [2:0] a_mem_fc,b_mem_fc;
+    logic [23:0] a_mem_addr,b_mem_addr;
+    logic [15:0] a_mem_din,b_mem_din;
     s24_cpu_bus cpu_bus(
         .clk(clk),.reset(reset),
         .a_as_n(a_as_n),.a_rw_n(a_rw_n),.a_uds_n(a_uds_n),.a_lds_n(a_lds_n),
@@ -171,14 +181,18 @@ module s24_core (
         .b_fc(b_fc),.b_addr(b_word_addr),.b_dout(b_dout),.b_din(b_din),.b_dtack_n(b_dtack_n),
         .bus_req(bus_req),.bus_cpu(bus_cpu),.bus_rnw(bus_rnw),.bus_be(bus_be),
         .bus_fc(bus_fc),.bus_addr(bus_addr),.bus_dout(bus_dout),
-        .bus_din(bus_din),.bus_ack(bus_ack));
+        .bus_din(bus_din),.bus_ack(bus_ack),.has_romboard(board.has_romboard),
+        .a_mem_req(a_mem_req),.a_mem_fc(a_mem_fc),.a_mem_addr(a_mem_addr),
+        .a_mem_din(a_mem_din),.a_mem_ack(a_mem_ack),
+        .b_mem_req(b_mem_req),.b_mem_fc(b_mem_fc),.b_mem_addr(b_mem_addr),
+        .b_mem_din(b_mem_din),.b_mem_ack(b_mem_ack));
 
     logic fd_start,fd_busy,fd_done,fd_irq_enter,b_iack_seen;
     logic [15:0] fd_ciphertext,fd_plaintext;
     logic [7:0] fd_state;
     s24_fd1094 fd1094(
         .clk(clk),.reset(sub_reset),.key_wr(key_wr),.key_word_addr(key_word_addr),
-        .key_wdata(key_wdata),.start(fd_start),.word_address(bus_addr[23:1]),
+        .key_wdata(key_wdata),.start(fd_start),.word_address(b_mem_addr[23:1]),
         .encrypted(fd_ciphertext),.irq_enter(fd_irq_enter),.busy(fd_busy),
         .instruction_start(b_instr_start),.instruction_opcode(b_instr_opcode),
         .instruction_address(b_instr_address),
@@ -200,12 +214,20 @@ module s24_core (
     logic io_rd,io_wr;
     logic [7:0] io_dout;
     logic [63:0] io_port_out;
-    logic [7:0] io_dir;
+    logic [63:0] io_port_write_data;
+    logic [7:0] io_dir,io_port_write;
     s24_io_5296 io(
         .clk(clk),.reset(reset),.rd(io_rd),.wr(io_wr),
         .addr({1'b0,bus_addr[5:1]}),
         .din(bus_dout[7:0]),.dout(io_dout),.port_in(input_ports),
-        .port_out(io_port_out),.port_dir(io_dir),.cnt(io_cnt));
+        .port_out(io_port_out),.port_dir(io_dir),
+        .port_write(io_port_write),.port_write_data(io_port_write_data),
+        .cnt(io_cnt));
+    s24_mahjong_mux mahjong_mux(
+        .clk(clk),.reset(reset),
+        .enable(board.input_profile==INPUT_MAHJONG),
+        .port_d_write(io_port_write[3]),
+        .port_d_data(io_port_write_data[31:24]),.line(mahjong_line));
 
     // Optional 834-6510 daughterboard. Hot Rod uses both encoder counters and
     // both ADCs; golf cabinets use the first counter when the descriptor says
@@ -245,10 +267,11 @@ module s24_core (
         .left(),.right(),.xleft(ym_l),.xright(ym_r));
 
     logic irq_rd_a,irq_rd_b,irq_wr;
+    logic irq_read_pending;
     logic [15:0] irq_dout;
     logic frc_irq;
     s24_irq irq(
-        .clk(clk),.reset(reset),.ce_8m(ce8),.hsync_tick(hsync_tick),.vcount(vcount),
+        .clk(clk),.reset(reset),.ce_8m(ce8),.hsync_tick(line_wrap),.vcount(vcount),
         .ym_irq(~ym_irq_n),.frc_irq(frc_irq),.rd_a(irq_rd_a),.rd_b(irq_rd_b),
         .wr(irq_wr),.addr(bus_addr[2:1]),.din(bus_dout),.be(bus_be),
         .dout(irq_dout),.ipl_a_n(a_ipl_n),.ipl_b_n(b_ipl_n));
@@ -283,9 +306,9 @@ module s24_core (
     logic [4:0] index_count;
     always_ff @(posedge clk) begin
         if(reset) index_count<=0;
-        // The registered line tick sees the old count. MAME advances the
-        // floppy index cadence at the start of scanline 384.
-        else if(hsync_tick && vcount==383) index_count <= index_count==19?0:index_count+1'd1;
+        // MAME advances the floppy index cadence at the start of scanline
+        // 384, i.e. on the same 383->384 wrap that raises vblank.
+        else if(line_wrap && vcount==383) index_count <= index_count==19?0:index_count+1'd1;
     end
 
     logic fdc_rd,fdc_wr,fdc_wait,fdc_media_req,fdc_media_wr,fdc_media_ack;
@@ -350,7 +373,8 @@ module s24_core (
     (* ramstyle="M10K, no_rw_check" *) logic [7:0] palette_ram_hi [0:8191];
     logic palette_wr;
     logic [15:0] palette_word, palette_cpu_word;
-    logic palette_shadow_bank;
+    logic palette_shadow_bank, palette_display_blank;
+    logic [7:0] palette_red, palette_green, palette_blue;
     integer palette_init;
     initial begin
         // Quartus 17 rejects a single elaboration loop above 5000 iterations.
@@ -363,6 +387,10 @@ module s24_core (
         palette_word <= {palette_ram_hi[mixed[12:0]],
                          palette_ram_lo[mixed[12:0]]};
         palette_shadow_bank <= mixed[13];
+        // The palette lookup is synchronous, so delay the 315-5294 display
+        // blank by the same cycle.  Blanking the palette index alone is not
+        // sufficient because software can program palette entry zero.
+        palette_display_blank <= display_blank;
         palette_cpu_word <= {palette_ram_hi[bus_addr[13:1]],
                              palette_ram_lo[bus_addr[13:1]]};
         if(palette_wr && bus_be[0])
@@ -371,7 +399,12 @@ module s24_core (
             palette_ram_hi[bus_addr[13:1]] <= bus_dout[15:8];
     end
     s24_palette pal(.palette_word(palette_word),.shadow_bank(palette_shadow_bank),
-                    .red(red),.green(green),.blue(blue));
+                    .red(palette_red),.green(palette_green),.blue(palette_blue));
+    always_comb begin
+        red   = (reset || palette_display_blank) ? 8'h00 : palette_red;
+        green = (reset || palette_display_blank) ? 8'h00 : palette_green;
+        blue  = (reset || palette_display_blank) ? 8'h00 : palette_blue;
+    end
 
     // --------------------------- board interconnect ------------------------
     function automatic logic is_tile_window(input logic [23:0] a);
@@ -440,8 +473,75 @@ module s24_core (
         else physical=SDR_ROMBOARD_BASE+{5'd0,bank,a[17:0]};
     endfunction
 
-    typedef enum logic [3:0] {X_IDLE,X_READ,X_WRITE,X_LOCAL,X_TILE,
-                              X_PALETTE,X_YM,X_FDC,X_FDKEY,X_WAIT} xstate_t;
+    // Each physical CPU bus has its own read path into SDRAM. Keep a request
+    // occupied until the CPU front-end has observed the completion pulse, so
+    // its level-held AS cycle cannot be launched twice. CPU-B opcode reads add
+    // the FD1094 stage after p3 returns the encrypted word.
+    typedef enum logic [1:0] {MR_IDLE,MR_SDRAM,MR_DECRYPT,MR_DROP} mrstate_t;
+    mrstate_t a_mrstate,b_mrstate;
+    always_ff @(posedge clk) begin
+        a_mem_ack<=1'b0;
+        b_mem_ack<=1'b0;
+        fd_start<=1'b0;
+        if(reset) begin
+            a_mrstate<=MR_IDLE;
+            b_mrstate<=MR_IDLE;
+            a_mem_din<=16'h0000;
+            b_mem_din<=16'h0000;
+            p0_req<=1'b0;
+            p3_req<=1'b0;
+            p0_addr<='0;
+            p3_addr<='0;
+            fd_ciphertext<=16'h0000;
+        end else begin
+            case(a_mrstate)
+                MR_IDLE: if(a_mem_req) begin
+                    p0_addr<=word_address(physical(1'b0,a_mem_addr,rom_bank[3:0]));
+                    p0_req<=1'b1;
+                    a_mrstate<=MR_SDRAM;
+                end
+                MR_SDRAM: if(p0_ack) begin
+                    p0_req<=1'b0;
+                    a_mem_din<=p0_data;
+                    a_mem_ack<=1'b1;
+                    a_mrstate<=MR_DROP;
+                end
+                MR_DROP: if(!a_mem_req) a_mrstate<=MR_IDLE;
+                default: a_mrstate<=MR_IDLE;
+            endcase
+
+            case(b_mrstate)
+                MR_IDLE: if(b_mem_req) begin
+                    p3_addr<=word_address(physical(1'b1,b_mem_addr,rom_bank[3:0]));
+                    p3_req<=1'b1;
+                    b_mrstate<=MR_SDRAM;
+                end
+                MR_SDRAM: if(p3_ack) begin
+                    p3_req<=1'b0;
+                    if(board.has_fd1094 && b_mem_fc[1] &&
+                       b_mem_addr<24'h100000) begin
+                        fd_ciphertext<=p3_data;
+                        fd_start<=1'b1;
+                        b_mrstate<=MR_DECRYPT;
+                    end else begin
+                        b_mem_din<=p3_data;
+                        b_mem_ack<=1'b1;
+                        b_mrstate<=MR_DROP;
+                    end
+                end
+                MR_DECRYPT: if(fd_done) begin
+                    b_mem_din<=fd_plaintext;
+                    b_mem_ack<=1'b1;
+                    b_mrstate<=MR_DROP;
+                end
+                MR_DROP: if(!b_mem_req) b_mrstate<=MR_IDLE;
+                default: b_mrstate<=MR_IDLE;
+            endcase
+        end
+    end
+
+    typedef enum logic [3:0] {X_IDLE,X_WRITE,X_LOCAL,X_TILE,
+                              X_PALETTE,X_YM,X_FDC,X_WAIT} xstate_t;
     xstate_t xs;
     logic [7:0] rom_bank;
     logic cpu_wr_pending;
@@ -499,44 +599,48 @@ module s24_core (
         bus_ack<=0;io_rd<=0;io_wr<=0;irq_rd_a<=0;irq_rd_b<=0;irq_wr<=0;
         magic_wr<=0;tile_wr<=0;mixer_wr<=0;palette_wr<=0;fdc_rd<=0;fdc_wr<=0;
         adc0_select<=0;adc1_select<=0;adc0_shift<=0;adc1_shift<=0;
-        frc_mode_write<=0;frc_ack_write<=0;fd_start<=0;
+        frc_mode_write<=0;frc_ack_write<=0;
         if(reset) begin
-            xs<=X_IDLE;bus_din<=16'hffff;p0_req<=0;p3_req<=0;
-            p0_addr<=0;p3_addr<=0;cpu_wr_pending<=0;cpu_phys<=0;rom_bank<=0;
-            p5_req<=0;p5_addr<=0;fdc_addr<=0;fd_ciphertext<=0;
+            xs<=X_IDLE;bus_din<=16'h0000;
+            cpu_wr_pending<=0;cpu_phys<=0;rom_bank<=0;
+            p5_req<=0;p5_addr<=0;fdc_addr<=0;
             tile_absel<=0;tile_xhout<=0;tile_xvout<=0;tile_syncmode<=0;
             ym_write_pending<=0;ym_addr_q<=0;ym_data_q<=0;
+            irq_read_pending<=0;
         end else begin
             if (ym_wr)
                 ym_write_pending <= 1'b0;
             case(xs)
             X_IDLE: if(bus_req) begin
-                if(is_memory(bus_cpu,bus_addr)) begin
+                irq_read_pending<=0;
+                // A00000-AFFFFF lives on CPU A's physical bus. A CPU-B
+                // crossing waits for an in-flight CPU-A memory cycle; when A
+                // is idle there is no added delay, matching the measured STOP
+                // exception without trying to infer the STOP instruction.
+                if(bus_cpu && bus_addr[23:20]==4'ha && a_mem_req) begin
+                    // Hold X_IDLE and leave the shared request pending.
+                end else if(is_memory(bus_cpu,bus_addr)) begin
                     cpu_phys<=physical(bus_cpu,bus_addr,rom_bank[3:0]);
-                    if(bus_rnw) begin
-                        if(!bus_cpu) begin p0_addr<=word_address(physical(0,bus_addr,rom_bank[3:0]));p0_req<=1; end
-                        else begin p3_addr<=word_address(physical(1,bus_addr,rom_bank[3:0]));p3_req<=1; end
-                        xs<=X_READ;
-                    end else if(is_writable(bus_cpu,bus_addr)) begin
+                    if(!bus_rnw && is_writable(bus_cpu,bus_addr)) begin
                         cpu_wr_pending<=1;xs<=X_WRITE;
-                    end else begin bus_din<=16'hffff;xs<=X_LOCAL; end
+                    end else begin bus_din<=16'h0000;xs<=X_LOCAL; end
                 end else if(is_tile_window(bus_addr)) begin
                     if(bus_rnw) xs<=X_TILE;
                     else begin tile_wr<=1;xs<=X_LOCAL; end
                 end else if(is_tile_absel(bus_addr)) begin
-                    bus_din<=16'hffff;
+                    bus_din<=16'h0000;
                     if(!bus_rnw)tile_absel<=merge16(tile_absel,bus_dout,bus_be);
                     xs<=X_LOCAL;
                 end else if(is_tile_xhout(bus_addr)) begin
-                    bus_din<=16'hffff;
+                    bus_din<=16'h0000;
                     if(!bus_rnw)tile_xhout<=merge16(tile_xhout,bus_dout,bus_be);
                     xs<=X_LOCAL;
                 end else if(is_tile_xvout(bus_addr)) begin
-                    bus_din<=16'hffff;
+                    bus_din<=16'h0000;
                     if(!bus_rnw)tile_xvout<=merge16(tile_xvout,bus_dout,bus_be);
                     xs<=X_LOCAL;
                 end else if(is_tile_syncmode(bus_addr)) begin
-                    bus_din<=16'hffff;
+                    bus_din<=16'h0000;
                     if(!bus_rnw)tile_syncmode<=merge16(tile_syncmode,bus_dout,bus_be);
                     xs<=X_LOCAL;
                 end else if(bus_addr[23:21]==3'b010 && !bus_addr[14]) begin
@@ -544,12 +648,23 @@ module s24_core (
                     else begin palette_wr<=1;xs<=X_LOCAL; end
                 end else if(bus_addr[23:21]==3'b010 && bus_addr[14]) begin
                     bus_din<=mixer_dout;if(!bus_rnw)mixer_wr<=1;xs<=X_LOCAL;
-                end else if((bus_addr[23:21]==3'b100)&&bus_addr[8:6]==0&&bus_be[0]) begin
-                    bus_din<={8'hff,io_dout};io_rd<=bus_rnw;io_wr<=~bus_rnw;xs<=X_LOCAL;
+                end else if((bus_addr[23:21]==3'b100)&&bus_addr[8:6]==0) begin
+                    // System 24 leaves the program-space unmapped value low;
+                    // the 315-5296 occupies only D7:D0.  A D15:D8-only read
+                    // therefore completes with zero without touching the
+                    // low-lane device.
+                    bus_din<={8'h00,io_dout};
+                    io_rd<=bus_rnw&&bus_be[0];
+                    io_wr<=~bus_rnw&&bus_be[0];
+                    xs<=X_LOCAL;
+                end else if((bus_addr[23:21]==3'b100)&&bus_addr[8:6]==1) begin
+                    // The optional I/O daughterboard handler is a deliberate
+                    // exception to the default-low map and returns 0xffff.
+                    bus_din<=16'hffff;xs<=X_LOCAL;
                 end else if((bus_addr[23:21]==3'b100)&&
-                            bus_addr[8:2]==7'b1000000&&bus_be[0]) begin
-                    bus_din<={8'hff,ym_dout};
-                    if(bus_rnw) xs<=X_LOCAL;
+                            bus_addr[8:2]==7'b1000000) begin
+                    bus_din<={8'h00,ym_dout};
+                    if(bus_rnw || !bus_be[0]) xs<=X_LOCAL;
                     else begin
                         ym_addr_q<=bus_addr[1];
                         ym_data_q<=bus_dout[7:0];
@@ -557,22 +672,24 @@ module s24_core (
                         xs<=X_YM;
                     end
                 end else if(bus_addr[23:19]==5'b11000 && !bus_addr[4] &&
-                            board.has_upd4701 && bus_be[0] &&
+                            board.has_upd4701 &&
                             (board.hotrod_io || !bus_addr[3])) begin
-                    bus_din<={8'hff,bus_addr[3]?upd1_dout:upd0_dout};
+                    bus_din<={8'h00,bus_addr[3]?upd1_dout:upd0_dout};
                     xs<=X_LOCAL;
                 end else if(bus_addr[23:19]==5'b11000 && bus_addr[4] &&
-                            board.has_adc && bus_be[0]) begin
-                    bus_din<={8'hff,bus_addr[1]?adc1_dout:adc0_dout};
-                    if(bus_addr[1]) begin
-                        adc1_shift<=bus_rnw;adc1_select<=~bus_rnw;
-                    end else begin
-                        adc0_shift<=bus_rnw;adc0_select<=~bus_rnw;
+                            board.has_adc) begin
+                    bus_din<={8'h00,bus_addr[1]?adc1_dout:adc0_dout};
+                    if(bus_be[0]) begin
+                        if(bus_addr[1]) begin
+                            adc1_shift<=bus_rnw;adc1_select<=~bus_rnw;
+                        end else begin
+                            adc0_shift<=bus_rnw;adc0_select<=~bus_rnw;
+                        end
                     end
                     xs<=X_LOCAL;
                 end else if(bus_addr[23:20]==4'ha) begin
                     bus_din<=irq_dout;irq_rd_a<=bus_rnw&&!bus_cpu;irq_rd_b<=bus_rnw&&bus_cpu;
-                    irq_wr<=~bus_rnw;xs<=X_LOCAL;
+                    irq_wr<=~bus_rnw;irq_read_pending<=bus_rnw;xs<=X_LOCAL;
                 // MAME mirrors the two FDC blocks by 0x07fff0, covering the
                 // complete B00000-B7FFFF region. A3 selects data/status and
                 // A2:A1 select the four word registers in the data block.
@@ -583,8 +700,8 @@ module s24_core (
                     // A high-byte-only 68000 write must leave the FDC intact.
                     fdc_wr<=~bus_rnw && bus_be[0];
                     xs<=X_FDC;
-                end else if(((bus_addr[23:18]==6'b101111)||
-                             (bus_addr[23:18]==6'b110011))&&bus_be[0]) begin
+                end else if((bus_addr[23:18]==6'b101111)||
+                            (bus_addr[23:18]==6'b110011)) begin
                     // The mapped registers live at odd byte addresses. The
                     // shared bus carries the aligned word address, so A[2:1]
                     // selects BC/CC0001,3,5,7 respectively.
@@ -593,44 +710,45 @@ module s24_core (
                             // The BC/CC0001 bank latch is populated only on
                             // ROM-board configurations. Floppy-only boards
                             // leave this byte open, matching rombd_common_map.
-                            bus_din<=board.has_romboard?{8'hff,rom_bank}:16'hffff;
-                            if(!bus_rnw && board.has_romboard)
+                            bus_din<=board.has_romboard?{8'h00,rom_bank}:16'h0000;
+                            if(!bus_rnw && bus_be[0] && board.has_romboard)
                                 rom_bank<=bus_dout[7:0];
                         end
                         2'd1: begin
                             bus_din<={15'd0,frc_mode};
-                            if(!bus_rnw)frc_mode_write<=1;
+                            if(!bus_rnw && bus_be[0])frc_mode_write<=1;
                         end
                         2'd2: begin
-                            bus_din<={8'hff,frc_count};
-                            if(!bus_rnw)frc_ack_write<=1;
+                            bus_din<={8'h00,frc_count};
+                            if(!bus_rnw && bus_be[0])frc_ack_write<=1;
                         end
                         default: begin
-                            bus_din<={8'hff,magic_dout};
-                            if(!bus_rnw)magic_wr<=1;
+                            bus_din<={8'h00,magic_dout};
+                            if(!bus_rnw && bus_be[0])magic_wr<=1;
                         end
                     endcase
                     xs<=X_LOCAL;
-                end else begin bus_din<=16'hffff;xs<=X_LOCAL; end
-            end
-            X_READ: begin
-                if((!bus_cpu&&p0_ack)||(bus_cpu&&p3_ack)) begin
-                    p0_req<=0;p3_req<=0;
-                    if(bus_cpu && board.has_fd1094 && bus_fc[1]
-                       && bus_fc!=3'b111 && bus_addr<24'h100000) begin
-                        fd_ciphertext<=p3_data;fd_start<=1'b1;xs<=X_FDKEY;
-                    end else begin
-                        bus_din<=bus_cpu?p3_data:p0_data;bus_ack<=1;xs<=X_WAIT;
-                    end
-                end
+                end else begin bus_din<=16'h0000;xs<=X_LOCAL; end
             end
             X_WRITE: if(wr_ack) begin cpu_wr_pending<=0;bus_ack<=1;xs<=X_WAIT;end
-            X_LOCAL: begin bus_ack<=1;xs<=X_WAIT;end
+            X_LOCAL: begin
+                // MAME's irq_r synchronizes the timer when the read handler
+                // runs.  Re-sample the combinational timer payload here,
+                // after the request phase, so a line-boundary update cannot
+                // return the stale value captured at X_IDLE.
+                if(irq_read_pending) bus_din<=irq_dout;
+                bus_ack<=1;xs<=X_WAIT;
+            end
             X_TILE: begin bus_din<=tile_dout;bus_ack<=1;xs<=X_WAIT;end
             X_PALETTE: begin bus_din<=palette_cpu_word;bus_ack<=1;xs<=X_WAIT;end
             X_YM: if(!ym_write_pending) begin bus_ack<=1;xs<=X_WAIT;end
-            X_FDC: if(!fdc_wait) begin bus_din<={8'hff,fdc_dout};bus_ack<=1;xs<=X_WAIT;end
-            X_FDKEY: if(fd_done) begin bus_din<=fd_plaintext;bus_ack<=1;xs<=X_WAIT;end
+            // segas24_state::fdc_r/status_r return a 16-bit 0x00xx value
+            // when a floppy controller is populated.  With no media profile
+            // the handler returns 0xffff instead.
+            X_FDC: if(!fdc_wait) begin
+                bus_din<={board.has_floppy ? 8'h00 : 8'hff,fdc_dout};
+                bus_ack<=1;xs<=X_WAIT;
+            end
             // bus_ack is registered in this clock domain.  The arbiter drops
             // bus_req one edge later, so do not treat that still-high request
             // as a new transaction on the intervening edge.

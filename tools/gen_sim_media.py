@@ -84,8 +84,7 @@ def generate(game: gen_mra.Game, rom_dir: pathlib.Path,
             key[i] | (key[i + 1] << 8) for i in range(0, len(key), 2)
         ])
 
-    descriptor = bytes((game.flags, game.magic, game.track_bytes & 0xff,
-                        game.track_bytes >> 8, game.input_profile, 0, 0, 0))
+    descriptor = gen_mra.descriptor_bytes(game)
     (target / "descriptor.hex").write_text(
         descriptor.hex() + "\n", encoding="ascii"
     )
@@ -102,6 +101,7 @@ def main() -> None:
     parser.add_argument("--out-dir", type=pathlib.Path,
                         default=pathlib.Path("verif/media"))
     args = parser.parse_args()
+    gen_mra.validate_game_contracts()
     if args.all == (args.setname is not None):
         parser.error("select exactly one setname or --all")
     selected = gen_mra.GAMES if args.all else (

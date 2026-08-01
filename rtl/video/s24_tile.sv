@@ -131,6 +131,10 @@ module s24_tile (
             control_regs[control_init] = 16'h0000;
     end
 
+    logic render_active;
+    logic pipeline_advance, line_stage_valid;
+    logic [1:0] render_layer, issue_line_layer;
+    logic [8:0] render_x, render_y;
     logic [15:0] tile_word, mask_word, line_scroll_word;
     logic [14:0] tile_addr, mask_addr;
     always_ff @(posedge clk) begin
@@ -173,9 +177,6 @@ module s24_tile (
     logic display_bank, fill_bank;
     logic [9:0] line_read_addr;
     logic [13:0] line0_q,line1_q,line2_q,line3_q;
-    logic render_active;
-    logic [1:0] render_layer;
-    logic [8:0] render_x, render_y;
     logic cache_valid;
     logic [11:0] cache_char;
     logic [2:0] cache_row;
@@ -202,14 +203,14 @@ module s24_tile (
     logic [11:0] wanted_pixel;
     logic [9:0] line_index;
     logic lookup_valid;
-    logic renderer_can_advance, pipeline_advance;
+    logic renderer_can_advance, fast_skip;
     logic [1:0] lookup_layer_q;
     logic [8:0] lookup_x_q;
     logic [8:0] lookup_source_x_q,lookup_source_y_q;
     logic [1:0] lookup_ctrl_mode_q;
     logic lookup_disabled_q,lookup_chosen_odd_q;
     logic [14:0] lookup_tile_addr_q,lookup_mask_addr_q;
-    logic [1:0] current_line_layer, issue_line_layer;
+    logic [1:0] current_line_layer;
     logic [1:0] issue_layer, issue_pair_even_layer, issue_fetch_layer;
     logic [8:0] issue_x;
     logic [15:0] issue_hscr_word, issue_vscr_word, issue_ctrl_word;
@@ -217,7 +218,6 @@ module s24_tile (
     logic [8:0] issue_source_x, issue_source_y;
     logic [9:0] issue_neg_vscroll;
     logic issue_chosen_odd;
-    logic line_stage_valid;
     logic [1:0] line_layer_q;
     logic [8:0] line_x_q, line_render_y_q;
     logic [15:0] line_hscr_q, line_vscr_q;
@@ -263,9 +263,21 @@ module s24_tile (
 
         wanted_char = tile_word[11:0];
         wanted_row = source_y[2:0];
-        wanted_pen = cache_bits[{source_x[2:0],2'b00} +: 4];
+        // MAME's STEP8(0,4) layout is MS-nibble first within each 16-bit
+        // character-RAM word. Preserve the two-word left-to-right order for
+        // an eight-pixel row while reversing the four nibble positions inside
+        // each word: 1234_5678 renders as pens 1,2,3,4,5,6,7,8.
+        wanted_pen = cache_bits[{source_x[2],~source_x[1:0],2'b00} +: 4];
         wanted_pixel = {tile_word[14:7],wanted_pen};
         line_index = {fill_bank,lookup_x_q};
+
+        // The display port erases the old scanline as it reads it.  A whole
+        // transparent eight-pixel selection span therefore needs no writes
+        // on the renderer port.  Skipping it preserves one-write-per-port RAM
+        // inference while leaving enough clocks to prepare every scanline.
+        fast_skip = lookup_valid && (disabled || !selected)
+                    && lookup_x_q[2:0] == 0
+                    && lookup_x_q <= 9'd488;
 
         renderer_can_advance = lookup_valid && render_active && !mem_req
                                && (disabled || !selected
@@ -292,6 +304,11 @@ module s24_tile (
         // The matching control metadata is registered with the synchronous
         // RAM result below.
         issue_pair_even_layer = {issue_layer[1],1'b0};
+        // MAME's draw_common() indexes scroll by the physical tilemap after
+        // the category pass is folded out: maps 0/1/2/3 use 5000/5001/5002/
+        // 5003 and 5004/5005/5006/5007 respectively. Only special modes
+        // below collapse the selected physical map onto the even member of
+        // its pair, matching MAME's early return for the odd map.
         issue_hscr_word = control_regs[{1'b0,issue_layer}];
         issue_vscr_word = control_regs[3'd4 + issue_layer];
         issue_ctrl_word = control_regs[3'd4 + {issue_layer[1],1'b0}];
@@ -366,7 +383,39 @@ module s24_tile (
         end
     endtask
 
-    always_ff @(posedge clk) begin
+    task automatic advance_renderer_skip;
+        begin
+            if (lookup_x_q >= 9'd488) begin
+                render_x <= 0;
+                cache_valid <= 1'b0;
+                if (lookup_layer_q == 2'd3) render_active <= 1'b0;
+                else render_layer <= lookup_layer_q + 1'd1;
+            end else render_x <= lookup_x_q + 9'd8;
+            // Discard metadata already issued for the skipped span and
+            // restart the synchronous lookup pipeline at the next boundary.
+            lookup_valid <= 1'b0;
+            line_stage_valid <= 1'b0;
+        end
+    endtask
+
+    // Port A supplies the visible pixel and erases it after the registered
+    // value has been captured.  Port B below renders into the opposite bank.
+    // This follows the proven JTS16 object/scroll line-buffer discipline and
+    // avoids multi-address writes on either physical RAM port.
+    always @(posedge clk) begin
+        line0_q <= line0[line_read_addr];
+        line1_q <= line1[line_read_addr];
+        line2_q <= line2[line_read_addr];
+        line3_q <= line3[line_read_addr];
+        if (ce_pixel) begin
+            line0[line_read_addr] <= 14'd0;
+            line1[line_read_addr] <= 14'd0;
+            line2[line_read_addr] <= 14'd0;
+            line3[line_read_addr] <= 14'd0;
+        end
+    end
+
+    always @(posedge clk) begin
         if (pipeline_advance) begin
             line_stage_valid <= 1'b1;
             line_layer_q <= issue_layer;
@@ -388,10 +437,6 @@ module s24_tile (
                 lookup_mask_addr_q <= mask_addr;
             end
         end
-        line0_q <= line0[line_read_addr];
-        line1_q <= line1[line_read_addr];
-        line2_q <= line2[line_read_addr];
-        line3_q <= line3[line_read_addr];
         if (reset) begin
             display_bank <= 0;
             fill_bank <= 1;
@@ -489,8 +534,9 @@ module s24_tile (
                         lookup_layer_q,lookup_x_q,render_layer,render_x,
                         lookup_tile_addr_q,lookup_mask_addr_q);
                 // synthesis translate_on
-                if (lookup_valid && (disabled || !selected)) begin
-                    write_line_pixel(14'd0);
+                if (fast_skip) begin
+                    advance_renderer_skip();
+                end else if (lookup_valid && (disabled || !selected)) begin
                     advance_renderer();
                 end else if (lookup_valid && cache_valid
                              && cache_char == wanted_char

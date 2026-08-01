@@ -10,6 +10,12 @@ module s24_io_5296 (
     input  logic [63:0] port_in,
     output logic [63:0] port_out,
     output logic [7:0]  port_dir,
+    // Pulses when MAME's per-port output callback would run: a write while
+    // that port is an output, or a direction transition in either direction.
+    output logic [7:0]  port_write,
+    // Callback payload captured with port_write.  This is explicit because
+    // the live latch/direction outputs update on the same clock edge.
+    output logic [63:0] port_write_data,
     output logic [2:0]  cnt
 );
     logic [7:0] latch [0:7];
@@ -40,17 +46,56 @@ module s24_io_5296 (
     always_ff @(posedge clk) begin
         if (reset) begin
             port_dir <= 8'h00;
+            port_write <= 8'h00;
+            port_write_data <= 64'h0;
             cnt_reg <= 8'h00;
             for (i = 0; i < 8; i = i + 1) latch[i] <= 8'h00;
-        end else if (wr) begin
-            case (addr)
-                6'h00,6'h01,6'h02,6'h03,6'h04,6'h05,6'h06,6'h07:
+        end else begin
+            port_write <= 8'h00;
+            port_write_data <= 64'h0;
+            if (wr) begin
+                case (addr)
+                6'h00,6'h01,6'h02,6'h03,6'h04,6'h05,6'h06,6'h07: begin
                     latch[addr[2:0]] <= din;
+                    if (port_dir[addr[2:0]]) begin
+                        port_write[addr[2:0]] <= 1'b1;
+                        port_write_data[addr[2:0]*8 +: 8] <= din;
+                    end
+                end
                 6'h0e: cnt_reg <= din;
-                6'h0f: port_dir <= din;
+                6'h0f: begin
+                    // 315_5296.cpp refreshes the output callback for every
+                    // port whose direction changes.  The callback observes
+                    // the latch when becoming output and zero when released.
+                    port_write <= port_dir ^ din;
+                    for (int p = 0; p < 8; p++) begin
+                        if (port_dir[p] ^ din[p])
+                            port_write_data[p*8 +: 8] <= din[p] ? latch[p] : 8'h00;
+                    end
+                    port_dir <= din;
+                end
                 default: ;
-            endcase
+                endcase
+            end
         end
     end
 endmodule
 
+// MahMahjan port-D callback.  This is deliberately strobe-driven: MAME
+// advances on every callback carrying bit 2 high, including repeated writes
+// of the same value, rather than only on a signal edge.
+module s24_mahjong_mux (
+    input  logic       clk,
+    input  logic       reset,
+    input  logic       enable,
+    input  logic       port_d_write,
+    input  logic [7:0] port_d_data,
+    output logic [2:0] line
+);
+    always_ff @(posedge clk) begin
+        if (reset || !enable)
+            line <= 3'd0;
+        else if (port_d_write && port_d_data[2])
+            line <= line + 1'd1;
+    end
+endmodule

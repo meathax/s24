@@ -68,8 +68,8 @@ module s24_fd1094 #(
     assign busy=(fstate!=F_IDLE);
     assign current_state=irq_mode?irq_key:normal_state;
     assign result_next=mask_byte[mask_bit_l]?16'hffff:preliminary;
-    assign cmp_history_high=history_word(instruction_address+1'b1);
-    assign cmp_history_low=history_word(instruction_address+2'd2);
+    assign cmp_history_high=history_word(instruction_address+23'd1);
+    assign cmp_history_low=history_word(instruction_address+23'd2);
 
     s24_fd1094_decrypt decryptor(
         .word_address(address_l),.encrypted(encrypted_l),.mainkey(mainkey),
@@ -99,6 +99,10 @@ module s24_fd1094 #(
                     encrypted_l<=encrypted;
                     vector_l<=(word_address<=3);
                     decrypt_state<=current_state;
+                    // word_address is a packed [23:1] bus address, so
+                    // [13:1] is the numeric low 13-bit MAME word address.
+                    // This matches decrypt_one()'s address & 0x1fff and its
+                    // (address & 0x0ffc) == 0 special-key window.
                     if((word_address[12:3]==0)&&(word_address>=4))
                         key_address<=word_address[13:1]|13'h1000;
                     else key_address<=word_address[13:1];
@@ -131,7 +135,7 @@ module s24_fd1094 #(
                     fetch_history_data[1]<=fetch_history_data[0];
                     fetch_history_data[0]<=result_next;
                     if(cmp_phase==1 && address_l==cmp_expected) begin
-                        cmp_high<=result_next;cmp_expected<=address_l+1'b1;cmp_phase<=2;
+                        cmp_high<=result_next;cmp_expected<=address_l+23'd1;cmp_phase<=2;
                     end else if(cmp_phase==2 && address_l==cmp_expected) begin
                         cmp_phase<=0;
                         if(result_next==16'hffff) begin
@@ -156,9 +160,9 @@ module s24_fd1094 #(
             if(instruction_start) begin
                 cmp_phase<=0;
                 if(instruction_opcode==16'h0c80) begin
-                    if(history_has(instruction_address+1'b1)) begin
+                    if(history_has(instruction_address+23'd1)) begin
                         cmp_high<=cmp_history_high;
-                        if(history_has(instruction_address+2'd2)) begin
+                        if(history_has(instruction_address+23'd2)) begin
                             if(cmp_history_low==16'hffff) begin
                                 case(cmp_history_high[9:8])
                                     2'b00: normal_state<=cmp_history_high[7:0];
@@ -172,11 +176,11 @@ module s24_fd1094 #(
                             end
                         end else begin
                             cmp_phase<=2;
-                            cmp_expected<=instruction_address+2'd2;
+                            cmp_expected<=instruction_address+23'd2;
                         end
                     end else begin
                         cmp_phase<=1;
-                        cmp_expected<=instruction_address+1'b1;
+                        cmp_expected<=instruction_address+23'd1;
                     end
                 end
                 if(instruction_opcode==16'h4e73) irq_mode<=0;

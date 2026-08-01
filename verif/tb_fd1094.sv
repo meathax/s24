@@ -11,6 +11,7 @@ module tb_fd1094;
     logic [7:0] current_state;
     logic [15:0] instruction_opcode=0;
     logic [23:1] instruction_address=0;
+    logic [23:1] state_test_address=23'h000200;
 
     s24_fd1094 #(.MASK_FILE("rtl/cpu/fd1094_masked.mem")) dut(
         .clk(clk),.reset(reset),.key_wr(key_wr),.key_word_addr(key_word_addr),
@@ -42,6 +43,32 @@ module tb_fd1094;
         end
     endtask
 
+    // Present an already-prefetched CMPI.L immediate at fx68k's execution
+    // boundary.  FD1094 state commands are recognized only for CMPI.L #x,D0
+    // and only when the low immediate word is $ffff.
+    task automatic execute_state_command(
+        input logic [15:0] opcode,
+        input logic [15:0] command,
+        input logic [15:0] command_low
+    );
+        begin
+            @(negedge clk);
+            state_test_address=state_test_address+23'd3;
+            instruction_address=state_test_address;
+            instruction_opcode=opcode;
+            dut.fetch_history_valid=4'b0011;
+            dut.fetch_history_addr[0]=instruction_address+23'd1;
+            dut.fetch_history_data[0]=command;
+            dut.fetch_history_addr[1]=instruction_address+23'd2;
+            dut.fetch_history_data[1]=command_low;
+            // Changing the lookup address above and allowing a delta makes
+            // legacy ModelSim reevaluate the function after these deposits.
+            #1;
+            instruction_start=1;
+            @(negedge clk);instruction_start=0;
+        end
+    endtask
+
     initial begin
         // 317-0058-04C key bytes used by the independent MAME-derived oracle.
         // Download while reset is held, matching the MiSTer ioctl sequence.
@@ -67,8 +94,35 @@ module tb_fd1094;
         @(negedge clk);instruction_start=0;
         if(current_state!==8'h00) $fatal(1,"executed RTE did not leave IRQ mode");
 
+        // MAME's four state commands.  In particular, 01xx selects state xx
+        // while leaving IRQ mode; jts16_fd1094_ctrl currently forces state 0
+        // for this case, so retain the MAME-compatible behavior here.
+        execute_state_command(16'h0c80,16'h005a,16'hffff);
+        if(current_state!==8'h5a) $fatal(1,"00xx did not select normal state");
+        @(negedge clk);irq_enter=1;
+        @(negedge clk);irq_enter=0;
+        if(current_state!==8'h19) $fatal(1,"IRQ acknowledge did not select key[0]");
+        execute_state_command(16'h0c80,16'h013c,16'hffff);
+        if(current_state!==8'h3c)
+            $fatal(1,"01xx did not select state and leave IRQ mode: current=%h normal=%h irq=%b",
+                   current_state,dut.normal_state,dut.irq_mode);
+        execute_state_command(16'h0c80,16'h0200,16'hffff);
+        if(current_state!==8'h19) $fatal(1,"02xx did not enter IRQ mode");
+        execute_state_command(16'h0c80,16'h0300,16'hffff);
+        if(current_state!==8'h3c) $fatal(1,"03xx did not leave IRQ mode");
+
+        // A non-$ffff low word is an ordinary comparison, and MAME's cmpild
+        // callback accepts offset zero only (CMPI.L to D0).  jts16's broad
+        // 0c80-0cbf opcode match is therefore intentionally not copied.
+        execute_state_command(16'h0c80,16'h0066,16'hfffe);
+        if(current_state!==8'h3c) $fatal(1,"ordinary CMPI.L changed FD1094 state");
+        execute_state_command(16'h0c81,16'h0066,16'hffff);
+        if(current_state!==8'h3c) $fatal(1,"CMPI.L to D1 changed FD1094 state");
+
         @(negedge clk);reset=1;
         @(negedge clk);reset=0;
+        if(current_state!==8'h00)
+            $fatal(1,"FD1094 reset did not select state 00");
         check_decrypt(23'h000007,16'h013a,16'hffff); // aggressive mask ROM
         $display("PASS FD1094 MAME vectors and mask ROM");
         $finish;

@@ -72,7 +72,10 @@ module s24_fdc (
         end else begin
             if (!bus_rd && !bus_wr) bus_seen <= 1'b0;
 
-            if (media_ack) begin
+            // Accept exactly one response for each outstanding request.  The
+            // SDRAM bridge normally pulses media_ack, but qualifying it keeps
+            // a stretched acknowledgement from consuming multiple bytes.
+            if (media_ack && media_req) begin
                 media_req <= 1'b0;
                 if (!media_wr) data_reg <= media_rdata;
                 if (span == 16'd1) begin

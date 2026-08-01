@@ -1,3 +1,5 @@
+import s24_pkg::*;
+
 module s24_inputs (
     input  logic [31:0] joy0,
     input  logic [31:0] joy1,
@@ -10,13 +12,19 @@ module s24_inputs (
     input  logic        golf_io,
     input  logic        hotrod_io,
     input  logic        golf_angle,
-    input  logic        gground_io,
+    input  logic [7:0]  input_profile,
+    input  logic [2:0]  mahjong_line,
+    // Eight active-low matrix rows.  MAME defines rows 0..5 and returns ff
+    // for the two unpopulated rows.
+    input  logic [63:0] mahjong_matrix,
     output logic [63:0] ports
 );
     function automatic [7:0] player(input [31:0] j);
-        // MAME system24_generic: L,R,U,D,unused,B2,B1,B3.
+        // MAME system24_generic: L,R,U,D,service,B2,B1,B3.
+        // Each player port has its own cabinet service switch on bit 3
+        // (SERVICE2 for P1 and SERVICE3 for P2).
         // MiSTer directions are {left,right,up,down} at j[1:0,3:2].
-        player = {~j[1], ~j[0], ~j[3], ~j[2], 1'b1,
+        player = {~j[1], ~j[0], ~j[3], ~j[2], ~j[12],
                   ~j[5], ~j[4], ~j[6]};
     endfunction
 
@@ -67,6 +75,53 @@ module s24_inputs (
         ports[47:40] = coinage;
         ports[55:48] = dsw;
 
+        case (input_profile)
+            INPUT_GGROUND: begin
+                // Gain Ground makes port C a real third-player port. Bit 0
+                // is Coin 3 rather than the generic Button 3 input.
+                ports[23:16] = {~joy2[1],~joy2[0],~joy2[3],~joy2[2],
+                                ~joy2[12],~joy2[5],~joy2[4],~joy2[11]};
+            end
+
+            INPUT_QUIZ4, INPUT_QROUKA: begin
+                // Quiz Mekurumeku Story and Quiz Rouka use the same four-
+                // player packing: players 3/4 contribute start/button bits
+                // to A/B and both direction nibbles share port C.
+                ports[7:0] = {~joy0[1],~joy0[0],~joy0[3],~joy0[2],
+                              ~joy2[4],1'b1,~joy0[4],~joy2[10]};
+                ports[15:8] = {~joy1[1],~joy1[0],~joy1[3],~joy1[2],
+                               ~joy3[4],1'b1,~joy1[4],~joy3[10]};
+                ports[23:16] = {~joy2[1],~joy2[0],~joy2[3],~joy2[2],
+                                ~joy3[1],~joy3[0],~joy3[3],~joy3[2]};
+
+                if (input_profile == INPUT_QROUKA) begin
+                    if (dsw[3]) begin
+                        // Common chute: only coin 1/2 remain on bits 0/1.
+                        ports[39:32] = {2'b11,~joy1[10],~joy0[10],
+                                        ~joy0[12],~(joy0[13]|test_mode),
+                                        ~joy1[11],~joy0[11]};
+                    end else begin
+                        // Separate chutes: coin 4,3,2,1 occupy bits 0,1,6,7.
+                        ports[39:32] = {~joy0[11],~joy1[11],
+                                        ~joy1[10],~joy0[10],~joy0[12],
+                                        ~(joy0[13]|test_mode),
+                                        ~joy2[11],~joy3[11]};
+                    end
+                end
+            end
+
+            INPUT_MAHJONG: begin
+                // Port A identifies the selected scan line; port C returns
+                // that active-low key row.  Port D advances the mux through
+                // the separate s24_mahjong_mux output-callback model below.
+                ports[7:0] = ~(8'b1 << mahjong_line);
+                ports[15:8] = 8'hff;
+                ports[23:16] = mahjong_matrix[mahjong_line*8 +: 8];
+            end
+
+            default: ;
+        endcase
+
         if (golf_io) begin
             // Super Masters/Dynamic Country Club replace the P1 direction
             // nibble with the encoded swing position and leave P2 unused.
@@ -91,11 +146,5 @@ module s24_inputs (
             ports[23:16] = 8'hff;
         end
 
-        if (gground_io) begin
-            // Gain Ground makes port C a real third-player port. Bit 0 is
-            // Coin 3 rather than the generic Button 3 input.
-            ports[23:16] = {~joy2[1],~joy2[0],~joy2[3],~joy2[2],
-                            ~joy2[12],~joy2[5],~joy2[4],~joy2[11]};
-        end
     end
 endmodule

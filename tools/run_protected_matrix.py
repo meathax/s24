@@ -46,7 +46,7 @@ def main() -> None:
                         default=pathlib.Path("verif/media"))
     parser.add_argument("--sets", nargs="+", choices=available,
                         default=list(available))
-    parser.add_argument("--target", type=int, choices=range(4), default=0)
+    parser.add_argument("--target", type=int, choices=range(7), default=0)
     parser.add_argument("--max-clocks", type=int, default=400_000_000)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
@@ -56,7 +56,10 @@ def main() -> None:
     if args.max_clocks <= 0:
         parser.error("--max-clocks must be positive")
 
-    subprocess.run(["verilator-safe", "status"], check=True)
+    # Keep dry-run source/data-only so it never takes or probes a simulation
+    # reservation. The general matrix runner follows the same contract.
+    if not args.dry_run:
+        subprocess.run(["verilator-safe", "status"], check=True)
     for setname in args.sets:
         game = available[setname]
         cmd = command(args.exe, game, args.media, args.target,

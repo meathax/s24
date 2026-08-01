@@ -14,6 +14,11 @@ module tb_cpu_bus;
     logic [23:0] bus_addr;
     logic [15:0] bus_dout;
     logic [15:0] bus_din=16'ha55a;
+    logic has_romboard=0;
+    logic a_mem_req,b_mem_req,a_mem_ack=0,b_mem_ack=0;
+    logic [2:0] a_mem_fc,b_mem_fc;
+    logic [23:0] a_mem_addr,b_mem_addr;
+    logic [15:0] a_mem_din=16'haaaa,b_mem_din=16'hbbbb;
 
     always #5 clk=~clk;
 
@@ -48,6 +53,14 @@ module tb_cpu_bus;
         end
     endtask
 
+    task automatic release_b_cycle;
+        begin
+            b_as_n=1;b_uds_n=1;b_lds_n=1;
+            @(posedge clk); #1;
+            if(!b_dtack_n) $fatal(1,"CPU B DTACK did not clear with AS");
+        end
+    endtask
+
     initial begin
         repeat(3) @(posedge clk); reset=0; @(posedge clk); #1;
 
@@ -66,7 +79,56 @@ module tb_cpu_bus;
         finish_a_cycle();
 
         if(a_din!=16'ha55a) $fatal(1,"readback latch mismatch");
-        $display("PASS tb_cpu_bus delayed strobes, byte enables and single-ack handshake");
+
+        // FC=111 is a 68000 interrupt-acknowledge cycle.  It is completed by
+        // VPA/autovector logic beside the CPUs and must never reach the board
+        // transaction stream (fd1094.cpp:926-930 changes state on this cycle).
+        @(negedge clk);a_fc=3'b111;a_as_n=0;a_uds_n=0;a_lds_n=0;
+        repeat(3) begin @(posedge clk); #1;
+            if(bus_req) $fatal(1,"interrupt acknowledge escaped onto board bus");
+        end
+        @(negedge clk);a_as_n=1;a_uds_n=1;a_lds_n=1;a_fc=3'b001;
+        @(posedge clk); #1;
+
+        // Preserve both independently asserted CPU cycles while the shared
+        // downstream path is busy, then service each exactly once.
+        @(negedge clk);
+        a_addr=23'h00200;a_dout=16'h1111;a_rw_n=0;a_as_n=0;a_uds_n=0;a_lds_n=0;
+        b_addr=23'h00300;b_dout=16'h2222;b_rw_n=0;b_as_n=0;b_uds_n=0;b_lds_n=0;
+        while(!bus_req) begin @(posedge clk); #1; end
+        if(bus_cpu || bus_addr!=24'h000400 || bus_dout!=16'h1111)
+            $fatal(1,"first simultaneous grant mismatch");
+        bus_ack=1;@(posedge clk);#1;bus_ack=0;
+        if(a_dtack_n) $fatal(1,"first simultaneous cycle was not acknowledged");
+        a_as_n=1;a_uds_n=1;a_lds_n=1;
+        while(!bus_req) begin @(posedge clk); #1; end
+        if(!bus_cpu || bus_addr!=24'h000600 || bus_dout!=16'h2222)
+            $fatal(1,"second simultaneous grant was lost or corrupted");
+        bus_ack=1;@(posedge clk);#1;bus_ack=0;
+        if(b_dtack_n) $fatal(1,"second simultaneous cycle was not acknowledged");
+        release_b_cycle();
+
+        // Reads from the two physical memory buses must proceed concurrently
+        // and must not consume the shared-device arbiter.
+        @(negedge clk);
+        a_addr=23'h00100;a_rw_n=1;a_as_n=0;a_uds_n=0;a_lds_n=0;
+        b_addr=23'h00200;b_rw_n=1;b_as_n=0;b_uds_n=0;b_lds_n=0;
+        while(!(a_mem_req&&b_mem_req)) begin @(posedge clk); #1; end
+        if(bus_req || a_mem_addr!=24'h000200 || b_mem_addr!=24'h000400)
+            $fatal(1,"independent read routing mismatch");
+        a_mem_ack=1;@(posedge clk);#1;a_mem_ack=0;
+        if(a_dtack_n || !b_dtack_n || a_din!=16'haaaa || !b_mem_req)
+            $fatal(1,"CPU A read did not complete independently");
+        a_as_n=1;a_uds_n=1;a_lds_n=1;
+        b_mem_ack=1;@(posedge clk);#1;b_mem_ack=0;
+        if(b_dtack_n || b_din!=16'hbbbb)
+            $fatal(1,"CPU B read did not complete independently");
+        b_as_n=1;b_uds_n=1;b_lds_n=1;
+        @(posedge clk);#1;
+        if(!a_dtack_n || !b_dtack_n || a_mem_req || b_mem_req)
+            $fatal(1,"independent read handshake did not return idle");
+
+        $display("PASS tb_cpu_bus independent reads, serialized writes and IACK exclusion");
         $finish;
     end
 endmodule
