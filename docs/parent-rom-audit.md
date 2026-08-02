@@ -13,8 +13,8 @@ Coin 1/Start 1 input reaches unmistakable live gameplay on both sides.
 | 3 | `bnzabros` | frame 781, CPU-B `0081ca`–`0100c4` | 4 MiB zero tail, 20-frame FDC index cadence, generic input and magic-latch contracts aligned | **complete:** attract is pixel-exact; visible Verilator frame 1800 proves live gameplay closely matched to MAME |
 | 4 | `hotrod` | frame 1321, CPU-B `006a5e`–`006a7c` | media, 2f00 FDC, analog daughterboard and `FF FF` aligned | **complete:** attract is pixel-exact; visible Verilator frame 2400 proves live racing closely matched to MAME |
 | 5 | `sspirits` | frame 1201, CPU-B `0086b4` | corrected `FF FD`; raw native rotation boundary defined | pending; historical run used wrong DIP |
-| 6 | `dcclub` | frame 781, CPU-B `00aeae`–`00af08` | TAS RMW bus re-arm and 4 MiB zero tail repaired; `FF FB` aligned | pending |
-| 7 | `sgmast` | frame 841, CPU-B `0092ba`–`0092d0` | corrected `FF FD`; neutral golf encoder aligned | pending; MAME parent key is marked `BAD_DUMP` |
+| 6 | `roughrac` | pending fresh MAME probe | newly promoted local archive; FD1094, uPD4701, `FF FD` profile | pending target-7 and visual proof |
+| 7 | `dcclub` | frame 781, CPU-B `00aeae`–`00af08` | TAS RMW bus re-arm and 4 MiB zero tail repaired; `FF FB` aligned | pending |
 
 The finite visual workflow is `tools/run_parent_lockstep.py`. It records the
 pinned behavioral-file hashes and checkout HEAD, isolated CFG/NVRAM/state,
@@ -208,10 +208,9 @@ avoid consuming the tighter RAM-block budget.
 Parent-global MRA control metadata is now derived from MAME 0.289 rather than
 using a blanket four-button label. Generic System 24 parents expose three
 actions; Hot Rod exposes its steering/accelerator controls with no digital
-action buttons; and the `sgmast`/`dcclub` parents expose Club, Stance, Angle
-Left and Angle Right plus the swing control. All local clones resolve the
-metadata through their parent and are rejected if they declare a clone-local
-override. Regeneration and profile validators pass for all 17 local MRAs. This
+action buttons; and the `dcclub` parent exposes Club, Stance, Angle
+Left and Angle Right plus the swing control. Regeneration and profile validators
+pass for all 7 local MRAs. This
 is generator metadata only and costs zero ALMs, registers, RAM blocks or DSPs.
 
 Historical source-unit diagnostics cover the full-core smoke and CPU-B Work-A

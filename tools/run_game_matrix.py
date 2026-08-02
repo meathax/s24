@@ -21,7 +21,6 @@ MAME_ATTRACT_B_PC_MIN = {
     "sspirits": 0x0086B4,
     "gground": 0x0085B0,
     "crkdown": 0x008E94,
-    "sgmast": 0x0092BA,
     "bnzabros": 0x0081CA,
     "dcclub": 0x00AEAE,
 }

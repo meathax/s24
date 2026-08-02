@@ -11,13 +11,13 @@ Set-Location -LiteralPath $repo
 # analog, magic-latch, and protected feature families. The runner stops at
 # the first failing set, preserving a useful first divergence.
 $sets = @(
-    'dcclub', 'dcclubj',
+    'dcclub',
     'sspirits',
-    'hotrod', 'hotroda', 'hotrodj', 'hotrodja',
-    'bnzabros', 'bnzabrosj',
-    'crkdown', 'crkdownu', 'crkdownj',
-    'sgmast', 'sgmastc', 'sgmastj',
-    'gground', 'ggroundj'
+    'hotrod',
+    'roughrac',
+    'bnzabros',
+    'crkdown',
+    'gground'
 )
 $runnerArgs = @(
     'tools/run_game_matrix.py',
@@ -26,8 +26,8 @@ $runnerArgs = @(
     '--sets'
 ) + $sets + @(
     '--target', '7',
-    # MAME's first stable dcclubj attract screen is around frame 1321; the
-    # RTL reaches only about 264 frames in the former 800M-clock cap.
+    # MAME's first stable dcclub attract screen needs the longer ROM-board cap;
+    # the RTL reaches only about 264 frames in the former 800M-clock cap.
     # Keep the universal gate long enough for the slowest BIOS/ROM-board set.
     '--max-clocks', '6000000000',
     '--progress-clocks', '100000000',

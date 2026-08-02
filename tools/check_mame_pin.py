@@ -13,12 +13,12 @@ import sys
 
 PINNED_COMMIT = "affe701f9210d003d2cc5eff311f94053afa679b"
 PINNED_VERSION = "0.288 (mame0288)"
+# MAME sets covered by the local and optional source contracts. Removed local
+# clones are intentionally not part of this profile pin.
 DRIVER_SETS = frozenset((
-    "hotrod", "hotroda", "hotrodj", "hotrodja", "sspirits", "gground",
-    "ggroundj", "crkdown", "crkdownu", "crkdownj", "sgmast", "sgmastc",
-    "sgmastj", "bnzabros", "bnzabrosj", "dcclub", "dcclubj",
-    "qrouka", "quizmeku", "mahmajn", "mahmajn2", "sspiritj", "sspirtfc",
-    "qsww", "dcclubfd", "roughrac",
+    "hotrod", "sspirits", "gground", "crkdown", "roughrac", "bnzabros",
+    "dcclub", "qrouka", "quizmeku", "mahmajn", "mahmajn2", "sspiritj",
+    "sspirtfc", "qsww", "dcclubfd",
 ))
 PINNED_FILES = {
     "src/mame/sega/segas24.cpp":

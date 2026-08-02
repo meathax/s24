@@ -20,16 +20,17 @@ grid samples was observed at:
 
 | Sets | First sampled frame | Secondary PC range |
 | --- | ---: | ---: |
-| `bnzabros`, `bnzabrosj` | 781 | `0x0081ca`–`0x0100c4` |
-| `dcclub`, `dcclubj` | 781/1321 | `0x00aeae`–`0x00af08` |
-| `crkdown`, `crkdownu`, `crkdownj` | 961 | `0x008e94` |
-| `hotrod`, `hotroda`, `hotrodj`, `hotrodja` | 1261/1321 | `0x006a5e`–`0x006a7c` |
-| `gground`, `ggroundj` | 1261 | `0x0085b0`–`0x0085b2` |
-| `sgmast`, `sgmastc`, `sgmastj` | 841/1141 | `0x0092ba`–`0x0092d0` |
+| `bnzabros` | 781 | `0x0081ca`–`0x0100c4` |
+| `dcclub` | 781 | `0x00aeae`–`0x00af08` |
+| `crkdown` | 961 | `0x008e94` |
+| `hotrod` | 1321 | `0x006a5e`–`0x006a7c` |
+| `gground` | 1261 | `0x0085b0`–`0x0085b2` |
+| `roughrac` | pending fresh probe | pending |
 | `sspirits` | 1201 | `0x0086b4` |
 
 The 60-second MAME reference sweep produced an adaptive first-game-screen
-snapshot for all 17 sets; no set remained below the grid threshold. These
+snapshot for the retained parent sets; Rough Racer was added afterward and
+still needs a fresh reference probe. These
 snapshots are retained under the ignored `verif/mame/matrix60adaptive` tree
 for later native-frame comparison.
 
@@ -73,9 +74,6 @@ python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --m
 
 `gground` passes target 7 at clock `1,201,502,881`, with 121 of 120
 qualifying frames, 103 rendered-content changes, zero unknown active samples,
-CPU-B code-window execution, and a complete native capture. `ggroundj` then
-passed at clock `893,597,473` with 121 of 120 qualifying frames, one content
-change, zero unknown active samples, CPU-B code-window execution, and a
-complete native capture. The authoritative logs are `verif/captures/gground-target7.log` and
-`verif/captures/ggroundj-target7.log`, each with result `exit_code=0`; the
-next candidate is `crkdownj` after the completed `crkdownu` gate.
+CPU-B code-window execution, and a complete native capture. The authoritative
+log is `verif/captures/gground-target7.log` with result `exit_code=0`; the next
+candidate is `sspirits`.

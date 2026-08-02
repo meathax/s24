@@ -54,9 +54,9 @@ The sprite path has additionally been audited against MAME's full draw loop:
 raw pen zero now goes through the indirect palette, large-sprite tile arithmetic
 is explicitly wide, and bounded list overflow keeps the frontmost entries.
 
-The ignored `roms/` folder currently contains 18 user-supplied sets. Run
-`python tools/gen_mra.py` to validate those archives and regenerate one MRA per
-set. Every generated external ROM region declares
+The ignored `roms/` folder contains user-supplied archives; the checked-in
+local support inventory currently contains 7 parent sets. Run `python tools/gen_mra.py`
+to validate those archives and regenerate one MRA per supported set. Every generated external ROM region declares
 `type="merged|nonmerged|split"` and retains its CRC, so the same MRA accepts
 full non-merged sets, split parent/clone sets, and merged parent archives with
 clone-prefixed members. The validator follows MiSTer's CRC-first archive lookup.
@@ -64,7 +64,7 @@ clone-prefixed members. The validator follows MiSTer's CRC-first archive lookup.
 complete simulation matrix. ROM, floppy, and key payloads are never tracked by
 this repository.
 
-All 18 MRAs select the same `s24.rbf`. Their eight-byte runtime descriptor
+All local MRAs select the same `s24.rbf`. Their eight-byte runtime descriptor
 enables only the applicable floppy, ROM-board, FD1094, analog, golf, Hot Rod,
 input-map, and magic-latch behavior without changing the synthesized image.
 `python tools/check_universal_profile.py` checks that inventory and the shared
@@ -77,7 +77,7 @@ and `FF FB` defaults
 instead of silently leaving the second DIP bank at `FF`. A focused wide/byte
 download regression covers this hardware-facing path.
 
-`tools/run_game_matrix.py` reuses one safe compiled model and runs all 18 sets
+`tools/run_game_matrix.py` reuses one safe compiled model and runs all supported local sets
 sequentially. Before a run it rejects missing media and stale board descriptors.
 Its target levels cover first floppy/ROM-board access, CNT1/CPU-B release,
 CPU-B instruction execution (including FD1094 decryption where populated),

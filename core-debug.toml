@@ -19,7 +19,7 @@ driver_files = [
   "src/mame/sega/315_5296.cpp",
   "src/mame/sega/fd1094.cpp",
 ]
-known_imperfect = ["crkdown", "crkdownu", "crkdownj", "sgmastc", "sgmastj"]
+known_imperfect = ["crkdown"]
 
 [commands]
 validate_rom_archives = "python tools/gen_mra.py --out-dir verif/modelsim_mra_baseline"
@@ -58,12 +58,17 @@ role = "analog-family"
 features = ["floppy-0x2f00", "upd4701", "msm6253", "hotrod-io"]
 
 [[sets]]
+name = "roughrac"
+role = "protected-floppy-analog"
+features = ["fd1094", "floppy-0x2d00", "upd4701"]
+
+[[sets]]
 name = "bnzabros"
 role = "combined-media"
 features = ["writable-floppy", "rom-board", "bnzabros-magic"]
 
 [[sets]]
-name = "dcclubj"
+name = "dcclub"
 role = "golf-analog-rom"
 features = ["rom-board", "upd4701", "golf-io", "dcclub-magic"]
 

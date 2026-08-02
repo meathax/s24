@@ -31,14 +31,6 @@ COORDINATOR = pathlib.Path(
     "C:/Users/meath/.codex/skills/verilator-live-lockstep/scripts/"
     "live_lockstep_compare.py"
 )
-REFERENCE_CAVEATS = {
-    "sgmast": (
-        "MAME marks 317-0058-05d.key BAD_DUMP/reconstructed; RTL and MAME "
-        "use identical bytes, but physical-board key accuracy is unproven."
-    ),
-}
-
-
 def sha256(path: pathlib.Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:

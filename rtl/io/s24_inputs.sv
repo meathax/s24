@@ -126,7 +126,7 @@ module s24_inputs (
         endcase
 
         if (golf_io) begin
-            // Super Masters/Dynamic Country Club replace the P1 direction
+            // Dynamic Country Club replaces the P1 direction
             // nibble with the encoded swing position and leave P2 unused.
             ports[7:0] = {golf_swing_hi(golf_swing_index(paddle)),
                           ~joy0[5],~joy0[7],~joy0[4],~joy0[6]};
