@@ -39,6 +39,10 @@ module tb_gground_boot(
 );
 `else
 module tb_gground_boot;
+    // Keep the non-visual regression's Hot Rod pedal as an explicit byte.
+    // Without this declaration the visual-only port name becomes an implicit
+    // one-bit net and silently truncates the MAME default pedal value.
+    logic [7:0] host_paddle0 = 8'h01;
 `endif
     localparam BOOT_WORDS = 131072;
     localparam ROMBOARD_WORDS = 2097152;

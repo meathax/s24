@@ -11,22 +11,41 @@ module s24_palette (
     endfunction
 
     // Only 32 expanded component values are possible. Precomputing both
-    // shadow/highlight results removes six combinational divide-by-five
-    // networks while preserving MAME's exact truncation.
+    // shadow/highlight results removes three combinational divide-by-five
+    // networks while preserving MAME's exact truncation. The intermediate
+    // widths are explicit because the MAME expression is wider than an
+    // 8-bit palette component; relying on implicit truncation made Verilator
+    // report WIDTHTRUNC and obscured the intended floor operation.
     (* romstyle="MLAB" *) logic [7:0] shade_r [0:63];
     (* romstyle="MLAB" *) logic [7:0] shade_g [0:63];
     (* romstyle="MLAB" *) logic [7:0] shade_b [0:63];
+
+    function automatic [7:0] shade_value(
+        input logic [4:0] component,
+        input logic        highlight
+    );
+        logic [8:0] expanded;
+        logic [10:0] numerator;
+        logic [10:0] quotient;
+        begin
+            expanded = {1'b0, component, component[4:2]};
+            numerator = highlight
+                      ? 11'd510 + (expanded * 11'd3)
+                      : expanded * 11'd3;
+            quotient = numerator / 11'd5;
+            shade_value = quotient[7:0];
+        end
+    endfunction
+
     integer shade_init;
-    integer shade_expanded;
     initial begin
         for (shade_init=0; shade_init<32; shade_init=shade_init+1) begin
-            shade_expanded = (shade_init << 3) | (shade_init >> 2);
-            shade_r[shade_init] = (shade_expanded * 3) / 5;
-            shade_g[shade_init] = (shade_expanded * 3) / 5;
-            shade_b[shade_init] = (shade_expanded * 3) / 5;
-            shade_r[32+shade_init] = (510 + shade_expanded * 3) / 5;
-            shade_g[32+shade_init] = (510 + shade_expanded * 3) / 5;
-            shade_b[32+shade_init] = (510 + shade_expanded * 3) / 5;
+            shade_r[shade_init] = shade_value(shade_init[4:0],1'b0);
+            shade_g[shade_init] = shade_value(shade_init[4:0],1'b0);
+            shade_b[shade_init] = shade_value(shade_init[4:0],1'b0);
+            shade_r[32+shade_init] = shade_value(shade_init[4:0],1'b1);
+            shade_g[32+shade_init] = shade_value(shade_init[4:0],1'b1);
+            shade_b[32+shade_init] = shade_value(shade_init[4:0],1'b1);
         end
     end
 

@@ -12,6 +12,10 @@ module tb_tile;
     logic [14:0] cpu_addr = 0;
     logic [15:0] cpu_din = 0;
     logic [1:0] cpu_be = 2'b11;
+    logic char_wr = 0;
+    logic [15:0] char_addr = 0;
+    logic [15:0] char_din = 0;
+    logic [1:0] char_be = 2'b11;
     logic [15:0] cpu_dout;
     logic [11:0] p0,p1,p2,p3;
     logic c0,c1,c2,c3;
@@ -35,6 +39,7 @@ module tb_tile;
     s24_tile dut(
         .clk(clk),.reset(reset),.ce_pixel(ce_pixel),.hcount(hcount),.vcount(vcount),
         .cpu_wr(cpu_wr),.cpu_addr(cpu_addr),.cpu_din(cpu_din),.cpu_be(cpu_be),
+        .char_wr(char_wr),.char_addr(char_addr),.char_din(char_din),.char_be(char_be),
         .cpu_dout(cpu_dout),.layer0_pixel(p0),.layer1_pixel(p1),
         .layer2_pixel(p2),.layer3_pixel(p3),.layer0_cat(c0),.layer1_cat(c1),
         .layer2_cat(c2),.layer3_cat(c3),.layer0_valid(valid0),.layer1_valid(valid1),
@@ -57,6 +62,20 @@ module tb_tile;
             cpu_wr = 1;
             @(negedge clk);
             cpu_wr = 0;
+        end
+    endtask
+
+    task automatic write_character(
+        input logic [15:0] address,
+        input logic [15:0] data
+    );
+        begin
+            @(negedge clk);
+            char_addr = address;
+            char_din = data;
+            char_wr = 1;
+            @(negedge clk);
+            char_wr = 0;
         end
     endtask
 
@@ -176,6 +195,13 @@ module tb_tile;
         repeat (4) @(negedge clk);
         reset = 0;
 
+        // Character zero has pens 1..8 on every row. Four consecutive
+        // 16-bit words form the aligned 64-bit pair consumed by the local
+        // video mirror; repeat the two source words for all eight rows.
+        for (int word_index=0; word_index<16; word_index++)
+            write_character(word_index[15:0],
+                            word_index[0] ? 16'h5678 : 16'h1234);
+
         for (int layer=0; layer<4; layer++)
             for (int mask=0; mask<2; mask++)
                 for (int category=0; category<2; category++)
@@ -218,13 +244,13 @@ module tb_tile;
         // Layer 0: category one, character zero. A zero mask bit selects the
         // even physical map independently of the tile category. This guards
         // MAME's physical window select from being conflated with bit 15.
-        for (int x=0; x<64; x++) write_tile(x,16'h8000);
+        for (int x=0; x<64; x++) write_tile(15'(x),16'h8000);
         write_tile(15'h5000,16'h0000);
         write_tile(15'h5004,16'h0000);
         write_tile(15'h5005,16'h8000);
         write_tile(15'h5006,16'h8000);
         write_tile(15'h5007,16'h8000);
-        for (int m=0; m<4; m++) write_tile(15'h6004+m,16'h0000);
+        for (int m=0; m<4; m++) write_tile(15'(15'h6004+m),16'h0000);
 
         // At 423->0, the ahead renderer targets line 1 in the old bank.
         line_boundary(10'd423);

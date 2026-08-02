@@ -66,14 +66,15 @@ module tb_sprite_overflow;
         assert(dut.stack_count==11'd1024)
             else $fatal(1,"bounded sprite count %0d",dut.stack_count);
         assert(dut.stack_head==10'd1 &&
-               dut.descriptor_stack[0][2*16 +:16]==16'd1024)
+               dut.descriptor_stack_ram.mem_lo[0][2*16 +:16]==16'd1024)
             else $fatal(1,
                 "overflow kept oldest descriptors: head=%0d slot0=%0d expected newest descriptor 1024",
-                dut.stack_head,dut.descriptor_stack[0][2*16 +:16]);
+                dut.stack_head,dut.descriptor_stack_ram.mem_lo[0][2*16 +:16]);
 
-        // Head 1 is the packed upper half of descriptor RAM word zero.
-        // Logical scanning must peel it, resume paired reads at physical slot
-        // 2, wrap at slot 1023, and finally consume slot 0 by itself.
+        // Head 1 means the oldest logical entry is slot 1. The newest
+        // descriptor wrapped into the low half of physical pair word zero.
+        // Logical scanning must resume at physical slot 2, wrap at slot 1023,
+        // and finally consume slot 0 by itself.
         track_render=1;
         @(negedge clk);
         vcount=10'd0;hcount=10'd655;ce_pixel=1;

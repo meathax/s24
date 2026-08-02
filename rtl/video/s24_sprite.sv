@@ -750,8 +750,12 @@ module s24_sprite (
                         end else if(stack_count==0) begin
                             line_valid[fill_bank]<=1;state<=S_IDLE;
                         end else begin
-                            render_pos<=stack_count-1'b1;
-                            state<=S_RENDER_PREFETCH;
+                            // The frame cache contains every vertically
+                            // eligible descriptor, not just the current
+                            // scanline's entries. Filter it before rendering
+                            // so long lists do not spend the line budget
+                            // fetching off-line sprites.
+                            state<=S_SCAN_PREFETCH;
                         end
                     end else clear_x<=clear_x+1'b1;
                 end

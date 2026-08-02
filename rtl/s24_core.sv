@@ -338,6 +338,11 @@ module s24_core (
     // ------------------------------- video --------------------------------
     logic tile_wr;
     logic [15:0] tile_dout;
+    logic cpu_wr_pending;
+    logic [26:0] cpu_phys;
+    logic char_shadow_wr;
+    assign char_shadow_wr = cpu_wr_pending
+                            && cpu_phys[26:17] == SDR_CHAR_BASE[26:17];
     // Write-only 315-5292 side registers. System 24 MAME currently models
     // these as no-ops, but they must decode separately from tile-name RAM.
     // Retaining the values gives later die/board work a safe integration point
@@ -349,6 +354,8 @@ module s24_core (
     s24_tile tile(
         .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
         .cpu_wr(tile_wr),.cpu_addr(bus_addr[15:1]),.cpu_din(bus_dout),.cpu_be(bus_be),
+        .char_wr(char_shadow_wr),.char_addr(cpu_phys[16:1]),
+        .char_din(bus_dout),.char_be(bus_be),
         .cpu_dout(tile_dout),.layer0_pixel(t0),.layer1_pixel(t1),
         .layer2_pixel(t2),.layer3_pixel(t3),.layer0_cat(tc0),.layer1_cat(tc1),
         .layer2_cat(tc2),.layer3_cat(tc3),.layer0_valid(tv0),.layer1_valid(tv1),
@@ -557,8 +564,6 @@ module s24_core (
                               X_PALETTE,X_YM,X_FDC,X_WAIT} xstate_t;
     xstate_t xs;
     logic [7:0] rom_bank;
-    logic cpu_wr_pending;
-    logic [26:0] cpu_phys;
     logic fdc_read_busy;
     logic fdc_read_odd;
 

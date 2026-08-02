@@ -46,6 +46,38 @@ module tb_core_dual_bus;
         end
     endtask
 
+    task automatic cpu_a_char_write(
+        input logic [23:0] address,
+        input logic [15:0] data,
+        input logic        uds_n_value,
+        input logic        lds_n_value,
+        input logic [1:0]  expected_be,
+        input logic [15:0] expected_word
+    );
+        begin
+            @(negedge clk);
+            a_addr=address>>1;
+            a_dout=data;
+            a_rw_n=0;
+            a_uds_n=uds_n_value;
+            a_lds_n=lds_n_value;
+            a_as_n=0;
+            wait(wr_req);#1;
+            if(wr_addr!=word_address(SDR_CHAR_BASE) ||
+               wr_data!=data || wr_be!=expected_be)
+                $fatal(1,"character write mismatch address=%h wr=%h/%h be=%b",
+                       address,wr_addr,wr_data,wr_be);
+            @(negedge clk);wr_ack=1;
+            @(negedge clk);wr_ack=0;
+            wait(!dut.a_dtack_n);#1;
+            if(dut.tile.character_ram.mem[0]!==expected_word)
+                $fatal(1,"character mirror mismatch address=%h value=%h expected=%h",
+                       address,dut.tile.character_ram.mem[0],expected_word);
+            a_rw_n=1;
+            idle_cpu_cycles();
+        end
+    endtask
+
     initial begin
         force dut.a_as_n=a_as_n; force dut.a_rw_n=a_rw_n;
         force dut.a_uds_n=a_uds_n; force dut.a_lds_n=a_lds_n;
@@ -91,6 +123,12 @@ module tb_core_dual_bus;
         wait(!dut.b_dtack_n);
         b_rw_n=1;
         idle_cpu_cycles();
+
+        // Character RAM aliases at A18:A17 and preserves individual 68000
+        // byte lanes in both the shared SDRAM image and the local video port.
+        cpu_a_char_write(24'h280000,16'h1234,1'b0,1'b0,2'b11,16'h1234);
+        cpu_a_char_write(24'h280000,16'hab00,1'b0,1'b1,2'b10,16'hab34);
+        cpu_a_char_write(24'h2c0000,16'h00cd,1'b1,1'b0,2'b01,16'habcd);
 
         // Protected CPU-B program reads retain the p3 -> FD1094 -> DTACK
         // sequence; the encrypted SDRAM word must not acknowledge directly.

@@ -109,6 +109,16 @@ module tb_core_smoke;
             !dut.is_writable(1'b1,24'h080000) ||
             !dut.is_writable(1'b1,24'h0ffffe))
             $fatal(1,"both CPUs must write the common low Work-A window");
+        if (!dut.is_memory(1'b0,24'h280000) ||
+            !dut.is_memory(1'b0,24'h2c0000) ||
+            !dut.is_memory(1'b1,24'h2ffffe) ||
+            !dut.is_writable(1'b0,24'h280000) ||
+            !dut.is_writable(1'b0,24'h2c0000) ||
+            !dut.is_writable(1'b1,24'h2ffffe) ||
+            dut.physical(1'b0,24'h280000,4'd0) != SDR_CHAR_BASE ||
+            dut.physical(1'b0,24'h2c0000,4'd0) != SDR_CHAR_BASE ||
+            dut.physical(1'b1,24'h2ffffe,4'd0) != SDR_CHAR_BASE+27'h1fffe)
+            $fatal(1,"character RAM window or physical mapping mismatch");
         if (dut.physical(1'b0,24'hf00000,4'd0) != SDR_WORKB_BASE ||
             dut.physical(1'b1,24'hf80000,4'd0) != SDR_WORKA_BASE)
             $fatal(1,"shared high work-RAM physical mapping mismatch");

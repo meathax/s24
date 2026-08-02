@@ -32,13 +32,14 @@ The source-level bus audit has also corrected 68000 low-byte alignment for the
 changes, together with the analog-board integration, pass deterministic
 ModelSim regression and full-core compilation.
 
-The 315-5292 decap review produced a source-only accuracy pass: tile RAM no
-longer absorbs writes to the four mirrored side-register windows, character
-RAM now mirrors its 128 KB physical population, raster sync uses the measured
-48-clock/four-line windows, and tile validity is carried independently of raw
-palette/pen data. New mixer and raster regression cases are present in
-`verif/`, but have not been executed under the current no-build/no-simulation
-restriction.
+The 315-5292 decap review produced a source and focused-simulation accuracy
+pass: tile RAM no longer absorbs writes to the four mirrored side-register
+windows, character RAM mirrors its 128 KB physical population through a local
+video port, raster sync uses the measured 48-clock/four-line windows, and tile
+validity is carried independently of raw palette/pen data. Palette, mixer,
+tile, character-port, full-core smoke, and dual-bus regressions execute under
+the safe Verilator flow; extended all-game differential coverage remains
+separate work.
 
 A second chip pass corrected interactions that cannot be modeled by
 a single topmost sprite value. The 315-5293/5295 path now retains the frontmost

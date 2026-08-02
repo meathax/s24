@@ -1,6 +1,77 @@
-// Sega 315-5292 four-layer tile generator. Tile/control RAM is local; the
-// writable 4-bpp character RAM remains in SDRAM. The inactive line is rendered
-// ahead into a double-buffer, leaving enough bandwidth for all four layers.
+// Video-side mirror of the 315-5292 character RAM. Keeping the CPU-visible
+// copy in SDRAM is useful for the two 68000 buses, but making the scanline
+// renderer cross the SDRAM CDC/arbitration path for every character row can
+// miss a 656-pixel line deadline on FPGA. The original device has a local
+// character-RAM display port, so mirror CPU writes into four 16-bit M10K banks
+// and read one aligned 64-bit row pair per renderer clock here.
+module s24_char_video_ram (
+    input  logic        clk,
+    input  logic        wr_en,
+    input  logic [15:0] wr_addr,
+    input  logic [15:0] wr_data,
+    input  logic [1:0]  wr_be,
+    input  logic [13:0] rd_addr,
+    output logic [63:0] rd_data
+);
+`ifdef VERILATOR
+    logic [15:0] mem [0:65535];
+    logic [15:0] q0,q1,q2,q3;
+    integer init_word;
+    initial begin
+        for (init_word=0; init_word<65536; init_word=init_word+1)
+            mem[init_word] = 16'h0000;
+    end
+    always_ff @(posedge clk) begin
+        q0 <= mem[{rd_addr,2'b00}];
+        q1 <= mem[{rd_addr,2'b01}];
+        q2 <= mem[{rd_addr,2'b10}];
+        q3 <= mem[{rd_addr,2'b11}];
+        if (wr_en) begin
+            if (wr_be[0]) mem[wr_addr][7:0]  <= wr_data[7:0];
+            if (wr_be[1]) mem[wr_addr][15:8] <= wr_data[15:8];
+        end
+    end
+    assign rd_data = {q3,q2,q1,q0};
+`else
+    logic [15:0] bank_q [0:3];
+    genvar bank;
+    generate
+        for (bank=0; bank<4; bank=bank+1) begin : g_bank
+            altsyncram ram (
+                .clock0(clk), .address_a(wr_addr[15:2]), .data_a(wr_data),
+                .wren_a(wr_en && wr_addr[1:0] == bank[1:0]), .q_a(),
+                .clock1(clk), .address_b(rd_addr), .data_b(16'h0000),
+                .wren_b(1'b0), .q_b(bank_q[bank]),
+                .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
+                .addressstall_b(1'b0), .byteena_a(wr_be), .byteena_b(1'b1),
+                .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
+                .clocken3(1'b1), .eccstatus(), .rden_a(1'b0), .rden_b(1'b1)
+            );
+            defparam
+                ram.operation_mode = "BIDIR_DUAL_PORT",
+                ram.width_a = 16,
+                ram.width_b = 16,
+                ram.widthad_a = 14,
+                ram.widthad_b = 14,
+                ram.numwords_a = 16384,
+                ram.numwords_b = 16384,
+                ram.ram_block_type = "M10K",
+                ram.intended_device_family = "Cyclone V",
+                ram.lpm_type = "altsyncram",
+                ram.outdata_reg_b = "CLOCK1",
+                ram.read_during_write_mode_mixed_ports = "OLD_DATA",
+                ram.width_byteena_a = 2,
+                ram.width_byteena_b = 1,
+                ram.power_up_uninitialized = "FALSE";
+        end
+    endgenerate
+    assign rd_data = {bank_q[3],bank_q[2],bank_q[1],bank_q[0]};
+`endif
+endmodule
+
+// Sega 315-5292 four-layer tile generator. Tile/control RAM and the
+// video-facing character-RAM mirror are local. The inactive line is rendered
+// ahead into a double-buffer, leaving deterministic time for all four layers.
 module s24_tile (
     input  logic        clk,
     input  logic        reset,
@@ -11,6 +82,10 @@ module s24_tile (
     input  logic [14:0] cpu_addr,
     input  logic [15:0] cpu_din,
     input  logic [1:0]  cpu_be,
+    input  logic        char_wr,
+    input  logic [15:0] char_addr,
+    input  logic [15:0] char_din,
+    input  logic [1:0]  char_be,
     output logic [15:0] cpu_dout,
     output logic [11:0] layer0_pixel,
     output logic [11:0] layer1_pixel,
@@ -57,10 +132,9 @@ module s24_tile (
     (* ramstyle = "M10K, no_rw_check" *) logic [13:0] line3 [0:1023];
 
     // MAME's 315-5292 device clears both character and tile RAM at device
-    // start. Character RAM lives in the core SDRAM and is cleared by the ROM
-    // loader; give the local tile/control RAM and scanline stores the same
-    // deterministic power-on contents. An initial image maps to M10K startup
-    // data and avoids a 32K-cycle reset scrub or reset mux on every RAM bit.
+    // start. Give the local tile/control RAM and scanline stores deterministic
+    // power-on contents. An initial image maps to M10K startup data and avoids
+    // a 32K-cycle reset scrub or reset mux on every RAM bit.
     integer ram_init0,ram_init1,ram_init2,ram_init3;
     integer ram_init4,ram_init5,ram_init6,ram_init7;
     initial for (ram_init0=0; ram_init0<4096; ram_init0=ram_init0+1) begin
@@ -184,6 +258,8 @@ module s24_tile (
     logic [11:0] request_char;
     logic [2:0] request_row;
     logic request_row_odd;
+    logic char_read_pending;
+    logic [63:0] char_read_data;
 
     assign line_read_addr = (hcount == 10'd655)
                             ? {~display_bank,9'd0}
@@ -204,6 +280,11 @@ module s24_tile (
     logic [9:0] line_index;
     logic lookup_valid;
     logic renderer_can_advance, fast_skip;
+
+    s24_char_video_ram character_ram (
+        .clk(clk),.wr_en(char_wr),.wr_addr(char_addr),.wr_data(char_din),
+        .wr_be(char_be),.rd_addr({wanted_char,wanted_row[2:1]}),
+        .rd_data(char_read_data));
     logic [1:0] lookup_layer_q;
     logic [8:0] lookup_x_q;
     logic [8:0] lookup_source_x_q,lookup_source_y_q;
@@ -222,19 +303,7 @@ module s24_tile (
     logic [8:0] line_x_q, line_render_y_q;
     logic [15:0] line_hscr_q, line_vscr_q;
     logic [1:0] line_ctrl_mode_q;
-
-    function automatic logic [26:3] character_line_address(
-        input logic [11:0] character,
-        input logic [2:0] row
-    );
-        logic [26:0] byte_address;
-        begin
-            // One 64-bit read contains two adjacent 32-bit character rows.
-            byte_address = SDR_CHAR_BASE + {10'd0,character,5'd0}
-                           + {22'd0,row[2:1],3'd0};
-            character_line_address = byte_address[26:3];
-        end
-    endfunction
+    logic [9:0] next_render_y;
 
     // Coordinate and window selection are a direct streaming form of MAME's
     // draw_common(). A mask bit of one selects the odd layer in each pair.
@@ -284,12 +353,12 @@ module s24_tile (
                     && lookup_x_q[2:0] == 0
                     && lookup_x_q <= 9'd488;
 
-        renderer_can_advance = lookup_valid && render_active && !mem_req
+        renderer_can_advance = lookup_valid && render_active && !char_read_pending
                                && (disabled || !selected
                                    || (cache_valid
                                        && cache_char == wanted_char
                                        && cache_row == wanted_row));
-        pipeline_advance = render_active && !mem_req
+        pipeline_advance = render_active && !char_read_pending
                            && (!lookup_valid || renderer_can_advance);
 
         // The line-scroll stage is the tail of the two-entry lookup pipeline.
@@ -364,8 +433,11 @@ module s24_tile (
         tile_addr = {1'b0,issue_fetch_layer,
                      issue_source_y[8:3],issue_source_x[8:3]};
         mask_addr = (line_layer_q[1] ? 15'h6800 : 15'h6000)
-                    + {line_render_y_q,2'b00}
+                    + {4'd0,line_render_y_q,2'b00}
                     + {13'd0,line_x_q[8:7]};
+        next_render_y = (vcount >= 10'd422)
+                      ? vcount - 10'd422
+                      : vcount + 10'd2;
     end
 
     task automatic write_line_pixel(input logic [13:0] value);
@@ -475,6 +547,7 @@ module s24_tile (
             request_char <= 0;
             request_row <= 0;
             request_row_odd <= 0;
+            char_read_pending <= 0;
             mem_req <= 0;
             mem_addr <= 0;
             layer0_pixel <= 0; layer1_pixel <= 0;
@@ -484,6 +557,10 @@ module s24_tile (
             layer0_valid <= 0; layer1_valid <= 0;
             layer2_valid <= 0; layer3_valid <= 0;
         end else begin
+            // Port p1 is retained at the module boundary for compatibility,
+            // but display fetches now use the deterministic local mirror.
+            mem_req <= 1'b0;
+            mem_addr <= '0;
             // The read address is one pixel ahead because hcount advances on
             // the same edge; the line RAM output is then stable for 3 clocks.
             if (ce_pixel) begin
@@ -500,8 +577,7 @@ module s24_tile (
                         fill_bank <= display_bank;
                         render_layer <= 0;
                         render_x <= 0;
-                        render_y <= (vcount >= 10'd422) ? vcount - 10'd422
-                                                       : vcount[8:0] + 9'd2;
+                        render_y <= next_render_y[8:0];
                         render_active <= (vcount >= 10'd422) || (vcount < 10'd382);
                         lookup_valid <= 0;
                         line_stage_valid <= 0;
@@ -522,15 +598,13 @@ module s24_tile (
                 end
             end
 
-            if (mem_req) begin
-                if (mem_ack) begin
-                    mem_req <= 1'b0;
-                    cache_char <= request_char;
-                    cache_row <= request_row;
-                    cache_bits <= request_row_odd ? mem_data[63:32]
-                                                  : mem_data[31:0];
-                    cache_valid <= 1'b1;
-                end
+            if (char_read_pending) begin
+                char_read_pending <= 1'b0;
+                cache_char <= request_char;
+                cache_row <= request_row;
+                cache_bits <= request_row_odd ? char_read_data[63:32]
+                                              : char_read_data[31:0];
+                cache_valid <= 1'b1;
             end else if (render_active) begin
                 // synthesis translate_off
                 if (lookup_valid &&
@@ -551,11 +625,10 @@ module s24_tile (
                     write_line_pixel({1'b1,tile_word[15],wanted_pixel});
                     advance_renderer();
                 end else if (lookup_valid) begin
-                    mem_addr <= character_line_address(wanted_char,wanted_row);
                     request_char <= wanted_char;
                     request_row <= wanted_row;
                     request_row_odd <= wanted_row[0];
-                    mem_req <= 1'b1;
+                    char_read_pending <= 1'b1;
                 end
             end
         end

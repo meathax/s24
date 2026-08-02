@@ -156,8 +156,9 @@ module tb_sprite;
             @(posedge clk);stress_clocks++;
         end
         assert(dut.state==dut.S_IDLE)
-            else $fatal(1,"1024-descriptor scanline missed budget state=%0d",
-                        dut.state);
+            else $fatal(1,"1024-descriptor scanline missed budget clocks=%0d state=%0d render_pos=%0d source_column=%0d emit_count=%0d total_columns=%0d",
+                        stress_clocks,dut.state,dut.render_pos,dut.source_column,
+                        dut.emit_count,dut.total_columns);
 
         // Source-level contracts for the Crack Down paths. These are kept in
         // the regression even when this bench is not being executed.
