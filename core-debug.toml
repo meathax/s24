@@ -26,9 +26,6 @@ validate_rom_archives = "python tools/gen_mra.py --out-dir verif/modelsim_mra_ba
 validate_media_matrix = "python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --dry-run --target 0"
 prepare_media = "python tools/gen_sim_media.py --all"
 build_sim = "powershell -ExecutionPolicy Bypass -File tools/build_game_model.ps1"
-run_qgh_first_video_write = "python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --sets qgh --target 4 --max-clocks 12000000"
-run_qgh_video_initialization = "python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --sets qgh --target 6 --max-clocks 20000000"
-run_qgh_visible_frame = "python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --sets qgh --target 3 --max-clocks 100000000 --progress-clocks 25000000 --frame-dir verif/frames"
 run_gground_full_track = "python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --sets gground --target 5 --max-clocks 260000000"
 run_gground_cnt1_release = "python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --sets gground --target 1 --max-clocks 720000000"
 run_gground_cpu_b_execution = "python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --sets gground --target 2 --max-clocks 900000000"
@@ -44,11 +41,6 @@ width = 496
 height = 384
 rotation = "descriptor-specific"
 capture_format = "P6"
-
-[[sets]]
-name = "qgh"
-role = "simplest-common-platform"
-features = ["rom-board", "unprotected-dual-cpu", "generic-digital-io", "qgh-magic", "special-tile-pairs"]
 
 [[sets]]
 name = "sspirits"

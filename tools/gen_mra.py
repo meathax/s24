@@ -44,7 +44,6 @@ INPUT_GENERIC = 0
 INPUT_GGROUND = 1
 
 MAGIC_NONE = 0
-MAGIC_QGH = 1
 MAGIC_DCCLUB = 2
 MAGIC_QROUKA = 3
 MAGIC_QUIZMEKU = 4
@@ -63,7 +62,6 @@ MAME_PARENT_DIP_DEFAULTS = {
     "sgmast": "FF FD",
     "bnzabros": "FF FE",
     "dcclub": "FF FB",
-    "qgh": "FF FD",
 }
 
 # MAME's declared ROM-board regions.  Simulation media must materialise the
@@ -71,7 +69,6 @@ MAME_PARENT_DIP_DEFAULTS = {
 MAME_ROMBOARD_REGION_BYTES = {
     "bnzabros": 0x400000,
     "dcclub": 0x400000,
-    "qgh": 0x400000,
 }
 
 INPUT_QUIZ4 = 2
@@ -173,7 +170,6 @@ def p(name: str, crc: str = "") -> Part:
 BOOT_DISK = Pair(p("epr-12187.ic2", "e83783f3"), p("epr-12186.ic1", "ce76319d"))
 BOOT_HOTROD = Pair(p("epr-11339.ic2", "75130e73"), p("epr-11338.ic1", "7d4a7ff3"))
 BOOT_DCCLUB = Pair(p("epr13948.bin", "d6a031c8"), p("epr13947.bin", "7e3cff5e"))
-BOOT_QGH = Pair(p("16900b", "20d7b7d1"), p("16899b", "397b3ba9"))
 
 BNZA_ROM = (
     Pair(p("mpr-13188-h.2", "d3802294"), p("mpr-13187-h.1", "e3d8c5f7")),
@@ -247,14 +243,6 @@ GAMES = (
          parent="dcclub", dsw="FF FB",
          romboard=(Pair(p("epr-14095a.2", "88d184e9"), p("epr-14094a.1", "7dd2b7d4")),
                    DCCLUB_COMMON, FillPair(0x100000))),
-    Game("qgh", "Quiz Ghost Hunter (Japan, ROM Based)", 1994,
-         BOOT_QGH, ROMBOARD, magic=MAGIC_QGH, dsw="FF FD",
-         romboard=(
-             Pair(p("16902a", "d35b7706"), p("16901a", "ab4bcb33")),
-             Pair(p("16904", "10987c88"), p("16903", "c19f9e46")),
-             Pair(p("16906", "99c6773e"), p("16905", "3922bbe3")),
-             Pair(p("16908", "407ec20f"), p("16907", "734b0a82")),
-         )),
 )
 
 # MAME-supported sets for which this workspace currently has no local archive.
@@ -649,7 +637,7 @@ def main() -> None:
     parser.add_argument("--no-validate", action="store_true")
     parser.add_argument(
         "--all-supported", action="store_true",
-        help="include working MAME sets not present in the local 18-set inventory",
+        help="include working MAME sets not present in the local 17-set inventory",
     )
     args = parser.parse_args()
     validate_game_contracts()

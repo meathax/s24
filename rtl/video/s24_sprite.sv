@@ -3,6 +3,136 @@
 // rendered backwards into an inactive scanline buffer. Sprite descriptors,
 // indirect palette tables, and 4-bpp tile data all share the 256 KiB sprite
 // RAM and are fetched through aligned 128-bit bursts.
+
+// Quartus 17 does not reliably infer the sprite line buffers from a
+// three-port array (display read/clear plus renderer read/write).  Keep the
+// behavioural model for Verilator, but map the FPGA implementation directly
+// to the Cyclone V dual-port primitive so these buffers remain M10K-backed.
+module s24_sprite_line_ram #(
+    parameter int WIDTH = 26,
+    parameter int ADDR_WIDTH = 10
+) (
+    input  logic clk,
+    input  logic [ADDR_WIDTH-1:0] address_a,
+    input  logic [WIDTH-1:0] data_a,
+    input  logic wren_a,
+    output logic [WIDTH-1:0] q_a,
+    input  logic [ADDR_WIDTH-1:0] address_b,
+    input  logic [WIDTH-1:0] data_b,
+    input  logic wren_b,
+    output logic [WIDTH-1:0] q_b
+);
+`ifdef VERILATOR
+    logic [WIDTH-1:0] mem [0:(1<<ADDR_WIDTH)-1];
+    always_ff @(posedge clk) begin
+        q_a <= mem[address_a];
+        q_b <= mem[address_b];
+        if(wren_a) mem[address_a] <= data_a;
+        if(wren_b) mem[address_b] <= data_b;
+    end
+`else
+    altsyncram ram (
+        .clock0(clk), .address_a(address_a), .data_a(data_a),
+        .wren_a(wren_a), .q_a(q_a),
+        .clock1(clk), .address_b(address_b), .data_b(data_b),
+        .wren_b(wren_b), .q_b(q_b),
+        .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
+        .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(1'b1),
+        .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
+        .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b1)
+    );
+    defparam
+        ram.operation_mode = "BIDIR_DUAL_PORT",
+        ram.width_a = WIDTH,
+        ram.width_b = WIDTH,
+        ram.widthad_a = ADDR_WIDTH,
+        ram.widthad_b = ADDR_WIDTH,
+        ram.numwords_a = (1 << ADDR_WIDTH),
+        ram.numwords_b = (1 << ADDR_WIDTH),
+        ram.ram_block_type = "M10K",
+        ram.intended_device_family = "Cyclone V",
+        ram.lpm_type = "altsyncram",
+        ram.outdata_reg_a = "CLOCK0",
+        ram.outdata_reg_b = "CLOCK1",
+        ram.read_during_write_mode_port_a = "NEW_DATA_NO_NBE_READ",
+        ram.read_during_write_mode_port_b = "NEW_DATA_NO_NBE_READ",
+        ram.width_byteena_a = 1,
+        ram.width_byteena_b = 1,
+        ram.power_up_uninitialized = "FALSE";
+`endif
+endmodule
+
+// A descriptor/clip pair is read as a packed pair while only one half is
+// written during list collection. Separate low/high arrays give Quartus one
+// clean write port per inferred RAM instead of a variable part-select write.
+module s24_sprite_pair_ram #(
+    parameter int WIDTH = 128,
+    parameter int ADDR_WIDTH = 9
+) (
+    input logic clk,
+    input logic [ADDR_WIDTH-1:0] read_addr,
+    output logic [WIDTH*2-1:0] read_data,
+    input logic [ADDR_WIDTH-1:0] write_addr,
+    input logic [WIDTH-1:0] write_data,
+    input logic write_enable,
+    input logic write_high
+);
+`ifdef VERILATOR
+    logic [WIDTH-1:0] mem_lo [0:(1<<ADDR_WIDTH)-1];
+    logic [WIDTH-1:0] mem_hi [0:(1<<ADDR_WIDTH)-1];
+    always_ff @(posedge clk) begin
+        read_data <= {mem_hi[read_addr],mem_lo[read_addr]};
+        if(write_enable) begin
+            if(write_high) mem_hi[write_addr] <= write_data;
+            else mem_lo[write_addr] <= write_data;
+        end
+    end
+`else
+    logic [WIDTH-1:0] q_lo,q_hi;
+    altsyncram ram_lo (
+        .clock0(clk), .address_a(read_addr), .data_a('0),
+        .wren_a(1'b0), .q_a(q_lo),
+        .clock1(clk), .address_b(write_addr), .data_b(write_data),
+        .wren_b(write_enable && !write_high), .q_b(),
+        .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
+        .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(1'b1),
+        .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
+        .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b0)
+    );
+    altsyncram ram_hi (
+        .clock0(clk), .address_a(read_addr), .data_a('0),
+        .wren_a(1'b0), .q_a(q_hi),
+        .clock1(clk), .address_b(write_addr), .data_b(write_data),
+        .wren_b(write_enable && write_high), .q_b(),
+        .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
+        .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(1'b1),
+        .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
+        .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b0)
+    );
+    always_ff @(posedge clk) read_data <= {q_hi,q_lo};
+    defparam
+        ram_lo.operation_mode = "BIDIR_DUAL_PORT",
+        ram_hi.operation_mode = "BIDIR_DUAL_PORT",
+        ram_lo.width_a = WIDTH, ram_hi.width_a = WIDTH,
+        ram_lo.width_b = WIDTH, ram_hi.width_b = WIDTH,
+        ram_lo.widthad_a = ADDR_WIDTH, ram_hi.widthad_a = ADDR_WIDTH,
+        ram_lo.widthad_b = ADDR_WIDTH, ram_hi.widthad_b = ADDR_WIDTH,
+        ram_lo.numwords_a = (1 << ADDR_WIDTH),
+        ram_hi.numwords_a = (1 << ADDR_WIDTH),
+        ram_lo.numwords_b = (1 << ADDR_WIDTH),
+        ram_hi.numwords_b = (1 << ADDR_WIDTH),
+        ram_lo.ram_block_type = "M10K", ram_hi.ram_block_type = "M10K",
+        ram_lo.intended_device_family = "Cyclone V",
+        ram_hi.intended_device_family = "Cyclone V",
+        ram_lo.lpm_type = "altsyncram", ram_hi.lpm_type = "altsyncram",
+        ram_lo.outdata_reg_a = "CLOCK0", ram_hi.outdata_reg_a = "CLOCK0",
+        ram_lo.width_byteena_a = 1, ram_hi.width_byteena_a = 1,
+        ram_lo.width_byteena_b = 1, ram_hi.width_byteena_b = 1,
+        ram_lo.power_up_uninitialized = "FALSE",
+        ram_hi.power_up_uninitialized = "FALSE";
+`endif
+endmodule
+
 module s24_sprite (
     input  logic         clk,
     input  logic         reset,
@@ -39,31 +169,34 @@ module s24_sprite (
     // front sprite leaves the priority bitmap unlocked for earlier sprites.
     // Port A feeds the visible scanline while port B performs the renderer's
     // read-before-write validity check and pixel update.
-    (* ramstyle="M10K, no_rw_check" *) logic [25:0] line0 [0:1023];
-    (* ramstyle="M10K, no_rw_check" *) logic [25:0] line1 [0:1023];
-    (* ramstyle="M10K, no_rw_check" *) logic [25:0] line2 [0:1023];
-    (* ramstyle="M10K, no_rw_check" *) logic [25:0] line3 [0:1023];
     // Complete normal descriptors are buffered once per frame. The small
     // index stack is then reused as the active-scanline list.
     // Two adjacent descriptors share each wide RAM word.  The per-line
     // active filter consumes the pair together, halving the scan cost for
     // long lists such as SSpirits' 1002 normal descriptors without storing
     // any additional descriptor bits.
-    (* ramstyle="M10K, no_rw_check" *) logic [255:0] descriptor_stack [0:(STACK_DEPTH/2)-1];
     (* ramstyle="M10K, no_rw_check" *) logic [9:0] sprite_stack [0:STACK_DEPTH-1];
     // {valid, flags, top, left, bottom, right}; raw clip coordinates are kept
     // because the -8 X origin and reverse-Y rule are applied while rendering.
-    (* ramstyle="M10K, no_rw_check" *) logic [161:0] clip_stack [0:(STACK_DEPTH/2)-1];
+    logic line_b_wren;
+    logic [1:0] line_b_sel;
+    logic [9:0] line_b_addr;
+    logic [25:0] line_b_data;
+    logic descriptor_write_enable,descriptor_write_high;
+    logic [8:0] descriptor_write_addr;
+    logic [127:0] descriptor_write_data;
+    logic [80:0] clip_write_data;
 
-    integer line_init;
-    initial begin
-        for(line_init=0;line_init<1024;line_init=line_init+1) begin
-            line0[line_init]=26'd0;
-            line1[line_init]=26'd0;
-            line2[line_init]=26'd0;
-            line3[line_init]=26'd0;
-        end
-    end
+    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(9)) descriptor_stack_ram (
+        .clk(clk),.read_addr(descriptor_read_pair),
+        .read_data(descriptor_stack_pair_q),.write_addr(descriptor_write_addr),
+        .write_data(descriptor_write_data),.write_enable(descriptor_write_enable),
+        .write_high(descriptor_write_high));
+    s24_sprite_pair_ram #(.WIDTH(81),.ADDR_WIDTH(9)) clip_stack_ram (
+        .clk(clk),.read_addr(descriptor_read_pair),
+        .read_data(clip_stack_pair_q),.write_addr(descriptor_write_addr),
+        .write_data(clip_write_data),.write_enable(descriptor_write_enable),
+        .write_high(descriptor_write_high));
 
     function automatic logic [15:0] burst_word(
         input logic [127:0] data,input logic [2:0] index
@@ -90,7 +223,7 @@ module s24_sprite (
     typedef enum logic [4:0] {
         S_IDLE,S_CLEAR,S_LIST_REQ,S_LIST_WAIT,S_SCAN_PREFETCH,S_SCAN,S_SCAN_SECOND,
         S_RENDER_PREFETCH,S_RENDER_REQ,
-        S_RENDER_WAIT,S_YDIV,S_YMAP,S_PALETTE_WAIT,S_X_SOURCE,S_DATA_WAIT,S_X_EMIT,
+        S_RENDER_WAIT,S_RENDER_SETUP,S_YDIV,S_YMAP,S_PALETTE_WAIT,S_X_SOURCE,S_DATA_WAIT,S_X_EMIT,
         S_NEXT_SPRITE
     } state_t;
     state_t state;
@@ -120,6 +253,11 @@ module s24_sprite (
     logic [80:0] clip_stack_q,scan_clip1;
     logic [80:0] render_clip;
     logic [127:0] descriptor,palette_table,data_cache;
+    (* ramstyle="MLAB, no_rw_check" *) logic [127:0] palette_cache_data [0:7];
+    logic [13:0] palette_cache_tags [0:7];
+    logic [7:0] palette_cache_valid;
+    logic [2:0] palette_cache_index;
+    logic palette_cache_hit;
     logic [13:0] data_cache_tag;
     logic data_cache_valid;
 
@@ -137,6 +275,9 @@ module s24_sprite (
     logic [16:0] line_value;
     logic vertical_allowed;
     logic signed [12:0] clip_min_x,clip_max_x,clip_first,clip_last;
+    logic signed [12:0] descriptor_origin_x;
+    logic [12:0] descriptor_output_width;
+    logic signed [13:0] descriptor_right_x;
 
     logic [15:0] d2,d3,d5;
     // Quartus 17 cannot apply a part-select directly to a function call.
@@ -170,6 +311,8 @@ module s24_sprite (
     logic [STACK_BITS-2:0] descriptor_read_pair;
     logic [15:0] scan_w1,scan_w4,scan1_w1,scan1_w4;
     logic [15:0] render_w0,render_w1,render_w2,render_w3,render_w4,render_w5;
+    logic [8:0] render_zoomx_step;
+    logic [19:0] descriptor_width_sum;
     logic [8:0] scan_zoomy_step;
     logic [10:0] scan_total_rows;
     logic [19:0] scan_height_sum;
@@ -249,6 +392,9 @@ module s24_sprite (
         d2=burst_word(descriptor,2);d3=burst_word(descriptor,3);
         d5=burst_word(descriptor,5);
         palette_base=d3[13:0];
+        palette_cache_index=palette_base[2:0];
+        palette_cache_hit=palette_cache_valid[palette_cache_index] &&
+                          palette_cache_tags[palette_cache_index]==palette_base;
         tile_base={d2[12:0],4'b0};
         total_rows={size_y_tiles,3'b0};
         total_columns={size_x_tiles,3'b0};
@@ -295,6 +441,17 @@ module s24_sprite (
         render_w3=burst_word(descriptor_stack_q,3);
         render_w4=burst_word(descriptor_stack_q,4);
         render_w5=burst_word(descriptor_stack_q,5);
+        render_zoomx_step=(!render_w0[13] ? render_w1[7:0]
+                                               : render_w1[15:8])==0
+                          ? 9'h040
+                          : {1'b0,(!render_w0[13] ? render_w1[7:0]
+                                                   : render_w1[15:8])}+1'b1;
+        descriptor_width_sum=20'd32
+                             + ({11'd0,render_zoomx_step}
+                                << (render_w5[14:12]+3));
+        descriptor_right_x=$signed({descriptor_origin_x[12],
+                                     descriptor_origin_x})
+                           + $signed({1'b0,descriptor_output_width})-14'sd1;
         descriptor_zoomy_step=(render_w1[7:0]==0)
                               ? 9'h040
                               : {1'b0,render_w1[7:0]}+1'b1;
@@ -401,18 +558,66 @@ module s24_sprite (
         end
     end
 
+    // Port B performs the renderer write or the inactive-bank clear. Port A
+    // always consumes/clears the currently displayed bank on a pixel edge.
+    logic line_b_clear;
+    always_comb begin
+        line_b_clear=state==S_CLEAR;
+        line_b_wren=line_b_clear;
+        line_b_sel=line_value[15:14];
+        line_b_addr={fill_bank,clear_x};
+        line_b_data=26'd0;
+        if(state==S_X_EMIT && data_cache_valid && data_cache_tag==wanted_tag &&
+           dest_x>=clip_min_x && dest_x<=clip_max_x && dest_x>=0 &&
+           dest_x<496 && line_value[16]) begin
+            line_b_addr={fill_bank,dest_x[8:0]};
+            line_b_data={1'b1,render_pos,line_value[13:0]};
+            case(line_value[15:14])
+                2'd0: line_b_wren=!line0_render_q[25];
+                2'd1: line_b_wren=!line1_render_q[25];
+                2'd2: line_b_wren=!line2_render_q[25];
+                default: line_b_wren=!line3_render_q[25];
+            endcase
+        end
+    end
+
+    s24_sprite_line_ram line0_ram (
+        .clk(clk),.address_a(display_read_addr),.data_a(26'd0),
+        .wren_a(ce_pixel),.q_a(line0_display_q),
+        .address_b(line_b_addr),.data_b(line_b_data),
+        .wren_b(line_b_wren && (line_b_clear || line_b_sel==2'd0)),
+        .q_b(line0_render_q));
+    s24_sprite_line_ram line1_ram (
+        .clk(clk),.address_a(display_read_addr),.data_a(26'd0),
+        .wren_a(ce_pixel),.q_a(line1_display_q),
+        .address_b(line_b_addr),.data_b(line_b_data),
+        .wren_b(line_b_wren && (line_b_clear || line_b_sel==2'd1)),
+        .q_b(line1_render_q));
+    s24_sprite_line_ram line2_ram (
+        .clk(clk),.address_a(display_read_addr),.data_a(26'd0),
+        .wren_a(ce_pixel),.q_a(line2_display_q),
+        .address_b(line_b_addr),.data_b(line_b_data),
+        .wren_b(line_b_wren && (line_b_clear || line_b_sel==2'd2)),
+        .q_b(line2_render_q));
+    s24_sprite_line_ram line3_ram (
+        .clk(clk),.address_a(display_read_addr),.data_a(26'd0),
+        .wren_a(ce_pixel),.q_a(line3_display_q),
+        .address_b(line_b_addr),.data_b(line_b_data),
+        .wren_b(line_b_wren && (line_b_clear || line_b_sel==2'd3)),
+        .q_b(line3_render_q));
+
+    always_comb begin
+        descriptor_write_enable=state==S_LIST_WAIT && mem_ack &&
+            mem_w0[15:14]==2'b00 && !(list_index==0 && mem_w0==0);
+        descriptor_write_high=stack_write_slot[0];
+        descriptor_write_addr=stack_write_slot[9:1];
+        descriptor_write_data=mem_data;
+        clip_write_data={current_clip_valid,current_clip_flags,current_clip_top,
+                         current_clip_left,current_clip_bottom,current_clip_right};
+    end
+
     always_ff @(posedge clk) begin
-        line0_display_q <= line0[display_read_addr];
-        line1_display_q <= line1[display_read_addr];
-        line2_display_q <= line2[display_read_addr];
-        line3_display_q <= line3[display_read_addr];
-        line0_render_q <= line0[render_read_addr];
-        line1_render_q <= line1[render_read_addr];
-        line2_render_q <= line2[render_read_addr];
-        line3_render_q <= line3[render_read_addr];
         sprite_stack_q <= sprite_stack[stack_render_slot];
-        descriptor_stack_pair_q <= descriptor_stack[descriptor_read_pair];
-        clip_stack_pair_q <= clip_stack[descriptor_read_pair];
         if(reset) begin
             state<=S_IDLE;display_bank<=0;fill_bank<=1;line_valid<=0;
             clear_x<=0;target_y<=0;
@@ -424,7 +629,9 @@ module s24_sprite (
             stack_head<=0;
             render_pos<=0;render_clip<=0;descriptor<=0;
             palette_table<=0;data_cache<=0;data_cache_tag<=0;
-            data_cache_valid<=0;mem_req<=0;mem_addr<=0;
+            data_cache_valid<=0;palette_cache_valid<=0;
+            descriptor_origin_x<=0;descriptor_output_width<=0;
+            mem_req<=0;mem_addr<=0;
             pixel0<=0;pixel1<=0;pixel2<=0;pixel3<=0;
             rank0<=0;rank1<=0;rank2<=0;rank3<=0;
             zoomx_step<=0;zoomy_step<=0;x_accum<=0;
@@ -445,10 +652,6 @@ module s24_sprite (
                 // Display consumption erases the old scanline through port A,
                 // so port B can immediately render the opposite bank without
                 // spending 496 clocks on a separate clear pass.
-                line0[display_read_addr]<=26'd0;
-                line1[display_read_addr]<=26'd0;
-                line2[display_read_addr]<=26'd0;
-                line3[display_read_addr]<=26'd0;
                 if(hcount==10'd655) begin
                     display_bank<=~display_bank;
                     if(line_valid[~display_bank]) begin
@@ -474,9 +677,9 @@ module s24_sprite (
                     end
                     if(state==S_IDLE) begin
                         if(vcount==10'd383) begin
-                            // Start the next frame's one-time linked-list walk
-                            // at vblank entry; even the 8192-entry SSpirits
-                            // list completes before visible line zero.
+                            // Start the next frame's linked-list walk at
+                            // vblank entry so live descriptor fields are
+                            // rebuilt before rendering.
                             list_index<=0;list_seen<=0;stack_count<=0;
                             stack_head<=0;current_clip_valid<=0;
                             list_cache_valid<=0;state<=S_LIST_REQ;
@@ -487,6 +690,7 @@ module s24_sprite (
                                         ? vcount[8:0]-9'd422
                                         : vcount[8:0]+9'd2;
                             scan_pos<=0;active_count<=0;
+                            data_cache_valid<=0;palette_cache_valid<=0;
                             if(list_cache_valid && stack_count!=0)
                                 state<=S_SCAN_PREFETCH;
                             else begin
@@ -521,10 +725,6 @@ module s24_sprite (
             case(state)
                 S_IDLE: ;
                 S_CLEAR: begin
-                    line0[{fill_bank,clear_x}]<=26'd0;
-                    line1[{fill_bank,clear_x}]<=26'd0;
-                    line2[{fill_bank,clear_x}]<=26'd0;
-                    line3[{fill_bank,clear_x}]<=26'd0;
                     if(clear_x==9'd495) begin
                         // The 315-5293/5295 buffers the linked sprite list for
                         // a frame. Rewalking long chains of skip descriptors
@@ -579,19 +779,6 @@ module s24_sprite (
                             end
                             2'b10: state<=S_LIST_REQ;
                             default: begin
-                                if(stack_write_slot[0]) begin
-                                    descriptor_stack[stack_write_slot[9:1]][255:128]
-                                        <=mem_data;
-                                    clip_stack[stack_write_slot[9:1]][161:81]
-                                        <={current_clip_valid,current_clip_flags,current_clip_top,
-                                           current_clip_left,current_clip_bottom,current_clip_right};
-                                end else begin
-                                    descriptor_stack[stack_write_slot[9:1]][127:0]
-                                        <=mem_data;
-                                    clip_stack[stack_write_slot[9:1]][80:0]
-                                        <={current_clip_valid,current_clip_flags,current_clip_top,
-                                           current_clip_left,current_clip_bottom,current_clip_right};
-                                end
                                 if(stack_count<STACK_COUNT_LIMIT)
                                     stack_count<=stack_count+1'b1;
                                 else
@@ -672,13 +859,26 @@ module s24_sprite (
                         zoomy_step<=(render_w1[7:0]==0)?9'h040:
                                    {1'b0,render_w1[7:0]}+1'b1;
                     end
+                    descriptor_origin_x<=$signed({render_w5[11],
+                                                   render_w5[11:0]})-13'sd8;
+                    descriptor_output_width<=descriptor_width_sum[18:6];
+                    state<=S_RENDER_SETUP;
+                end
+                S_RENDER_SETUP: begin
+                    // MAME tests each emitted X against the clip rectangle.
+                    // Rejecting a descriptor whose complete scaled span
+                    // cannot intersect it is exactly equivalent and avoids
+                    // needless palette/data traffic for long lists.
+                    if(descriptor_origin_x>$signed(clip_max_x) ||
+                       descriptor_right_x<$signed(clip_min_x)) begin
+                        state<=S_NEXT_SPRITE;
                     // 1:1 is by far the common sprite case (Hot Rod's title
                     // has 27/27 descriptors at step 0x40). Map the scanline
                     // directly instead of walking from the sprite top for
                     // every output line. This removes the remaining line-
                     // buffer overruns without a divider, multiplier, RAM or
                     // DSP. Other zoom factors retain the exact accumulator.
-                    if(descriptor_zoomy_step==9'h040) begin
+                    end else if(descriptor_zoomy_step==9'h040) begin
                         if(!vertical_allowed ||
                            $signed({4'd0,target_y})<descriptor_origin_y ||
                            $signed({4'd0,target_y})>=descriptor_bottom_y) begin
@@ -736,8 +936,15 @@ module s24_sprite (
                        source_row>=total_rows) state<=S_NEXT_SPRITE;
                     else if(($signed({4'd0,target_y})>=dest_y) &&
                             ($signed({4'd0,target_y})<dest_y+$signed({10'd0,y_sum[8:6]}))) begin
-                        mem_addr<=sprite_burst({palette_base,3'b0});mem_req<=1;
-                        state<=S_PALETTE_WAIT;
+                        if(palette_cache_hit) begin
+                            palette_table<=palette_cache_data[palette_cache_index];
+                            source_column<=0;x_accum<=6'h20;
+                            dest_x<=$signed({d5[11],d5[11:0]})-13'sd8;
+                            state<=S_X_SOURCE;
+                        end else begin
+                            mem_addr<=sprite_burst({palette_base,3'b0});mem_req<=1;
+                            state<=S_PALETTE_WAIT;
+                        end
                     end else begin
                         dest_y<=dest_y+{10'd0,y_sum[8:6]};
                         y_accum<=y_sum[5:0];source_row<=source_row+1'b1;
@@ -745,9 +952,12 @@ module s24_sprite (
                 end
                 S_PALETTE_WAIT: if(mem_ack) begin
                     mem_req<=0;palette_table<=mem_data;source_column<=0;
+                    palette_cache_data[palette_cache_index]<=mem_data;
+                    palette_cache_tags[palette_cache_index]<=palette_base;
+                    palette_cache_valid[palette_cache_index]<=1;
                     x_accum<=6'h20;
                     dest_x<=$signed({d5[11],d5[11:0]})-13'sd8;
-                    data_cache_valid<=0;state<=S_X_SOURCE;
+                    state<=S_X_SOURCE;
                 end
                 S_X_SOURCE: begin
                     if(source_column>=total_columns) state<=S_NEXT_SPRITE;
@@ -774,27 +984,6 @@ module s24_sprite (
                         mem_addr<=sprite_burst({wanted_tag,3'b000});
                         mem_req<=1;state<=S_DATA_WAIT;
                     end else begin
-                        if(dest_x>=clip_min_x && dest_x<=clip_max_x &&
-                           dest_x>=0 && dest_x<496 && line_value[16]) begin
-                            case(line_value[15:14])
-                                2'd0: if(!line0_render_q[25]) begin
-                                    line0[{fill_bank,dest_x[8:0]}]
-                                        <= {1'b1,render_pos,line_value[13:0]};
-                                end
-                                2'd1: if(!line1_render_q[25]) begin
-                                    line1[{fill_bank,dest_x[8:0]}]
-                                        <= {1'b1,render_pos,line_value[13:0]};
-                                end
-                                2'd2: if(!line2_render_q[25]) begin
-                                    line2[{fill_bank,dest_x[8:0]}]
-                                        <= {1'b1,render_pos,line_value[13:0]};
-                                end
-                                default: if(!line3_render_q[25]) begin
-                                    line3[{fill_bank,dest_x[8:0]}]
-                                        <= {1'b1,render_pos,line_value[13:0]};
-                                end
-                            endcase
-                        end
                         dest_x<=dest_x+1'b1;
                         if(emit_count==1) begin
                             source_column<=source_column+1'b1;

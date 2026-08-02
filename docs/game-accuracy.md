@@ -1,6 +1,6 @@
 # Per-game MAME contract
 
-All 18 local sets use the same RTL image and an eight-byte descriptor. This
+All 17 supported local sets use the same RTL image and an eight-byte descriptor. This
 table records the game-specific hardware paths that must remain enabled; it is
 a source contract, not a claim that unrun hardware has been verified.
 
@@ -19,7 +19,6 @@ whatever data happened to remain beyond the raw 80-cylinder image in SDRAM.
 | `bnzabros`, `bnzabrosj` | 0x2d00-byte writable floppy, banked ROM board, Bonanza Bros magic-latch permutation, 20-frame floppy index cadence |
 | `dcclub` | Banked ROM board, Dynamic Country Club magic latch, golf swing encoder and discrete angle controls |
 | `dcclubj` | Same ROM/golf/protection path plus uPD4701 analog angle control |
-| `qgh` | Four-megabyte banked ROM population, QGH magic-latch permutation, generic System 24 digital ports, special tile-pair modes |
 
 Common behavior shared by every row includes dual 10 MHz 68000 buses, the
 315-5292 tile/character path, linked-list sprites and clipping, mixer priority,

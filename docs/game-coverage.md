@@ -8,8 +8,8 @@ index 0; no game-specific Quartus revision or RBF is required.
 
 As of 2026-08-01, active bring-up, debugging, attract-gate coverage, and
 progress reporting ignore clone sets. The tracked representative MAME parent
-sets are `hotrod`, `sspirits`, `gground`, `crkdown`, `sgmast`, `bnzabros`,
-`dcclub`, and `qgh`. Clone profiles remain supported by the universal core and
+sets are `hotrod`, `sspirits`, `gground`, `crkdown`, `sgmast`, `bnzabros`, and
+`dcclub`. Clone profiles remain supported by the universal core and
 remain in source-only profile, descriptor, MRA, loader, and media-contract
 validation, but they are not scheduled for individual long Verilator runs or
 counted in the active completion denominator unless a clone-specific problem
@@ -37,7 +37,6 @@ The excluded clones are `hotroda`, `hotrodj`, `hotrodja`, `ggroundj`,
 | `bnzabrosj` | floppy + ROM board | magic selector 7 |
 | `dcclub` | ROM board | golf I/O, magic selector 2 |
 | `dcclubj` | ROM board | uPD4701, golf I/O, magic selector 2 |
-| `qgh` | ROM board | magic selector 1 |
 
 The descriptor fields are feature flags, magic selector, floppy track size,
 and input profile, followed by three reserved zero bytes. `tools/gen_mra.py`
@@ -47,8 +46,8 @@ contract.
 
 Verification status is authoritative only when the target-7 log contains the
 set's `PASS tb_gground_boot ... milestone 7` line and its result file reports
-`exit_code=0`. Four of the eight tracked parent sets have recorded this gate:
-`qgh`, `sspirits`, `gground`, and `crkdown`. Historical clone passes remain
+`exit_code=0`. The release parents with recorded gates are `gground`,
+`crkdown`, `bnzabros`, and `hotrod`; historical clone passes remain
 valid evidence but do not contribute to active parent-set coverage. The other
 parent sets are run sequentially; no set is considered passed from a
 standalone or stale PPM.
@@ -61,7 +60,7 @@ python tools/run_game_matrix.py --exe ignored.exe --dry-run
 python tools/report_attract_coverage.py
 ```
 
-The first command verifies the complete 18-set inventory, common RBF name,
+The first command verifies the complete 17-set inventory, common RBF name,
 descriptor bytes, media indexes, DIP defaults, required RTL in `files.qip`,
 and the account build-policy settings. The second validates all prepared media
 contracts without starting a simulation.

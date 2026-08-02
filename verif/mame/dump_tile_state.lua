@@ -146,5 +146,88 @@ emu.register_frame_done(function()
     print(string.format(
         "S24MAME sprite frame=%d max_active=%d source_width=%d clipped_width=%d y=%d",
         frame, max_active, max_width, max_clipped, max_y))
+    local palette_tags, data_tags = {}, {}
+    local active_descriptors = 0
+    for _, index in ipairs(normals) do
+        local base = 0x600000 + index * 16
+        local word2 = space:read_u16(base + 4)
+        local word3 = space:read_u16(base + 6)
+        local word4 = space:read_u16(base + 8)
+        local word5 = space:read_u16(base + 10)
+        local top = word4 & 0xfff
+        if top >= 0x800 then top = top - 0x1000 end
+        local rows = 8 << ((word4 >> 12) & 7)
+        if max_y >= top and max_y < top + rows then
+            active_descriptors = active_descriptors + 1
+            palette_tags[word3 & 0x3fff] = true
+            local columns = 8 << ((word5 >> 12) & 7)
+            local source_row = max_y - top
+            local tile_y = source_row >> 3
+            local within_y = source_row & 7
+            local size_x = 1 << ((word5 >> 12) & 7)
+            for source_column = 0, columns - 1 do
+                local tile_x = source_column >> 3
+                local within_x = source_column & 7
+                local tile_ordinal = tile_y * size_x + tile_x
+                local wanted_word = ((word2 & 0x1fff) << 4) +
+                    tile_ordinal * 16 + within_y * 2 + (within_x >> 2)
+                data_tags[(wanted_word & 0x1ffff) >> 3] = true
+            end
+        end
+    end
+    local unique_palettes, unique_data = 0, 0
+    for _ in pairs(palette_tags) do unique_palettes = unique_palettes + 1 end
+    for _ in pairs(data_tags) do unique_data = unique_data + 1 end
+    print(string.format(
+        "S24MAME sprite frame=%d active_descriptors=%d unique_palettes=%d unique_data_bursts=%d",
+        frame, active_descriptors, unique_palettes, unique_data))
+    local palette_cache, data_cache = {}, {}
+    local palette_requests, palette_misses, data_requests, data_misses = 0, 0, 0, 0
+    for position = #normals, 1, -1 do
+        local index = normals[position]
+        local base = 0x600000 + index * 16
+        local word2 = space:read_u16(base + 4)
+        local word3 = space:read_u16(base + 6)
+        local word4 = space:read_u16(base + 8)
+        local word5 = space:read_u16(base + 10)
+        local top = word4 & 0xfff
+        if top >= 0x800 then top = top - 0x1000 end
+        local rows = 8 << ((word4 >> 12) & 7)
+        if max_y >= top and max_y < top + rows then
+            local palette_tag = word3 & 0x3fff
+            local palette_index = palette_tag & 7
+            palette_requests = palette_requests + 1
+            if palette_cache[palette_index] ~= palette_tag then
+                palette_cache[palette_index] = palette_tag
+                palette_misses = palette_misses + 1
+            end
+            local columns = 8 << ((word5 >> 12) & 7)
+            local source_row = max_y - top
+            local tile_y = source_row >> 3
+            local within_y = source_row & 7
+            local size_x = 1 << ((word5 >> 12) & 7)
+            local prior_tag = -1
+            for source_column = 0, columns - 1 do
+                local tile_x = source_column >> 3
+                local within_x = source_column & 7
+                local wanted_word = ((word2 & 0x1fff) << 4) +
+                    (tile_y * size_x + tile_x) * 16 +
+                    within_y * 2 + (within_x >> 2)
+                local data_tag = (wanted_word & 0x1ffff) >> 3
+                if data_tag ~= prior_tag then
+                    prior_tag = data_tag
+                    local data_index = data_tag & 15
+                    data_requests = data_requests + 1
+                    if data_cache[data_index] ~= data_tag then
+                        data_cache[data_index] = data_tag
+                        data_misses = data_misses + 1
+                    end
+                end
+            end
+        end
+    end
+    print(string.format(
+        "S24MAME sprite frame=%d cache8_palette=%d/%d cache16_data=%d/%d",
+        frame, palette_misses, palette_requests, data_misses, data_requests))
     machine:exit()
 end, "frame")

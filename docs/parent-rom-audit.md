@@ -1,6 +1,6 @@
 # Parent-ROM RTL/MAME audit
 
-This is the live evidence ledger for the eight locally available MAME parent
+This is the live evidence ledger for the seven locally available MAME parent
 sets. Clones are intentionally excluded. A historical target-7 result is a
 runtime milestone only; a parent is complete here only after a current-build,
 fresh-state native-frame RTL/MAME comparison reaches attract and deterministic
@@ -15,7 +15,6 @@ Coin 1/Start 1 input reaches unmistakable live gameplay on both sides.
 | 5 | `sspirits` | frame 1201, CPU-B `0086b4` | corrected `FF FD`; raw native rotation boundary defined | pending; historical run used wrong DIP |
 | 6 | `dcclub` | frame 781, CPU-B `00aeae`–`00af08` | TAS RMW bus re-arm and 4 MiB zero tail repaired; `FF FB` aligned | pending |
 | 7 | `sgmast` | frame 841, CPU-B `0092ba`–`0092d0` | corrected `FF FD`; neutral golf encoder aligned | pending; MAME parent key is marked `BAD_DUMP` |
-| 8 | `qgh` | frame 781, CPU-B `0100c4` | 4 MiB ROM population, magic and `FF FD` aligned; PC threshold is valid only with sustained pixel/change gate | pending current build; historical pass used wrong DIP and loose PC bound |
 
 The finite visual workflow is `tools/run_parent_lockstep.py`. It records the
 pinned behavioral-file hashes and checkout HEAD, isolated CFG/NVRAM/state,
@@ -212,7 +211,7 @@ actions; Hot Rod exposes its steering/accelerator controls with no digital
 action buttons; and the `sgmast`/`dcclub` parents expose Club, Stance, Angle
 Left and Angle Right plus the swing control. All local clones resolve the
 metadata through their parent and are rejected if they declare a clone-local
-override. Regeneration and profile validators pass for all 18 local MRAs. This
+override. Regeneration and profile validators pass for all 17 local MRAs. This
 is generator metadata only and costs zero ALMs, registers, RAM blocks or DSPs.
 
 Historical source-unit diagnostics cover the full-core smoke and CPU-B Work-A
@@ -240,4 +239,4 @@ test completes at category 1 in 1,058 clocks. The one-line operand-width
 correction adds no registers, RAM, or DSPs. Crack Down's recorded tile controls
 (`0000/0000/01f0/0000`) keep control-mode bits 13-14 clear, so the correction
 cannot alter its accepted normal-mode raster. Visual revalidation will target
-QGH and any other special-mode family.
+the remaining special-mode families.

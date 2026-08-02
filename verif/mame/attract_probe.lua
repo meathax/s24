@@ -94,7 +94,7 @@ subspace:install_write_tap(0x800100, 0x800103, "s24_attract_audio_sub", write_pr
 emu.register_frame_done(function()
     frame = frame + 1
     if frame == 800 then
-        local error_text = screen:snapshot("qgh_attract")
+        local error_text = screen:snapshot("s24_attract")
         if error_text then
             print("S24MAME attract snapshot error=" .. error_text)
         else

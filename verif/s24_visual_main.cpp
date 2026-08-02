@@ -522,6 +522,13 @@ int main(int argc, char** argv) {
                         std::fprintf(stderr, "frame=%llu checksum=%08x changed=%llu\n",
                             static_cast<unsigned long long>(frames), now,
                             static_cast<unsigned long long>(changed_frames));
+                    if ((frames % 30) == 0)
+                        std::fprintf(stderr,
+                            "sprite_diag frame=%llu max_stack=%u max_active=%u deadline_misses=%u\n",
+                            static_cast<unsigned long long>(frames),
+                            static_cast<unsigned>(top.host_sprite_max_stack),
+                            static_cast<unsigned>(top.host_sprite_max_active),
+                            static_cast<unsigned>(top.host_sprite_deadline_misses));
                     prior_checksum = now;
                     if (!host_frame_written && auto_capture_frame &&
                         frames >= auto_capture_frame && !host_frame_out.empty()) {
@@ -617,10 +624,11 @@ int main(int argc, char** argv) {
             SDL_RenderPresent(renderer);
             char title[192];
             std::snprintf(title, sizeof(title),
-                "Sega System 24 %s - frame %llu changes %llu%s",
+                "Sega System 24 %s - frame %llu changes %llu sprite misses %u%s",
                 game.empty() ? "" : game.c_str(),
                 static_cast<unsigned long long>(frames),
                 static_cast<unsigned long long>(changed_frames),
+                static_cast<unsigned>(top.host_sprite_deadline_misses),
                 save_pending ? " - checkpoint pending" : "");
             SDL_SetWindowTitle(window, title);
             displayed_frames = frames;

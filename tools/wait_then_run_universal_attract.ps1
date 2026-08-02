@@ -3,23 +3,9 @@ param(
 )
 
 $repo = 'C:\Users\meath\OneDrive\Documents\Sega System 24'
-$qghResultPath = Join-Path $repo 'verif\captures\qgh-target7.result'
 $matrixLogPath = Join-Path $repo 'verif\captures\universal-target7.log'
 $matrixResultPath = Join-Path $repo 'verif\captures\universal-target7.result'
 Set-Location -LiteralPath $repo
-
-# QGH is the first candidate and owns the only pending core simulation. Do not
-# touch the machine-wide simulation launcher until its result is final.
-while (-not (Test-Path -LiteralPath $qghResultPath -PathType Leaf)) {
-    Start-Sleep -Seconds $PollSeconds
-}
-
-$qghResult = Get-Content -Raw -LiteralPath $qghResultPath
-if ($qghResult -notmatch 'exit_code=0(?:\s|$)') {
-    "qgh prerequisite did not pass: $($qghResult.Trim())" |
-        Set-Content -LiteralPath $matrixResultPath
-    exit 1
-}
 
 # Move from the simplest unprotected ROM-board family through the floppy,
 # analog, magic-latch, and protected feature families. The runner stops at

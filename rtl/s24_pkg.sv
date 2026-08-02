@@ -38,7 +38,6 @@ package s24_pkg;
 
     typedef enum logic [3:0] {
         MAGIC_NONE      = 4'd0,
-        MAGIC_QGH       = 4'd1,
         MAGIC_DCCLUB    = 4'd2,
         MAGIC_QROUKA    = 4'd3,
         MAGIC_QUIZMEKU  = 4'd4,

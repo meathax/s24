@@ -4,8 +4,8 @@ This core is not yet a deployable or MAME-exact release. The table below is
 the working contract used to prevent a successful FPGA build from being
 mistaken for successful emulation.
 
-Active game progress now tracks only the eight MAME parent sets: `hotrod`,
-`sspirits`, `gground`, `crkdown`, `sgmast`, `bnzabros`, `dcclub`, and `qgh`.
+Active game progress now tracks only the seven MAME parent sets: `hotrod`,
+`sspirits`, `gground`, `crkdown`, `sgmast`, `bnzabros`, and `dcclub`.
 Clone sets are ignored for individual bring-up and long Verilator regression
 runs unless a clone-specific fault appears. Their profiles remain supported
 and continue to participate in the inexpensive universal descriptor, MRA,
@@ -25,7 +25,7 @@ scope and excluded clone list.
 | 834-6510 analog board | uPD4701 and MSM6253 models pass deterministic regression with descriptor-gated `0xC00000` mirrors; hardware control testing pending |
 | IRQ/timer controller | HSync/8 MHz timer modes, per-CPU masks, and MAME raster levels implemented; sprite/VBlank assertions use the registered 423->0 and 383->384 boundaries |
 | Floppy controller | Flat-image transfers, MAME track geometry, deterministic FBNeo-compatible 2 MiB zero padding, low-byte write qualification, no-media open bus, 20-frame index cadence, and full `B00000-B7FFFF` mirroring implemented; focused command/media sequencing regression passes |
-| ROM sets / MRAs | All 18 local ZIPs CRC-validated against MAME 0.288; one MRA per set targets `s24.rbf` |
+| ROM sets / MRAs | All 17 supported local ZIPs CRC-validated against MAME 0.288; one MRA per set targets `s24.rbf` |
 
 The source-level bus audit has also corrected 68000 low-byte alignment for the
 315-5296 and the shared ROM-bank/FRC/magic registers at `BC/CC0001-7`. These
@@ -136,7 +136,7 @@ about 15.3 million clocks; release timing is the next MAME-equivalence target.
 The earlier 260-million-clock target-1 run correctly stopped before CNT1 after
 four tracks and 51,984 bytes, so that bounded failure was not an RTL regression.
 
-The real-ROM bench is now descriptor-driven for all 18 local sets. It supports
+The real-ROM bench is now descriptor-driven for all 17 supported local sets. It supports
 floppy-only, ROM-board-only, combined floppy/ROM-board, and optional FD1094,
 uPD4701, ADC, golf, Hot Rod, input-profile, and magic-latch populations without
 recompiling the model. It retains accepted floppy writes in an exact byte
@@ -162,27 +162,13 @@ The real-ROM bench now has a target-4 milestone for the first tile, character,
 sprite, palette, or mixer write. A MAME Lua pass-through trace records the same
 five windows on both 68000 program spaces without modifying bus data.
 
-For QGH, MAME's first writes are tile `20c002=0000` at 0.1625734 s, sprite
-`604000=4001` at 0.1687204 s, mixer `40401a=0101` with low-byte mask at
-0.1966872 s, palette `402000=0000` at 0.1968364 s, and character
-`280000=0000` at 0.2390594 s. At 14.917112 s it has issued 38,908 tile,
-108,944 character, 6,976 palette, 258 mixer, and 32,869 sprite writes. DCCLUB
-and Gain Ground share the disk BIOS clear sequence: their first tile, palette,
-and sprite writes occur at 1.4156424 s, 1.9023114 s, and 1.9258192 s.
-
-The current-worktree QGH ModelSim baseline reaches its first video write at
-8,484,316 48-MHz master clocks with both CPUs executing and no unknown active
-pixels. The bounded target-4 rerun completed on 2026-07-31 with 114,550 CPU-A
-instructions, 49,375 CPU-B instructions, 230,197 boot reads, 98,304 ROM-board
-reads, and 133,240 completed memory writes.
-Its observed tuple is CPU 1, address `20c002`, data `0000`, byte enable `11`,
-an exact address/data/lane match to MAME's sub-CPU full-word tile write.
-This comparison found and fixed two video-path defects:
+The bounded target-4 rerun reached the first MAME-correlated video write with
+both CPUs executing and no unknown active pixels. This comparison found and
+fixed two video-path defects:
 
 * MAME clears 315-5292 tile/control RAM at device start, while the RTL local
   RAM previously powered up unknown. Deterministic M10K initialization now
-  matches MAME, reducing the five-million-clock QGH run from 213,052 unknown
-  active pixels to zero and character-line requests from 1,666,010 to 2,302.
+  matches the reference and eliminates unknown active pixels.
 * Sprite RAM is `600000-63ffff` mirrored by `180000`; A18 remains decoded.
   The old RTL incorrectly treated the full `600000-7fffff` range as sprite
   RAM. The decode now uses mask `e40000`, leaving the intervening ranges open.
@@ -199,14 +185,7 @@ write and counters as ModelSim. Target 6 also passes at loop count 12,476,974:
 tile, sprite, palette, character, and mixer writes are all observed, with zero
 unknown active pixels. No launcher bypass was used.
 
-The QGH visible-video target passes at loop count 56,662,177 with 63
-post-release frames, 15,630 non-black pixels, 25,008 mixed pixels, and zero
-unknown pixels. The strengthened target-7 attract gate now also passes QGH at
-loop count 154,290,721: 121/120 qualifying frames, 14 rendered-content
-changes, zero unknown active samples, CPU-B code-window execution, and a
-complete 496x384 native capture. This is recorded in
-`verif/captures/qgh-target7.log` with result `exit_code=0`; a rebuilt-model
-recorder is complete. Gain Ground World (`gground`) now also passes target 7
+Gain Ground World (`gground`) now also passes target 7
 at loop count 1,201,502,881 with 121/120 qualifying frames, 103 rendered-
 content changes, zero unknown active samples, CPU-B code-window execution,
 and a complete native capture. Gain Ground Japan (`ggroundj`) then passes at
@@ -241,14 +220,14 @@ reads, ruling out the narrow tap base as the sole explanation.
 
 The MAME 0.288 no-input probe now samples a coarse whole-screen grid, avoiding
 false negatives from fixed coordinates on rotated or text-only screens. Across
-all 18 profile sets, the first sampled game-owned screen with at least 1000
+all 17 profile sets, the first sampled game-owned screen with at least 1000
 non-black grid samples used a secondary-CPU PC of at least `0x006a5e`; the
-pre-release QGH baseline was `0x000f58`. Target 7 therefore uses an explicit
+Target 7 therefore uses an explicit
 MAME-derived default lower bound of `0x004000`, 120 consecutive qualifying
 frames, 1000 non-black pixels per frame, and at least one rendered-content or
 frame-occupancy change. The shared model was rebuilt with this gate on
-2026-07-31. QGH, `gground`, `ggroundj`, `crkdown`, and `crkdownu` have passed
-it; `crkdownj` is the active next candidate.
+2026-07-31. `gground`, `ggroundj`, `crkdown`, and `crkdownu` have passed it;
+`crkdownj` is the active next candidate.
 
 A fresh pinned MAME 0.288 probe on 2026-08-01 reproduced the Crack Down
 reference for `crkdown`, `crkdownu`, and `crkdownj`: each reached its first
@@ -274,7 +253,7 @@ The remaining 60-second MAME probes measured `sgmast`/`sgmastc` at frame 841,
 
 ## Universal profile integration
 
-The project now treats the 18-set list in `tools/gen_mra.py` as a checked
+The project now treats the 17-set list in `tools/gen_mra.py` as a checked
 hardware contract rather than duplicated metadata. One canonical descriptor
 encoder is shared by MRA generation, simulation-media generation, and the game
 matrix. It rejects inconsistent feature/media combinations, unsupported input
@@ -337,7 +316,7 @@ The authoritative target-7 gate subsequently passed for `crkdown`: the log
 contains `PASS tb_gground_boot crkdown game milestone 7`, the result is
 `exit_code=0`, and the capture reached `frames=277/10` and `attract=121/120`
 at 906,948,385 clocks. At the time of this run, recorded universal-profile
-coverage was `5/18`: `qgh`, `gground`, `ggroundj`, `crkdown`, and `crkdownu`.
+coverage was `4/17`: `gground`, `ggroundj`, `crkdown`, and `crkdownu`.
 `crkdownu` passed at 906,948,385 clocks with 121/120 qualifying attract frames,
 three content changes, zero unknown active samples, and a complete native
 capture; the supervised matrix had started `crkdownj`, but that run was
@@ -355,8 +334,8 @@ contains the strict PASS line and its result reports `exit_code=0`. The
 `crkdownj` target-7 process was stopped by the user at
 2026-08-01 13:55:04 +10:00 before completion (`exit_code=130`). Coverage stays
 at that historical point. A later `sspirits` pass brought recorded all-set
-coverage to `6/18`. Under the current parent-only policy, active target-7
-coverage is `4/8`: `qgh`, `sspirits`, `gground`, and `crkdown`; clone results
+coverage to `5/17`. Under the current parent-only policy, active target-7
+coverage is `4/7`: `sspirits`, `gground`, `crkdown`, and `bnzabros`; clone results
 are retained as evidence but no longer counted or scheduled for rerun.
 
 The retry harness now preserves each future attempt as a numbered

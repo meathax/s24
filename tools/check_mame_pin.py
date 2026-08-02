@@ -16,7 +16,7 @@ PINNED_VERSION = "0.288 (mame0288)"
 DRIVER_SETS = frozenset((
     "hotrod", "hotroda", "hotrodj", "hotrodja", "sspirits", "gground",
     "ggroundj", "crkdown", "crkdownu", "crkdownj", "sgmast", "sgmastc",
-    "sgmastj", "bnzabros", "bnzabrosj", "dcclub", "dcclubj", "qgh",
+    "sgmastj", "bnzabros", "bnzabrosj", "dcclub", "dcclubj",
     "qrouka", "quizmeku", "mahmajn", "mahmajn2", "sspiritj", "sspirtfc",
     "qsww", "dcclubfd", "roughrac",
 ))

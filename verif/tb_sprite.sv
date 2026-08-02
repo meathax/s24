@@ -114,9 +114,8 @@ module tb_sprite;
         assert(list_collect_cycles==first_list_collect_cycles)
             else $fatal(1,"sprite list was rescanned within one frame");
 
-        // Crossing the native frame boundary must invalidate the cached list
-        // even if line zero itself were unavailable. The next scheduled line
-        // recollects and stamps the new epoch.
+        // Crossing the native frame boundary rebuilds the cache from live
+        // descriptor fields and stamps the new epoch.
         first_cache_epoch=dut.cache_epoch;
         line_boundary(10'd383);
         repeat(40) @(posedge clk);
@@ -125,28 +124,28 @@ module tb_sprite;
         assert(list_collect_cycles>first_list_collect_cycles &&
                dut.cache_epoch!=first_cache_epoch &&
                dut.cache_epoch==dut.frame_epoch)
-            else $fatal(1,"sprite list did not refresh at frame epoch");
+            else $fatal(1,"sprite descriptor cache did not refresh at frame epoch");
 
         // SSpirits reaches 1002 normal descriptors behind a full 8192-entry
         // linked list. Exercise the retained-cache worst case with 48 active
         // one-tile sprites and prove one scanline still meets 656*3 clocks.
         for(int s=0;s<1024;s++) begin
             if(s[0]) begin
-                dut.descriptor_stack[s>>1][255:128]=128'd0;
-                dut.descriptor_stack[s>>1][128+1*16 +:16]=16'h003f;
-                dut.descriptor_stack[s>>1][128+2*16 +:16]=16'h0010;
-                dut.descriptor_stack[s>>1][128+3*16 +:16]=16'h0002;
-                dut.descriptor_stack[s>>1][128+4*16 +:16]=(s<48)?16'h0002:16'h01f4;
-                dut.descriptor_stack[s>>1][128+5*16 +:16]=16'(8+(s%48)*8);
-                dut.clip_stack[s>>1][161:81]=81'd0;
+                dut.descriptor_stack_ram.mem_hi[s>>1]=128'd0;
+                dut.descriptor_stack_ram.mem_hi[s>>1][1*16 +:16]=16'h003f;
+                dut.descriptor_stack_ram.mem_hi[s>>1][2*16 +:16]=16'h0010;
+                dut.descriptor_stack_ram.mem_hi[s>>1][3*16 +:16]=16'h0002;
+                dut.descriptor_stack_ram.mem_hi[s>>1][4*16 +:16]=(s<48)?16'h0002:16'h01f4;
+                dut.descriptor_stack_ram.mem_hi[s>>1][5*16 +:16]=16'(8+(s%48)*8);
+                dut.clip_stack_ram.mem_hi[s>>1]=81'd0;
             end else begin
-                dut.descriptor_stack[s>>1][127:0]=128'd0;
-                dut.descriptor_stack[s>>1][1*16 +:16]=16'h003f;
-                dut.descriptor_stack[s>>1][2*16 +:16]=16'h0010;
-                dut.descriptor_stack[s>>1][3*16 +:16]=16'h0002;
-                dut.descriptor_stack[s>>1][4*16 +:16]=(s<48)?16'h0002:16'h01f4;
-                dut.descriptor_stack[s>>1][5*16 +:16]=16'(8+(s%48)*8);
-                dut.clip_stack[s>>1][80:0]=81'd0;
+                dut.descriptor_stack_ram.mem_lo[s>>1]=128'd0;
+                dut.descriptor_stack_ram.mem_lo[s>>1][1*16 +:16]=16'h003f;
+                dut.descriptor_stack_ram.mem_lo[s>>1][2*16 +:16]=16'h0010;
+                dut.descriptor_stack_ram.mem_lo[s>>1][3*16 +:16]=16'h0002;
+                dut.descriptor_stack_ram.mem_lo[s>>1][4*16 +:16]=(s<48)?16'h0002:16'h01f4;
+                dut.descriptor_stack_ram.mem_lo[s>>1][5*16 +:16]=16'(8+(s%48)*8);
+                dut.clip_stack_ram.mem_lo[s>>1]=81'd0;
             end
         end
         dut.stack_head=0;dut.stack_count=11'd1024;

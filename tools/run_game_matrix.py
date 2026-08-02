@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run one safe Verilated System 24 model across the 18 local game sets."""
+"""Run one safe Verilated System 24 model across the supported game sets."""
 
 from __future__ import annotations
 
@@ -24,7 +24,6 @@ MAME_ATTRACT_B_PC_MIN = {
     "sgmast": 0x0092BA,
     "bnzabros": 0x0081CA,
     "dcclub": 0x00AEAE,
-    "qgh": 0x0100C4,
 }
 
 
@@ -52,6 +51,8 @@ class GameplayProfile:
 # frame 1800 is live interactive training play, not an attract demonstration.
 # Hot Rod starts from its real P1 accelerator rather than a digital Start
 # button; full throttle is held through the frame-2400 live-race capture.
+# Scramble Spirits enters Mission 1 with the generic three-button packet and
+# reaches unmistakable vertically presented gameplay by frame 2200.
 GAMEPLAY_PROFILES = {
     "gground": GameplayProfile(1335, 1420, 1420, 1920, 1300),
     "crkdown": GameplayProfile(1050, 1380, 0, 2260, 1000),
@@ -59,6 +60,7 @@ GAMEPLAY_PROFILES = {
     "hotrod": GameplayProfile(
         1060, 0, 0, 2400, 1000,
         pedal_frame=1140, pedal_end_frame=2401, pedal_value=255),
+    "sspirits": GameplayProfile(1210, 1270, 1450, 2200, 1200),
 }
 
 

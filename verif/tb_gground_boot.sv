@@ -32,7 +32,10 @@ module tb_gground_boot(
     output logic        host_trace_rnw,
     output logic [1:0]  host_trace_be,
     output logic [23:0] host_trace_addr,
-    output logic [15:0] host_trace_data
+    output logic [15:0] host_trace_data,
+    output logic [10:0] host_sprite_max_stack,
+    output logic [10:0] host_sprite_max_active,
+    output logic [31:0] host_sprite_deadline_misses
 );
 `else
 module tb_gground_boot;
@@ -674,6 +677,33 @@ module tb_gground_boot;
         .wr_req(wr_req),.wr_addr(wr_addr),.wr_data(wr_data),
         .wr_be(wr_be),.wr_ack(wr_ack));
 
+    // Simulation-only observability for long-list renderer audits. A miss
+    // means the prior scanline was still rendering when the next native line
+    // boundary arrived. These counters are outside synthesizable core RTL.
+    logic [10:0] sprite_max_stack_count=0;
+    logic [10:0] sprite_max_active_count=0;
+    logic [31:0] sprite_deadline_misses=0;
+    always_ff @(posedge clk) begin
+        if(reset) begin
+            sprite_max_stack_count<=0;
+            sprite_max_active_count<=0;
+            sprite_deadline_misses<=0;
+        end else begin
+            if(dut.sprite.stack_count>sprite_max_stack_count)
+                sprite_max_stack_count<=dut.sprite.stack_count;
+            if(dut.sprite.active_count>sprite_max_active_count)
+                sprite_max_active_count<=dut.sprite.active_count;
+            if(ce_pixel && dut.hcount==10'd655 && dut.vcount<10'd384 &&
+               dut.sprite.state!=0)
+                sprite_deadline_misses<=sprite_deadline_misses+1'b1;
+        end
+    end
+`ifdef S24_VISUAL
+    assign host_sprite_max_stack=sprite_max_stack_count;
+    assign host_sprite_max_active=sprite_max_active_count;
+    assign host_sprite_deadline_misses=sprite_deadline_misses;
+`endif
+
     // TARGET 0: first game-media access; 1: CNT1 release and CPU-B read;
     // 2: CPU-B instruction (plus decrypt for FD1094); 3: sustained visible
     // game video after CPU-B release; 4: first write to any video memory;
@@ -904,8 +934,7 @@ module tb_gground_boot;
                 dut.sprite.line_valid,dut.sprite.state,dut.sprite.target_y,
                 dut.sprite.dest_x);
         end
-        // ROM-board BIOSes can touch game media very early (QGH currently
-        // reaches target 0 after 82 instructions), while deeper milestones
+        // ROM-board BIOSes can touch game media very early, while deeper milestones
         // should demonstrate sustained execution.
         if(cpu_a_instructions < ((target==0) ? 20 : 100))
             $fatal(1,"%s CPU A did not execute enough for target %0d",

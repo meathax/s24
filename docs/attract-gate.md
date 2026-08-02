@@ -8,7 +8,7 @@ verification contract, not a claim that every set has passed.
 - MAME executable: 0.288 (`mame0288`)
 - Source commit: `affe701f9210d003d2cc5eff311f94053afa679b`
 - Driver: `src/mame/sega/segas24.cpp`
-- QGH set: `qgh`, no coin, start, service, or joystick input
+- Reference input: no coin, start, service, or joystick input
 - Reference probe: `verif/mame/attract_probe.lua`
 
 The probe samples observable screen pixels, a coarse whole-screen pixel grid,
@@ -20,7 +20,7 @@ grid samples was observed at:
 
 | Sets | First sampled frame | Secondary PC range |
 | --- | ---: | ---: |
-| `qgh`, `bnzabros`, `bnzabrosj` | 781 | `0x0081ca`–`0x0100c4` |
+| `bnzabros`, `bnzabrosj` | 781 | `0x0081ca`–`0x0100c4` |
 | `dcclub`, `dcclubj` | 781/1321 | `0x00aeae`–`0x00af08` |
 | `crkdown`, `crkdownu`, `crkdownj` | 961 | `0x008e94` |
 | `hotrod`, `hotroda`, `hotrodj`, `hotrodja` | 1261/1321 | `0x006a5e`–`0x006a7c` |
@@ -29,14 +29,12 @@ grid samples was observed at:
 | `sspirits` | 1201 | `0x0086b4` |
 
 The 60-second MAME reference sweep produced an adaptive first-game-screen
-snapshot for all 18 sets; no set remained below the grid threshold. These
+snapshot for all 17 sets; no set remained below the grid threshold. These
 snapshots are retained under the ignored `verif/mame/matrix60adaptive` tree
 for later native-frame comparison.
 
 The universal gate therefore defaults to a secondary-CPU PC lower bound of
 `0x004000`, below the observed minimum but above the pre-release BIOS baseline.
-QGH's first sampled title/attract image is the expected static `GAME OVER /
-CREDIT 0` screen at frame 781 (`13.578544 s`) with PC `0x0100c4`.
 
 ## Verilator target 7
 
@@ -70,21 +68,14 @@ Run the first candidate after `verilator-safe status` reports a free
 simulation slot:
 
 ```text
-python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --media verif/media --sets qgh --target 7 --max-clocks 6000000000 --progress-clocks 1000000000 --attract-b-pc-min 0x4000 --frame-dir verif/frames/qgh-attract
+python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --media verif/media --sets gground crkdown bnzabros hotrod --target 7 --max-clocks 6000000000 --progress-clocks 1000000000 --attract-b-pc-min 0x4000 --frame-dir verif/frames/release-attract
 ```
 
-The unchanged baseline only passed target 3 at clock `56,662,177`, with 63
-frames, 15,630 cumulative non-black pixels, 25,008 mixed pixels, zero unknown
-pixels, and last CPU-B PC `0x000f58`. That is recorded as visible video, not
-attract mode. QGH passes target 7 at clock `154,290,721`, with 121 of 120
-required qualifying frames, 14 rendered-content changes, zero unknown active
-samples, CPU-B code-window execution, and a complete native capture.
-`gground` now also passes target 7 at clock `1,201,502,881`, with 121 of 120
+`gground` passes target 7 at clock `1,201,502,881`, with 121 of 120
 qualifying frames, 103 rendered-content changes, zero unknown active samples,
 CPU-B code-window execution, and a complete native capture. `ggroundj` then
 passed at clock `893,597,473` with 121 of 120 qualifying frames, one content
 change, zero unknown active samples, CPU-B code-window execution, and a
-complete native capture. The authoritative logs are `verif/captures/qgh-target7.log`,
-`verif/captures/gground-target7.log`, and
+complete native capture. The authoritative logs are `verif/captures/gground-target7.log` and
 `verif/captures/ggroundj-target7.log`, each with result `exit_code=0`; the
 next candidate is `crkdownj` after the completed `crkdownu` gate.
