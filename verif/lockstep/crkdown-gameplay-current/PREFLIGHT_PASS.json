@@ -72,8 +72,8 @@
     "checkpoint": {
       "path": "crkdown-fixed-chain.vltsv",
       "size": 9765917,
-      "sha256": "af7dbe427e67a684286916e8f4c727c3047819619fa9ccae5bdf8801f61f1432",
-      "native_frame": 1800,
+      "sha256": "f5f79a575021abc8759c66a5708e5749bc518bd9cd1d5ace1ea7940f43dca937",
+      "native_frame": 2260,
       "applied_events": [
         {"frame": 1050, "control": "coin1", "duration_frames": 4},
         {"frame": 1380, "control": "start1", "duration_frames": 4}

@@ -184,25 +184,46 @@ module s24_sprite (
     logic signed [12:0] scan1_origin_y;
     logic signed [13:0] scan1_bottom_y;
     logic scan1_vertical_allowed,scan1_active;
+    logic scan_pair_valid;
+    logic [1:0] scan_advance;
+    logic [STACK_BITS:0] scan_next_pos;
+    logic [STACK_BITS-1:0] scan_next_slot;
     logic [STACK_BITS-1:0] scan_second_index;
     logic scan_second_last;
 
     // STACK_DEPTH is a power of two; assignment truncation performs wrap.
-    assign stack_write_slot=stack_count[STACK_BITS-1:0];
+    // Once full, overwrite the oldest cached descriptor so the bounded ring
+    // retains MAME's newest/frontmost list entries.
+    assign stack_write_slot=(stack_count<STACK_COUNT_LIMIT)
+                            ? stack_count[STACK_BITS-1:0] : stack_head;
     assign stack_render_slot=render_pos[STACK_BITS-1:0];
-    assign stack_scan_slot=scan_pos[STACK_BITS-1:0];
+    assign stack_scan_slot=stack_head+scan_pos[STACK_BITS-1:0];
+    // Packed descriptor RAM supplies two logical entries per clock whenever
+    // the ring cursor is physically even.  An odd head peels one upper-half
+    // entry, then resumes paired scanning at the next even physical slot.
+    assign scan_pair_valid=!stack_scan_slot[0] &&
+                           (scan_pos+1'b1<stack_count);
+    assign scan_advance=scan_pair_valid ? 2'd2 : 2'd1;
+    assign scan_next_pos=scan_pos+{{(STACK_BITS-1){1'b0}},scan_advance};
+    assign scan_next_slot=stack_scan_slot+
+                          {{(STACK_BITS-2){1'b0}},scan_advance};
 
     always_comb begin
         if(state==S_SCAN_PREFETCH)
             descriptor_read_pair=stack_scan_slot[STACK_BITS-1:1];
         else if(state==S_SCAN || state==S_SCAN_SECOND)
-            descriptor_read_pair=(scan_pos[STACK_BITS-1:0]+2'd2) >> 1;
+            descriptor_read_pair=scan_next_slot[STACK_BITS-1:1];
         else
             descriptor_read_pair=sprite_stack_q[STACK_BITS-1:1];
 
         if(state==S_SCAN_PREFETCH || state==S_SCAN || state==S_SCAN_SECOND) begin
-            descriptor_stack_q=descriptor_stack_pair_q[127:0];
-            clip_stack_q=clip_stack_pair_q[80:0];
+            if(stack_scan_slot[0]) begin
+                descriptor_stack_q=descriptor_stack_pair_q[255:128];
+                clip_stack_q=clip_stack_pair_q[161:81];
+            end else begin
+                descriptor_stack_q=descriptor_stack_pair_q[127:0];
+                clip_stack_q=clip_stack_pair_q[80:0];
+            end
         end else if(sprite_stack_q[0]) begin
             descriptor_stack_q=descriptor_stack_pair_q[255:128];
             clip_stack_q=clip_stack_pair_q[161:81];
@@ -349,6 +370,7 @@ module s24_sprite (
                     target_y<=scan_clip1[24:16];
         end
         scan1_active=scan1_vertical_allowed &&
+                     scan_pair_valid &&
                      (scan_pos+1'b1<stack_count) &&
                      $signed({4'd0,target_y})>=scan1_origin_y &&
                      $signed({4'd0,target_y})<scan1_bottom_y;
@@ -557,22 +579,23 @@ module s24_sprite (
                             end
                             2'b10: state<=S_LIST_REQ;
                             default: begin
-                                if(stack_count<11'd1024) begin
-                                    if(stack_write_slot[0]) begin
-                                        descriptor_stack[stack_write_slot[9:1]][255:128]
-                                            <=mem_data;
-                                        clip_stack[stack_write_slot[9:1]][161:81]
-                                            <={current_clip_valid,current_clip_flags,current_clip_top,
-                                               current_clip_left,current_clip_bottom,current_clip_right};
-                                    end else begin
-                                        descriptor_stack[stack_write_slot[9:1]][127:0]
-                                            <=mem_data;
-                                        clip_stack[stack_write_slot[9:1]][80:0]
-                                            <={current_clip_valid,current_clip_flags,current_clip_top,
-                                               current_clip_left,current_clip_bottom,current_clip_right};
-                                    end
-                                    stack_count<=stack_count+1'b1;
+                                if(stack_write_slot[0]) begin
+                                    descriptor_stack[stack_write_slot[9:1]][255:128]
+                                        <=mem_data;
+                                    clip_stack[stack_write_slot[9:1]][161:81]
+                                        <={current_clip_valid,current_clip_flags,current_clip_top,
+                                           current_clip_left,current_clip_bottom,current_clip_right};
+                                end else begin
+                                    descriptor_stack[stack_write_slot[9:1]][127:0]
+                                        <=mem_data;
+                                    clip_stack[stack_write_slot[9:1]][80:0]
+                                        <={current_clip_valid,current_clip_flags,current_clip_top,
+                                           current_clip_left,current_clip_bottom,current_clip_right};
                                 end
+                                if(stack_count<STACK_COUNT_LIMIT)
+                                    stack_count<=stack_count+1'b1;
+                                else
+                                    stack_head<=stack_head+1'b1;
                                 if(mem_w0[12:0]==0) begin
                                     list_cache_valid<=1;
                                     cache_epoch<=frame_epoch;
@@ -584,39 +607,37 @@ module s24_sprite (
                 end
                 S_SCAN_PREFETCH: state<=S_SCAN;
                 S_SCAN: begin
-                    if(scan_active) begin
+                    if(scan_active && scan1_active) begin
                         sprite_stack[active_count[STACK_BITS-1:0]]
                             <=stack_scan_slot;
                         active_count<=active_count+1'b1;
-                    end
-                    if(scan_active && scan1_active) begin
                         // sprite_stack has one write port.  Only pairs where
                         // both descriptors are active need this second cycle;
                         // sparse long lists still approach two descriptors
                         // filtered per clock.
                         scan_second_index<=stack_scan_slot+1'b1;
-                        scan_second_last<=(scan_pos+2'd2>=stack_count);
+                        scan_second_last<=(scan_next_pos>=stack_count);
                         state<=S_SCAN_SECOND;
-                    end else if(scan_pos+2'd2>=stack_count) begin
-                        if(scan_active || scan1_active) begin
-                            if(scan1_active)
-                                sprite_stack[active_count[STACK_BITS-1:0]]
-                                    <=stack_scan_slot+1'b1;
-                            render_pos<=active_count;
-                            state<=S_RENDER_PREFETCH;
-                        end else if(active_count!=0) begin
-                            render_pos<=active_count-1'b1;
-                            state<=S_RENDER_PREFETCH;
-                        end else begin
-                            line_valid[fill_bank]<=1;state<=S_IDLE;
-                        end
                     end else begin
-                        if(scan1_active) begin
+                        if(scan_active || scan1_active) begin
                             sprite_stack[active_count[STACK_BITS-1:0]]
-                                <=stack_scan_slot+1'b1;
+                                <=scan_active ? stack_scan_slot
+                                              : stack_scan_slot+1'b1;
                             active_count<=active_count+1'b1;
                         end
-                        scan_pos<=scan_pos+2'd2;
+                        if(scan_next_pos>=stack_count) begin
+                            if(scan_active || scan1_active) begin
+                                render_pos<=active_count;
+                                state<=S_RENDER_PREFETCH;
+                            end else if(active_count!=0) begin
+                                render_pos<=active_count-1'b1;
+                                state<=S_RENDER_PREFETCH;
+                            end else begin
+                                line_valid[fill_bank]<=1;state<=S_IDLE;
+                            end
+                        end else begin
+                            scan_pos<=scan_next_pos;
+                        end
                     end
                 end
                 S_SCAN_SECOND: begin
@@ -627,7 +648,7 @@ module s24_sprite (
                         render_pos<=active_count;
                         state<=S_RENDER_PREFETCH;
                     end else begin
-                        scan_pos<=scan_pos+2'd2;
+                        scan_pos<=scan_next_pos;
                         state<=S_SCAN;
                     end
                 end

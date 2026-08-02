@@ -45,9 +45,12 @@ class GameplayProfile:
 # Button 1 as well as Start 1; a Start-only run leaves CREDIT 1 intact and is
 # merely the attract demo, so action_frame is intentionally non-zero.  Crack
 # Down accepts Start 1 on its title screen and reaches live play by frame 2240.
+# Bonanza Bros accepts the highlighted training-stage choice with P1 Button 1;
+# frame 1800 is live interactive training play, not an attract demonstration.
 GAMEPLAY_PROFILES = {
     "gground": GameplayProfile(1335, 1420, 1420, 1920, 1300),
     "crkdown": GameplayProfile(1050, 1380, 0, 2260, 1000),
+    "bnzabros": GameplayProfile(900, 950, 1000, 1800, 800),
 }
 
 

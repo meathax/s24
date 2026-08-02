@@ -9,8 +9,8 @@ Coin 1/Start 1 input reaches unmistakable live gameplay on both sides.
 | Order | Parent | MAME attract milestone | Source/profile audit | Current visual proof |
 | ---: | --- | --- | --- | --- |
 | 1 | `gground` | frame 1261, CPU-B `0085b0`–`0085b2` | aligned; corrected `FF FD` DIP; deterministic coin/start/action profile | **complete:** attract is pixel-exact; visible Verilator frame 1920 proves live gameplay closely matched to MAME |
-| 2 | `crkdown` | frame 961, CPU-B `008e94` | aligned; shared physical-window/category separation targets the old radar defect | **complete attract:** target 7/exit 0; native leaderboard pixel-exact to MAME; gameplay proof in progress |
-| 3 | `bnzabros` | frame 781, CPU-B `0081ca`–`0100c4` | 4 MiB zero tail, independent FRC IRQ, generic input and magic-latch contracts aligned | **complete attract:** native leaderboard pixel-exact; deterministic MAME gameplay schedule and RTL gameplay proof pending |
+| 2 | `crkdown` | frame 961, CPU-B `008e94` | aligned; shared physical-window/category separation repaired the old radar defect | **complete:** attract is pixel-exact; visible Verilator frame 2260 proves live gameplay closely matched to MAME |
+| 3 | `bnzabros` | frame 781, CPU-B `0081ca`–`0100c4` | 4 MiB zero tail, independent FRC IRQ, generic input and magic-latch contracts aligned | **complete attract:** native leaderboard pixel-exact; deterministic MAME gameplay reference captured; RTL gameplay proof pending |
 | 4 | `hotrod` | frame 1321, CPU-B `006a5e`–`006a7c` | media, 2f00 FDC, neutral analog daughterboard and `FF FF` aligned | **complete attract:** native title pixel-exact; deterministic gameplay proof pending |
 | 5 | `sspirits` | frame 1201, CPU-B `0086b4` | corrected `FF FD`; raw native rotation boundary defined | pending; historical run used wrong DIP |
 | 6 | `dcclub` | frame 781, CPU-B `00aeae`–`00af08` | TAS RMW bus re-arm and 4 MiB zero tail repaired; `FF FB` aligned | pending |
@@ -78,19 +78,19 @@ contract: coin at frame 1050, Start 1 at 1380, and first unambiguous live play
 by frame 2240. The bounded RTL proof captures frame 2260 after saving a
 restartable checkpoint at frame 1000; its reference is preserved as
 `verif/frames/current-parent-audit/crkdown-gameplay-mame.png`. RTL gameplay is
-not marked complete until that visible Verilator capture and diff finish.
+now complete through the visible Verilator frame-2260 capture and diff below.
 
 The physical-window correction necessarily changed Verilator's model
 fingerprint, so the older frame-2220 checkpoint is preserved but is not loaded
 by the corrected executable. A fresh atomic chain checkpoint has advanced to
-native frame 1800 in `crkdown-fixed-chain.vltsv` (9,765,917 bytes, valid
+native frame 2260 in `crkdown-fixed-chain.vltsv` (9,765,917 bytes, valid
 `vltsaved` trailer). Subsequent visible runs advance that state in short slices;
 the compatibility guard is not bypassed. The SDL host also presents once per
 completed native frame without host VSync while retaining chunk-rate event and
 input polling, avoiding redundant host waits without changing simulated time.
 The deterministic four-frame Coin 1 pulse at native frames 1050-1053 and Start
 1 pulse at frames 1380-1383 are now both inside the saved state. The frame-2260
-gameplay capture remains ahead of the current chain.
+gameplay capture and final checkpoint are complete.
 The native framebuffer checksum changed on consecutive frames 1419 and 1420
 immediately after the Start pulse, proving the input left the prior static
 title phase. Frame 1420 is the exact all-black checksum `b3b9fdc5`, matching
@@ -101,10 +101,11 @@ scene as MAME frame 1450: both contain 91 RGB colors, non-black occupancy is
 186,545 versus 186,929 pixels, 84.91% of native pixels are exact, and RGB MAE
 is 6.23. The residual is moving-character animation phase. This supporting
 comparison is recorded in `POST_START_COMPARISON.json`; the live-play
-frame-2260 gate remains mandatory.
+frame-2260 gate remained the final acceptance point.
 The focused input regression also directly proves the MAME289 generic SERVICE
 contract: Coin 1 is active-low bit 0, Start 1 is active-low bit 4, and both
-asserted produce `0xee` with zero ModelSim errors.
+asserted produce `0xee`. This source-unit result is supporting diagnostics;
+visible Verilator gameplay is the acceptance proof.
 The preserved pre-fix gameplay pair gives the tile repair a regional acceptance
 gate: the radar interior contains only 1,100 non-black pixels in RTL versus
 29,165 in MAME, while the lower playfield has 119,144 versus 119,395 and the
@@ -112,6 +113,19 @@ same 91-color cardinality. The machine-readable baseline is
 `verif/lockstep/crkdown-gameplay-current/PRE_FIX_BASELINE.json`; its MAME image
 is pixel-identical to deterministic source frame 2254, with raw-RGB SHA-256
 `d42fa663256ace727d2e7f501032cc84337185c739e27143a73d0daa7baad027`.
+
+The required visible Verilator gameplay capture now completes at native frame
+2260 with a live HWND, automatic checkpoint and clean exit. Against the closest
+fresh MAME frame (2254), 126,127/190,464 native pixels are exact (66.22%), raw
+RGB MAE is 21.04, and radius-2 Gaussian RGB MAE is 4.39. Both sides visibly
+show the same split-screen playfield, actors, map and HUD. Most importantly,
+the repaired radar interior contains 29,210 non-black pixels versus MAME's
+29,165, replacing the pre-fix RTL count of only 1,100; playfield occupancy is
+119,144 versus 119,395 and both retain 91 colors. The residual is animated
+palette/character phase, so Crack Down is accepted as a close gameplay match.
+The preserved pair is `crkdown-gameplay-fixed.png` and
+`crkdown-gameplay-mame-best-fixed.png`; complete metrics are in
+`FINAL_GAMEPLAY_COMPARISON.json`.
 
 Hot Rod exposed two shared renderer defects rather than a profile mismatch.
 The sprite engine buffers the linked
@@ -135,10 +149,10 @@ mask zero selects the even physical tilemap and mask one selects the odd
 physical tilemap, while tile-name bit 15 independently selects the mixer
 category. This follows MAME 0.289 `draw_common()`/`draw_rect()` and costs no
 additional storage or selection logic; the focused tile regression now uses a
-category-one tile on the even map to keep the two decisions independent. A
-fresh isolated ModelSim run checks all 16 combinations of four physical maps,
-two mask values and two category values, then completes a rendered-pixel test
-with zero errors or warnings.
+category-one tile on the even map to keep the two decisions independent. The
+current Verilator 5.050 tile regression checks this separation together with
+normal and special-mode vectors, then completes its rendered-pixel test at
+category one in 1,058 clocks.
 
 For long single-side attract qualification, the visible launcher accepts
 `-Target 7 -FrameOut <path>`.  It keeps the SDL window interactive and exits it
@@ -172,34 +186,29 @@ metadata through their parent and are rejected if they declare a clone-local
 override. Regeneration and profile validators pass for all 18 local MRAs. This
 is generator metadata only and costs zero ALMs, registers, RAM blocks or DSPs.
 
-Focused ModelSim regressions pass for the full-core smoke and CPU-B Work-A
+Historical source-unit diagnostics cover the full-core smoke and CPU-B Work-A
 write path, paired sprite scan/zoom/clipping, tile category/line rendering,
 dual-CPU bus/TAS handling, raster/timer/FRC IRQs, the full writable floppy
-track, game input profiles, and all magic-latch tables. These tests remain
-supporting evidence only; visible Verilator gameplay is the completion gate.
+track, game input profiles, and all magic-latch tables. They are breadcrumbs,
+not acceptance evidence. All new focused regressions use Verilator, and visible
+Verilator gameplay remains the parent completion gate.
 
-The MAME289 sprite audit found a separate pathological-list discrepancy that
-is frozen until the active Crack Down checkpoint completes. MAME retains and
-reverse-renders up to 8192 normal descriptors; the current packed RTL cache
-silently keeps the oldest 1024 and drops later/frontmost entries. The focused
-1025-entry `tb_sprite_overflow` discriminator fails exactly at descriptor 1024
-(`head=0`, slot 0 still descriptor 0), while the existing 1024-entry timing
-regression remains green at 1,354 clocks. The deferred bounded-ring repair
-must also handle an odd ring head across packed descriptor pairs. It needs no
-additional RAM or DSP and only a small modular-address mux/adder; expanding to
-literal MAME-sized storage would cost at least about 1.59 Mbit and is rejected.
-Known Scramble Spirits usage is 1002 normal descriptors, so this finding does
-not invalidate existing parent evidence but closes a source-accuracy gap.
+The MAME289 sprite audit found and repaired a pathological-list discrepancy.
+MAME retains and reverse-renders up to 8192 normal descriptors; RTL now keeps
+the newest/frontmost 1024 in its bounded ring instead of dropping later entries.
+The Verilator 5.050 overflow regression proves descriptor 1024 replaces zero,
+logical odd-head scan order `[1,2,0]`, and reverse render order `[0,2,1]`. The
+existing 1024-entry stress regression remains green at 1,354 clocks. The fix
+adds no RAM blocks or DSPs, approximately ten state bits and low-tens ALMs;
+expanding to literal MAME-sized storage would cost at least about 1.59 Mbit and
+is rejected. Known Scramble Spirits usage is 1002 normal descriptors.
 
-The MAME289 special-tile-mode audit also found one exact pending shared fix:
-mode 1 must negate the full ten-bit vertical-scroll word when choosing the
-physical map, while RTL currently drops input bit 9. Modes 2/3 and all other
-new special-mode vectors pass. An opt-in ModelSim assertion reproduces the
-failure as layer 0 versus MAME layer 1 for `vscroll=0x0200`; the default suite
-passes. The eventual one-line operand-width correction adds no registers,
-RAM, or DSPs, but is intentionally deferred until the active Crack Down
-checkpoint reaches frame 2260 so its executable provenance remains intact.
-Crack Down's recorded tile controls (`0000/0000/01f0/0000`) keep control-mode
-bits 13-14 clear, so that future mode-1-only correction cannot change its
-normal-mode raster; post-fix visual revalidation will target QGH and any other
-special-mode family rather than rerunning unrelated parents without evidence.
+The MAME289 special-tile-mode audit found and repaired one exact shared defect:
+mode 1 now negates the full ten-bit vertical-scroll word when choosing the
+physical map while preserving nine-bit source-Y wrapping. Modes 1/2/3 and all
+normal vectors pass the focused Verilator 5.050 regression; its rendered-pixel
+test completes at category 1 in 1,058 clocks. The one-line operand-width
+correction adds no registers, RAM, or DSPs. Crack Down's recorded tile controls
+(`0000/0000/01f0/0000`) keep control-mode bits 13-14 clear, so the correction
+cannot alter its accepted normal-mode raster. Visual revalidation will target
+QGH and any other special-mode family.

@@ -209,15 +209,11 @@ module tb_tile;
         check_special_issue(2'd3,9'd8,9'd10,16'h8000,16'h0003,
                             16'h0208,2'd1,9'd0,9'd13);
 
-`ifdef S24_EXPOSE_MODE1_VSCROLL_BIT9
         // MAME negates the full scroll word before testing bit 9.  This
-        // opt-in assertion intentionally exposes the current RTL defect:
-        // s24_tile negates only bits 8:0, so vscroll=0x200 selects layer 0
-        // here instead of MAME's layer 1.  Keep the default suite green until
-        // the shared synthesizable fix can be rebuilt and lockstep-tested.
+        // regression keeps the map-select bit independent from the ordinary
+        // nine-bit source-Y wrapping.
         check_special_issue(2'd1,9'd0,9'd0,16'h0000,16'h0200,
                             16'h0000,2'd1,9'd0,9'd0);
-`endif
 
         // Layer 0: category one, character zero. A zero mask bit selects the
         // even physical map independently of the tile category. This guards

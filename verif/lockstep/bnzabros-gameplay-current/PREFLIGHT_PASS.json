@@ -1,0 +1,80 @@
+{
+  "schema": "rtl-mame-gameplay-preflight-v2",
+  "result": "pass",
+  "game": "bnzabros",
+  "parent": "bnzabros",
+  "clone": false,
+  "reference": {
+    "executable": "D:\\Arcade\\AI\\mame\\mame.exe",
+    "executable_sha256": "dcf8677fce188e8e2625d4a2928005565652930d3f85d930f5d49d939535b182",
+    "version": "0.288 (mame0288)",
+    "behavioral_source_audit": "D:\\Arcade\\AI\\mame289",
+    "segas24_cpp_sha256": "ef5c780edb731233530729e31e832f6adf4575ea931d6add023daf39d5756db6",
+    "segaic24_cpp_sha256": "d37dec05ace5470719336704e7706e4800da73854a0783e169f3bed534b48ee7",
+    "fd1094_cpp_sha256": "41b023a16437e9676517f8d56ef1d4c67dcfe8544b37c36b9d1022e23cec022f"
+  },
+  "media": {
+    "archive": {
+      "path": "roms/bnzabros.zip",
+      "size": 945969,
+      "sha256": "4e7a9a80a594f98aebed2a3a9277fccc3a582e0da7f0fe36624f29c1401648f6"
+    },
+    "rtl_regions": [
+      {"path": "verif/media/bnzabros/boot.mem", "size": 786432, "sha256": "607f4842ab6e7fe14713cd2e2183675b174244a2836094a19bb8e8c8bc80c525"},
+      {"path": "verif/media/bnzabros/floppy.bin", "size": 2097152, "sha256": "ae0abce7de6277c85f6dd998562a62605804bcebfd31f8bf44d86bc1619f1cf3"},
+      {"path": "verif/media/bnzabros/romboard.mem", "size": 12582912, "sha256": "04b8d6aeb31e044a684f1a50b0244ae7898407be70c921dba7417b3a1e5dfe46"},
+      {"path": "verif/media/bnzabros/descriptor.hex", "size": 18, "sha256": "841cd842c70419e13becf3439a9d5f7111a92436aa54527157a6e825dc9e5afc"}
+    ]
+  },
+  "configuration": {
+    "flags": 3,
+    "track_bytes": 11520,
+    "magic_selector": 7,
+    "input_profile": 0,
+    "rtl_dips": {"COINAGE": 255, "DSW": 254},
+    "mame_default_dips": {"COINAGE": 255, "DSW": 254},
+    "mame_reference": ".build/mame-gameplay/bnzabros-coin900-start950-action1000"
+  },
+  "input_packet": {
+    "identity": "bnzabros-gameplay-v1",
+    "owner": "deterministic global parent profile",
+    "events": [
+      {"frame": 900, "control": "coin1", "duration_frames": 4},
+      {"frame": 950, "control": "start1", "duration_frames": 4},
+      {"frame": 1000, "control": "button1", "duration_frames": 4}
+    ],
+    "capture_frame": 1800,
+    "mame_result": "frame 1800 is unmistakable live training gameplay with timer 2:53"
+  },
+  "video": {
+    "rtl_native": [496, 384],
+    "mame_raw_visible": [496, 384],
+    "crop": [0, 0, 496, 384],
+    "orientation": "ROT0 native hardware raster",
+    "fixed_alignment": [0, 0]
+  },
+  "rtl": {
+    "verilator": "5.050 2026-07-01 rev vUNKNOWN-built20260702",
+    "top": "tb_gground_boot",
+    "build_wrapper": "tools/build_gground_visual.ps1",
+    "build_exit_code": 0,
+    "executable": "C:\\Users\\meath\\.codex\\visualizations\\2026\\08\\01\\019fbcc5-1b7a-7fe1-87a9-5f1231344106\\s24_obj_visual_postfix\\Vtb_gground_boot.exe",
+    "executable_size": 1552306,
+    "executable_sha256": "a51ae99bb51c33ea3d397e9940849bbad2417073f1e49bb118d9042ed140e9c4",
+    "tile_source_sha256": "50c43bb2c56540019aebc734df95cb14ab18b62e717839039dd750629f5f77f1",
+    "sprite_source_sha256": "35292856e90c97583090e04eda08c612eda3aaf3898ab487ffff10c043087611",
+    "staged_source_count": 23,
+    "repository_source_match": true,
+    "checkpoint_round_trip": {
+      "restored_path": "bnzabros-chain.vltsv",
+      "restored_native_frame": 20,
+      "advanced_checkpoint": "bnzabros-chain-next.vltsv",
+      "advanced_native_frame": 100,
+      "size": 9765929,
+      "sha256": "47e4d996ccba20011b6ca8b9274626e78abdc676d6cff246c3c11a3cf7c3dd42",
+      "fresh_process_runtime_exit_code": 0,
+      "visible_hwnd_verified": true
+    }
+  },
+  "mismatches": []
+}

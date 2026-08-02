@@ -344,7 +344,9 @@ module s24_tile (
                                 ? line_scroll_word[8:0]
                                 : line_hscr_q[8:0]);
             issue_source_y = line_render_y_q + line_vscr_q[8:0];
-            issue_neg_vscroll = 10'd0 - {1'b0,line_vscr_q[8:0]};
+            // MAME chooses the mode-1 physical map from bit 9 of the full
+            // ten-bit negated scroll value. Source Y still wraps at 9 bits.
+            issue_neg_vscroll = 10'd0 - line_vscr_q[9:0];
             if (line_ctrl_mode_q == 1)
                 issue_chosen_odd = !issue_neg_vscroll[9]
                                    ^ (line_render_y_q
