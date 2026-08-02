@@ -28,3 +28,20 @@ __pycache__/
 *.bin
 *.key
 !rtl/cpu/fx68k/*.mem
+
+# Local simulator/checkpoint and deployment output. These are reproducible
+# from the checked-in RTL, media descriptors, and verification scripts.
+/.build/
+/.tmp_verilator/
+/*.vltsv
+/*.vltsv.token
+/cfg/
+/nvram/
+/screenshots/
+/release_mister/
+/verif/captures/
+/verif/lockstep/
+/c5_pin_model_dump.txt
+/jtag.cdf
+/modelsim.ini
+/quartus-*.log

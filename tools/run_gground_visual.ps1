@@ -4,15 +4,18 @@ param(
     [string]$Restore = '',
     [string]$Save = 'gground.vltsv',
     [switch]$Detached,
-    [switch]$SkipBuild
+    [switch]$SkipBuild,
+    [switch]$NoAutoFinish
 )
 
-$arguments = @(
-    '-Game', 'gground', '-ModelDirectory', $ModelDirectory,
-    '-Save', $Save
-)
-if ($Restore) { $arguments += @('-Restore', $Restore) }
-if ($Detached) { $arguments += '-Detached' }
-if ($SkipBuild) { $arguments += '-SkipBuild' }
-& (Join-Path $PSScriptRoot 'run_game_visual.ps1') @arguments
+$parameters = @{
+    Game = 'gground'
+    ModelDirectory = $ModelDirectory
+    Save = $Save
+}
+if ($Restore) { $parameters.Restore = $Restore }
+if ($Detached) { $parameters.Detached = $true }
+if ($SkipBuild) { $parameters.SkipBuild = $true }
+if ($NoAutoFinish) { $parameters.NoAutoFinish = $true }
+& (Join-Path $PSScriptRoot 'run_game_visual.ps1') @parameters
 exit $LASTEXITCODE

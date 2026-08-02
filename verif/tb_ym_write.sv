@@ -207,18 +207,21 @@ module tb_ym_write;
         cpu_local_read(24'h800040,2'b11,16'hffff); // explicit IOD stub
 
         // CNT is register 0e in the 315-5296 I/O block, hence byte address
-        // $80001c.  MAME wires CNT2 directly to YM2151 reset_w: high asserts
-        // reset and low releases it.
+        // $80001c. CNT2 drives the YM2151 active-low /IC pin, while JT51's
+        // reset input is active high. System 24 writes CNT=04 to release YM.
         cpu_local_write(24'h80001c, 8'h04);
         if (!dut.io_cnt[2])
-            $fatal(1, "I/O CNT2 did not assert JT51 reset");
-        if (!dut.ym.rst)
-            $fatal(1, "JT51 reset was not asserted by CNT2");
+            $fatal(1, "I/O CNT2 release pin did not go high");
+        if (dut.ym.rst)
+            $fatal(1, "JT51 remained reset after CNT2 release");
         cpu_local_write(24'h80001c, 8'h00);
         if (dut.io_cnt[2])
-            $fatal(1, "I/O CNT2 did not release JT51 reset");
+            $fatal(1, "I/O CNT2 reset pin did not go low");
+        if (!dut.ym.rst)
+            $fatal(1, "JT51 reset was not asserted after CNT2 cleared");
+        cpu_local_write(24'h80001c, 8'h04);
         if (dut.ym.rst)
-            $fatal(1, "JT51 reset remained asserted after CNT2 cleared");
+            $fatal(1, "JT51 failed to leave reset after CNT2 re-release");
         repeat (4) @(posedge clk);
 
         // Start at different points in the divided-enable sequence.  The core

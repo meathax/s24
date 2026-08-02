@@ -26,36 +26,53 @@ Sources are ordered by authority for this implementation.
 2. MAME upstream: https://github.com/mamedev/mame
 3. Working local System 32 MiSTer core supplied as the platform reference:
    `D:/Arcade/AI/s32` (MiSTer wrapper, SDRAM conventions, build structure).
-4. fx68k synthesizable 68000: https://github.com/jtfpga/fx68k
+4. fx68k synthesizable 68000: https://github.com/ijor/fx68k
+   The vendored rtl/cpu/fx68k copy retains the synthesizable CPU and the
+   local changes needed for packed Verilator save-state structs, instruction
+   acceptance tagging, and System 24 bus timing.
 5. JT51 synthesizable YM2151: https://github.com/jotego/jt51
+   The local copy is based on JT51 master snapshot
+   985a573dcfc1ff135553a39f7eae21d18ba57cbe. Its channel register path now
+   uses the upstream jt51_reg_ch organization. The local integration keeps
+   the System 24 bus/timing adaptations and applies the upstream wider
+   accumulator saturation, qualified timer-overflow flag, and envelope-rate
+   behavior, with focused channel, tone, and timer regressions under verif/.
 6. Jotego core collection and its licensed reusable modules:
    https://github.com/jotego/jtcores
-7. Jotego JTS16 System 16 core, pinned to archived commit
-   `d80e197f7413628bc02cb953cca8a476804b2358` (2022-10-07):
-   https://github.com/jotego/jts16
-   This GPL-3.0 source is a secondary implementation cross-check for reusable
-   Sega-era engineering patterns such as FD1094 verification, paired 68000
-   clock enables, line-buffer discipline, final-stage display blanking, and
-   bounded memory handshakes. System 16 maps, timing, video priority, sound,
-   and cabinet logic are not System 24 behavioral evidence.
-8. Furrtek 315-5242 die-trace RTL:
+   The current master snapshot used for source comparison is
+   2540976bcc930a0dbc099a92baefdebac2810b52.
+7. Jotego JTS16 FD1094 RTL:
+   https://github.com/jotego/jtcores/tree/master/cores/s16/hdl
+   The three FD1094 files are preserved under verif/upstream/jtcores_s16.
+   They are a decryption/control oracle, not a drop-in System 24 wrapper:
+   the production path retains System 24 key-window, instruction-boundary,
+   and MAME state-command semantics. verif/tb_fd1094_upstream_compare.sv
+   compares the upstream equations against the production combinational
+   decoder over fixed and deterministic pseudo-random vectors.
+8. Jotego JTS18 315-5242 behavioral reference:
+   https://github.com/jotego/jtcores/blob/master/cores/s18/hdl/jts18_colmix.v
+   This is used for palette/shadow/highlight/output-stage review only; the
+   source is preserved under verif/upstream/jtcores_s18 and the System 24
+   mixer and register map remain MAME-derived.
+9. Furrtek 315-5242 die-trace RTL and physical research:
    https://github.com/furrtek/SiliconRE/tree/master/Sega/315-5242
-9. System 24 board summary and photographs:
-   https://www.system16.com/hardware.php?id=708
-10. Furrtek 315-5292 decap supplied for this project:
-   `D:/Downloads/sega_315-5292_furrtek_mz.jpg` (SHA-256
-   `5A7C1B0C22965429B06C9085EF41D5D785BA6EE5BCA3FDFD7A2DF0C8CF29DA96`).
-11. SiliconPr0n archive entry for Furrtek's Sega 315-5292 image:
+10. System 24 board summary and photographs:
+    https://www.system16.com/hardware.php?id=708
+11. Furrtek 315-5292 decap supplied for this project:
+    D:/Downloads/sega_315-5292_furrtek_mz.jpg (SHA-256
+    5A7C1B0C22965429BA06C9085EF41D5D785BA6EE5BCA3FDFD7A2DF0C8CF29DA96).
+12. SiliconPr0n archive entry for Furrtek's Sega 315-5292 image:
     https://siliconpr0n.org/archive/doku.php?id=furrtek:sega:315-5292
-12. Furrtek SiliconRE gate-array cell lists and completed trace examples:
+13. Furrtek SiliconRE gate-array cell lists and completed trace examples:
     https://github.com/furrtek/SiliconRE
-13. Original Sega System 24 schematic index:
+14. Original Sega System 24 schematic index:
     https://techdocs.exodusemulator.com/Arcade/SegaSystem24/index.html
-14. Preserved Charles MacDonald 315-5292 notes, measured raster timing, and
+15. Preserved Charles MacDonald 315-5292 notes, measured raster timing, and
     partial pin information:
     https://w.atwiki.jp/arcadegames/pages/33.html
 
-No public FPGA implementation of the complete System 24 video chipset was
-found during the source survey. JTS16 does contain a synthesizable FD1094, but
-this core's independently structured implementation remains tied to current
-MAME behavior and uses JTS16 only as a secondary design and regression review.
+No public FPGA implementation explicitly identified as the complete System 24
+315-5292, 315-5293, 315-5294, 315-5295, or 315-5296 chipset was found during
+the source survey. The System 24 graphics path therefore remains built from
+MAME, schematics, die research, measurements, and differential simulation;
+JTS18's 315-5242 behavior is not treated as a drop-in System 24 video core.

@@ -8,6 +8,9 @@ module tb_video_timing;
     logic hblank,vblank,hsync,vsync,hsync_tick;
     integer pixels=0;
     integer lines=0;
+    integer active_pixels=0;
+    integer visible_lines=0;
+    integer line_active_pixels=0;
     always #5 clk=~clk;
 
     s24_video_timing dut(
@@ -26,10 +29,30 @@ module tb_video_timing;
             assert(vsync == !((vcount >= 10'd395) && (vcount < 10'd399)))
                 else $fatal(1,"vsync phase at %0d",vcount);
             pixels++;
-            if (hcount == 10'd655) lines++;
+            if (!hblank && !vblank) begin
+                active_pixels++;
+                line_active_pixels++;
+            end
+            if (hcount == 10'd655) begin
+                lines++;
+                if (vcount < 10'd384) begin
+                    assert(line_active_pixels == 496)
+                        else $fatal(1,"visible line %0d has %0d active pixels",
+                                    vcount,line_active_pixels);
+                    visible_lines++;
+                end else begin
+                    assert(line_active_pixels == 0)
+                        else $fatal(1,"blank line %0d emitted active pixels",vcount);
+                end
+                line_active_pixels=0;
+            end
             if (lines == 424) begin
                 assert(pixels == 656*424) else $fatal(1,"raster size %0d",pixels);
-                $display("PASS 656x424 raster and measured sync windows");
+                assert(visible_lines == 384)
+                    else $fatal(1,"visible line count %0d",visible_lines);
+                assert(active_pixels == 496*384)
+                    else $fatal(1,"active pixel count %0d",active_pixels);
+                $display("PASS 656x424 raster, 496x384 progressive active area and measured sync windows");
                 $finish;
             end
         end

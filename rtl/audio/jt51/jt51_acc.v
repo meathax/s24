@@ -62,9 +62,12 @@ end
 
 wire ren = rl_I[1];
 wire len = rl_I[0];
-reg signed [16:0] pre_left, pre_right;
+// Keep the internal mix wide until the exact 16-bit output boundary.  The
+// upstream JT51 accumulator uses three guard bits here; the old local copy
+// had only one, which could wrap a multi-operator mix before saturation.
+reg signed [18:0] pre_left, pre_right;
 wire signed [15:0] total;
-wire signed [16:0] total_ex = {total[15],total};
+wire signed [18:0] total_ex = { {3{total[15]}},total};
 
 reg sum_all;
 
@@ -74,9 +77,9 @@ wire rst_sum = c2_enters;
 //wire rst_sum = m2_enters;
 
 function signed [15:0] lim16;
-    input signed [16:0] din;
-    lim16 = !din[16] &&  din[15] ? 16'h7fff :
-           ( din[16] && !din[15] ? 16'h8000 : din[15:0] );
+    input signed [18:0] din;
+    lim16 = din[18:16]=={3{din[15]}} ? din[15:0] :
+            { din[18], {15{~din[18]}}};
 endfunction
 
 
@@ -88,12 +91,12 @@ always @(posedge clk) begin
         if( rst_sum )  begin
             sum_all <= 1'b1;
             if( !sum_all ) begin
-                pre_right <= ren ? total_ex : 17'd0;
-                pre_left  <= len ? total_ex : 17'd0;
+                pre_right <= ren ? total_ex : 19'd0;
+                pre_left  <= len ? total_ex : 19'd0;
             end
             else begin
-                pre_right <= pre_right + (ren ? total_ex : 17'd0);
-                pre_left  <= pre_left  + (len ? total_ex : 17'd0);
+                pre_right <= pre_right + (ren ? total_ex : 19'd0);
+                pre_left  <= pre_left  + (len ? total_ex : 19'd0);
             end
         end
         if( c1_enters ) begin

@@ -24,6 +24,13 @@ module jt51_csr_ch(
     input         cen,
     input  [ 7:0] din,
 
+    // The current JT51 implementation keeps channel state in real per-
+    // channel registers.  The older local copy used an eight-stage CSR,
+    // which loses adjacent channel writes when software programs two
+    // channels back-to-back (a pattern used by System 24 games).
+    input  [ 2:0] up_ch,
+    input  [ 2:0] ch,
+
     input         up_rl_ch,  
     input         up_fb_ch,  
     input         up_con_ch, 
@@ -32,13 +39,13 @@ module jt51_csr_ch(
     input         up_ams_ch, 
     input         up_pms_ch, 
 
-    output  [1:0] rl,
-    output  [2:0] fb,
-    output  [2:0] con,
-    output  [6:0] kc,
-    output  [5:0] kf,
-    output  [1:0] ams,
-    output  [2:0] pms
+    output reg [1:0] rl,
+    output reg [2:0] fb,
+    output reg [2:0] con,
+    output reg [6:0] kc,
+    output reg [5:0] kf,
+    output reg [1:0] ams,
+    output reg [2:0] pms
 );
 
 wire    [1:0]   rl_in   = din[7:6];
@@ -49,26 +56,65 @@ wire    [5:0]   kf_in   = din[7:2];
 wire    [1:0]   ams_in  = din[1:0];
 wire    [2:0]   pms_in  = din[6:4];
 
-wire [25:0] reg_in = {   
-        up_rl_ch    ? rl_in     : rl,
-        up_fb_ch    ? fb_in     : fb,
-        up_con_ch   ? con_in    : con,
-        up_kc_ch    ? kc_in     : kc,
-        up_kf_ch    ? kf_in     : kf,
-        up_ams_ch   ? ams_in    : ams,
-        up_pms_ch   ? pms_in    : pms   };
+// Channel data is not a CSR.  A second channel write can arrive before all
+// eight channels have traversed a serial pipeline, so each YM2151 channel
+// needs its own storage.  This is the channel-register organization used by
+// current upstream JT51 (jt51_reg_ch), adapted to the older local wrapper's
+// signal names.
+reg [1:0] reg_rl [0:7];
+reg [2:0] reg_fb [0:7];
+reg [2:0] reg_con[0:7];
+reg [6:0] reg_kc [0:7];
+reg [5:0] reg_kf [0:7];
+reg [1:0] reg_ams[0:7];
+reg [2:0] reg_pms[0:7];
+integer i;
 
-wire [25:0] reg_out;
+always @(posedge clk) begin
+    if (rst) begin
+        rl      <= 0;
+        fb      <= 0;
+        con     <= 0;
+        kc      <= 0;
+        kf      <= 0;
+        ams     <= 0;
+        pms     <= 0;
+    end else if (cen) begin
+        rl  <= reg_rl[ch];
+        fb  <= reg_fb[ch-3'd1];
+        con <= reg_con[ch];
+        kc  <= reg_kc[ch];
+        kf  <= reg_kf[ch];
+        ams <= reg_ams[ch-3'd6];
+        pms <= reg_pms[ch];
+    end
+end
 
-assign { rl, fb, con, kc, kf, ams, pms  } = reg_out;
-
-jt51_sh #( .width(26), .stages(8)) u_regop(
-    .rst    ( rst     ),
-    .clk    ( clk     ),
-    .cen    ( cen     ),
-    .din    ( reg_in  ),
-    .drop   ( reg_out )
-);
+always @(posedge clk) begin
+    if (rst) begin
+        for (i=0; i<8; i=i+1) begin
+            reg_rl[i]  <= 0;
+            reg_fb[i]  <= 0;
+            reg_con[i] <= 0;
+            reg_kc[i]  <= 0;
+            reg_kf[i]  <= 0;
+            reg_ams[i] <= 0;
+            reg_pms[i] <= 0;
+        end
+    end else begin
+        if (up_rl_ch) begin
+            reg_rl[up_ch]  <= rl_in;
+            reg_fb[up_ch]  <= fb_in;
+            reg_con[up_ch] <= con_in;
+        end
+        if (up_kc_ch) reg_kc[up_ch] <= kc_in;
+        if (up_kf_ch) reg_kf[up_ch] <= kf_in;
+        if (up_pms_ch) begin
+            reg_ams[up_ch] <= ams_in;
+            reg_pms[up_ch] <= pms_in;
+        end
+    end
+end
 
 
 endmodule

@@ -5,13 +5,23 @@ module emu (
     assign USER_OUT='1;
     assign {UART_RTS,UART_TXD,UART_DTR}=0;
     assign {SD_SCK,SD_MOSI,SD_CS}='Z;
+    `ifndef MISTER_FB
     assign {DDRAM_CLK,DDRAM_BURSTCNT,DDRAM_ADDR,DDRAM_DIN,
             DDRAM_BE,DDRAM_RD,DDRAM_WE}='0;
-    assign VGA_F1=0; assign VGA_SCALER=0; assign VGA_DISABLE=0;
+    `endif
+    assign VGA_F1=0; assign VGA_SCALER=rotation_active; assign VGA_DISABLE=0;
     assign HDMI_FREEZE=0; assign HDMI_BLACKOUT=0; assign HDMI_BOB_DEINT=0;
     assign AUDIO_S=1; assign AUDIO_MIX=0;
     assign LED_DISK=0; assign LED_POWER=0; assign BUTTONS=0;
-    assign VIDEO_ARX=13'd31; assign VIDEO_ARY=13'd24;
+    logic [1:0] aspect;
+    logic [127:0] status;
+    assign aspect=status[2:1];
+    wire [1:0] rotation=status[9:8];
+    wire [2:0] scaling=status[12:10];
+    wire rotation_active=|rotation;
+    wire rotate_ccw=(rotation==2'd1);
+    wire [12:0] aspect_arx=aspect==0 ? (rotation_active ? 13'd3 : 13'd4) : {11'd0,aspect-1'b1};
+    wire [12:0] aspect_ary=aspect==0 ? (rotation_active ? 13'd4 : 13'd3) : 13'd0;
 
     `ifndef BUILD_DATE
     `define BUILD_DATE "S24-WIP"
@@ -19,9 +29,14 @@ module emu (
     localparam CONF_STR={
         "S24;;",
         "O[2:1],Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
-        "O[5:3],Scandoubler Fx,None,CRT 25%,CRT 50%,CRT 75%;",
         "O[6],Pause,Off,On;",
         "O[7],Service Mode,Off,On;",
+        "O[9:8],Rotation,Normal,Rotate 90 CCW,Rotate 90 CW;",
+        "O[12:10],Scaling,Normal,V-Integer,HV-Integer-,HV-Integer+,HV-Integer;",
+        "P1O[101],CRT Adjust,Off,On;",
+        "H1P1O[100:96],CRT H-Size,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
+        "H1P1O[85:79],CRT H-Position,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,+32,+33,+34,+35,+36,+37,+38,+39,+40,+41,+42,+43,+44,+45,+46,+47,+48,-48,-47,-46,-45,-44,-43,-42,-41,-40,-39,-38,-37,-36,-35,-34,-33,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
+        "H1P1O[78:74],CRT V-Shift,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
         "R[0],Reset;",
         "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test;",
         "V,v",`BUILD_DATE
@@ -35,13 +50,10 @@ module emu (
     assign CLK_VIDEO=clk_sys;
 
     logic [1:0] buttons;
-    logic [63:0] status;
     logic [31:0] joy0,joy1,joy2,joy3;
     logic [8:0] spinner0,spinner1,spinner2,spinner3;
     logic [7:0] paddle0,paddle1,paddle2,paddle3;
     logic forced_scandoubler;
-    // Driven bidirectionally by hps_io and video_mixer; Quartus 17 requires
-    // an inout connection to be a structural net, not a variable.
     wire [21:0] gamma_bus;
     logic ioctl_download,ioctl_upload,ioctl_wr,ioctl_rd,ioctl_wait;
     logic [15:0] ioctl_index;
@@ -52,7 +64,8 @@ module emu (
     hps_io #(.CONF_STR(CONF_STR),.WIDE(1)) hps(
         .clk_sys(clk_sys),.HPS_BUS(HPS_BUS),.EXT_BUS(),.gamma_bus(gamma_bus),
         .forced_scandoubler(forced_scandoubler),.buttons(buttons),.status(status),
-        .status_menumask(16'd0),.joystick_0(joy0),.joystick_1(joy1),
+        .video_rotated(video_rotated),.new_vmode(1'b0),
+        .status_menumask({14'd0,~status[101],1'b0}),.joystick_0(joy0),.joystick_1(joy1),
         .joystick_2(joy2),.joystick_3(joy3),
         .paddle_0(paddle0),.paddle_1(paddle1),
         .paddle_2(paddle2),.paddle_3(paddle3),
@@ -167,6 +180,127 @@ module emu (
         .p5_req(p5_req),.p5_addr(p5_addr),.p5_data(p5_data),.p5_ack(p5_ack),
         .wr_req(cwr_req),.wr_addr(cwr_addr),.wr_data(cwr_data),.wr_be(cwr_be),.wr_ack(cwr_ack));
 
+    // CRT Adjust is kept on the core side so the native raster, analog output
+    // and optional framebuffer rotation all see the same adjusted stream.
+    reg crt_on=1'b0;
+    reg signed [4:0] hsize_s=5'sd0;
+    reg [6:0] hpos_d=7'd0;
+    reg signed [5:0] vshift_s=6'sd0;
+    always @(posedge clk_sys) if(core_ce) begin
+        crt_on   <= status[101];
+        hsize_s  <= $signed(status[100:96]);
+        hpos_d   <= status[85:79];
+        vshift_s <= $signed({status[78],status[78:74]});
+    end
+
+    wire signed [8:0] hpos_off = (hpos_d <= 7'd48)
+        ? $signed({2'b0,hpos_d})
+        : $signed({2'b0,hpos_d}) - 9'sd128;
+    wire signed [7:0] rd_period_s = 8'sd12 + $signed({{3{hsize_s[4]}},hsize_s});
+    wire [7:0] rd_period = (rd_period_s < 8'sd4) ? 8'd4 : rd_period_s[7:0];
+
+    wire hs_ref;
+    reg hs_ref_d=1'b0;
+    reg [7:0] rd_acc=8'd0;
+    always @(posedge clk_sys) hs_ref_d <= hs_ref;
+    wire hs_ref_rise = hs_ref & ~hs_ref_d;
+    wire rd_tick = (rd_acc + 8'd4) >= {1'b0,rd_period};
+    always @(posedge clk_sys) begin
+        if(hs_ref_rise) rd_acc <= 8'd0;
+        else if(rd_tick) rd_acc <= rd_acc + 8'd4 - rd_period;
+        else rd_acc <= rd_acc + 8'd4;
+    end
+    wire rd_ce = crt_on ? rd_tick : core_ce;
+
+    wire [7:0] crt_r,crt_g,crt_b;
+    wire crt_hs,crt_vs,crt_hb,crt_vb;
+    crt_adjust #(
+        .VTOTAL(424),
+        .HTOTAL(656),
+        .HPOS_MODE(0)
+    ) crt_adjust_i (
+        .clk(clk_sys),
+        .pxl_cen(core_ce),
+        .pxl2_cen(rd_ce),
+        .active(crt_on),
+        .hsize(hsize_s),
+        .hoffset(hpos_off),
+        .voffset(vshift_s),
+        .r_in(r),.g_in(g),.b_in(b),
+        .hs_in(hsync),.vs_in(vsync),
+        .hb_in(hblank|vblank),.vb_in(vblank),
+        .r_out(crt_r),.g_out(crt_g),.b_out(crt_b),
+        .hs_out(crt_hs),.vs_out(crt_vs),
+        .hb_out(crt_hb),.vb_out(crt_vb),
+        .hs_ref_out(hs_ref)
+    );
+
+    // Keep the OSD's DE origin tied to the native active edge.  CRT H-Position
+    // moves the sync, while the OSD remains centered on the physical display.
+    wire native_de = ~(hblank|vblank);
+    reg native_de_d=1'b0;
+    always @(posedge clk_sys) if(core_ce) native_de_d <= native_de;
+    wire native_rise = core_ce && native_de && ~native_de_d;
+    wire crt_de = ~crt_hb;
+    reg crt_de_d=1'b0;
+    always @(posedge clk_sys) if(rd_ce) crt_de_d <= crt_de;
+    wire crt_fall = rd_ce && crt_de_d && ~crt_de;
+    reg de_osd=1'b0;
+    always @(posedge clk_sys) begin
+        if(native_rise) de_osd <= 1'b1;
+        else if(crt_fall) de_osd <= 1'b0;
+    end
+
+    wire video_ce = crt_on ? rd_ce : core_ce;
+    wire [7:0] video_r = crt_on ? crt_r : r;
+    wire [7:0] video_g = crt_on ? crt_g : g;
+    wire [7:0] video_b = crt_on ? crt_b : b;
+    wire video_hs = crt_on ? crt_hs : hsync;
+    wire video_vs = crt_on ? crt_vs : vsync;
+    wire video_de = crt_on ? de_osd : native_de;
+    wire video_de_freak;
+    video_freak video_freak_i (
+        .CLK_VIDEO(clk_sys),
+        .CE_PIXEL(video_ce),
+        .VGA_VS(video_vs),
+        .HDMI_WIDTH(HDMI_WIDTH),
+        .HDMI_HEIGHT(HDMI_HEIGHT),
+        .VGA_DE(video_de_freak),
+        .VIDEO_ARX(VIDEO_ARX),
+        .VIDEO_ARY(VIDEO_ARY),
+        .VGA_DE_IN(video_de),
+        .ARX(aspect_arx[11:0]),
+        .ARY(aspect_ary[11:0]),
+        .CROP_SIZE(12'd0),
+        .CROP_OFF(5'd0),
+        .SCALE(scaling)
+    );
+
+    wire video_rotated;
+`ifdef MISTER_FB
+    screen_rotate video_rotate (
+        .CLK_VIDEO(clk_sys),
+        .CE_PIXEL(video_ce),
+        .VGA_R(video_r),.VGA_G(video_g),.VGA_B(video_b),
+        .VGA_HS(video_hs),.VGA_VS(video_vs),.VGA_DE(video_de),
+        .rotate_ccw(rotate_ccw),
+        .no_rotate(~rotation_active),
+        .flip(1'b0),
+        .video_rotated(video_rotated),
+        .FB_EN(FB_EN),.FB_FORMAT(FB_FORMAT),
+        .FB_WIDTH(FB_WIDTH),.FB_HEIGHT(FB_HEIGHT),
+        .FB_BASE(FB_BASE),.FB_STRIDE(FB_STRIDE),
+        .FB_VBL(FB_VBL),.FB_LL(FB_LL),
+        .DDRAM_CLK(DDRAM_CLK),.DDRAM_BUSY(DDRAM_BUSY),
+        .DDRAM_BURSTCNT(DDRAM_BURSTCNT),.DDRAM_ADDR(DDRAM_ADDR),
+        .DDRAM_DIN(DDRAM_DIN),.DDRAM_BE(DDRAM_BE),
+        .DDRAM_WE(DDRAM_WE),.DDRAM_RD(DDRAM_RD)
+    );
+    assign FB_FORCE_BLANK=1'b0;
+`else
+    assign video_rotated=1'b0;
+`endif
+
     logic swr_req,swr_ack;
     logic [26:1] swr_addr;
     logic [15:0] swr_data;
@@ -263,15 +397,16 @@ module emu (
     // and 57.51 Hz vertical.  The legacy in-core video_mixer was intended for
     // older 15 kHz cores and re-timed this medium-resolution stream, producing
     // line repeats, frame tearing and vertical jumps on real hardware.
-    wire [2:0] scandoubler_fx=status[5:3];
-    assign CE_PIXEL=core_ce;
-    assign VGA_R=r;
-    assign VGA_G=g;
-    assign VGA_B=b;
-    assign VGA_HS=hsync;
-    assign VGA_VS=vsync;
-    assign VGA_DE=~(hblank|vblank);
-    assign VGA_SL=scandoubler_fx[1:0];
+    assign CE_PIXEL=video_ce;
+    assign VGA_R=video_r;
+    assign VGA_G=video_g;
+    assign VGA_B=video_b;
+    assign VGA_HS=video_hs;
+    assign VGA_VS=video_vs;
+    assign VGA_DE=video_de;
+    // System 24 is already a 384-line medium-resolution source.  Do not
+    // discard/darken alternate native lines in the framework scanline stage.
+    assign VGA_SL=2'b00;
 
     assign LED_USER=~rom_loaded|ioctl_download|wrong_sdram_size;
 endmodule

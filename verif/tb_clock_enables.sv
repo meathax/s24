@@ -17,6 +17,7 @@ module tb_clock_enables;
     integer phi1_before_pause;
     integer phi2_before_pause;
     integer ce16_before_pause;
+    logic ce16_q=0,ce8_q=0,ce4_q=0;
 
     always #5 clk = ~clk;
 
@@ -27,12 +28,17 @@ module tb_clock_enables;
         if (!reset) begin
             if (phi1 && phi2)
                 $fatal(1, "phi1 and phi2 overlapped");
+            if ((ce_16m && ce16_q) || (ce_8m && ce8_q) || (ce_4m && ce4_q))
+                $fatal(1, "derived pixel/device enable was wider than one source clock");
             if (phi1) phi1_count = phi1_count + 1;
             if (phi2) phi2_count = phi2_count + 1;
             if (ce_16m) ce16_count = ce16_count + 1;
             if (ce_8m) ce8_count = ce8_count + 1;
             if (ce_4m) ce4_count = ce4_count + 1;
         end
+        ce16_q <= ce_16m;
+        ce8_q <= ce_8m;
+        ce4_q <= ce_4m;
     end
 
     initial begin

@@ -54,8 +54,12 @@ module s24_sprite_line_ram #(
         ram.lpm_type = "altsyncram",
         ram.outdata_reg_a = "CLOCK0",
         ram.outdata_reg_b = "CLOCK1",
-        ram.read_during_write_mode_port_a = "NEW_DATA_NO_NBE_READ",
-        ram.read_during_write_mode_port_b = "NEW_DATA_NO_NBE_READ",
+        // Both ports deliberately consume the old pixel while clearing or
+        // replacing it.  This matches the behavioural model's nonblocking
+        // read-before-write semantics. NEW_DATA made port A return the zero
+        // it was simultaneously writing and hid nearly every sprite on FPGA.
+        ram.read_during_write_mode_port_a = "OLD_DATA",
+        ram.read_during_write_mode_port_b = "OLD_DATA",
         ram.width_byteena_a = 1,
         ram.width_byteena_b = 1,
         ram.power_up_uninitialized = "FALSE";

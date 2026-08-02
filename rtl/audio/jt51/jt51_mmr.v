@@ -101,7 +101,7 @@ module jt51_mmr(
     output          use_prev1
 );
 
-reg [7:0] selected_register, din_copy ;
+reg [7:0] selected_register, op_din, ch_din ;
 
 reg       up_rl,  up_kc,  up_kf,  up_pms,
           up_dt1, up_tl,  up_ks,  up_dt2,
@@ -150,7 +150,8 @@ always @(posedge clk, posedge rst) begin : memory_mapped_registers
         lfo_w           <= 2'd0;
         { ct2, ct1 }    <= 2'd0;
         csm             <= 1'b0;
-        din_copy        <= 8'd0;
+        op_din          <= 8'd0;
+        ch_din          <= 8'd0;
         test_mode       <= 8'd0;
         `ifdef SIMULATION
         mmr_dump <= 1'b0;
@@ -158,23 +159,18 @@ always @(posedge clk, posedge rst) begin : memory_mapped_registers
     end else begin
         // WRITE IN REGISTERS
         if( write ) begin
+            // Upstream JT51 stores channel data directly, so those strobes
+            // last for one bus access. Operator data still traverses an
+            // eight-slot CSR and must remain requested across a following
+            // address write until the next data write replaces the request.
+            { up_rl, up_kc, up_kf, up_pms } <= 4'd0;
             if( !a0 )
                 selected_register <= din;
             else begin
-                din_copy <= din;
+                { up_dt1, up_tl, up_ks, up_amsen,
+                  up_dt2, up_d1l, up_keyon } <= 7'd0;
                 up_op    <= selected_register[4:3]; // operator to update
                 up_ch    <= selected_register[2:0]; // channel to update
-                up_rl    <= 1'b0;
-                up_kc    <= 1'b0;
-                up_kf    <= 1'b0;
-                up_pms   <= 1'b0;
-                up_dt1   <= 1'b0;
-                up_tl    <= 1'b0;
-                up_ks    <= 1'b0;
-                up_amsen <= 1'b0;
-                up_dt2   <= 1'b0;
-                up_d1l   <= 1'b0;
-                up_keyon <= 1'b0;
                 // Global registers
                 if( selected_register < 8'h20 ) begin
                     case( selected_register)
@@ -183,7 +179,10 @@ always @(posedge clk, posedge rst) begin : memory_mapped_registers
                     `ifdef TEST_SUPPORT
                     REG_TEST2:  { test_op0, test_eg } <= din[1:0];
                     `endif
-                    REG_KON:    up_keyon     <= 1'b1;
+                    REG_KON: begin
+                        up_keyon <= 1'b1;
+                        op_din   <= din;
+                    end
                     REG_NOISE:  { ne, nfrq } <= { din[7], din[4:0] };
                     REG_CLKA1:  value_A[9:2] <= din;
                     REG_CLKA2:  value_A[1:0] <= din[1:0];
@@ -217,6 +216,7 @@ always @(posedge clk, posedge rst) begin : memory_mapped_registers
                 end else
                 // channel registers
                 if( selected_register < 8'h40 ) begin
+                    ch_din <= din;
                     case( selected_register[4:3] )
                         2'h0: up_rl <= 1'b1;
                         2'h1: up_kc <= 1'b1;
@@ -227,6 +227,7 @@ always @(posedge clk, posedge rst) begin : memory_mapped_registers
                 else
                 // operator registers
                 begin
+                    op_din <= din;
                     case( selected_register[7:5] )
                         3'h2: up_dt1    <= 1'b1;
                         3'h3: up_tl     <= 1'b1;
@@ -274,7 +275,8 @@ jt51_reg u_reg(
     .rst        ( rst       ),
     .clk        ( clk       ),      // P1
     .cen        ( cen       ),      // P1
-    .din        ( din_copy  ),
+    .din        ( op_din   ),
+    .ch_din     ( ch_din   ),
 
     .up_rl      ( up_rl     ),
     .up_kc      ( up_kc     ),
