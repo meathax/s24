@@ -11,7 +11,7 @@ Coin 1/Start 1 input reaches unmistakable live gameplay on both sides.
 | 1 | `gground` | frame 1261, CPU-B `0085b0`–`0085b2` | aligned; corrected `FF FD` DIP; deterministic coin/start/action profile | **complete:** attract is pixel-exact; visible Verilator frame 1920 proves live gameplay closely matched to MAME |
 | 2 | `crkdown` | frame 961, CPU-B `008e94` | aligned; shared physical-window/category separation repaired the old radar defect | **complete:** attract is pixel-exact; visible Verilator frame 2260 proves live gameplay closely matched to MAME |
 | 3 | `bnzabros` | frame 781, CPU-B `0081ca`–`0100c4` | 4 MiB zero tail, 20-frame FDC index cadence, generic input and magic-latch contracts aligned | **complete:** attract is pixel-exact; visible Verilator frame 1800 proves live gameplay closely matched to MAME |
-| 4 | `hotrod` | frame 1321, CPU-B `006a5e`–`006a7c` | media, 2f00 FDC, neutral analog daughterboard and `FF FF` aligned | **complete attract:** native title pixel-exact; deterministic gameplay proof pending |
+| 4 | `hotrod` | frame 1321, CPU-B `006a5e`–`006a7c` | media, 2f00 FDC, analog daughterboard and `FF FF` aligned | **complete:** attract is pixel-exact; visible Verilator frame 2400 proves live racing closely matched to MAME |
 | 5 | `sspirits` | frame 1201, CPU-B `0086b4` | corrected `FF FD`; raw native rotation boundary defined | pending; historical run used wrong DIP |
 | 6 | `dcclub` | frame 781, CPU-B `00aeae`–`00af08` | TAS RMW bus re-arm and 4 MiB zero tail repaired; `FF FB` aligned | pending |
 | 7 | `sgmast` | frame 841, CPU-B `0092ba`–`0092d0` | corrected `FF FD`; neutral golf encoder aligned | pending; MAME parent key is marked `BAD_DUMP` |
@@ -158,8 +158,20 @@ The preserved pair is `verif/frames/current-parent-audit/hotrod-final.png` and
 Hot Rod exposes Coin 1 on both its dedicated chute port and the generic SERVICE
 port, matching RTL `joy0[11]` driving both. The MAME capture adapters now pulse
 every matching Coin 1 field instead of relying on unordered Lua `pairs()` to
-choose one; gameplay timing remains deliberately unset until a frame-stamped
-reference run proves it.
+choose one. A frame-stamped MAME probe proves that digital Start is ignored:
+the cabinet requests its real accelerator. The global parent profile therefore
+pulses Coin 1 at frame 1060, keeps steering neutral and holds P1 pedal `0xff`
+from frame 1140 through the frame-2400 capture. The shared visual top now maps
+Up/right trigger and the deterministic packet to the existing eight-bit pedal
+input; this is simulation-only and adds no synthesizable logic or storage.
+
+The final visible Verilator frame 2400 is active racing and best matches MAME
+frame 2305 under the identical input packet: 152,692/190,464 pixels are exact
+(80.17%), RGB MAE is 10.70 and radius-2 Gaussian RGB MAE is 3.96. MAME frame
+2304 is the closest structural phase at Gaussian MAE 1.43. Cars, road,
+buildings, HUD and `GAS 149` align; the residual is raster/vehicle animation
+phase. The final 9,765,925-byte checkpoint SHA-256 is
+`450049f84d6053a0ba1c9609c13b8e35a8fb8d0f090fadc720bda4e31514b2fe`.
 
 Crack Down gameplay exposed the corresponding normal-window rule directly:
 mask zero selects the even physical tilemap and mask one selects the odd

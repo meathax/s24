@@ -1,0 +1,56 @@
+{
+  "schema": "rtl-mame-gameplay-preflight-v2",
+  "result": "pass",
+  "game": "hotrod",
+  "parent": "hotrod",
+  "clone": false,
+  "reference": {
+    "executable": "D:\\Arcade\\AI\\mame\\mame.exe",
+    "version": "0.288 (mame0288)",
+    "behavioral_source_audit": "D:\\Arcade\\AI\\mame289",
+    "segas24_cpp_sha256": "ef5c780edb731233530729e31e832f6adf4575ea931d6add023daf39d5756db6"
+  },
+  "media": {
+    "archive": {"path": "roms/hotrod.zip", "size": 1058328, "sha256": "d0d822809c482124233e398076c091e0685dac577d818f7695eb93f28bf9f2e0"},
+    "rtl_regions": [
+      {"path": "verif/media/hotrod/boot.mem", "size": 786432, "sha256": "68c76be4c1cd7f5bcc697947b42c18475d4c1c6de9f95625f9ed8464eb0f140a"},
+      {"path": "verif/media/hotrod/floppy.bin", "size": 2097152, "sha256": "2e79f0ebd19d84cb49a7b186bf8b7cee64926a3578820c7128c5a46ffe0faaad"},
+      {"path": "verif/media/hotrod/descriptor.hex", "size": 18, "sha256": "99ba5cbb73af95bed726e9289f24964ab3d9b059a9a1044a194ea4f182c42700"}
+    ]
+  },
+  "configuration": {
+    "flags": 89,
+    "track_bytes": 12032,
+    "magic_selector": 0,
+    "input_profile": 0,
+    "rtl_dips": {"COINAGE": 255, "DSW": 255},
+    "steering": 0,
+    "pedal_released": 1
+  },
+  "input_packet": {
+    "identity": "hotrod-gameplay-v1",
+    "owner": "deterministic global parent profile",
+    "events": [
+      {"frame": 1060, "control": "coin1", "duration_frames": 4},
+      {"frame": 1140, "control": "p1_pedal", "value": 255, "end_frame": 2401}
+    ],
+    "capture_frame": 2400,
+    "mame_result": "active race; digital Start is not used"
+  },
+  "rtl": {
+    "verilator": "5.050 2026-07-01 rev vUNKNOWN-built20260702",
+    "top": "tb_gground_boot",
+    "build_exit_code": 0,
+    "executable_sha256": "ddfea071e439f62cde0bcdbdb3bad2497c27797119500ce4dbf5a8d1ea2da52c",
+    "checkpoint": {
+      "path": "hotrod-final.vltsv",
+      "native_frame": 2400,
+      "size": 9765925,
+      "sha256": "450049f84d6053a0ba1c9609c13b8e35a8fb8d0f090fadc720bda4e31514b2fe",
+      "visible_hwnd_verified": true,
+      "runtime_exit_code": 0,
+      "window_closed": true
+    }
+  },
+  "mismatches": []
+}

@@ -51,6 +51,12 @@ def main() -> None:
         ])
         if gameplay.checkpoint_frame:
             plusargs.append(f"+AUTOSAVE_FRAME={gameplay.checkpoint_frame}")
+        if gameplay.pedal_frame:
+            plusargs.extend([
+                f"+AUTO_PEDAL_FRAME={gameplay.pedal_frame}",
+                f"+AUTO_PEDAL_END_FRAME={gameplay.pedal_end_frame}",
+                f"+AUTO_PEDAL_VALUE={gameplay.pedal_value}",
+            ])
         if not args.host_frame_out:
             parser.error("--gameplay requires --host-frame-out")
         plusargs.append(f"+HOST_FRAME_OUT={args.host_frame_out.resolve()}")

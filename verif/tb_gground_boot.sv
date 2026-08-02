@@ -13,6 +13,7 @@ module tb_gground_boot(
     input  logic [31:0] host_joy1,
     input  logic [31:0] host_joy2,
     input  logic [31:0] host_joy3,
+    input  logic [7:0]  host_paddle0,
     output logic        host_ce_pixel,
     output logic        host_hblank,
     output logic        host_vblank,
@@ -643,7 +644,7 @@ module tb_gground_boot;
         // MAME's no-input Hot Rod pedals default to 0x01; golf's swing
         // pedal defaults to 0x00. Do not use the midpoint 0x80 for both.
         .dsw(dsw_value),.coinage(coinage_value),
-        .paddle(board.hotrod_io ? 8'h01 : 8'h00),
+        .paddle(board.hotrod_io ? host_paddle0 : 8'h00),
         .test_mode(1'b0),.golf_io(board.golf_io),
         .hotrod_io(board.hotrod_io),
         .golf_angle(board.golf_io&&board.has_upd4701),
@@ -656,7 +657,7 @@ module tb_gground_boot;
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),
         .input_ports(simulated_inputs),
         .spinner0('0),.spinner1('0),.spinner2('0),.spinner3('0),
-        .paddle0(board.hotrod_io ? 8'h01 : 8'h00),
+        .paddle0(board.hotrod_io ? host_paddle0 : 8'h00),
         .paddle1(board.hotrod_io ? 8'h01 : 8'h00),
         .paddle2(board.hotrod_io ? 8'h01 : 8'h00),
         .paddle3(board.hotrod_io ? 8'h01 : 8'h00),

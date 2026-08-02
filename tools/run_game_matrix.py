@@ -38,6 +38,9 @@ class GameplayProfile:
     capture_frame: int
     checkpoint_frame: int = 0
     input_frames: int = 4
+    pedal_frame: int = 0
+    pedal_end_frame: int = 0
+    pedal_value: int = 0
 
 
 # Keep game-specific verification behaviour in the same global parent
@@ -47,10 +50,15 @@ class GameplayProfile:
 # Down accepts Start 1 on its title screen and reaches live play by frame 2240.
 # Bonanza Bros accepts the highlighted training-stage choice with P1 Button 1;
 # frame 1800 is live interactive training play, not an attract demonstration.
+# Hot Rod starts from its real P1 accelerator rather than a digital Start
+# button; full throttle is held through the frame-2400 live-race capture.
 GAMEPLAY_PROFILES = {
     "gground": GameplayProfile(1335, 1420, 1420, 1920, 1300),
     "crkdown": GameplayProfile(1050, 1380, 0, 2260, 1000),
     "bnzabros": GameplayProfile(900, 950, 1000, 1800, 800),
+    "hotrod": GameplayProfile(
+        1060, 0, 0, 2400, 1000,
+        pedal_frame=1140, pedal_end_frame=2401, pedal_value=255),
 }
 
 

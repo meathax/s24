@@ -1,0 +1,36 @@
+{
+  "schema": "rtl-mame-gameplay-comparison-v1",
+  "result": "pass_close_match",
+  "game": "hotrod",
+  "parent": "hotrod",
+  "clone": false,
+  "rtl": {
+    "frame": 2400,
+    "path": "verif/frames/current-parent-audit/hotrod-gameplay-final-2400.png",
+    "raw_rgb_sha256": "fd42e4acd9545242307d6d9d3f8a486bfb627f9999ad7502d2cceeaaec21e8fa",
+    "visible_hwnd_verified": true,
+    "runtime_exit_code": 0,
+    "window_closed": true
+  },
+  "mame": {
+    "version": "0.288 (mame0288)",
+    "best_raw_frame": 2305,
+    "path": "verif/frames/current-parent-audit/hotrod-gameplay-mame-2305.png",
+    "raw_rgb_sha256": "92dc5e52803132399754908116eb5bc1f04dcefd39ac84526d06c8952922ebe7",
+    "best_structural_frame": 2304
+  },
+  "metrics": {
+    "total_pixels": 190464,
+    "exact_pixels": 152692,
+    "different_pixels": 37772,
+    "exact_ratio": 0.8016843077956989,
+    "rgb_mae": 10.695119987679211,
+    "gaussian_radius_2_rgb_mae": 3.9606609823028673,
+    "best_structural_gaussian_radius_2_rgb_mae": 1.4291309643817205
+  },
+  "acceptance": {
+    "unmistakable_gameplay": true,
+    "matched_scene": ["cars", "road", "buildings", "HUD", "gas state"],
+    "residual": "raster and moving-vehicle animation phase"
+  }
+}

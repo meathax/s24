@@ -55,7 +55,7 @@ std::string plusarg_value(int argc, char** argv, const char* prefix) {
 }
 
 void set_inputs(Vtb_gground_boot& top, SDL_GameController* pad,
-                uint32_t automatic_joy = 0) {
+                uint32_t automatic_joy = 0, uint8_t automatic_pedal = 0) {
     SDL_PumpEvents();
     const Uint8* key = SDL_GetKeyboardState(nullptr);
     uint32_t joy = 0;
@@ -87,8 +87,18 @@ void set_inputs(Vtb_gground_boot& top, SDL_GameController* pad,
         joy |= uint32_t(SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_START)) << 10;
         joy |= uint32_t(SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_BACK)) << 11;
     }
+    uint8_t pedal = key[SDL_SCANCODE_UP] ? 0xff : 0x01;
+    if (pad) {
+        const Sint16 trigger = SDL_GameControllerGetAxis(
+            pad, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+        if (trigger > 0)
+            pedal = static_cast<uint8_t>(1 +
+                (static_cast<uint32_t>(trigger) * 254U / 32767U));
+    }
+    if (automatic_pedal) pedal = automatic_pedal;
     top.host_joy0 = joy | automatic_joy;
     top.host_joy1 = top.host_joy2 = top.host_joy3 = 0;
+    top.host_paddle0 = pedal;
 }
 
 uint32_t checksum(const std::array<uint8_t, kWidth * kHeight * 3>& pixels) {
@@ -358,6 +368,7 @@ int main(int argc, char** argv) {
     top.clk = 0;
     top.host_restore = 0;
     top.host_joy0 = top.host_joy1 = top.host_joy2 = top.host_joy3 = 0;
+    top.host_paddle0 = 1;
 
     uint64_t frames = 0;
     uint32_t prior_checksum = 0;
@@ -416,6 +427,11 @@ int main(int argc, char** argv) {
     const uint64_t auto_coin_frame = frame_arg("+AUTO_COIN_FRAME=");
     const uint64_t auto_start_frame = frame_arg("+AUTO_START_FRAME=");
     const uint64_t auto_action_frame = frame_arg("+AUTO_ACTION_FRAME=");
+    const uint64_t auto_pedal_frame = frame_arg("+AUTO_PEDAL_FRAME=");
+    const uint64_t auto_pedal_end_frame = frame_arg("+AUTO_PEDAL_END_FRAME=");
+    const uint64_t auto_pedal_value_arg = frame_arg("+AUTO_PEDAL_VALUE=");
+    const uint8_t auto_pedal_value = static_cast<uint8_t>(
+        std::min<uint64_t>(255, auto_pedal_value_arg));
     const uint64_t auto_input_frames_arg = frame_arg("+AUTO_INPUT_FRAMES=");
     const uint64_t auto_input_frames = std::max<uint64_t>(
         1, auto_input_frames_arg ? auto_input_frames_arg : 4);
@@ -424,18 +440,22 @@ int main(int argc, char** argv) {
     const std::string host_frame_out =
         plusarg_value(argc, argv, "+HOST_FRAME_OUT=");
     bool host_frame_written = false;
-    if (auto_coin_frame || auto_start_frame || auto_action_frame || auto_capture_frame)
+    if (auto_coin_frame || auto_start_frame || auto_action_frame ||
+        auto_pedal_frame || auto_capture_frame)
         std::fprintf(stderr,
-            "Automatic gameplay input: coin=%llu start=%llu action=%llu capture=%llu exit=%llu pulse=%llu\n",
+            "Automatic gameplay input: coin=%llu start=%llu action=%llu pedal=%llu..%llu value=%u capture=%llu exit=%llu pulse=%llu\n",
             static_cast<unsigned long long>(auto_coin_frame),
             static_cast<unsigned long long>(auto_start_frame),
             static_cast<unsigned long long>(auto_action_frame),
+            static_cast<unsigned long long>(auto_pedal_frame),
+            static_cast<unsigned long long>(auto_pedal_end_frame),
+            static_cast<unsigned>(auto_pedal_value),
             static_cast<unsigned long long>(auto_capture_frame),
             static_cast<unsigned long long>(auto_exit_frame),
             static_cast<unsigned long long>(auto_input_frames));
     std::fprintf(stderr,
         "Controls: arrows/D-pad move, Z/X/C or A/B/X fire, Enter/Start, "
-        "5/Back coin, F2 test, Esc quit.\n");
+        "5/Back coin, Up/right trigger accelerator, F2 test, Esc quit.\n");
 #ifdef S24_NO_SAVABLE
     std::fprintf(stderr,
         "Full-state checkpointing is unavailable for this fx68k model.\n");
@@ -467,7 +487,11 @@ int main(int argc, char** argv) {
         if (auto_action_frame && frames >= auto_action_frame &&
             frames < auto_action_frame + auto_input_frames)
             automatic_joy |= uint32_t{1} << 4;
-        set_inputs(top, pad, automatic_joy);
+        const uint8_t automatic_pedal =
+            auto_pedal_frame && frames >= auto_pedal_frame &&
+            (!auto_pedal_end_frame || frames < auto_pedal_end_frame)
+                ? (auto_pedal_value ? auto_pedal_value : 0xff) : 0;
+        set_inputs(top, pad, automatic_joy, automatic_pedal);
 
         for (int half_cycle = 0; half_cycle < 100000 && running; ++half_cycle) {
             top.clk = !top.clk;

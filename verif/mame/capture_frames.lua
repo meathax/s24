@@ -13,10 +13,14 @@ local frame = 0
 local coin_frame = tonumber(os.getenv("S24_COIN_FRAME") or "0") or 0
 local start_frame = tonumber(os.getenv("S24_START_FRAME") or "0") or 0
 local action_frame = tonumber(os.getenv("S24_ACTION_FRAME") or "0") or 0
+local pedal_frame = tonumber(os.getenv("S24_PEDAL_FRAME") or "0") or 0
+local pedal_end_frame = tonumber(os.getenv("S24_PEDAL_END_FRAME") or "0") or 0
+local pedal_value = tonumber(os.getenv("S24_PEDAL_VALUE") or "255") or 255
 local input_frames = tonumber(os.getenv("S24_INPUT_FRAMES") or "4") or 4
 local coin_fields = {}
 local start_field = nil
 local action_field = nil
+local pedal_field = nil
 
 if not screen then
     error("System 24 frame capture requires :screen")
@@ -37,7 +41,7 @@ if final_frame == 0 then
     error("S24_CAPTURE_FRAMES must name at least one positive frame")
 end
 
-if coin_frame > 0 or start_frame > 0 or action_frame > 0 then
+if coin_frame > 0 or start_frame > 0 or action_frame > 0 or pedal_frame > 0 then
     for tag, port in pairs(machine.ioport.ports) do
         for name, field in pairs(port.fields) do
             local lower = string.lower(name)
@@ -56,11 +60,18 @@ if coin_frame > 0 or start_frame > 0 or action_frame > 0 then
                 action_field = field
                 print(string.format("S24MAME gameplay action field=%s port=%s", name, tag))
             end
+            if not pedal_field and
+               (string.lower(tag) == ":pedal1" or lower == "p1 pedal" or
+                lower == "pedal 1" or lower == "pedal1") then
+                pedal_field = field
+                print(string.format("S24MAME gameplay pedal field=%s port=%s", name, tag))
+            end
         end
     end
     if coin_frame > 0 and #coin_fields == 0 then error("Coin 1 input field not found") end
     if start_frame > 0 and not start_field then error("Player 1 Start input field not found") end
     if action_frame > 0 and not action_field then error("P1 Button 1 input field not found") end
+    if pedal_frame > 0 and not pedal_field then error("P1 Pedal input field not found") end
 end
 
 emu.register_frame_done(function()
@@ -76,6 +87,11 @@ emu.register_frame_done(function()
     if action_field then
         action_field:set_value(frame >= action_frame and
                                frame < action_frame + input_frames and 1 or 0)
+    end
+    if pedal_field then
+        local pedal_active = frame >= pedal_frame and
+            (pedal_end_frame == 0 or frame < pedal_end_frame)
+        pedal_field:set_value(pedal_active and pedal_value or 1)
     end
     if captures[frame] then
         local name = string.format("%s_%06d", prefix, frame)

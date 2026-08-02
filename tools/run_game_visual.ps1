@@ -10,6 +10,9 @@ param(
     [UInt64]$AutoCoinFrame = 0,
     [UInt64]$AutoStartFrame = 0,
     [UInt64]$AutoActionFrame = 0,
+    [UInt64]$AutoPedalFrame = 0,
+    [UInt64]$AutoPedalEndFrame = 0,
+    [ValidateRange(0,255)][int]$AutoPedalValue = 255,
     [UInt64]$AutoCaptureFrame = 0,
     [UInt64]$AutoExitFrame = 0,
     [UInt64]$AutoSaveFrame = 0,
@@ -59,6 +62,9 @@ if ($Detached) {
     if ($AutoCoinFrame) { $childArguments += ' -AutoCoinFrame ' + $AutoCoinFrame }
     if ($AutoStartFrame) { $childArguments += ' -AutoStartFrame ' + $AutoStartFrame }
     if ($AutoActionFrame) { $childArguments += ' -AutoActionFrame ' + $AutoActionFrame }
+    if ($AutoPedalFrame) { $childArguments += ' -AutoPedalFrame ' + $AutoPedalFrame }
+    if ($AutoPedalEndFrame) { $childArguments += ' -AutoPedalEndFrame ' + $AutoPedalEndFrame }
+    if ($AutoPedalFrame) { $childArguments += ' -AutoPedalValue ' + $AutoPedalValue }
     if ($AutoCaptureFrame) { $childArguments += ' -AutoCaptureFrame ' + $AutoCaptureFrame }
     if ($AutoExitFrame) { $childArguments += ' -AutoExitFrame ' + $AutoExitFrame }
     if ($AutoSaveFrame) { $childArguments += ' -AutoSaveFrame ' + $AutoSaveFrame }
@@ -93,6 +99,9 @@ if ($Save) { $arguments += "+SAVE=$Save" }
 if ($AutoCoinFrame) { $arguments += "+AUTO_COIN_FRAME=$AutoCoinFrame" }
 if ($AutoStartFrame) { $arguments += "+AUTO_START_FRAME=$AutoStartFrame" }
 if ($AutoActionFrame) { $arguments += "+AUTO_ACTION_FRAME=$AutoActionFrame" }
+if ($AutoPedalFrame) { $arguments += "+AUTO_PEDAL_FRAME=$AutoPedalFrame" }
+if ($AutoPedalEndFrame) { $arguments += "+AUTO_PEDAL_END_FRAME=$AutoPedalEndFrame" }
+if ($AutoPedalFrame) { $arguments += "+AUTO_PEDAL_VALUE=$AutoPedalValue" }
 if ($AutoCaptureFrame) { $arguments += "+AUTO_CAPTURE_FRAME=$AutoCaptureFrame" }
 if ($AutoExitFrame) { $arguments += "+AUTO_EXIT_FRAME=$AutoExitFrame" }
 if ($AutoSaveFrame) { $arguments += "+AUTOSAVE_FRAME=$AutoSaveFrame" }

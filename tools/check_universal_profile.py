@@ -126,12 +126,21 @@ def validate_gameplay_profiles() -> None:
         )
     for parent, profile in run_game_matrix.GAMEPLAY_PROFILES.items():
         if not (0 < profile.checkpoint_frame <= profile.coin_frame
-                < profile.start_frame < profile.capture_frame):
+                < profile.capture_frame):
             raise ValueError(f"{parent}: invalid gameplay frame ordering")
+        if profile.start_frame and not (
+                profile.coin_frame < profile.start_frame
+                < profile.capture_frame):
+            raise ValueError(f"{parent}: invalid gameplay start frame")
         if profile.action_frame and not (
-                profile.start_frame <= profile.action_frame
+                max(profile.coin_frame, profile.start_frame) <= profile.action_frame
                 < profile.capture_frame):
             raise ValueError(f"{parent}: invalid gameplay action frame")
+        if profile.pedal_frame and not (
+                profile.coin_frame <= profile.pedal_frame
+                < profile.pedal_end_frame <= profile.capture_frame + 1
+                and 0 < profile.pedal_value <= 255):
+            raise ValueError(f"{parent}: invalid gameplay pedal packet")
         if profile.input_frames <= 0:
             raise ValueError(f"{parent}: gameplay input pulse must be nonzero")
     for game in gen_mra.GAMES:

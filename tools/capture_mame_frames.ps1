@@ -8,6 +8,9 @@ param(
     [int]$CoinFrame = 0,
     [int]$StartFrame = 0,
     [int]$ActionFrame = 0,
+    [int]$PedalFrame = 0,
+    [int]$PedalEndFrame = 0,
+    [ValidateRange(1,255)][int]$PedalValue = 255,
     [ValidateRange(1,120)][int]$InputFrames = 4,
     [switch]$VideoNone
 )
@@ -25,6 +28,9 @@ $priorPrefix = [Environment]::GetEnvironmentVariable('S24_CAPTURE_PREFIX')
 $priorCoin = [Environment]::GetEnvironmentVariable('S24_COIN_FRAME')
 $priorStart = [Environment]::GetEnvironmentVariable('S24_START_FRAME')
 $priorAction = [Environment]::GetEnvironmentVariable('S24_ACTION_FRAME')
+$priorPedal = [Environment]::GetEnvironmentVariable('S24_PEDAL_FRAME')
+$priorPedalEnd = [Environment]::GetEnvironmentVariable('S24_PEDAL_END_FRAME')
+$priorPedalValue = [Environment]::GetEnvironmentVariable('S24_PEDAL_VALUE')
 $priorInputFrames = [Environment]::GetEnvironmentVariable('S24_INPUT_FRAMES')
 try {
     $env:S24_CAPTURE_FRAMES = (($Frames | Sort-Object -Unique) -join ',')
@@ -32,6 +38,9 @@ try {
     $env:S24_COIN_FRAME = $CoinFrame
     $env:S24_START_FRAME = $StartFrame
     $env:S24_ACTION_FRAME = $ActionFrame
+    $env:S24_PEDAL_FRAME = $PedalFrame
+    $env:S24_PEDAL_END_FRAME = $PedalEndFrame
+    $env:S24_PEDAL_VALUE = $PedalValue
     $env:S24_INPUT_FRAMES = $InputFrames
     $videoArguments = if ($VideoNone) { @('-video','none') } else { @('-window','-nomaximize') }
     & $MameExecutable $Game @videoArguments -skip_gameinfo -nothrottle `
@@ -48,5 +57,8 @@ try {
     [Environment]::SetEnvironmentVariable('S24_COIN_FRAME',$priorCoin)
     [Environment]::SetEnvironmentVariable('S24_START_FRAME',$priorStart)
     [Environment]::SetEnvironmentVariable('S24_ACTION_FRAME',$priorAction)
+    [Environment]::SetEnvironmentVariable('S24_PEDAL_FRAME',$priorPedal)
+    [Environment]::SetEnvironmentVariable('S24_PEDAL_END_FRAME',$priorPedalEnd)
+    [Environment]::SetEnvironmentVariable('S24_PEDAL_VALUE',$priorPedalValue)
     [Environment]::SetEnvironmentVariable('S24_INPUT_FRAMES',$priorInputFrames)
 }
