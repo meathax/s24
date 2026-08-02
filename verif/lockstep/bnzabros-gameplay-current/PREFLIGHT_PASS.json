@@ -68,10 +68,10 @@
     "checkpoint_round_trip": {
       "restored_path": "bnzabros-chain.vltsv",
       "restored_native_frame": 20,
-      "advanced_checkpoint": "bnzabros-chain-next.vltsv",
-      "advanced_native_frame": 100,
+      "advanced_checkpoint": "bnzabros-final.vltsv",
+      "advanced_native_frame": 1800,
       "size": 9765929,
-      "sha256": "47e4d996ccba20011b6ca8b9274626e78abdc676d6cff246c3c11a3cf7c3dd42",
+      "sha256": "b00a6b764d67d4fb9318dbd02a26c2f1a822b9d6e98742b1cb1a3dacc5c37009",
       "fresh_process_runtime_exit_code": 0,
       "visible_hwnd_verified": true
     }

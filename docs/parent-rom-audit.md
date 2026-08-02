@@ -10,7 +10,7 @@ Coin 1/Start 1 input reaches unmistakable live gameplay on both sides.
 | ---: | --- | --- | --- | --- |
 | 1 | `gground` | frame 1261, CPU-B `0085b0`–`0085b2` | aligned; corrected `FF FD` DIP; deterministic coin/start/action profile | **complete:** attract is pixel-exact; visible Verilator frame 1920 proves live gameplay closely matched to MAME |
 | 2 | `crkdown` | frame 961, CPU-B `008e94` | aligned; shared physical-window/category separation repaired the old radar defect | **complete:** attract is pixel-exact; visible Verilator frame 2260 proves live gameplay closely matched to MAME |
-| 3 | `bnzabros` | frame 781, CPU-B `0081ca`–`0100c4` | 4 MiB zero tail, independent FRC IRQ, generic input and magic-latch contracts aligned | **complete attract:** native leaderboard pixel-exact; deterministic MAME gameplay reference captured; RTL gameplay proof pending |
+| 3 | `bnzabros` | frame 781, CPU-B `0081ca`–`0100c4` | 4 MiB zero tail, 20-frame FDC index cadence, generic input and magic-latch contracts aligned | **complete:** attract is pixel-exact; visible Verilator frame 1800 proves live gameplay closely matched to MAME |
 | 4 | `hotrod` | frame 1321, CPU-B `006a5e`–`006a7c` | media, 2f00 FDC, neutral analog daughterboard and `FF FF` aligned | **complete attract:** native title pixel-exact; deterministic gameplay proof pending |
 | 5 | `sspirits` | frame 1201, CPU-B `0086b4` | corrected `FF FD`; raw native rotation boundary defined | pending; historical run used wrong DIP |
 | 6 | `dcclub` | frame 781, CPU-B `00aeae`–`00af08` | TAS RMW bus re-arm and 4 MiB zero tail repaired; `FF FB` aligned | pending |
@@ -63,6 +63,23 @@ Bonanza Bros likewise completed with an explicit detached runtime result
 leaderboard capture. It has `0/190464` different pixels and RGB MAE `0.0`
 against fresh isolated MAME frames 860–869; both raw-RGB SHA-256 values are
 `6e9ee712585d6a12ea49bf8f0caccf70c00e90277b17bd2b04adc9adfc468694`.
+
+Its deterministic global gameplay profile pulses Coin 1 at frame 900, Start 1
+at 950 and Button 1 at 1000 to select the highlighted training stage. Fresh
+visible Verilator checkpoints prove `CREDIT 1` at frame 925, the training
+choice at 975, the selected stage intro at 1100 and live play from frame 1600.
+The final frame-1800 RTL/MAME pair has 183,486/190,464 exact pixels (96.34%),
+RGB MAE 3.86 and radius-2 Gaussian RGB MAE 2.15. Both sides show the same live
+actors, timer, HUD, map and obstacles; the residual is small animation/palette
+phase. The final Verilator checkpoint is `bnzabros-final.vltsv` (9,765,929
+bytes, SHA-256 `b00a6b764d67d4fb9318dbd02a26c2f1a822b9d6e98742b1cb1a3dacc5c37009`).
+
+MAME 0.289 source also confirms Bonanza's crash-sensitive floppy index rule:
+the index state advances on scanline 384 and is low once per 20 frames. RTL's
+registered 383-to-384 transition and 0..19 counter match exactly. The 0x2d00
+track geometry, 4 MiB ROM-board population, magic table
+`{2,4,0,5,7,3,1,6}` and generic SERVICE/action mapping are aligned. These
+profile/source contracts add no FPGA storage; media remains external SDRAM.
 
 Crack Down completed with `PASS tb_gground_boot crkdown game milestone 7`,
 an explicit detached `exit_code=0`, and automatic closure of its SDL window.
