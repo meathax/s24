@@ -54,12 +54,14 @@ module s24_sprite_line_ram #(
         ram.lpm_type = "altsyncram",
         ram.outdata_reg_a = "CLOCK0",
         ram.outdata_reg_b = "CLOCK1",
-        // Both ports deliberately consume the old pixel while clearing or
-        // replacing it.  This matches the behavioural model's nonblocking
-        // read-before-write semantics. NEW_DATA made port A return the zero
-        // it was simultaneously writing and hid nearly every sprite on FPGA.
-        ram.read_during_write_mode_port_a = "OLD_DATA",
-        ram.read_during_write_mode_port_b = "OLD_DATA",
+        // Quartus 17 only accepts OLD_DATA for mixed-port collisions in a
+        // BIDIR_DUAL_PORT M10K.  Port A is read-only; its clear write is
+        // intentionally disabled below and the inactive bank is cleared by
+        // port B in S_CLEAR. This avoids relying on unsupported same-port
+        // OLD_DATA semantics, which previously made FPGA sprites disappear.
+        ram.read_during_write_mode_mixed_ports = "OLD_DATA",
+        ram.read_during_write_mode_port_a = "NEW_DATA_NO_NBE_READ",
+        ram.read_during_write_mode_port_b = "NEW_DATA_NO_NBE_READ",
         ram.width_byteena_a = 1,
         ram.width_byteena_b = 1,
         ram.power_up_uninitialized = "FALSE";
@@ -590,25 +592,25 @@ module s24_sprite (
 
     s24_sprite_line_ram line0_ram (
         .clk(clk),.address_a(display_read_addr),.data_a(26'd0),
-        .wren_a(ce_pixel),.q_a(line0_display_q),
+        .wren_a(1'b0),.q_a(line0_display_q),
         .address_b(line_b_addr),.data_b(line_b_data),
         .wren_b(line_b_wren && (line_b_clear || line_b_sel==2'd0)),
         .q_b(line0_render_q));
     s24_sprite_line_ram line1_ram (
         .clk(clk),.address_a(display_read_addr),.data_a(26'd0),
-        .wren_a(ce_pixel),.q_a(line1_display_q),
+        .wren_a(1'b0),.q_a(line1_display_q),
         .address_b(line_b_addr),.data_b(line_b_data),
         .wren_b(line_b_wren && (line_b_clear || line_b_sel==2'd1)),
         .q_b(line1_render_q));
     s24_sprite_line_ram line2_ram (
         .clk(clk),.address_a(display_read_addr),.data_a(26'd0),
-        .wren_a(ce_pixel),.q_a(line2_display_q),
+        .wren_a(1'b0),.q_a(line2_display_q),
         .address_b(line_b_addr),.data_b(line_b_data),
         .wren_b(line_b_wren && (line_b_clear || line_b_sel==2'd2)),
         .q_b(line2_render_q));
     s24_sprite_line_ram line3_ram (
         .clk(clk),.address_a(display_read_addr),.data_a(26'd0),
-        .wren_a(ce_pixel),.q_a(line3_display_q),
+        .wren_a(1'b0),.q_a(line3_display_q),
         .address_b(line_b_addr),.data_b(line_b_data),
         .wren_b(line_b_wren && (line_b_clear || line_b_sel==2'd3)),
         .q_b(line3_render_q));
@@ -656,9 +658,10 @@ module s24_sprite (
             if(ce_pixel && hcount==10'd655 && vcount==10'd383)
                 frame_epoch<=~frame_epoch;
             if(ce_pixel) begin
-                // Display consumption erases the old scanline through port A,
-                // so port B can immediately render the opposite bank without
-                // spending 496 clocks on a separate clear pass.
+                // Display consumption is read-only on port A. The opposite
+                // bank is cleared by port B in S_CLEAR before it is reused;
+                // this keeps the returned pixel independent of vendor
+                // same-port read-during-write behavior.
                 if(hcount==10'd655) begin
                     display_bank<=~display_bank;
                     if(line_valid[~display_bank]) begin
@@ -693,17 +696,17 @@ module s24_sprite (
                         end else if(vcount>=10'd422 || vcount<10'd382) begin
                             fill_bank<=display_bank;
                             line_valid[display_bank]<=0;
+                            clear_x<=0;
                             target_y <= (vcount>=10'd422)
                                         ? vcount[8:0]-9'd422
                                         : vcount[8:0]+9'd2;
                             scan_pos<=0;active_count<=0;
                             data_cache_valid<=0;palette_cache_valid<=0;
-                            if(list_cache_valid && stack_count!=0)
-                                state<=S_SCAN_PREFETCH;
-                            else begin
-                                line_valid[display_bank]<=1;
-                                state<=S_IDLE;
-                            end
+                            // Clear the inactive bank through renderer port B
+                            // before reading it on the next frame. Port A is
+                            // read-only so FPGA M10Ks return the sprite pixel
+                            // that was present before the display edge.
+                            state<=S_CLEAR;
                         end
                     end
                 end else if(hcount<10'd495 && line_valid[display_bank]) begin
