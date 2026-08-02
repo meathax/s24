@@ -99,7 +99,7 @@ module tb_loader;
         begin_write(4,6,16'hf0de);
         assert(key_wr && key_word_addr==12'd3 && key_wdata==16'hf0de) else $fatal(1,"key path");
 
-        // Exercise every descriptor used by the 7-set local s24.rbf matrix.
+        // Exercise every descriptor used by the 6-set local s24.rbf matrix.
         // This list is the hardware-facing contract for every locally
         // supported parent set.
         check_profile(8'h59,MAGIC_NONE,16'h2f00,INPUT_GENERIC,"hotrod");
@@ -108,12 +108,11 @@ module tb_loader;
         check_profile(8'h05,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"crkdown");
         check_profile(8'h0d,MAGIC_NONE,16'h2d00,INPUT_GENERIC,"roughrac");
         check_profile(8'h03,MAGIC_BNZABROS,16'h2d00,INPUT_GENERIC,"bnzabros");
-        check_profile(8'h22,MAGIC_DCCLUB,16'h0000,INPUT_GENERIC,"dcclub");
 
         ioctl_download=0;
         @(posedge clk);#1;
         assert(rom_loaded) else $fatal(1,"missing boot commit");
-        $display("PASS loader endian, raw media, key, 7 local profiles, boot commit");
+        $display("PASS loader endian, raw media, key, 6 local profiles, boot commit");
         $finish;
     end
 endmodule

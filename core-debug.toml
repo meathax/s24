@@ -68,11 +68,6 @@ role = "combined-media"
 features = ["writable-floppy", "rom-board", "bnzabros-magic"]
 
 [[sets]]
-name = "dcclub"
-role = "golf-analog-rom"
-features = ["rom-board", "upd4701", "golf-io", "dcclub-magic"]
-
-[[sets]]
 name = "crkdown"
 role = "sprite-clipping"
 features = ["fd1094", "reverse-y-clipping", "large-sprite-addressing", "mame-imperfect-graphics"]

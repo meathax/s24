@@ -6,7 +6,7 @@ param(
 $repo = 'C:\Users\meath\OneDrive\Documents\Sega System 24'
 $pwsh = 'C:\Program Files\PowerShell\7\pwsh.exe'
 $sets = @(
-    'sspirits', 'hotrod', 'roughrac', 'bnzabros', 'dcclub', 'crkdown', 'gground'
+    'sspirits', 'hotrod', 'roughrac', 'bnzabros', 'crkdown', 'gground'
 )
 
 Set-Location -LiteralPath $repo

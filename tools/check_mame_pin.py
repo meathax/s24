@@ -17,7 +17,7 @@ PINNED_VERSION = "0.288 (mame0288)"
 # clones are intentionally not part of this profile pin.
 DRIVER_SETS = frozenset((
     "hotrod", "sspirits", "gground", "crkdown", "roughrac", "bnzabros",
-    "dcclub", "qrouka", "quizmeku", "mahmajn", "mahmajn2", "sspiritj",
+    "qrouka", "quizmeku", "mahmajn", "mahmajn2", "sspiritj",
     "sspirtfc", "qsww", "dcclubfd",
 ))
 PINNED_FILES = {

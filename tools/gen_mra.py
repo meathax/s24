@@ -60,14 +60,12 @@ MAME_PARENT_DIP_DEFAULTS = {
     "gground": "FF FD",
     "crkdown": "FF FF",
     "bnzabros": "FF FE",
-    "dcclub": "FF FB",
 }
 
 # MAME's declared ROM-board regions.  Simulation media must materialise the
 # complete hardware-visible address space, including explicit erased banks.
 MAME_ROMBOARD_REGION_BYTES = {
     "bnzabros": 0x400000,
-    "dcclub": 0x400000,
 }
 
 INPUT_QUIZ4 = 2
@@ -169,7 +167,6 @@ def p(name: str, crc: str = "") -> Part:
 
 BOOT_DISK = Pair(p("epr-12187.ic2", "e83783f3"), p("epr-12186.ic1", "ce76319d"))
 BOOT_HOTROD = Pair(p("epr-11339.ic2", "75130e73"), p("epr-11338.ic1", "7d4a7ff3"))
-BOOT_DCCLUB = Pair(p("epr13948.bin", "d6a031c8"), p("epr13947.bin", "7e3cff5e"))
 
 BNZA_ROM = (
     Pair(p("mpr-13188-h.2", "d3802294"), p("mpr-13187-h.1", "e3d8c5f7")),
@@ -179,7 +176,6 @@ BNZA_ROM = (
     # media instead of allowing an uninitialised/ffff tail.
     FillPair(0x100000),
 )
-DCCLUB_COMMON = Pair(p("mpr-14097-t.4", "4bd74cae"), p("mpr-14096-t.3", "38d96502"))
 
 
 GAMES = (
@@ -205,11 +201,6 @@ GAMES = (
     Game("bnzabros", "Bonanza Bros (US, Floppy DS3-5000-07d? Based)", 1990,
          BOOT_DISK, FLOPPY | ROMBOARD, 0x2D00, MAGIC_BNZABROS, romboard=BNZA_ROM,
          floppy=p("ds3-5000-07d.img", "2e70251f"), dsw="FF FE"),
-    Game("dcclub", "Dynamic Country Club (World, ROM Based)", 1991,
-         BOOT_DCCLUB, ROMBOARD | GOLF_IO, magic=MAGIC_DCCLUB, dsw="FF FB",
-         romboard=(Pair(p("epr-15345.2", "d9e120c2"), p("epr-15344.1", "8f8b9f74")),
-                   DCCLUB_COMMON, FillPair(0x100000)),
-         mra_controls=MRA_CONTROL_GOLF),
 )
 
 # MAME-supported sets for which this workspace currently has no local archive.
@@ -265,7 +256,7 @@ OPTIONAL_GAMES = (
          key=p("317-0058-08b.key", "fe0a336a")),
     Game("dcclubfd", "Dynamic Country Club (US, Floppy Based, FD1094 317-0058-09d)", 1991,
          BOOT_DISK, FLOPPY | FD1094 | GOLF_IO, 0x2D00,
-         magic=MAGIC_DCCLUB, parent="dcclub", dsw="FF FB",
+         magic=MAGIC_DCCLUB, dsw="FF FB", mra_controls=MRA_CONTROL_GOLF,
          floppy=p("ds3-5000-09d.img", "69870887"),
          key=p("317-0058-09d.key", "a91ebffb")),
 )
@@ -604,7 +595,7 @@ def main() -> None:
     parser.add_argument("--no-validate", action="store_true")
     parser.add_argument(
         "--all-supported", action="store_true",
-        help="include working MAME sets not present in the local 7-set inventory",
+        help="include working MAME sets not present in the local 6-set inventory",
     )
     args = parser.parse_args()
     validate_game_contracts()

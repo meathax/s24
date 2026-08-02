@@ -6,9 +6,9 @@ index 0; no game-specific Quartus revision or RBF is required.
 
 ## Active verification scope
 
-As of 2026-08-02, the local inventory contains only the seven MAME parent sets
-`hotrod`, `sspirits`, `gground`, `crkdown`, `roughrac`, `bnzabros`, and
-`dcclub`. Clone sets are not part of this profile or its verification matrix.
+As of 2026-08-02, the local inventory contains only the six MAME parent sets
+`hotrod`, `sspirits`, `gground`, `crkdown`, `roughrac`, and `bnzabros`. Clone
+sets are not part of this profile or its verification matrix.
 
 | Set | Media | Runtime hardware selected |
 | --- | --- | --- |
@@ -18,7 +18,6 @@ As of 2026-08-02, the local inventory contains only the seven MAME parent sets
 | `crkdown` | floppy + key | FD1094 |
 | `roughrac` | floppy + key | FD1094, uPD4701 |
 | `bnzabros` | floppy + ROM board | magic selector 7 |
-| `dcclub` | ROM board | golf I/O, magic selector 2 |
 
 The descriptor fields are feature flags, magic selector, floppy track size,
 and input profile, followed by three reserved zero bytes. `tools/gen_mra.py`
@@ -42,7 +41,7 @@ python tools/run_game_matrix.py --exe ignored.exe --dry-run
 python tools/report_attract_coverage.py
 ```
 
-The first command verifies the complete 7-set inventory, common RBF name,
+The first command verifies the complete 6-set inventory, common RBF name,
 descriptor bytes, media indexes, DIP defaults, required RTL in `files.qip`,
 and the account build-policy settings. The second validates all prepared media
 contracts without starting a simulation.

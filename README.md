@@ -26,9 +26,7 @@ controller, dual-fx68k integration, JT51, MAME-derived device RTL, and
 verification scaffolding. All nineteen deterministic chip/module regressions
 pass. A full-core synthetic boot test also loads both fx68k control stores and
 proves CPU-A reset-vector fetch, instruction execution, shared memory traffic,
-and video line progress. A real DCCLUB boot now completes the BIOS RAM/device
-tests far enough to enter banked ROM-board checksumming with valid byte enables
-and single-ack transactions. Attract mode and MAME frame/audio comparison remain
+and video line progress. Attract mode and MAME frame/audio comparison remain
 incomplete, so no RBF is considered deployable. See `docs/status.md` for the
 exact implementation boundary.
 
@@ -55,7 +53,7 @@ raw pen zero now goes through the indirect palette, large-sprite tile arithmetic
 is explicitly wide, and bounded list overflow keeps the frontmost entries.
 
 The ignored `roms/` folder contains user-supplied archives; the checked-in
-local support inventory currently contains 7 parent sets. Run `python tools/gen_mra.py`
+local support inventory currently contains 6 parent sets. Run `python tools/gen_mra.py`
 to validate those archives and regenerate one MRA per supported set. Every generated external ROM region declares
 `type="merged|nonmerged|split"` and retains its CRC, so the same MRA accepts
 full non-merged sets, split parent/clone sets, and merged parent archives with

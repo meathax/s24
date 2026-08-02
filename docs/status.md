@@ -4,8 +4,8 @@ This core is not yet a deployable or MAME-exact release. The table below is
 the working contract used to prevent a successful FPGA build from being
 mistaken for successful emulation.
 
-Active game progress tracks the seven retained MAME parent sets: `hotrod`,
-`sspirits`, `gground`, `crkdown`, `roughrac`, `bnzabros`, and `dcclub`.
+Active game progress tracks the six retained MAME parent sets: `hotrod`,
+`sspirits`, `gground`, `crkdown`, `roughrac`, and `bnzabros`.
 Clone sets are not part of the profile, MRA inventory, loader checks, or
 verification matrix. See `docs/game-coverage.md` for the exact scope.
 
@@ -22,7 +22,7 @@ verification matrix. See `docs/game-coverage.md` for the exact scope.
 | 834-6510 analog board | uPD4701 and MSM6253 models pass deterministic regression with descriptor-gated `0xC00000` mirrors; hardware control testing pending |
 | IRQ/timer controller | HSync/8 MHz timer modes, per-CPU masks, and MAME raster levels implemented; sprite/VBlank assertions use the registered 423->0 and 383->384 boundaries |
 | Floppy controller | Flat-image transfers, MAME track geometry, deterministic FBNeo-compatible 2 MiB zero padding, low-byte write qualification, no-media open bus, 20-frame index cadence, and full `B00000-B7FFFF` mirroring implemented; focused command/media sequencing regression passes |
-| ROM sets / MRAs | All 7 supported local ZIPs CRC-validated against MAME 0.288; one MRA per set targets `s24.rbf` |
+| ROM sets / MRAs | All 6 supported local ZIPs CRC-validated against MAME 0.288; one MRA per set targets `s24.rbf` |
 
 The source-level bus audit has also corrected 68000 low-byte alignment for the
 315-5296 and the shared ROM-bank/FRC/magic registers at `BC/CC0001-7`. These
@@ -97,12 +97,6 @@ Quartus timing result or RBF is accepted until synthesis succeeds, the
 Fast Fit timing reports are inspected, and at least one unprotected and one
 FD1094 game reach deterministic boot milestones matching MAME.
 
-The real-ROM DCCLUB integration bench now reaches the BIOS banked-ROM checksum
-loop after valid RAM, tile, character, palette, and sprite transactions. At
-200,000,000 clocks it records 137,358 ROM-board reads, 659,029 writes, and
-12,800 palette writes without a CPU or bus assertion. CPU-B release follows
-additional ROM checks and remains a hardware/extended-simulation milestone.
-
 The real-ROM Gain Ground integration bench loads all 8 KB of FD1094 key data
 and reaches the first floppy-media request at 210,451,455 clocks. The earlier
 milestone records 5,248,303 CPU-A instructions, 8,009,666 BIOS reads, 662,837
@@ -134,7 +128,7 @@ about 15.3 million clocks; release timing is the next MAME-equivalence target.
 The earlier 260-million-clock target-1 run correctly stopped before CNT1 after
 four tracks and 51,984 bytes, so that bounded failure was not an RTL regression.
 
-The real-ROM bench is now descriptor-driven for all 7 supported local sets. It supports
+The real-ROM bench is now descriptor-driven for all 6 supported local sets. It supports
 floppy-only, ROM-board-only, combined floppy/ROM-board, and optional FD1094,
 uPD4701, ADC, golf, Hot Rod, input-profile, and magic-latch populations without
 recompiling the model. It retains accepted floppy writes in an exact byte
@@ -188,29 +182,8 @@ at loop count 1,201,502,881 with 121/120 qualifying frames, 103 rendered-
 content changes, zero unknown active samples, CPU-B code-window execution,
 and a complete native capture. The authoritative result is
 `verif/captures/gground-target7.result` with `exit_code=0`. The next
-candidate is `sspirits`; a bounded `dcclub` target-7 diagnostic run stopped at
-its 6,000,000,000-clock bound: CPU-B remains
-in the MAME-correlated `TST.W $a002` timer wait at `008058`, and the video
-remains black. A MAME 0.288 IRQ trace shows dcclub programming timer data `0x0f3d`,
-mode `1`, and CPU-B mask `0x1c`; bounded RTL IRQ-bus and timer-state logging
-then matched the MAME setup writes for the mode and masks, but no RTL
-`a00000=0x0f3d` timer-data write occurred. At the 700M-clock diagnostic stop,
-RTL reported `timer_data=0`, `timer_value=0xec1`, CPU-B at `00805c:66fa`, and
-pending timer IRQs; this isolates the next check to CPU-B timer-read payload
-and sampling rather than the register byte lanes. The patched observation
-model is queued through the machine-wide safe Verilator launcher. Audio and
-pixel-perfect MAME differential comparison remain separate obligations after
-complete set coverage.
-
-An isolated MAME 0.288 rerun records the main CPU polling `A00004` with zero
-data from 9.8916345 through 11.1780515 seconds, followed by the expected
-`0x0f3d` timer-data, mode-1, and CPU-B mask-`0x1c` writes beginning at
-12.7441422 seconds. The same bounded IRQ read tap did not observe a CPU-B
-read, so the CPU-B address/trace boundary remains an explicit unknown; no RTL
-timer payload change is accepted from this observation alone.
-The follow-up dual-alias probe tapped both `0x00a000-0x00a007` and
-`0xa00000-0xa00007`; it saw the CPU-B setup writes only and still no CPU-B
-reads, ruling out the narrow tap base as the sole explanation.
+candidate is `sspirits`. Audio and pixel-perfect MAME differential comparison
+remain separate obligations after complete set coverage.
 
 The MAME 0.288 no-input probe now samples a coarse whole-screen grid, avoiding
 false negatives from fixed coordinates on rotated or text-only screens. Across
@@ -243,19 +216,19 @@ its target-7 reference baseline is the next required evidence item.
 
 ## Universal profile integration
 
-The project now treats the 7-set list in `tools/gen_mra.py` as a checked
+The project now treats the 6-set list in `tools/gen_mra.py` as a checked
 hardware contract rather than duplicated metadata. One canonical descriptor
 encoder is shared by MRA generation, simulation-media generation, and the game
 matrix. It rejects inconsistent feature/media combinations, unsupported input
 profiles, invalid track sizes, and malformed DIP defaults before a run.
 
 `tools/check_universal_profile.py` verifies that the generated MRA inventory is
-exactly those 7 local sets, that every MRA names `s24`, and that descriptor bytes,
+exactly those 6 local sets, that every MRA names `s24`, and that descriptor bytes,
 media indexes, switch defaults, universal RTL sources, and required Fast Fit
 settings agree. It also invokes `tools/check_mame_pin.py`, so the profile gate
 requires the pinned MAME executable and behavioral source hashes. The RTL
-loader regression explicitly loads all 7 local profiles and passes. The all-game
-media dry run passes all 7 local contracts.
+loader regression explicitly loads all 6 local profiles and passes. The all-game
+media dry run passes all 6 local contracts.
 
 The mixer sprite-rank selection is now a balanced comparator tree rather than
 a four-deep chain. Its focused regression passes tile blocking and fallback,
@@ -288,10 +261,10 @@ native frame boundary, restored in a fresh process, advanced to a later frame,
 and saved again; both processes exited zero. SDL also enforces nearest-neighbour
 integer scaling independently of core rendering.
 
-The retained seven-parent matrix is the only active progress denominator.
+The retained six-parent matrix is the only active progress denominator.
 Current target-7 evidence is complete for `gground`, `crkdown`, `bnzabros`, and
-`hotrod`; `sspirits`, `roughrac`, and `dcclub` remain pending fresh visual
-verification. Removed clone runs and artifacts are outside the supported
+`hotrod`; `sspirits` and `roughrac` remain pending fresh visual verification.
+Removed runs and artifacts are outside the supported
 inventory and are not counted.
 
 The retry harness now preserves each future attempt as a numbered

@@ -21,7 +21,6 @@ grid samples was observed at:
 | Sets | First sampled frame | Secondary PC range |
 | --- | ---: | ---: |
 | `bnzabros` | 781 | `0x0081ca`–`0x0100c4` |
-| `dcclub` | 781 | `0x00aeae`–`0x00af08` |
 | `crkdown` | 961 | `0x008e94` |
 | `hotrod` | 1321 | `0x006a5e`–`0x006a7c` |
 | `gground` | 1261 | `0x0085b0`–`0x0085b2` |
