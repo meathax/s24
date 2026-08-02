@@ -8,7 +8,7 @@
   <rbf>s24</rbf>
   <rotation>horizontal</rotation>
   <joystick>Steering Wheel / Accelerator</joystick>
-  <buttons default="Start,Select,R,L" names="-,-,-,-,Start,Coin,Service,Test"/>
+  <buttons default="Start,Select,R,L" names="-,-,-,-,-,-,Start,Coin,Service,Test"/>
   <switches default="FF FF"/>
   <rom index="1" zip="hotrod.zip|hotrodj.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">

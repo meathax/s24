@@ -261,7 +261,9 @@ module s24_core (
     logic signed [15:0] ym_l,ym_r;
     always_ff @(posedge clk) if (reset) ym_half<=0; else if (ce4) ym_half<=~ym_half;
     jt51 ym(
-        .rst(reset | ~io_cnt[2]),.clk(clk),.cen(ce4),.cen_p1(ce4 & ym_half),
+        // The 315-5296 CNT2 callback drives YM2151 reset directly: high is
+        // reset asserted and low is normal operation (MAME reset_w binding).
+        .rst(reset | io_cnt[2]),.clk(clk),.cen(ce4),.cen_p1(ce4 & ym_half),
         .cs_n(~ym_wr),.wr_n(~ym_wr),.a0(ym_addr_q),.din(ym_data_q),
         .dout(ym_dout),.ct1(),.ct2(),.irq_n(ym_irq_n),.sample(),
         .left(),.right(),.xleft(ym_l),.xright(ym_r));

@@ -109,7 +109,10 @@ module s24_sprite_pair_ram #(
         .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
         .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b0)
     );
-    always_ff @(posedge clk) read_data <= {q_hi,q_lo};
+    // q_lo/q_hi are already registered by the M10K output registers.  A
+    // second fabric register here made hardware reads one cycle later than
+    // the behavioural Verilator model and displaced descriptor/clip pairs.
+    assign read_data = {q_hi,q_lo};
     defparam
         ram_lo.operation_mode = "BIDIR_DUAL_PORT",
         ram_hi.operation_mode = "BIDIR_DUAL_PORT",

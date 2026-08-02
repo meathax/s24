@@ -126,18 +126,19 @@ class MraControls:
 MRA_CONTROL_PROFILES = {
     MRA_CONTROL_GENERIC: MraControls(
         "8-way",
-        ("Button 1", "Button 2", "Button 3", "-",
+        ("Button 1", "Button 2", "Button 3", "-", "-", "-",
          "Start", "Coin", "Service", "Test"),
         ("A", "B", "X", "Start", "Select", "R", "L"),
     ),
     MRA_CONTROL_HOTROD: MraControls(
         "Steering Wheel / Accelerator",
-        ("-", "-", "-", "-", "Start", "Coin", "Service", "Test"),
+        ("-", "-", "-", "-", "-", "-", "Start", "Coin", "Service", "Test"),
         ("Start", "Select", "R", "L"),
     ),
     MRA_CONTROL_GOLF: MraControls(
         "Swing / Angle",
         ("Club", "Stance", "Angle Left", "Angle Right",
+         "-", "-",
          "Start", "Coin", "Service", "Test"),
         ("A", "B", "X", "Y", "Start", "Select", "R", "L"),
     ),
@@ -567,6 +568,10 @@ def emit_romboard_item(lines: list[str], item: Pair | SoloLane | FillPair) -> No
 def generate(game: Game, out_dir: pathlib.Path) -> pathlib.Path:
     zips = archive_names(game)
     controls = mra_controls_for(game)
+    if len(controls.names) != 10:
+        raise ValueError(f"{game.setname}: MiSTer control names require 10 slots")
+    if len(controls.defaults) != sum(name != "-" for name in controls.names):
+        raise ValueError(f"{game.setname}: compact control defaults do not match named inputs")
     button_names = ",".join(controls.names)
     button_defaults = ",".join(controls.defaults)
     lines = [

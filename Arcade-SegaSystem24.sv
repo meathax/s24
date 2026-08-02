@@ -7,7 +7,7 @@ module emu (
     assign {SD_SCK,SD_MOSI,SD_CS}='Z;
     assign {DDRAM_CLK,DDRAM_BURSTCNT,DDRAM_ADDR,DDRAM_DIN,
             DDRAM_BE,DDRAM_RD,DDRAM_WE}='0;
-    assign VGA_SL=0; assign VGA_F1=0; assign VGA_SCALER=0; assign VGA_DISABLE=0;
+    assign VGA_F1=0; assign VGA_SCALER=0; assign VGA_DISABLE=0;
     assign HDMI_FREEZE=0; assign HDMI_BLACKOUT=0; assign HDMI_BOB_DEINT=0;
     assign AUDIO_S=1; assign AUDIO_MIX=0;
     assign LED_DISK=0; assign LED_POWER=0; assign BUTTONS=0;
@@ -23,7 +23,7 @@ module emu (
         "O[6],Pause,Off,On;",
         "O[7],Service Mode,Off,On;",
         "R[0],Reset;",
-        "J1,B1,B2,B3,B4,Start,Coin,Service,Test;",
+        "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test;",
         "V,v",`BUILD_DATE
     };
 
@@ -258,12 +258,20 @@ module emu (
         .p4_req(mp4_req),.p4_addr(mp4_addr),.p4_dout(mp4_data),.p4_ack(mp4_ack),
         .p5_req(mp5_req),.p5_addr(mp5_addr),.p5_dout(mp5_data),.p5_ack(mp5_ack));
 
-    video_mixer #(.LINE_LENGTH(500),.HALF_DEPTH(0),.GAMMA(1)) video(
-        .CLK_VIDEO(clk_sys),.CE_PIXEL(CE_PIXEL),.ce_pix(core_ce),
-        .scandoubler(forced_scandoubler),.hq2x(1'b0),.gamma_bus(gamma_bus),
-        .R(r),.G(g),.B(b),.HSync(hsync),.VSync(vsync),.HBlank(hblank),.VBlank(vblank),
-        .HDMI_FREEZE(1'b0),.freeze_sync(),.VGA_R(VGA_R),.VGA_G(VGA_G),.VGA_B(VGA_B),
-        .VGA_VS(VGA_VS),.VGA_HS(VGA_HS),.VGA_DE(VGA_DE));
+    // Present the board's native 16 MHz, 656x424-total raster directly to the
+    // MiSTer framework.  This is 496x384 active video at 24.39 kHz horizontal
+    // and 57.51 Hz vertical.  The legacy in-core video_mixer was intended for
+    // older 15 kHz cores and re-timed this medium-resolution stream, producing
+    // line repeats, frame tearing and vertical jumps on real hardware.
+    wire [2:0] scandoubler_fx=status[5:3];
+    assign CE_PIXEL=core_ce;
+    assign VGA_R=r;
+    assign VGA_G=g;
+    assign VGA_B=b;
+    assign VGA_HS=hsync;
+    assign VGA_VS=vsync;
+    assign VGA_DE=~(hblank|vblank);
+    assign VGA_SL=scandoubler_fx[1:0];
 
     assign LED_USER=~rom_loaded|ioctl_download|wrong_sdram_size;
 endmodule

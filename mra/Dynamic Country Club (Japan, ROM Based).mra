@@ -8,7 +8,7 @@
   <rbf>s24</rbf>
   <rotation>horizontal</rotation>
   <joystick>Swing / Angle</joystick>
-  <buttons default="A,B,X,Y,Start,Select,R,L" names="Club,Stance,Angle Left,Angle Right,Start,Coin,Service,Test"/>
+  <buttons default="A,B,X,Y,Start,Select,R,L" names="Club,Stance,Angle Left,Angle Right,-,-,Start,Coin,Service,Test"/>
   <switches default="FF FB"/>
   <rom index="1" zip="dcclub.zip|dcclubj.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
