@@ -24,7 +24,10 @@ reg  [7:0] mask_idx;
 reg        mask_2x;
 reg        mask_rotate;
 reg        mask_enable;
-reg [10:0] mask_lut[256];
+// The LUT is only 256 x 11 bits. Keep it in logic because it is written from
+// clk_sys and read from clk; this preserves the source semantics without an
+// inferred dual-clock RAM whose collision behavior is undefined in hardware.
+(* ramstyle = "logic" *) reg [10:0] mask_lut[256];
 
 always @(posedge clk) begin
 	reg [4:0] hcount;

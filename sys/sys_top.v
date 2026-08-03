@@ -27,7 +27,7 @@ module sys_top
 	input         FPGA_CLK3_50,
 
 	//////////// HDMI //////////
-	output        HDMI_I2C_SCL,
+	inout         HDMI_I2C_SCL,
 	inout         HDMI_I2C_SDA,
 
 	output        HDMI_MCLK,
@@ -97,7 +97,6 @@ module sys_top
 
 	////////// I/O ALT /////////
 	output        SD_SPI_CS,
-	input         SD_SPI_MISO,
 	output        SD_SPI_CLK,
 	output        SD_SPI_MOSI,
 
@@ -107,7 +106,6 @@ module sys_top
 
 	////////// ADC //////////////
 	output        ADC_SCK,
-	input         ADC_SDO,
 	output        ADC_SDI,
 	output        ADC_CONVST,
 
@@ -125,22 +123,25 @@ module sys_top
 );
 
 //////////////////////  Secondary SD  ///////////////////////////////////
-wire SD_CS, SD_CLK, SD_MOSI, SD_MISO, SD_CD;
+wire SD_CS, SD_CLK, SD_MOSI, SD_OE, SD_CD;
+wire [3:0] adc_bus;
+assign adc_bus[2] = 1'b0;
+assign ADC_SCK = adc_bus[3];
+assign ADC_SDI = adc_bus[1];
+assign ADC_CONVST = adc_bus[0];
 
 `ifndef MISTER_DUAL_SDRAM
 	wire   sd_cd       = SDCD_SPDIF & ~SW[2]; // SW[2]=ON workaround for faulty boards without SD card detect pin.
 	assign SD_CD       = mcp_en ? mcp_sdcd : sd_cd;
-	assign SD_MISO     = SD_CD | (mcp_en ? SD_SPI_MISO : (VGA_EN | SDIO_DAT[0]));
-	assign SD_SPI_CS   = mcp_en ?  (mcp_sdcd  ? 1'bZ : SD_CS) : (sog & ~cs1 & ~VGA_EN) ? 1'b1 : 1'bZ;
-	assign SD_SPI_CLK  = (~mcp_en | mcp_sdcd) ? 1'bZ : SD_CLK;
-	assign SD_SPI_MOSI = (~mcp_en | mcp_sdcd) ? 1'bZ : SD_MOSI;
-	assign {SDIO_CLK,SDIO_CMD,SDIO_DAT} = av_dis ? 6'bZZZZZZ : (mcp_en | sd_cd) ? {vga_g,vga_r,vga_b} : {SD_CLK,SD_MOSI,SD_CS,3'bZZZ};
+	assign SD_SPI_CS   = mcp_en ?  (mcp_sdcd  ? 1'bZ : (SD_OE ? SD_CS : 1'bZ)) : (sog & ~cs1 & ~VGA_EN) ? 1'b1 : 1'bZ;
+	assign SD_SPI_CLK  = (~mcp_en | mcp_sdcd | ~SD_OE) ? 1'bZ : SD_CLK;
+	assign SD_SPI_MOSI = (~mcp_en | mcp_sdcd | ~SD_OE) ? 1'bZ : SD_MOSI;
+	assign {SDIO_CLK,SDIO_CMD,SDIO_DAT} = av_dis ? 6'bZZZZZZ : (mcp_en | sd_cd) ? {vga_g,vga_r,vga_b} : SD_OE ? {SD_CLK,SD_MOSI,SD_CS,3'bZZZ} : 6'bZZZZZZ;
 `else
 	assign SD_CD       = mcp_sdcd;
-	assign SD_MISO     = mcp_sdcd | SD_SPI_MISO;
-	assign SD_SPI_CS   = mcp_sdcd ? 1'bZ : SD_CS;
-	assign SD_SPI_CLK  = mcp_sdcd ? 1'bZ : SD_CLK;
-	assign SD_SPI_MOSI = mcp_sdcd ? 1'bZ : SD_MOSI;
+	assign SD_SPI_CS   = mcp_sdcd ? 1'bZ : (SD_OE ? SD_CS : 1'bZ);
+	assign SD_SPI_CLK  = mcp_sdcd ? 1'bZ : (SD_OE ? SD_CLK : 1'bZ);
+	assign SD_SPI_MOSI = mcp_sdcd ? 1'bZ : (SD_OE ? SD_MOSI : 1'bZ);
 `endif
 
 //////////////////////  LEDs/Buttons  ///////////////////////////////////
@@ -610,6 +611,7 @@ sysmem_lite sysmem
 
 	//DE10-nano has no reset signal on GPIO, so core has to emulate cold reset button.
 	.reset_hps_cold_req(btn_r),
+	.reset_hps_warm_req(1'b0),
 
 	//64-bit DDR3 RAM access
 	.ram1_clk(ram_clk),
@@ -681,6 +683,12 @@ ddr_svc ddr_svc
 	.ch0_data(alsa_readdata),
 	.ch0_req(alsa_req),
 	.ch0_ready(alsa_ready),
+`else
+	.ch0_addr(29'd0),
+	.ch0_burst(8'd0),
+	.ch0_data(),
+	.ch0_req(1'b0),
+	.ch0_ready(),
 `endif
 
 	.ch1_addr(pal_addr),
@@ -749,7 +757,7 @@ wire         bob_deint;
 	ascal
 	(
 		.reset_na   (~reset_req),
-		.run        (1),
+		.run        (1'b1),
 		.freeze     (freeze),
 		.bob_deint  (bob_deint),
 
@@ -762,11 +770,11 @@ wire         bob_deint;
 		.i_vs     (hvs_fix),
 		.i_fl     (f1),
 		.i_de     (hde_emu),
-		.iauto    (1),
-		.himin    (0),
-		.himax    (0),
-		.vimin    (0),
-		.vimax    (0),
+		.iauto    (1'b1),
+		.himin    (12'd0),
+		.himax    (12'd0),
+		.vimin    (12'd0),
+		.vimax    (12'd0),
 
 		.o_clk    (clk_hdmi),
 		.o_ce     (scaler_out),
@@ -795,7 +803,10 @@ wire         bob_deint;
 		.vrrmax   (HEIGHT + VBP + VS[11:0] + 12'd1),
 		.swblack  (hdmi_blackout),
 
-		.mode     ({~lowlat,LFB_EN ? LFB_FLT : |scaler_flt,2'b00}),
+		// ascal mode is five bits: bit 3 selects triple buffering and bits
+		// 2:0 select the filter. Preserve the legacy four-bit value in the
+		// low four bits and drive the newly explicit MSB low.
+		.mode     ({1'b0,~lowlat,LFB_EN ? LFB_FLT : |scaler_flt,2'b00}),
 		.poly_clk (clk_sys),
 		.poly_a   (coef_addr),
 		.poly_dw  (coef_data),
@@ -805,6 +816,7 @@ wire         bob_deint;
 		.pal1_dw  (pal_d),
 		.pal1_a   (pal_a),
 		.pal1_wr  (pal_wr),
+		.pal1_dr  (),
 
 	`ifdef MISTER_FB
 		`ifdef MISTER_FB_PALETTE
@@ -814,7 +826,21 @@ wire         bob_deint;
 			.pal2_a   (fb_pal_a),
 			.pal2_wr  (fb_pal_wr),
 			.pal_n    (fb_en),
+		`else
+			.pal_n    (1'b0),
+			.pal2_clk (1'b0),
+			.pal2_dw  (24'd0),
+			.pal2_dr  (),
+			.pal2_a   (8'd0),
+			.pal2_wr  (1'b0),
 		`endif
+	`else
+		.pal_n    (1'b0),
+		.pal2_clk (1'b0),
+		.pal2_dw  (24'd0),
+		.pal2_dr  (),
+		.pal2_a   (8'd0),
+		.pal2_wr  (1'b0),
 	`endif
 
 		.o_fb_ena         (FB_EN),
@@ -823,6 +849,10 @@ wire         bob_deint;
 		.o_fb_format      (FB_FMT),
 		.o_fb_base        (FB_BASE),
 		.o_fb_stride      (FB_STRIDE),
+		.o_border         (24'd0),
+		.i_hdmax         (),
+		.i_vdmax         (),
+		.format          (2'b01),
 
 		.avl_clk          (clk_100m),
 		.avl_waitrequest  (vbuf_waitrequest),
@@ -882,7 +912,7 @@ end
 reg  ar_md_start;
 wire ar_md_busy;
 reg  [11:0] ar_md_mul1, ar_md_mul2, ar_md_div;
-wire [11:0] ar_md_res;
+wire [23:0] ar_md_res_full;
 
 sys_umuldiv #(12,12,12) ar_muldiv
 (
@@ -893,7 +923,8 @@ sys_umuldiv #(12,12,12) ar_muldiv
 	.mul1(ar_md_mul1),
 	.mul2(ar_md_mul2),
 	.div(ar_md_div),
-	.result(ar_md_res)
+	.result(ar_md_res_full),
+	.remainder()
 );
 
 reg [11:0] hmin;
@@ -967,7 +998,7 @@ always @(posedge clk_vid) begin
 				ar_md_start<= 1;
 			end
 		2: begin
-				wcalc <= ar_md_res;
+				wcalc <= ar_md_res_full[11:0];
 				if(ar_md_start | ar_md_busy) state <= 2;
 			end
 
@@ -978,7 +1009,7 @@ always @(posedge clk_vid) begin
 				ar_md_start<= 1;
 			end
 		4: begin
-				hcalc <= ar_md_res;
+				hcalc <= ar_md_res_full[11:0];
 				if(ar_md_start | ar_md_busy) state <= 4;
 			end
 
@@ -1204,7 +1235,8 @@ cyclonev_hps_interface_peripheral_i2c hdmi_i2c
 		.dout(hdmi_data_osd),
 		.hs_out(hdmi_hs_osd),
 		.vs_out(hdmi_vs_osd),
-		.de_out(hdmi_de_osd)
+		.de_out(hdmi_de_osd),
+		.osd_status()
 	);
 
 	wire hdmi_cs_osd;
@@ -1576,10 +1608,10 @@ assign SDCD_SPDIF = (mcp_en & ~spdif) ? 1'b0 : 1'bZ;
 assign HDMI_MCLK = clk_audio;
 wire clk_audio;
 
-pll_audio pll_audio
+	pll_audio pll_audio
 (
 	.refclk(FPGA_CLK3_50),
-	.rst(0),
+	.rst(1'b0),
 	.outclk_0(clk_audio)
 );
 
@@ -1610,6 +1642,9 @@ audio_out audio_out
 `ifndef MISTER_DISABLE_ALSA
 	.alsa_l(alsa_l),
 	.alsa_r(alsa_r),
+`else
+	.alsa_l(16'd0),
+	.alsa_r(16'd0),
 `endif
 
 	.i2s_bclk(HDMI_SCLK),
@@ -1825,7 +1860,7 @@ emu emu
 	.AUDIO_S(audio_s),
 	.AUDIO_MIX(audio_mix),
 
-	.ADC_BUS({ADC_SCK,ADC_SDO,ADC_SDI,ADC_CONVST}),
+	.ADC_BUS(adc_bus),
 
 	.DDRAM_CLK(ram_clk),
 	.DDRAM_ADDR(ram_address),
@@ -1867,7 +1902,7 @@ emu emu
 
 	.SD_SCK(SD_CLK),
 	.SD_MOSI(SD_MOSI),
-	.SD_MISO(SD_MISO),
+	.SD_OE(SD_OE),
 	.SD_CS(SD_CS),
 	.SD_CD(SD_CD),
 

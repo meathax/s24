@@ -19,7 +19,6 @@ module s24_fdc (
     input  logic [7:0]  media_rdata,
     input  logic        media_ack
 );
-    logic side;
     logic [3:0] mode;
     logic [7:0] status, track, sector, data_reg, physical_track;
     logic irq, drq;
@@ -64,7 +63,7 @@ module s24_fdc (
 
     always_ff @(posedge clk) begin
         if (reset) begin
-            side <= 0; mode <= 0; status <= 0; track <= 0; sector <= 0;
+            mode <= 0; status <= 0; track <= 0; sector <= 0;
             data_reg <= 0; physical_track <= 0; irq <= 0; drq <= 0;
             span <= 0; position <= 0; track_base <= 0;
             media_req <= 0; media_wr <= 0; media_addr <= 0;
@@ -114,7 +113,6 @@ module s24_fdc (
                                 end
                                 4'h9,4'hb: begin
                                     mode <= bus_din[7:4];
-                                    side <= bus_din[3];
                                     // byte offset = track_size*(2*track+side)
                                     track_base <= image_track_offset(
                                         track_size, {physical_track,bus_din[3]});

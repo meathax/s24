@@ -119,7 +119,10 @@ module s24_tile (
     // synchronous video reads so their paths terminate in M10K output
     // registers instead of long asynchronous MLAB muxes.
     (* ramstyle = "M10K, no_rw_check" *) logic [7:0] line_scroll_issue_lo [0:2047];
-    (* ramstyle = "M10K, no_rw_check" *) logic [7:0] line_scroll_issue_hi [0:2047];
+    // Only scroll bits 9:8 are consumed by the renderer. Store those two
+    // bits directly instead of carrying six dead high-byte bits through an
+    // inferred RAM that Quartus later removes.
+    (* ramstyle = "M10K, no_rw_check" *) logic [1:0] line_scroll_issue_hi [0:2047];
     (* ramstyle = "M10K, no_rw_check" *) logic [7:0] mask_ram_lo [0:4095];
     (* ramstyle = "M10K, no_rw_check" *) logic [7:0] mask_ram_hi [0:4095];
     logic [15:0] control_regs [0:7];
@@ -196,7 +199,7 @@ module s24_tile (
         for (small_ram_init=0; small_ram_init<2048;
              small_ram_init=small_ram_init+1) begin
             line_scroll_issue_lo[small_ram_init] = 8'h00;
-            line_scroll_issue_hi[small_ram_init] = 8'h00;
+            line_scroll_issue_hi[small_ram_init] = 2'b00;
         end
         for (small_ram_init=0; small_ram_init<4096;
              small_ram_init=small_ram_init+1) begin
@@ -236,7 +239,7 @@ module s24_tile (
         cpu_dout <= {tile_ram_hi[cpu_addr],tile_ram_lo[cpu_addr]};
         if (pipeline_advance) begin
             line_scroll_word <= {
-                line_scroll_issue_hi[{issue_line_layer,render_y}],
+                6'b0, line_scroll_issue_hi[{issue_line_layer,render_y}],
                 line_scroll_issue_lo[{issue_line_layer,render_y}]
             };
             if (line_stage_valid) begin
@@ -253,7 +256,7 @@ module s24_tile (
                     line_scroll_issue_lo[cpu_addr[10:0]] <= cpu_din[7:0];
                 end
                 if (cpu_be[1]) begin
-                    line_scroll_issue_hi[cpu_addr[10:0]] <= cpu_din[15:8];
+                    line_scroll_issue_hi[cpu_addr[10:0]] <= cpu_din[9:8];
                 end
             end
             if ((cpu_addr >= 15'h6000 && cpu_addr < 15'h66a0) ||
@@ -306,7 +309,7 @@ module s24_tile (
     logic [8:0] lookup_x_q;
     logic [8:0] lookup_source_x_q,lookup_source_y_q;
     logic [1:0] lookup_ctrl_mode_q;
-    logic lookup_disabled_q,lookup_chosen_odd_q;
+    logic lookup_disabled_q;
     // synthesis translate_off
     logic [14:0] lookup_tile_addr_q,lookup_mask_addr_q;
     // synthesis translate_on
@@ -519,7 +522,6 @@ module s24_tile (
                 lookup_source_y_q <= issue_source_y;
                 lookup_ctrl_mode_q <= line_ctrl_mode_q;
                 lookup_disabled_q <= line_vscr_q[15];
-                lookup_chosen_odd_q <= issue_chosen_odd;
                 // synthesis translate_off
                 lookup_tile_addr_q <= tile_addr;
                 lookup_mask_addr_q <= mask_addr;
@@ -547,7 +549,6 @@ module s24_tile (
             lookup_source_y_q <= 0;
             lookup_ctrl_mode_q <= 0;
             lookup_disabled_q <= 0;
-            lookup_chosen_odd_q <= 0;
             // synthesis translate_off
             lookup_tile_addr_q <= 0;
             lookup_mask_addr_q <= 0;

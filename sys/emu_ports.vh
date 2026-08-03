@@ -91,7 +91,9 @@ inout   [3:0] ADC_BUS,
 //SD-SPI
 output        SD_SCK,
 output        SD_MOSI,
-input         SD_MISO,
+// Explicitly separates an unused/core-owned SD bus from the physical
+// top-level tri-state boundary. The System 24 core leaves this bus disabled.
+output        SD_OE,
 output        SD_CS,
 input         SD_CD,
 

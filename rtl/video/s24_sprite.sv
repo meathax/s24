@@ -73,7 +73,8 @@ endmodule
 // clean write port per inferred RAM instead of a variable part-select write.
 module s24_sprite_pair_ram #(
     parameter int WIDTH = 128,
-    parameter int ADDR_WIDTH = 9
+    parameter int ADDR_WIDTH = 9,
+    parameter int PACKED_WIDTH = WIDTH
 ) (
     input logic clk,
     input logic [ADDR_WIDTH-1:0] read_addr,
@@ -83,22 +84,71 @@ module s24_sprite_pair_ram #(
     input logic write_enable,
     input logic write_high
 );
+    // The renderer consumes only four descriptor fields (49 bits) and six
+    // clip fields (38 bits). Packing those fields removes dead q_a bits from
+    // the generated M10K without changing the externally visible record.
+    function automatic logic [PACKED_WIDTH-1:0] pack_word(
+        input logic [WIDTH-1:0] value
+    );
+        begin
+            pack_word='0;
+            if(PACKED_WIDTH==49) begin
+                pack_word[0]=value[13];
+                pack_word[16:1]=value[31:16];
+                pack_word[32:17]=value[79:64];
+                pack_word[48:33]=value[95:80];
+            end else if(PACKED_WIDTH==38) begin
+                pack_word[0]=value[80];
+                pack_word[1]=value[77];
+                pack_word[10:2]=value[56:48];
+                pack_word[19:11]=value[40:32];
+                pack_word[28:20]=value[24:16];
+                pack_word[37:29]=value[8:0];
+            end else begin
+                pack_word=value[PACKED_WIDTH-1:0];
+            end
+        end
+    endfunction
+
+    function automatic logic [WIDTH-1:0] unpack_word(
+        input logic [PACKED_WIDTH-1:0] value
+    );
+        begin
+            unpack_word='0;
+            if(PACKED_WIDTH==49) begin
+                unpack_word[13]=value[0];
+                unpack_word[31:16]=value[16:1];
+                unpack_word[79:64]=value[32:17];
+                unpack_word[95:80]=value[48:33];
+            end else if(PACKED_WIDTH==38) begin
+                unpack_word[80]=value[0];
+                unpack_word[77]=value[1];
+                unpack_word[56:48]=value[10:2];
+                unpack_word[40:32]=value[19:11];
+                unpack_word[24:16]=value[28:20];
+                unpack_word[8:0]=value[37:29];
+            end else begin
+                unpack_word[PACKED_WIDTH-1:0]=value;
+            end
+        end
+    endfunction
 `ifdef VERILATOR
-    logic [WIDTH-1:0] mem_lo [0:(1<<ADDR_WIDTH)-1];
-    logic [WIDTH-1:0] mem_hi [0:(1<<ADDR_WIDTH)-1];
+    logic [PACKED_WIDTH-1:0] mem_lo [0:(1<<ADDR_WIDTH)-1];
+    logic [PACKED_WIDTH-1:0] mem_hi [0:(1<<ADDR_WIDTH)-1];
     always_ff @(posedge clk) begin
-        read_data <= {mem_hi[read_addr],mem_lo[read_addr]};
+        read_data <= {unpack_word(mem_hi[read_addr]),
+                      unpack_word(mem_lo[read_addr])};
         if(write_enable) begin
-            if(write_high) mem_hi[write_addr] <= write_data;
-            else mem_lo[write_addr] <= write_data;
+            if(write_high) mem_hi[write_addr] <= pack_word(write_data);
+            else mem_lo[write_addr] <= pack_word(write_data);
         end
     end
 `else
-    logic [WIDTH-1:0] q_lo,q_hi;
+    logic [PACKED_WIDTH-1:0] q_lo,q_hi;
     altsyncram ram_lo (
-        .clock0(clk), .address_a(read_addr), .data_a({WIDTH{1'b0}}),
+        .clock0(clk), .address_a(read_addr), .data_a({PACKED_WIDTH{1'b0}}),
         .wren_a(1'b0), .q_a(q_lo),
-        .clock1(clk), .address_b(write_addr), .data_b(write_data),
+        .clock1(clk), .address_b(write_addr), .data_b(pack_word(write_data)),
         .wren_b(write_enable && !write_high), .q_b(),
         .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
         .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(1'b1),
@@ -106,9 +156,9 @@ module s24_sprite_pair_ram #(
         .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b0)
     );
     altsyncram ram_hi (
-        .clock0(clk), .address_a(read_addr), .data_a({WIDTH{1'b0}}),
+        .clock0(clk), .address_a(read_addr), .data_a({PACKED_WIDTH{1'b0}}),
         .wren_a(1'b0), .q_a(q_hi),
-        .clock1(clk), .address_b(write_addr), .data_b(write_data),
+        .clock1(clk), .address_b(write_addr), .data_b(pack_word(write_data)),
         .wren_b(write_enable && write_high), .q_b(),
         .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
         .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(1'b1),
@@ -118,12 +168,12 @@ module s24_sprite_pair_ram #(
     // q_lo/q_hi are already registered by the M10K output registers.  A
     // second fabric register here made hardware reads one cycle later than
     // the behavioural Verilator model and displaced descriptor/clip pairs.
-    assign read_data = {q_hi,q_lo};
+    assign read_data = {unpack_word(q_hi),unpack_word(q_lo)};
     defparam
         ram_lo.operation_mode = "BIDIR_DUAL_PORT",
         ram_hi.operation_mode = "BIDIR_DUAL_PORT",
-        ram_lo.width_a = WIDTH, ram_hi.width_a = WIDTH,
-        ram_lo.width_b = WIDTH, ram_hi.width_b = WIDTH,
+        ram_lo.width_a = PACKED_WIDTH, ram_hi.width_a = PACKED_WIDTH,
+        ram_lo.width_b = PACKED_WIDTH, ram_hi.width_b = PACKED_WIDTH,
         ram_lo.widthad_a = ADDR_WIDTH, ram_hi.widthad_a = ADDR_WIDTH,
         ram_lo.widthad_b = ADDR_WIDTH, ram_hi.widthad_b = ADDR_WIDTH,
         ram_lo.numwords_a = (1 << ADDR_WIDTH),
@@ -148,7 +198,8 @@ endmodule
 // second descriptor-RAM read for every visible sprite.
 module s24_sprite_active_ram #(
     parameter int WIDTH = 209,
-    parameter int ADDR_WIDTH = 10
+    parameter int ADDR_WIDTH = 10,
+    parameter int PACKED_WIDTH = WIDTH
 ) (
     input logic clk,
     input logic [ADDR_WIDTH-1:0] read_addr,
@@ -157,27 +208,74 @@ module s24_sprite_active_ram #(
     input logic [WIDTH-1:0] write_data,
     input logic write_enable
 );
+    // Active entries use the same 49-bit descriptor and 38-bit clip payloads
+    // as the pair RAM, packed into one 87-bit M10K word.
+    function automatic logic [PACKED_WIDTH-1:0] pack_word(
+        input logic [WIDTH-1:0] value
+    );
+        begin
+            pack_word='0;
+            if(PACKED_WIDTH==87) begin
+                pack_word[0]=value[94];
+                pack_word[16:1]=value[112:97];
+                pack_word[32:17]=value[160:145];
+                pack_word[48:33]=value[176:161];
+                pack_word[49]=value[80];
+                pack_word[50]=value[77];
+                pack_word[59:51]=value[56:48];
+                pack_word[68:60]=value[40:32];
+                pack_word[77:69]=value[24:16];
+                pack_word[86:78]=value[8:0];
+            end else begin
+                pack_word=value[PACKED_WIDTH-1:0];
+            end
+        end
+    endfunction
+
+    function automatic logic [WIDTH-1:0] unpack_word(
+        input logic [PACKED_WIDTH-1:0] value
+    );
+        begin
+            unpack_word='0;
+            if(PACKED_WIDTH==87) begin
+                unpack_word[94]=value[0];
+                unpack_word[112:97]=value[16:1];
+                unpack_word[160:145]=value[32:17];
+                unpack_word[176:161]=value[48:33];
+                unpack_word[80]=value[49];
+                unpack_word[77]=value[50];
+                unpack_word[56:48]=value[59:51];
+                unpack_word[40:32]=value[68:60];
+                unpack_word[24:16]=value[77:69];
+                unpack_word[8:0]=value[86:78];
+            end else begin
+                unpack_word[PACKED_WIDTH-1:0]=value;
+            end
+        end
+    endfunction
 `ifdef VERILATOR
-    logic [WIDTH-1:0] mem [0:(1<<ADDR_WIDTH)-1];
+    logic [PACKED_WIDTH-1:0] mem [0:(1<<ADDR_WIDTH)-1];
     always_ff @(posedge clk) begin
-        read_data <= mem[read_addr];
-        if(write_enable) mem[write_addr] <= write_data;
+        read_data <= unpack_word(mem[read_addr]);
+        if(write_enable) mem[write_addr] <= pack_word(write_data);
     end
 `else
+    logic [PACKED_WIDTH-1:0] q_a;
     altsyncram ram (
-        .clock0(clk), .address_a(read_addr), .data_a({WIDTH{1'b0}}),
-        .wren_a(1'b0), .q_a(read_data),
-        .clock1(clk), .address_b(write_addr), .data_b(write_data),
+        .clock0(clk), .address_a(read_addr), .data_a({PACKED_WIDTH{1'b0}}),
+        .wren_a(1'b0), .q_a(q_a),
+        .clock1(clk), .address_b(write_addr), .data_b(pack_word(write_data)),
         .wren_b(write_enable), .q_b(),
         .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
         .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(1'b1),
         .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
         .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b0)
     );
+    assign read_data = unpack_word(q_a);
     defparam
         ram.operation_mode = "BIDIR_DUAL_PORT",
-        ram.width_a = WIDTH,
-        ram.width_b = WIDTH,
+        ram.width_a = PACKED_WIDTH,
+        ram.width_b = PACKED_WIDTH,
         ram.widthad_a = ADDR_WIDTH,
         ram.widthad_b = ADDR_WIDTH,
         ram.numwords_a = (1 << ADDR_WIDTH),
@@ -254,12 +352,12 @@ module s24_sprite (
     logic [127:0] descriptor_write_data;
     logic [80:0] clip_write_data;
 
-    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(STACK_BITS-1)) descriptor_stack_ram (
+    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(STACK_BITS-1),.PACKED_WIDTH(49)) descriptor_stack_ram (
         .clk(clk),.read_addr(descriptor_read_pair),
         .read_data(descriptor_stack_pair_q),.write_addr(descriptor_write_addr),
         .write_data(descriptor_write_data),.write_enable(descriptor_write_enable),
         .write_high(descriptor_write_high));
-    s24_sprite_pair_ram #(.WIDTH(81),.ADDR_WIDTH(STACK_BITS-1)) clip_stack_ram (
+    s24_sprite_pair_ram #(.WIDTH(81),.ADDR_WIDTH(STACK_BITS-1),.PACKED_WIDTH(38)) clip_stack_ram (
         .clk(clk),.read_addr(descriptor_read_pair),
         .read_data(clip_stack_pair_q),.write_addr(descriptor_write_addr),
         .write_data(clip_write_data),.write_enable(descriptor_write_enable),
@@ -267,12 +365,12 @@ module s24_sprite (
     logic [255:0] descriptor_stack_pair2_q;
     logic [161:0] clip_stack_pair2_q;
     logic [STACK_BITS-2:0] descriptor_read_pair2;
-    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(STACK_BITS-1)) descriptor_stack_ram2 (
+    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(STACK_BITS-1),.PACKED_WIDTH(49)) descriptor_stack_ram2 (
         .clk(clk),.read_addr(descriptor_read_pair2),
         .read_data(descriptor_stack_pair2_q),.write_addr(descriptor_write_addr),
         .write_data(descriptor_write_data),.write_enable(descriptor_write_enable),
         .write_high(descriptor_write_high));
-    s24_sprite_pair_ram #(.WIDTH(81),.ADDR_WIDTH(STACK_BITS-1)) clip_stack_ram2 (
+    s24_sprite_pair_ram #(.WIDTH(81),.ADDR_WIDTH(STACK_BITS-1),.PACKED_WIDTH(38)) clip_stack_ram2 (
         .clk(clk),.read_addr(descriptor_read_pair2),
         .read_data(clip_stack_pair2_q),.write_addr(descriptor_write_addr),
         .write_data(clip_write_data),.write_enable(descriptor_write_enable),
@@ -283,7 +381,7 @@ module s24_sprite (
     logic active_cache_write_enable;
     logic [127:0] active_render_descriptor;
     logic [80:0] active_render_clip;
-    s24_sprite_active_ram #(.ADDR_WIDTH(ACTIVE_BITS)) active_cache_ram (
+    s24_sprite_active_ram #(.ADDR_WIDTH(ACTIVE_BITS),.PACKED_WIDTH(87)) active_cache_ram (
         .clk(clk),.read_addr(active_cache_read_addr),
         .read_data(active_cache_q),.write_addr(active_cache_write_addr),
         .write_data(active_cache_write_data),
@@ -377,7 +475,10 @@ module s24_sprite (
     logic [80:0] render_clip;
     logic [127:0] descriptor,palette_table,data_cache;
     (* ramstyle="MLAB, no_rw_check" *) logic [127:0] palette_cache_data [0:7];
-    logic [13:0] palette_cache_tags [0:7];
+    // Eight-entry tags are intentionally implemented as fabric registers.
+    // They are tiny and share the renderer clock; allowing Quartus to infer a
+    // RAM here only adds pass-through logic and a 276020 diagnostic.
+    (* ramstyle="logic" *) logic [13:0] palette_cache_tags [0:7];
     logic [7:0] palette_cache_valid;
     logic [2:0] palette_cache_index;
     logic palette_cache_hit;

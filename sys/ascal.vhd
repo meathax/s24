@@ -493,7 +493,10 @@ ARCHITECTURE rtl OF ascal IS
 	SIGNAL o_sh,o_sh1,o_sh2,o_sh3,o_sh4 : std_logic;
 	SIGNAL o_reset_na : std_logic;
 	SIGNAL o_dpram : arr_dw(0 TO BLEN*2-1);
-	ATTRIBUTE ramstyle OF o_dpram : SIGNAL IS "no_rw_check";
+	-- This is a 32-word (for the System 24 128-bit Avalon profile) staging
+	-- buffer crossing avl_clk to o_clk. Keep it in logic rather than inferring
+	-- a dual-clock RAM with undefined mixed-port read-during-write behavior.
+	ATTRIBUTE ramstyle OF o_dpram : SIGNAL IS "logic";
 	SIGNAL o_line0,o_line1,o_line2,o_line3 : arr_pix(0 TO OHRESL-1);
 	SIGNAL o_linf0,o_linf1,o_linf2,o_linf3 : arr_pix(0 TO OHRESM-1);
 
@@ -1021,9 +1024,12 @@ ARCHITECTURE rtl OF ascal IS
 	SIGNAL o_h_poly_mem : arr_uv40(0 TO 2**FRAC-1);
 	SIGNAL o_v_poly_mem : arr_uv40(0 TO 2**FRAC-1);
 	SIGNAL o_a_poly_mem : arr_uv40(0 TO 2**FRAC-1);
-	ATTRIBUTE ramstyle OF o_h_poly_mem : SIGNAL IS "no_rw_check";
-	ATTRIBUTE ramstyle OF o_v_poly_mem : SIGNAL IS "no_rw_check";
-	ATTRIBUTE ramstyle OF o_a_poly_mem : SIGNAL IS "no_rw_check";
+	-- Polyphase tables are at most 256 x 40 bits and are updated only during
+	-- configuration. Fabric storage keeps their cross-clock read semantics
+	-- deterministic instead of inferring an ambiguous dual-clock block RAM.
+	ATTRIBUTE ramstyle OF o_h_poly_mem : SIGNAL IS "logic";
+	ATTRIBUTE ramstyle OF o_v_poly_mem : SIGNAL IS "logic";
+	ATTRIBUTE ramstyle OF o_a_poly_mem : SIGNAL IS "logic";
 	SIGNAL o_a_poly_addr, o_v_poly_addr : integer RANGE 0 TO 2**FRAC-1;
 	SIGNAL o_h_poly_phase_a,o_h_poly_phase_a2,o_h_poly_phase_a3, o_h_poly_phase_a4, o_h_poly_phase_a5 : poly_phase_t;
 	SIGNAL o_v_poly_phase_a,o_v_poly_phase_a2,o_v_poly_phase_a3, o_v_poly_phase_a4, o_v_poly_phase_a5 : poly_phase_t;

@@ -116,7 +116,8 @@ spdif toslink
 	.bit_out_en_i(mclk_ce),
 
 	.sample_i({ar,al}),
-	.spdif_o(spdif)
+	.spdif_o(spdif),
+	.sample_req_o()
 );
 
 sigma_delta_dac #(15) sd_l

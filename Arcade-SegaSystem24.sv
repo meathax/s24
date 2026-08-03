@@ -2,9 +2,13 @@ module emu (
     `include "sys/emu_ports.vh"
 );
     assign ADC_BUS='Z;
-    assign USER_OUT='1;
+    // This core has no user-I/O protocol. Drive unused open-drain lines low
+    // so the board pins have a deterministic output-enable and Quartus does
+    // not leave permanently disabled USER_IO output drivers.
+    assign USER_OUT='0;
     assign {UART_RTS,UART_TXD,UART_DTR}=0;
-    assign {SD_SCK,SD_MOSI,SD_CS}='Z;
+    assign {SD_SCK,SD_MOSI,SD_CS}=3'b000;
+    assign SD_OE=1'b0;
     `ifndef MISTER_FB
     assign {DDRAM_CLK,DDRAM_BURSTCNT,DDRAM_ADDR,DDRAM_DIN,
             DDRAM_BE,DDRAM_RD,DDRAM_WE}='0;
@@ -54,7 +58,6 @@ module emu (
     logic [8:0] spinner0,spinner1,spinner2,spinner3;
     logic [7:0] paddle0,paddle1,paddle2,paddle3;
     logic forced_scandoubler;
-    wire [21:0] gamma_bus;
     logic ioctl_download,ioctl_upload,ioctl_wr,ioctl_rd,ioctl_wait;
     logic [15:0] ioctl_index;
     logic [26:0] ioctl_addr;
@@ -62,20 +65,46 @@ module emu (
     logic [15:0] sdram_sz;
     s24_pkg::board_desc_t descriptor;
     hps_io #(.CONF_STR(CONF_STR),.WIDE(1)) hps(
-        .clk_sys(clk_sys),.HPS_BUS(HPS_BUS),.EXT_BUS(),.gamma_bus(gamma_bus),
+        .clk_sys(clk_sys),.HPS_BUS(HPS_BUS),.EXT_BUS(),.gamma_bus(),
         .forced_scandoubler(forced_scandoubler),.buttons(buttons),.status(status),
         .video_rotated(video_rotated),.new_vmode(1'b0),
         .status_menumask({14'd0,~status[101],1'b0}),.joystick_0(joy0),.joystick_1(joy1),
         .joystick_2(joy2),.joystick_3(joy3),
+        .joystick_4(),.joystick_5(),
+        .joystick_l_analog_0(),.joystick_l_analog_1(),
+        .joystick_l_analog_2(),.joystick_l_analog_3(),
+        .joystick_l_analog_4(),.joystick_l_analog_5(),
+        .joystick_r_analog_0(),.joystick_r_analog_1(),
+        .joystick_r_analog_2(),.joystick_r_analog_3(),
+        .joystick_r_analog_4(),.joystick_r_analog_5(),
+        .joystick_0_rumble(16'd0),.joystick_1_rumble(16'd0),
+        .joystick_2_rumble(16'd0),.joystick_3_rumble(16'd0),
+        .joystick_4_rumble(16'd0),.joystick_5_rumble(16'd0),
         .paddle_0(paddle0),.paddle_1(paddle1),
         .paddle_2(paddle2),.paddle_3(paddle3),
+        .paddle_4(),.paddle_5(),
         .spinner_0(spinner0),.spinner_1(spinner1),
         .spinner_2(spinner2),.spinner_3(spinner3),
+        .spinner_4(),.spinner_5(),
+        .ps2_kbd_clk_out(),.ps2_kbd_data_out(),
+        .ps2_kbd_clk_in(1'b0),.ps2_kbd_data_in(1'b0),
+        .ps2_kbd_led_status(3'b000),.ps2_kbd_led_use(3'b000),
+        .ps2_mouse_clk_out(),.ps2_mouse_data_out(),
+        .ps2_mouse_clk_in(1'b0),.ps2_mouse_data_in(1'b0),
+        .ps2_key(),.ps2_mouse(),.ps2_mouse_ext(),
+        .direct_video(),
+        .status_in(128'd0),.status_set(1'b0),
+        .info_req(1'b0),.info(8'd0),
+        .img_mounted(),.img_readonly(),.img_size(),
+        .sd_lba('{32'd0}),.sd_blk_cnt('{6'd0}),
+        .sd_rd(1'b0),.sd_wr(1'b0),.sd_ack(),
+        .sd_buff_addr(),.sd_buff_dout(),.sd_buff_din('{16'd0}),.sd_buff_wr(),
         .ioctl_download(ioctl_download),.ioctl_upload(ioctl_upload),
         .ioctl_upload_req(1'b0),.ioctl_upload_index(8'd0),
         .ioctl_wr(ioctl_wr),.ioctl_rd(ioctl_rd),.ioctl_index(ioctl_index),
         .ioctl_addr(ioctl_addr),.ioctl_dout(ioctl_dout),.ioctl_din(ioctl_din),
-        .ioctl_wait(ioctl_wait),.sdram_sz(sdram_sz));
+        .ioctl_wait(ioctl_wait),.ioctl_file_ext(),.RTC(),.TIMESTAMP(),
+        .uart_mode(),.uart_speed(),.sdram_sz(sdram_sz));
     assign ioctl_din=0;
 
     logic [7:0] dsw,coinage;
@@ -175,6 +204,7 @@ module emu (
         .ce_pixel(core_ce),.hblank(hblank),.vblank(vblank),
         .hsync(hsync),.vsync(vsync),.red(r),.green(g),.blue(b),
         .audio_l(AUDIO_L),.audio_r(AUDIO_R),
+        .audio_event(),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
         .p1_req(p1_req),.p1_addr(p1_addr),.p1_data(p1_data),.p1_ack(p1_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),

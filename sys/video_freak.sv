@@ -162,7 +162,13 @@ wire        div_run;
 reg  [23:0] div_num;
 reg  [11:0] div_den;
 wire [23:0] div_res;
-sys_udiv #(24,12) div(CLK_VIDEO,div_start,div_run, div_num,div_den,div_res);
+// The quotient drives the scaler; explicitly terminate the unused remainder
+// output so Quartus records an intentional boundary instead of a missing
+// instance connection.
+sys_udiv #(24,12) div(
+	.clk(CLK_VIDEO), .start(div_start), .busy(div_run),
+	.num(div_num), .div(div_den), .result(div_res), .remainder()
+);
 
 reg         mul_start;
 wire        mul_run;

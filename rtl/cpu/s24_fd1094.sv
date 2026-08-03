@@ -1,3 +1,71 @@
+// The FD1094 key table has one synchronous CPU read port and one HPS download
+// write port. Keep the byte banks as explicit true dual-port M10Ks so Quartus
+// does not infer a same-clock RAM with an implicit pass-through path.
+module s24_fd1094_key_ram (
+    input  logic        clk,
+    input  logic [11:0] read_addr,
+    output logic [7:0]  even_q,
+    output logic [7:0]  odd_q,
+    input  logic        write_enable,
+    input  logic [11:0] write_addr,
+    input  logic [15:0] write_data
+);
+`ifdef VERILATOR
+    logic [7:0] even_mem [0:4095];
+    logic [7:0] odd_mem [0:4095];
+    assign even_q = even_mem[read_addr];
+    assign odd_q = odd_mem[read_addr];
+    always_ff @(posedge clk) begin
+        if(write_enable) begin
+            even_mem[write_addr] <= write_data[7:0];
+            odd_mem[write_addr] <= write_data[15:8];
+        end
+    end
+`else
+    altsyncram ram_even (
+        .clock0(clk), .address_a(read_addr), .data_a(8'h00),
+        .wren_a(1'b0), .q_a(even_q),
+        .clock1(clk), .address_b(write_addr), .data_b(write_data[7:0]),
+        .wren_b(write_enable), .q_b(),
+        .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
+        .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(1'b1),
+        .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
+        .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b0)
+    );
+    altsyncram ram_odd (
+        .clock0(clk), .address_a(read_addr), .data_a(8'h00),
+        .wren_a(1'b0), .q_a(odd_q),
+        .clock1(clk), .address_b(write_addr), .data_b(write_data[15:8]),
+        .wren_b(write_enable), .q_b(),
+        .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
+        .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(1'b1),
+        .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
+        .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b0)
+    );
+    defparam
+        ram_even.operation_mode = "BIDIR_DUAL_PORT",
+        ram_odd.operation_mode = "BIDIR_DUAL_PORT",
+        ram_even.width_a = 8, ram_odd.width_a = 8,
+        ram_even.width_b = 8, ram_odd.width_b = 8,
+        ram_even.widthad_a = 12, ram_odd.widthad_a = 12,
+        ram_even.widthad_b = 12, ram_odd.widthad_b = 12,
+        ram_even.numwords_a = 4096, ram_odd.numwords_a = 4096,
+        ram_even.numwords_b = 4096, ram_odd.numwords_b = 4096,
+        ram_even.ram_block_type = "M10K", ram_odd.ram_block_type = "M10K",
+        ram_even.intended_device_family = "Cyclone V",
+        ram_odd.intended_device_family = "Cyclone V",
+        ram_even.lpm_type = "altsyncram", ram_odd.lpm_type = "altsyncram",
+        ram_even.outdata_reg_a = "UNREGISTERED",
+        ram_odd.outdata_reg_a = "UNREGISTERED",
+        ram_even.read_during_write_mode_mixed_ports = "OLD_DATA",
+        ram_odd.read_during_write_mode_mixed_ports = "OLD_DATA",
+        ram_even.width_byteena_a = 1, ram_odd.width_byteena_a = 1,
+        ram_even.width_byteena_b = 1, ram_odd.width_byteena_b = 1,
+        ram_even.power_up_uninitialized = "FALSE",
+        ram_odd.power_up_uninitialized = "FALSE";
+`endif
+endmodule
+
 module s24_fd1094 #(
     parameter MASK_FILE="rtl/cpu/fd1094_masked.mem"
 ) (
@@ -18,13 +86,16 @@ module s24_fd1094 #(
     output logic [15:0] plaintext,
     output logic [7:0]  current_state
 );
-    // The HPS writes both bytes of a key word in one cycle. Banking even and
-    // odd bytes gives each M10K one write port and one decrypt read port.
-    (* ramstyle="M10K, no_rw_check" *) logic [7:0] key_ram_even [0:4095];
-    (* ramstyle="M10K, no_rw_check" *) logic [7:0] key_ram_odd [0:4095];
+    logic [7:0] key_ram_even_q,key_ram_odd_q;
+    s24_fd1094_key_ram key_ram (
+        .clk(clk), .read_addr(key_address[12:1]),
+        .even_q(key_ram_even_q), .odd_q(key_ram_odd_q),
+        .write_enable(key_wr), .write_addr(key_word_addr),
+        .write_data(key_wdata));
 `ifdef SYNTHESIS
     logic [7:0] mask_q;
     altsyncram mask_ram (
+        .clock0(clk),
         .address_a(mask_address_l), .q_a(mask_q),
         .aclr0(1'b0), .addressstall_a(1'b0), .clocken0(1'b1),
         .eccstatus(), .rden_a(1'b1)
@@ -130,8 +201,8 @@ module s24_fd1094 #(
                 end
                 F_KEY: begin
                     mainkey <= key_address[0]
-                               ? key_ram_odd[key_address[12:1]]
-                               : key_ram_even[key_address[12:1]];
+                               ? key_ram_odd_q
+                               : key_ram_even_q;
                     fstate<=F_DECRYPT;
                 end
                 F_DECRYPT: begin
@@ -214,10 +285,9 @@ module s24_fd1094 #(
             end
         end
         // Key download deliberately remains writable while the emulated CPU
-        // is held in reset by ioctl_download.
+        // is held in reset by ioctl_download. The explicit key RAM module
+        // owns the byte writes; these state bytes mirror the first words.
         if(key_wr) begin
-            key_ram_even[key_word_addr]<=key_wdata[7:0];
-            key_ram_odd[key_word_addr]<=key_wdata[15:8];
             case({key_word_addr,1'b0})
                 13'd0: begin irq_key<=key_wdata[7:0];global_key1<=key_wdata[15:8];end
                 13'd2: begin global_key2<=key_wdata[7:0];global_key3<=key_wdata[15:8];end

@@ -162,7 +162,6 @@ module pll_cfg_hdmi
 
 
     //other PLL signals for dyn ph shift
-    wire            phase_done/*synthesis keep*/;
     wire            phase_en/*synthesis keep*/;
     wire            up_dn/*synthesis keep*/;
     wire  [4:0]     cnt_sel;
@@ -1154,7 +1153,9 @@ module pll_cfg_hdmi
     dyn_phase_shift dyn_phase_shift_inst (
         .clk(clk), 
         .reset(reset),
-        .phase_done(phase_done),
+        // Dynamic phase shifting is disabled in this reduced reconfiguration
+        // block, so do not create an unused phase_done fanout from the PLL.
+        .phase_done(1'b0),
         .pll_start_valid(pll_start_valid),
         .dps_changed(dps_changed),
         .dps_changed_valid(dps_changed_valid),
@@ -1196,6 +1197,7 @@ module pll_cfg_hdmi
     .avmm_atpgmode(avmm_atpgmode),
     .avmm_mdio_dis(avmm_mdio_dis),
     .avmm_scanen(avmm_scanen),
+    .avmm_ser_shift_load(1'b0),
 
     // Outputs to fpll
     .dprio_address(dprio_address),
@@ -1233,6 +1235,11 @@ module pll_cfg_hdmi
     //FPLL_1 or 0 address lut
     generic_lcell_comb lcell_fpll_0_1 (
 		.dataa(1'b0),
+		.datab(1'b0),
+		.datac(1'b0),
+		.datad(1'b0),
+		.datae(1'b0),
+		.dataf(1'b0),
         .combout (fpll_1));
     defparam lcell_fpll_0_1.lut_mask = 64'hAAAAAAAAAAAAAAAA;
 	 defparam lcell_fpll_0_1.dont_touch = "on";
@@ -1277,6 +1284,5 @@ module pll_cfg_hdmi
     //assign reconfig_from_pll signals
     assign dprio_readdata = reconfig_from_pll [15:0]; 
     assign locked_orig    = reconfig_from_pll [16];
-    assign phase_done     = reconfig_from_pll [17];
 
 endmodule
