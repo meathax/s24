@@ -29,15 +29,15 @@ localparam NADDR_WIDTH = 9;
 localparam NANO_WIDTH = 68;
 localparam NANO_DEPTH = 336;
 
-localparam BSER1_NMA = 'h003;
-localparam RSTP0_NMA = 'h002;
-localparam HALT1_NMA = 'h001;
-localparam TRAC1_NMA = 'h1C0;
-localparam ITLX1_NMA = 'h1C4;
+localparam logic [UADDR_WIDTH-1:0] BSER1_NMA = 10'h003;
+localparam logic [UADDR_WIDTH-1:0] RSTP0_NMA = 10'h002;
+localparam logic [UADDR_WIDTH-1:0] HALT1_NMA = 10'h001;
+localparam logic [UADDR_WIDTH-1:0] TRAC1_NMA = 10'h1C0;
+localparam logic [UADDR_WIDTH-1:0] ITLX1_NMA = 10'h1C4;
 
-localparam TVN_SPURIOUS = 12;
-localparam TVN_AUTOVEC = 13;
-localparam TVN_INTERRUPT = 15;
+localparam logic [3:0] TVN_SPURIOUS = 4'd12;
+localparam logic [3:0] TVN_AUTOVEC = 4'd13;
+localparam logic [3:0] TVN_INTERRUPT = 4'd15;
 
 localparam NANO_DOB_DBD = 2'b01;
 localparam NANO_DOB_ADB = 2'b10;
@@ -271,7 +271,7 @@ module fx68k(
 		// Originally it's invalid on hardware reset, and forced later when coming out of reset
 		if( Clks.pwrUp) begin
 			microAddr <= RSTP0_NMA;
-			nanoAddr <= RSTP0_NMA;
+			nanoAddr <= RSTP0_NMA[NADDR_WIDTH-1:0];
 		end
 		else if( enT1) begin
 			microAddr <= nma;
@@ -1201,9 +1201,9 @@ module excUnit( input s_clks Clks,
 	output logic [15:0] oEdb,
 	output logic [23:1] eab);
 
-localparam REG_USP = 15;
-localparam REG_SSP = 16;
-localparam REG_DT = 17;
+localparam logic [4:0] REG_USP = 5'd15;
+localparam logic [4:0] REG_SSP = 5'd16;
+localparam logic [4:0] REG_DT = 5'd17;
 
 	// Register file
 	reg [15:0] regs68L[ 18];
@@ -1303,7 +1303,7 @@ localparam REG_DT = 17;
 				rxReg = { Irdecod.rxIsAreg, Irdecod.rx};
 				
 			if( (& rxReg)) begin
-				rxMux = pswS ? REG_SSP : 15;
+				rxMux = pswS ? REG_SSP : 5'd15;
 				rxIsSp = 1'b1;
 			end
 			else begin
@@ -1962,7 +1962,7 @@ module pren( mask, hbit);
       // idle = 1;
       for( i = size-1; i >= 0; i = i - 1) begin
           if( mask[ i]) begin
-             hbit = i;
+		         hbit = i[outbits-1:0];
              // idle = 0;
          end
       end
@@ -2181,18 +2181,18 @@ module sequencer( input s_clks Clks, input enT3,
 			tvn = rSpurious ? TVN_SPURIOUS : TVN_AUTOVEC;
 		
 		else if( rTrace)
-			tvn = 9;
+			tvn = 4'd9;
 		else if( rInterrupt) begin
 			tvn = TVN_INTERRUPT;
 			grp1Nma = ITLX1_NMA;
 		end
 		else begin
 			unique case( 1'b1)					// Can't happen more than one of these
-			rIllegal:			tvn = 4;
-			rPriv:				tvn = 8;
-			rLineA:				tvn = 10;
-			rLineF:				tvn = 11;
-			default:			tvn = 1;		// Signal no group 0/1 exception
+			rIllegal:			tvn = 4'd4;
+			rPriv:				tvn = 4'd8;
+			rLineA:			tvn = 4'd10;
+			rLineF:			tvn = 4'd11;
+			default:			tvn = 4'd1;		// Signal no group 0/1 exception
 			endcase
 		end
 	end
@@ -2318,8 +2318,6 @@ module busControl( input s_clks Clks, input enT1, input enT4,
 	assign UDSn = rUDS;
 	assign eRWn = rRWn;
 
-	reg dataOe;
-		
 	reg bcPend;
 	reg isWriteReg, bciByte, isRmcReg, wendReg;
 	assign bciWrite = isWriteReg;
@@ -2407,15 +2405,8 @@ module busControl( input s_clks Clks, input enT1, input enT4,
 			rUDS <= 1'b1;
 			rLDS <= 1'b1;
 			rRWn <= 1'b1;
-			dataOe <= '0;
 		end
 		else begin
-
-			if( Clks.enPhi2 & isWriteReg & (busPhase == S2))
-				dataOe <= 1'b1;
-			else if( Clks.enPhi1 & (busEnding | (busPhase == SIDLE)) )
-				dataOe <= 1'b0;
-						
 			if( Clks.enPhi1 & busEnding)
 				rRWn <= 1'b1;
 			else if( Clks.enPhi1 & isWriteReg) begin
@@ -2504,6 +2495,26 @@ endmodule
 //
 
 module uRom( input clk, input [UADDR_WIDTH-1:0] microAddr, output logic [UROM_WIDTH-1:0] microOutput);
+	`ifdef SYNTHESIS
+	logic [UROM_WIDTH-1:0] micro_q;
+	altsyncram ram (
+		.clock0(clk), .address_a(microAddr), .q_a(micro_q),
+		.aclr0(1'b0), .addressstall_a(1'b0), .clocken0(1'b1),
+		.eccstatus(), .rden_a(1'b1)
+	);
+	defparam
+		ram.operation_mode = "ROM",
+		ram.width_a = UROM_WIDTH,
+		ram.widthad_a = UADDR_WIDTH,
+		ram.numwords_a = UROM_DEPTH,
+		ram.ram_block_type = "M10K",
+		ram.intended_device_family = "Cyclone V",
+		ram.lpm_type = "altsyncram",
+		ram.outdata_reg_a = "CLOCK0",
+		ram.init_file = "rtl/cpu/fx68k/microrom.mif",
+		ram.power_up_uninitialized = "FALSE";
+	assign microOutput = micro_q;
+	`else
 	reg [UROM_WIDTH-1:0] uRam[ UROM_DEPTH];		
 	initial begin
 		// Keep the initialization file path rooted at the project.  A bare
@@ -2514,10 +2525,31 @@ module uRom( input clk, input [UADDR_WIDTH-1:0] microAddr, output logic [UROM_WI
 	
 	always_ff @( posedge clk) 
 		microOutput <= uRam[ microAddr];
+	`endif
 endmodule
 
 
 module nanoRom( input clk, input [NADDR_WIDTH-1:0] nanoAddr, output logic [NANO_WIDTH-1:0] nanoOutput);
+	`ifdef SYNTHESIS
+	logic [NANO_WIDTH-1:0] nano_q;
+	altsyncram ram (
+		.clock0(clk), .address_a(nanoAddr), .q_a(nano_q),
+		.aclr0(1'b0), .addressstall_a(1'b0), .clocken0(1'b1),
+		.eccstatus(), .rden_a(1'b1)
+	);
+	defparam
+		ram.operation_mode = "ROM",
+		ram.width_a = NANO_WIDTH,
+		ram.widthad_a = NADDR_WIDTH,
+		ram.numwords_a = NANO_DEPTH,
+		ram.ram_block_type = "M10K",
+		ram.intended_device_family = "Cyclone V",
+		ram.lpm_type = "altsyncram",
+		ram.outdata_reg_a = "CLOCK0",
+		ram.init_file = "rtl/cpu/fx68k/nanorom.mif",
+		ram.power_up_uninitialized = "FALSE";
+	assign nanoOutput = nano_q;
+	`else
 	reg [NANO_WIDTH-1:0] nRam[ NANO_DEPTH];		
 	initial begin
 		$readmemb("rtl/cpu/fx68k/nanorom.mem", nRam);
@@ -2525,6 +2557,7 @@ module nanoRom( input clk, input [NADDR_WIDTH-1:0] nanoAddr, output logic [NANO_
 	
 	always_ff @( posedge clk) 
 		nanoOutput <= nRam[ nanoAddr];
+	`endif
 endmodule
 
 // Translate uaddr to nanoaddr

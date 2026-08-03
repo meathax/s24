@@ -1,6 +1,8 @@
 import s24_pkg::*;
 
-module s24_core (
+module s24_core #(
+    parameter int unsigned CLK_HZ = 48_000_000
+) (
     input  logic        clk,
     input  logic        reset,
     input  logic        pause,
@@ -30,6 +32,7 @@ module s24_core (
     output logic [7:0]  blue,
     output logic [15:0] audio_l,
     output logic [15:0] audio_r,
+    output audio_event_t audio_event,
 
     output logic        p0_req,
     output logic [26:1] p0_addr,
@@ -62,7 +65,7 @@ module s24_core (
     input  logic        wr_ack
 );
     logic phi1, phi2, ce16, ce8, ce4;
-    s24_clock_enables clocks(
+    s24_clock_enables #(.CLK_HZ(CLK_HZ)) clocks(
         .clk(clk),.reset(reset),.pause(pause),.phi1(phi1),.phi2(phi2),
         .ce_16m(ce16),.ce_8m(ce8),.ce_4m(ce4));
     assign ce_pixel = ce16;
@@ -257,7 +260,7 @@ module s24_core (
     logic ym_wr, ym_write_pending, ym_addr_q;
     logic [7:0] ym_data_q;
     logic [7:0] ym_dout;
-    logic ym_irq_n,ym_half;
+    logic ym_irq_n,ym_half,ym_sample,ym_irq_q;
     logic signed [15:0] ym_l,ym_r;
     always_ff @(posedge clk) if (reset) ym_half<=0; else if (ce4) ym_half<=~ym_half;
     jt51 ym(
@@ -266,7 +269,7 @@ module s24_core (
         // reset input. MAME ymopm.cpp likewise documents reset_w as active LOW.
         .rst(reset | ~io_cnt[2]),.clk(clk),.cen(ce4),.cen_p1(ce4 & ym_half),
         .cs_n(~ym_wr),.wr_n(~ym_wr),.a0(ym_addr_q),.din(ym_data_q),
-        .dout(ym_dout),.ct1(),.ct2(),.irq_n(ym_irq_n),.sample(),
+        .dout(ym_dout),.ct1(),.ct2(),.irq_n(ym_irq_n),.sample(ym_sample),
         .left(),.right(),.xleft(ym_l),.xright(ym_r));
 
     logic irq_rd_a,irq_rd_b,irq_wr;
@@ -306,11 +309,21 @@ module s24_core (
                 if ((!frc_mode && frc_div==23) || (frc_mode && frc_div==1535)) begin
                     frc_div<=0;
                     if (frc_mode) begin
-                        frc_count <= (frc_count==8'h66)?0:frc_count+1'd1;
-                    end else frc_count <= frc_count + 1'd1;
+                        frc_count <= (frc_count==8'h66)?8'd0:frc_count+8'd1;
+                    end else frc_count <= frc_count + 8'd1;
                 end else frc_div<=frc_div+1'd1;
             end
-            if (frc_mode_write) begin frc_mode<=bus_dout[0];frc_div<=0;frc_count<=0; end
+            if (frc_mode_write) begin
+                // MAME restarts the free-running counter's mode-dependent
+                // cadence on a mode write.  Reset both the visible count
+                // divider and the independent IRQ prescaler so a mode switch
+                // cannot inherit a fractional phase from the old mode.
+                frc_mode<=bus_dout[0];
+                frc_div<=0;
+                frc_irq_div<=0;
+                frc_count<=0;
+                frc_tick<=0;
+            end
         end
     end
 
@@ -319,7 +332,8 @@ module s24_core (
         if(reset) index_count<=0;
         // MAME advances the floppy index cadence at the start of scanline
         // 384, i.e. on the same 383->384 wrap that raises vblank.
-        else if(line_wrap && vcount==383) index_count <= index_count==19?0:index_count+1'd1;
+        else if(line_wrap && vcount==10'd383)
+            index_count <= index_count==5'd19 ? 5'd0 : index_count+5'd1;
     end
 
     logic fdc_rd,fdc_wr,fdc_wait,fdc_media_req,fdc_media_wr,fdc_media_ack;
@@ -803,4 +817,40 @@ module s24_core (
     endfunction
     assign audio_l=pause?16'sd0:mix_sat(ym_l,dac_sample);
     assign audio_r=pause?16'sd0:mix_sat(ym_r,dac_sample);
+
+    // Board-domain audio observability.  YM writes are emitted only at the
+    // same cen_p1 edge presented to JT51; sample pulses expose the serial-DAC
+    // boundary, IRQ edges expose the timer/key-on interrupt boundary, and a
+    // DAC event is emitted when port-H's R-2R value changes.  The stream is a
+    // diagnostic interface and does not alter the audio datapath.
+    logic signed [15:0] dac_sample_q;
+    always_ff @(posedge clk) begin
+        audio_event <= '0;
+        if (reset) begin
+            ym_irq_q <= 1'b0;
+            dac_sample_q <= '0;
+        end else begin
+            if (ym_wr) begin
+                audio_event.valid <= 1'b1;
+                audio_event.event_type <= AUDIO_EVENT_YM_WRITE;
+                audio_event.address <= {7'd0,ym_addr_q};
+                audio_event.value <= {ym_data_q,8'h00};
+            end else if (ym_sample) begin
+                audio_event.valid <= 1'b1;
+                audio_event.event_type <= AUDIO_EVENT_YM_SAMPLE;
+                audio_event.left <= ym_l;
+                audio_event.right <= ym_r;
+            end else if (!ym_irq_n && ym_irq_q) begin
+                audio_event.valid <= 1'b1;
+                audio_event.event_type <= AUDIO_EVENT_YM_IRQ;
+                audio_event.value[0] <= 1'b1;
+            end else if (dac_sample != dac_sample_q) begin
+                audio_event.valid <= 1'b1;
+                audio_event.event_type <= AUDIO_EVENT_DAC;
+                audio_event.value <= dac_sample;
+            end
+            ym_irq_q <= ~ym_irq_n;
+            dac_sample_q <= dac_sample;
+        end
+    end
 endmodule

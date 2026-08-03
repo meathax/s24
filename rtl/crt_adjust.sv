@@ -152,11 +152,9 @@ module crt_adjust #(
     // ------------------------------------------------------------------
     reg [7:0] r_in_q, g_in_q, b_in_q;
     reg       hs_in_q, hb_in_q, vs_in_q, vb_in_q;
-    reg       hs_in_d;
     initial begin
         r_in_q = 0; g_in_q = 0; b_in_q = 0;
         hs_in_q = 0; hb_in_q = 1; vs_in_q = 0; vb_in_q = 0;
-        hs_in_d = 0;
     end
 
     always @(posedge clk) if (pxl_cen) begin
@@ -167,12 +165,7 @@ module crt_adjust #(
         hb_in_q  <= hb_in;
         vs_in_q  <= vs_in;
         vb_in_q  <= vb_in;
-        hs_in_d  <= hs_in;
     end
-
-    // Native HSync rise (used only for the shift register that produces the
-    // shifted reference below).
-    wire hs_rise_native = pxl_cen && (hs_in & ~hs_in_d);
 
     // ------------------------------------------------------------------
     //  H-Shift shift register (HPOS_SYNCSHIFT). Delays HSync by N pixels
@@ -224,12 +217,11 @@ module crt_adjust #(
     //  WRITE side @ pxl_cen
     // ------------------------------------------------------------------
     reg [AW-1:0] wrp;
-    reg [AW-1:0] hmax;
     reg [AW-1:0] hb0, hb1;
     reg          lhb_l;
     reg          bank;
     initial begin
-        wrp = 0; hmax = 0;
+        wrp = 0;
         hb0 = 0; hb1 = 0;
         lhb_l = 0;
         bank = 0;
@@ -242,7 +234,6 @@ module crt_adjust #(
         mem[{bank, wrp[AW-2:0]}] <= {r_in, g_in, b_in};
         if (hs_rise_in) begin
             wrp  <= {AW{1'b0}};
-            hmax <= wrp;
             bank <= ~bank;
         end else begin
             wrp <= wrp + 1'b1;
@@ -324,7 +315,8 @@ module crt_adjust #(
     wire signed [AW+1:0] rdcnt_s = $signed({2'b0, rdcnt});
     wire signed [AW+1:0] hb1_s   = $signed({2'b0, hb1});
     wire signed [AW+1:0] hb0_s   = $signed({2'b0, hb0});
-    wire [AW-1:0] rd_addr = (rdcnt_s - hoff_s);
+    wire signed [AW+1:0] rd_addr_calc = rdcnt_s - hoff_s;
+    wire [AW-1:0] rd_addr = rd_addr_calc[AW-1:0];
     always @(posedge clk) if (pxl2_cen) begin
         rd_data <= mem[{~bank, rd_addr[AW-2:0]}];
         pass_q  <= (rdcnt_s >= (hb1_s + hoff_s)) && (rdcnt_s < (hb0_s + hoff_s)) && ~vb_active;
@@ -400,5 +392,3 @@ module crt_adjust #(
     end
 
 endmodule
-
-

@@ -29,7 +29,9 @@ module s24_irq (
     // Sticky diagnostic breadcrumbs for the MAME dcclub timer polling loop.
     // They do not participate in functional behavior and are observed only
     // by the verification bench.
+    // synthesis translate_off
     logic timer_reload_seen, timer_zero_read_a, timer_zero_read_b;
+    // synthesis translate_on
 
     function automatic logic [11:0] merge_timer(
         input logic [11:0] old_data,
@@ -90,9 +92,11 @@ module s24_irq (
             sprite_irq <= 0;
             frc_a <= 0;
             frc_b <= 0;
+            // synthesis translate_off
             timer_reload_seen <= 0;
             timer_zero_read_a <= 0;
             timer_zero_read_b <= 0;
+            // synthesis translate_on
         end else begin
             // MAME's irq_frc timer is free-running and independent of the
             // readable FRC counter phase.  A tick latches only the CPU lines
@@ -120,16 +124,20 @@ module s24_irq (
                     timer_value <= timer_data;
                     timer_a <= 1'b1;
                     timer_b <= 1'b1;
+                    // synthesis translate_off
                     timer_reload_seen <= 1'b1;
+                    // synthesis translate_on
                 end else timer_value <= timer_value + 1'd1;
             end
 
             // MAME returns the timer value for every IRQ-controller read;
             // dcclub's wait loop polls A00002 (register 1), not register 2.
+            // synthesis translate_off
             if (rd_a && timer_value == 0)
                 timer_zero_read_a <= 1'b1;
             if (rd_b && timer_value == 0)
                 timer_zero_read_b <= 1'b1;
+            // synthesis translate_on
 
             if (rd_a && addr == 2) timer_a <= 1'b0;
             if (rd_b && addr == 3) timer_b <= 1'b0;

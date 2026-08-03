@@ -22,6 +22,15 @@ module tb_gground_boot(
     output logic [7:0]  host_red,
     output logic [7:0]  host_green,
     output logic [7:0]  host_blue,
+    output logic signed [15:0] host_audio_l,
+    output logic signed [15:0] host_audio_r,
+    output logic        host_audio_event_valid,
+    output logic [2:0]  host_audio_event_type,
+    output logic [1:0]  host_audio_event_channel,
+    output logic [7:0]  host_audio_event_address,
+    output logic [15:0] host_audio_event_value,
+    output logic [15:0] host_audio_event_left,
+    output logic [15:0] host_audio_event_right,
     output logic [23:0] host_main_pc,
     output logic [23:0] host_sub_pc,
     output logic [31:0] host_main_instructions,
@@ -33,9 +42,11 @@ module tb_gground_boot(
     output logic [1:0]  host_trace_be,
     output logic [23:0] host_trace_addr,
     output logic [15:0] host_trace_data,
-    output logic [10:0] host_sprite_max_stack,
+    output logic [13:0] host_sprite_max_stack,
     output logic [10:0] host_sprite_max_active,
-    output logic [31:0] host_sprite_deadline_misses
+    output logic [31:0] host_sprite_deadline_misses,
+    output logic [31:0] host_sprite_pixels,
+    output logic [31:0] host_mixed_pixels
 );
 `else
 module tb_gground_boot;
@@ -77,6 +88,7 @@ module tb_gground_boot;
     logic ce_pixel,hblank,vblank,hsync,vsync;
     logic [7:0] red,green,blue;
     logic [15:0] audio_l,audio_r;
+    audio_event_t audio_event;
     logic [7:0] dsw_value,coinage_value;
     logic [63:0] simulated_inputs;
     logic p0_req,p0_ack,p1_req,p1_ack,p2_req,p2_ack;
@@ -136,6 +148,7 @@ module tb_gground_boot;
     // satisfy the target after the game has left its attract loop.
     logic frame_code_window_current=0;
     logic capture_code_window_seen=0;
+    logic sprite_probe_done=0;
     logic cnt1_d=0;
     logic vsync_d=0;
     logic [23:1] last_a_address,last_b_address;
@@ -164,6 +177,15 @@ module tb_gground_boot;
         host_red=red;
         host_green=green;
         host_blue=blue;
+        host_audio_l=audio_l;
+        host_audio_r=audio_r;
+        host_audio_event_valid=audio_event.valid;
+        host_audio_event_type=audio_event.event_type;
+        host_audio_event_channel=audio_event.channel;
+        host_audio_event_address=audio_event.address;
+        host_audio_event_value=audio_event.value;
+        host_audio_event_left=audio_event.left;
+        host_audio_event_right=audio_event.right;
         host_main_pc={last_a_address,1'b0};
         host_sub_pc={last_b_address,1'b0};
         host_main_instructions=cpu_a_instructions;
@@ -472,6 +494,7 @@ module tb_gground_boot;
             frame_nonblack_pixels<=0;
             frame_capture_active<=0;
             frame_capture_done<=0;
+            sprite_probe_done<=0;
         end
 
         if(wr_req && !wr_ack) begin
@@ -578,6 +601,16 @@ module tb_gground_boot;
         vsync_d<=vsync;
         if(dut.io_cnt[1] && cnt1_d && vsync && !vsync_d) begin
             video_frames<=video_frames+1;
+            if(video_frames==1000 && !sprite_probe_done) begin
+                sprite_probe_done<=1;
+                $display("%s sprite_probe frame=%0d ram0=%h,%h,%h,%h,%h,%h,%h,%h ram8=%h,%h,%h,%h,%h,%h,%h,%h active=%0d stack=%0d state=%0d",
+                    game_name,video_frames,
+                    sprite_ram[0],sprite_ram[1],sprite_ram[2],sprite_ram[3],
+                    sprite_ram[4],sprite_ram[5],sprite_ram[6],sprite_ram[7],
+                    sprite_ram[8],sprite_ram[9],sprite_ram[10],sprite_ram[11],
+                    sprite_ram[12],sprite_ram[13],sprite_ram[14],sprite_ram[15],
+                    dut.sprite.active_count,dut.sprite.stack_count,dut.sprite.state);
+            end
             // MAME's no-input attract screens are a sustained observable
             // milestone, not merely the first game-owned write.  Require
             // consecutive rendered frames with useful pixels, no unknown
@@ -671,7 +704,7 @@ module tb_gground_boot;
         .mahjong_line(mahjong_line),
         .ce_pixel(ce_pixel),.hblank(hblank),.vblank(vblank),
         .hsync(hsync),.vsync(vsync),.red(red),.green(green),.blue(blue),
-        .audio_l(audio_l),.audio_r(audio_r),
+        .audio_l(audio_l),.audio_r(audio_r),.audio_event(audio_event),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
         .p1_req(p1_req),.p1_addr(p1_addr),.p1_data(p1_data),.p1_ack(p1_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),
@@ -684,14 +717,16 @@ module tb_gground_boot;
     // Simulation-only observability for long-list renderer audits. A miss
     // means the prior scanline was still rendering when the next native line
     // boundary arrived. These counters are outside synthesizable core RTL.
-    logic [10:0] sprite_max_stack_count=0;
+    logic [13:0] sprite_max_stack_count=0;
     logic [10:0] sprite_max_active_count=0;
     logic [31:0] sprite_deadline_misses=0;
+    logic [31:0] sprite_debug_frame=0;
     always_ff @(posedge clk) begin
         if(reset) begin
             sprite_max_stack_count<=0;
             sprite_max_active_count<=0;
             sprite_deadline_misses<=0;
+            sprite_debug_frame<=0;
         end else begin
             if(dut.sprite.stack_count>sprite_max_stack_count)
                 sprite_max_stack_count<=dut.sprite.stack_count;
@@ -700,12 +735,28 @@ module tb_gground_boot;
             if(ce_pixel && dut.hcount==10'd655 && dut.vcount<10'd384 &&
                dut.sprite.state!=0)
                 sprite_deadline_misses<=sprite_deadline_misses+1'b1;
+            if(ce_pixel && dut.hcount==10'd655 && dut.vcount==10'd383) begin
+                sprite_debug_frame<=sprite_debug_frame+1'b1;
+`ifdef S24_VISUAL
+                if((sprite_debug_frame % 30)==0)
+                    $display("sprite_queue frame=%0d state=%0d target=%0d next=%0d valid=%b display=%0d fill=%0d epoch=%0d refresh_pending=%0d cache=%0d gen=%0d/%0d/%0d/%0d",
+                        sprite_debug_frame,dut.sprite.state,dut.sprite.target_y,
+                        dut.sprite.render_next_target,dut.sprite.line_valid,
+                        dut.sprite.display_bank,dut.sprite.fill_bank,
+                        dut.sprite.frame_epoch,dut.sprite.cache_refresh_pending,
+                        dut.sprite.list_cache_valid,
+                        dut.sprite.bank_generation[0],dut.sprite.bank_generation[1],
+                        dut.sprite.bank_generation[2],dut.sprite.bank_generation[3]);
+`endif
+            end
         end
     end
 `ifdef S24_VISUAL
     assign host_sprite_max_stack=sprite_max_stack_count;
     assign host_sprite_max_active=sprite_max_active_count;
     assign host_sprite_deadline_misses=sprite_deadline_misses;
+    assign host_sprite_pixels=sprite_pixels;
+    assign host_mixed_pixels=mixed_pixels;
 `endif
 
     // TARGET 0: first game-media access; 1: CNT1 release and CPU-B read;

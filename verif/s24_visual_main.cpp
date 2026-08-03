@@ -107,6 +107,73 @@ uint32_t checksum(const std::array<uint8_t, kWidth * kHeight * 3>& pixels) {
     return value;
 }
 
+class WavWriter {
+public:
+    bool open(const fs::path& path) {
+        stream.open(path, std::ios::binary | std::ios::trunc);
+        if (!stream) return false;
+        write_bytes("RIFF", 4);
+        write_u32(36); // patched on close
+        write_bytes("WAVEfmt ", 8);
+        write_u32(16); // PCM fmt chunk
+        write_u16(1);  // PCM
+        write_u16(2);  // stereo
+        write_u32(kSampleRate);
+        write_u32(kSampleRate * 4); // byte rate
+        write_u16(4);  // block align
+        write_u16(16); // bits per sample
+        write_bytes("data", 4);
+        write_u32(0); // patched on close
+        return bool(stream);
+    }
+
+    void append(int16_t left, int16_t right) {
+        if (!stream) return;
+        write_u16(static_cast<uint16_t>(left));
+        write_u16(static_cast<uint16_t>(right));
+        ++samples;
+        peak = std::max<uint32_t>(peak,
+            std::max<uint32_t>(std::abs(static_cast<int>(left)),
+                               std::abs(static_cast<int>(right))));
+        if (left || right) ++nonzero;
+    }
+
+    void close() {
+        if (!stream) return;
+        const uint32_t data_bytes = static_cast<uint32_t>(samples * 4);
+        stream.seekp(4, std::ios::beg);
+        write_u32(36 + data_bytes);
+        stream.seekp(40, std::ios::beg);
+        write_u32(data_bytes);
+        stream.close();
+        std::fprintf(stderr,
+            "WAV audio samples=%llu nonzero=%llu peak=%u rate=%u\n",
+            static_cast<unsigned long long>(samples),
+            static_cast<unsigned long long>(nonzero), peak, kSampleRate);
+    }
+
+    static constexpr uint32_t kSampleRate = 48000;
+
+private:
+    void write_bytes(const char* data, std::size_t count) {
+        stream.write(data, static_cast<std::streamsize>(count));
+    }
+    void write_u16(uint16_t value) {
+        const char bytes[2] = {char(value & 0xff), char(value >> 8)};
+        stream.write(bytes, 2);
+    }
+    void write_u32(uint32_t value) {
+        const char bytes[4] = {char(value & 0xff), char((value >> 8) & 0xff),
+                               char((value >> 16) & 0xff), char(value >> 24)};
+        stream.write(bytes, 4);
+    }
+
+    std::ofstream stream;
+    uint64_t samples = 0;
+    uint64_t nonzero = 0;
+    uint32_t peak = 0;
+};
+
 bool atomic_text(const fs::path& path, const std::string& value) {
     const fs::path temporary = path.string() + ".tmp";
     for (int attempt = 0; attempt < 200; ++attempt) {
@@ -239,6 +306,20 @@ bool append_trace(std::ofstream& stream, uint64_t frame,
     return bool(stream);
 }
 
+bool append_audio_event(std::ofstream& stream, uint64_t frame,
+                        const Vtb_gground_boot& top) {
+    if (!top.host_audio_event_valid) return true;
+    stream << "{\"frame\":" << frame
+           << ",\"event\":\"audio\",\"type\":"
+           << unsigned(top.host_audio_event_type)
+           << ",\"channel\":" << unsigned(top.host_audio_event_channel)
+           << ",\"address\":" << unsigned(top.host_audio_event_address)
+           << ",\"value\":" << unsigned(top.host_audio_event_value)
+           << ",\"left\":" << top.host_audio_event_left
+           << ",\"right\":" << top.host_audio_event_right << "}\n";
+    return bool(stream);
+}
+
 bool save_checkpoint(VerilatedContext& context, Vtb_gground_boot& top,
                      const std::string& path, uint64_t frames,
                      uint32_t prior_checksum, uint64_t changed_frames,
@@ -298,6 +379,7 @@ int main(int argc, char** argv) {
     const fs::path lockstep_root = lockstep_arg;
     const bool lockstep = !lockstep_arg.empty();
     std::ofstream trace_stream;
+    std::ofstream audio_event_stream;
     if (lockstep) {
         std::error_code error;
         fs::create_directories(lockstep_root / "rtl", error);
@@ -310,6 +392,12 @@ int main(int argc, char** argv) {
                           std::ios::binary | std::ios::app);
         if (!trace_stream) {
             std::fprintf(stderr, "Cannot open RTL lockstep trace\n");
+            return 5;
+        }
+        audio_event_stream.open(lockstep_root / "rtl_audio_events.jsonl",
+                                std::ios::binary | std::ios::app);
+        if (!audio_event_stream) {
+            std::fprintf(stderr, "Cannot open RTL audio event trace\n");
             return 5;
         }
     }
@@ -439,6 +527,13 @@ int main(int argc, char** argv) {
     const uint64_t auto_exit_frame = frame_arg("+AUTO_EXIT_FRAME=");
     const std::string host_frame_out =
         plusarg_value(argc, argv, "+HOST_FRAME_OUT=");
+    const std::string wav_path = plusarg_value(argc, argv, "+WAV_OUT=");
+    WavWriter wav;
+    if (!wav_path.empty() && !wav.open(wav_path)) {
+        std::fprintf(stderr, "Cannot open WAV output: %s\n", wav_path.c_str());
+        return 5;
+    }
+    uint64_t audio_phase = 0;
     bool host_frame_written = false;
     if (auto_coin_frame || auto_start_frame || auto_action_frame ||
         auto_pedal_frame || auto_capture_frame)
@@ -496,10 +591,26 @@ int main(int argc, char** argv) {
         for (int half_cycle = 0; half_cycle < 100000 && running; ++half_cycle) {
             top.clk = !top.clk;
             top.eval();
+            if (top.clk && !wav_path.empty()) {
+                // The synthesizable core clock is the measured 48.317307 MHz
+                // System 24 source. Resample its signed PCB mix to a standard
+                // 48 kHz capture without changing the RTL audio path.
+                audio_phase += WavWriter::kSampleRate;
+                if (audio_phase >= 48317307ULL) {
+                    audio_phase -= 48317307ULL;
+                    wav.append(top.host_audio_l, top.host_audio_r);
+                }
+            }
             if (lockstep && top.clk && top.host_trace_valid &&
                     !fs::exists(lockstep_root / "TRACE_STOP.txt") &&
                     !append_trace(trace_stream, published_frames, top)) {
                 std::fprintf(stderr, "Cannot append RTL lockstep trace\n");
+                running = false;
+            }
+            if (lockstep && top.clk && top.host_audio_event_valid &&
+                    !fs::exists(lockstep_root / "TRACE_STOP.txt") &&
+                    !append_audio_event(audio_event_stream, published_frames, top)) {
+                std::fprintf(stderr, "Cannot append RTL audio event trace\n");
                 running = false;
             }
             const bool raster_advanced = top.clk &&
@@ -524,11 +635,13 @@ int main(int argc, char** argv) {
                             static_cast<unsigned long long>(changed_frames));
                     if ((frames % 30) == 0)
                         std::fprintf(stderr,
-                            "sprite_diag frame=%llu max_stack=%u max_active=%u deadline_misses=%u\n",
+                            "sprite_diag frame=%llu max_stack=%u max_active=%u deadline_misses=%u sprite_pixels=%u mixed_pixels=%u\n",
                             static_cast<unsigned long long>(frames),
                             static_cast<unsigned>(top.host_sprite_max_stack),
                             static_cast<unsigned>(top.host_sprite_max_active),
-                            static_cast<unsigned>(top.host_sprite_deadline_misses));
+                            static_cast<unsigned>(top.host_sprite_deadline_misses),
+                            static_cast<unsigned>(top.host_sprite_pixels),
+                            static_cast<unsigned>(top.host_mixed_pixels));
                     prior_checksum = now;
                     if (!host_frame_written && auto_capture_frame &&
                         frames >= auto_capture_frame && !host_frame_out.empty()) {
@@ -635,6 +748,7 @@ int main(int argc, char** argv) {
         }
     }
 
+    wav.close();
     top.final();
     if (pad) SDL_GameControllerClose(pad);
     SDL_DestroyTexture(texture);

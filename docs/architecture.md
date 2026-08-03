@@ -65,14 +65,23 @@ phi1/phi2 pair; normal 10 MHz operation resumes automatically.
 
 ## Universal descriptor
 
-MRA index 0 contains an 8-byte descriptor. Byte 0 selects floppy/ROM media,
+MRA index 0 contains an eight-byte descriptor. Byte 0 selects floppy/ROM media,
 FD1094, uPD4701, MSM6253, golf encoder, Hot Rod controls, and mahjong mux.
 Byte 1 selects the magic-latch table. Bytes 2-3 carry the little-endian floppy
-track size in bytes. Byte 4 selects a game-specific digital input profile
-(currently generic or Gain Ground); bytes 5-7 are reserved and must be zero.
+track size in bytes. Byte 4 selects a game-specific digital input profile.
+Legacy descriptors leave bytes 5-7 zero. Version-one profiles use byte 5 as
+`profile_version`, byte 6 as packed motherboard/RAM revision, sprite-memory
+population, and FDC timing profile, and byte 7 as packed ROM-board/EPLD,
+analogue, video orientation/flip, and CPU/protection profiles.
 
 The descriptor is committed after all other indexed ROM regions have loaded,
 so one `s24.rbf` can configure every present game without resynthesis.
+
+Shared CPU writes and device cycles cross the typed `board_transaction_t`
+boundary in `rtl/s24_board_arbiter.sv`. Independent memory reads continue
+through the SDRAM adapter, while the arbiter holds one granted transaction
+unchanged until completion/DTACK. The exact EPM5032 equations and unmeasured
+electrical timing remain unknown and are tracked in `docs/online-evidence.json`.
 
 ## Cross-chip priority contract
 

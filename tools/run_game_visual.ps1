@@ -7,6 +7,7 @@ param(
     [string]$LockstepDirectory = '',
     [ValidateRange(0,8)][int]$Target = 8,
     [string]$FrameOut = '',
+    [string]$WavOut = '',
     [UInt64]$AutoCoinFrame = 0,
     [UInt64]$AutoStartFrame = 0,
     [UInt64]$AutoActionFrame = 0,
@@ -19,8 +20,10 @@ param(
     [UInt64]$AutoInputFrames = 4,
     [string]$HostFrameOut = '',
     [switch]$Gameplay,
+    [switch]$RealAudio,
     [switch]$NoAutoFinish,
     [string]$ResultFile = '',
+    [string]$RunTag = '',
     [switch]$Detached,
     [switch]$SkipBuild
 )
@@ -38,8 +41,14 @@ if ($HostFrameOut) {
     $hostFrameParent = Split-Path -Parent $HostFrameOut
     if ($hostFrameParent) { New-Item -ItemType Directory -Force -Path $hostFrameParent | Out-Null }
 }
+if ($WavOut) {
+    $wavParent = Split-Path -Parent $WavOut
+    if ($wavParent) { New-Item -ItemType Directory -Force -Path $wavParent | Out-Null }
+}
 if (!$SkipBuild) {
-    & (Join-Path $PSScriptRoot 'build_gground_visual.ps1') -ModelDirectory $ModelDirectory
+    $buildArgs = @{ ModelDirectory = $ModelDirectory }
+    if($RealAudio) { $buildArgs.RealAudio = $true }
+    & (Join-Path $PSScriptRoot 'build_gground_visual.ps1') @buildArgs
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 if (!(Test-Path -LiteralPath $exe)) { throw "Visual model not built: $exe" }
@@ -47,7 +56,9 @@ if (!(Test-Path -LiteralPath $exe)) { throw "Visual model not built: $exe" }
 if ($Detached) {
     $logDirectory = Join-Path $repoRoot '.build'
     New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
-    $detachedResult = Join-Path $logDirectory "$Game-live.result"
+    $logStem = $Game
+    if ($RunTag) { $logStem = "$Game-$RunTag" }
+    $detachedResult = Join-Path $logDirectory "$logStem-live.result"
     Remove-Item -LiteralPath $detachedResult -ErrorAction SilentlyContinue
     $childArguments = '-NoProfile -ExecutionPolicy Bypass -File "' + $PSCommandPath +
         '" -Game "' + $Game + '" -ModelDirectory "' + $ModelDirectory +
@@ -70,13 +81,16 @@ if ($Detached) {
     if ($AutoSaveFrame) { $childArguments += ' -AutoSaveFrame ' + $AutoSaveFrame }
     if ($AutoInputFrames) { $childArguments += ' -AutoInputFrames ' + $AutoInputFrames }
     if ($HostFrameOut) { $childArguments += ' -HostFrameOut "' + $HostFrameOut + '"' }
+    if ($WavOut) { $childArguments += ' -WavOut "' + $WavOut + '"' }
+    if ($RunTag) { $childArguments += ' -RunTag "' + $RunTag + '"' }
     if ($Gameplay) { $childArguments += ' -Gameplay' }
+    if ($RealAudio) { $childArguments += ' -RealAudio' }
     if ($NoAutoFinish) { $childArguments += ' -NoAutoFinish' }
     $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $childArguments `
         -WorkingDirectory $repoRoot `
         -WindowStyle Hidden `
-        -RedirectStandardOutput (Join-Path $logDirectory "$Game-live.stdout.log") `
-        -RedirectStandardError (Join-Path $logDirectory "$Game-live.stderr.log") `
+        -RedirectStandardOutput (Join-Path $logDirectory "$logStem-live.stdout.log") `
+        -RedirectStandardError (Join-Path $logDirectory "$logStem-live.stderr.log") `
         -PassThru
     Write-Host "$Game visual simulator launched (PID $($process.Id))."
     exit 0
@@ -107,6 +121,7 @@ if ($AutoExitFrame) { $arguments += "+AUTO_EXIT_FRAME=$AutoExitFrame" }
 if ($AutoSaveFrame) { $arguments += "+AUTOSAVE_FRAME=$AutoSaveFrame" }
 if ($AutoInputFrames) { $arguments += "+AUTO_INPUT_FRAMES=$AutoInputFrames" }
 if ($HostFrameOut) { $arguments += "+HOST_FRAME_OUT=$HostFrameOut" }
+if ($WavOut) { $arguments += "+WAV_OUT=$WavOut" }
 if ($NoAutoFinish) { $arguments += '+NO_AUTO_FINISH=1' }
 & verilator-sim-safe -- $exe @arguments
 $runExit = $LASTEXITCODE

@@ -160,7 +160,10 @@ module emu (
     logic [1:0] cwr_be;
     logic core_ce,hblank,vblank,hsync,vsync;
     logic [7:0] r,g,b;
-    s24_core core(
+    // The generated Cyclone V PLL is 48.317307 MHz. Pass that value to the
+    // fractional enables so the board's native 16 MHz PCD raster remains at
+    // its exact 656x424 timing instead of inheriting a /3 frequency error.
+    s24_core #(.CLK_HZ(48_317_307)) core(
         .clk(clk_sys),.reset(core_reset),.pause(status[6]),.board(descriptor),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),
         .input_ports(input_ports),
@@ -394,7 +397,7 @@ module emu (
 
     // Present the board's native 16 MHz, 656x424-total raster directly to the
     // MiSTer framework.  This is 496x384 active video at 24.39 kHz horizontal
-    // and 57.51 Hz vertical.  The legacy in-core video_mixer was intended for
+    // and 57.524 Hz vertical.  The legacy in-core video_mixer was intended for
     // older 15 kHz cores and re-timed this medium-resolution stream, producing
     // line repeats, frame tearing and vertical jumps on real hardware.
     assign CE_PIXEL=video_ce;

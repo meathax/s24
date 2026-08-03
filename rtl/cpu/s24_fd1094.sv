@@ -22,8 +22,28 @@ module s24_fd1094 #(
     // odd bytes gives each M10K one write port and one decrypt read port.
     (* ramstyle="M10K, no_rw_check" *) logic [7:0] key_ram_even [0:4095];
     (* ramstyle="M10K, no_rw_check" *) logic [7:0] key_ram_odd [0:4095];
-    (* romstyle="M10K" *) logic [7:0] mask_rom [0:8191];
+`ifdef SYNTHESIS
+    logic [7:0] mask_q;
+    altsyncram mask_ram (
+        .address_a(mask_address_l), .q_a(mask_q),
+        .aclr0(1'b0), .addressstall_a(1'b0), .clocken0(1'b1),
+        .eccstatus(), .rden_a(1'b1)
+    );
+    defparam
+        mask_ram.operation_mode = "ROM",
+        mask_ram.width_a = 8,
+        mask_ram.widthad_a = 13,
+        mask_ram.numwords_a = 8192,
+        mask_ram.ram_block_type = "M10K",
+        mask_ram.intended_device_family = "Cyclone V",
+        mask_ram.lpm_type = "altsyncram",
+        mask_ram.outdata_reg_a = "UNREGISTERED",
+        mask_ram.init_file = "rtl/cpu/fd1094_masked.mif",
+        mask_ram.power_up_uninitialized = "FALSE";
+`else
+    logic [7:0] mask_rom [0:8191];
     initial $readmemh(MASK_FILE,mask_rom);
+`endif
 
     logic [7:0] irq_key=0,global_key1=0,global_key2=0,global_key3=0;
     logic [7:0] normal_state,decrypt_state,mainkey;
@@ -120,7 +140,14 @@ module s24_fd1094 #(
                     mask_bit_l<=dec_mask_bit;
                     fstate<=F_MASK;
                 end
-                F_MASK: begin mask_byte<=mask_rom[mask_address_l];fstate<=F_DONE;end
+                F_MASK: begin
+                    `ifdef SYNTHESIS
+                    mask_byte<=mask_q;
+                    `else
+                    mask_byte<=mask_rom[mask_address_l];
+                    `endif
+                    fstate<=F_DONE;
+                end
                 F_DONE: begin
                     plaintext<=result_next;
                     done<=1'b1;

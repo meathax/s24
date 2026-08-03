@@ -159,6 +159,18 @@ class Game:
     dsw: str = "FF FF"
     input_profile: int = 0
     mra_controls: str | None = None
+    # Versioned board-profile extension.  Zero preserves the original
+    # descriptor bytes; nonzero values use bytes 5..7 for named hardware
+    # populations and timing profiles.  These are board-family metadata, not
+    # set-name conditionals.
+    profile_version: int = 0
+    motherboard_revision: int = 0
+    sprite_memory_population: int = 0
+    fdc_timing_profile: int = 0
+    romboard_profile: int = 0
+    analogue_profile: int = 0
+    video_profile: int = 0
+    cpu_profile: int = 0
 
 
 def p(name: str, crc: str = "") -> Part:
@@ -276,16 +288,27 @@ ALL_GAMES = GAMES + OPTIONAL_GAMES + UNDUMPED_GAMES
 
 
 def descriptor_bytes(game: Game) -> bytes:
-    """Return the sole runtime hardware profile consumed by s24.rbf."""
+    """Return the compatible eight-byte runtime board profile."""
+    options0 = (
+        (game.motherboard_revision & 0x0F) << 4 |
+        (game.sprite_memory_population & 0x03) << 2 |
+        (game.fdc_timing_profile & 0x03)
+    )
+    options1 = (
+        (game.romboard_profile & 0x03) << 6 |
+        (game.analogue_profile & 0x03) << 4 |
+        (game.video_profile & 0x03) << 2 |
+        (game.cpu_profile & 0x03)
+    )
     return bytes((
         game.flags,
         game.magic,
         game.track_bytes & 0xFF,
         game.track_bytes >> 8,
         game.input_profile,
-        0,
-        0,
-        0,
+        game.profile_version,
+        options0,
+        options1,
     ))
 
 
@@ -326,6 +349,26 @@ def validate_game_contracts(games: tuple[Game, ...] = ALL_GAMES) -> None:
                 f"{game.setname}: unsupported input profile "
                 f"{game.input_profile}"
             )
+        if not 0 <= game.profile_version <= 0xFF:
+            raise ValueError(f"{game.setname}: invalid profile version")
+        if game.profile_version == 0 and any((
+                game.motherboard_revision, game.sprite_memory_population,
+                game.fdc_timing_profile, game.romboard_profile,
+                game.analogue_profile, game.video_profile, game.cpu_profile)):
+            raise ValueError(
+                f"{game.setname}: legacy profile cannot carry profile fields"
+            )
+        if not 0 <= game.motherboard_revision <= 0x0F:
+            raise ValueError(f"{game.setname}: invalid motherboard revision")
+        for label, value in (
+                ("sprite memory population", game.sprite_memory_population),
+                ("FDC timing profile", game.fdc_timing_profile),
+                ("ROM-board profile", game.romboard_profile),
+                ("analogue profile", game.analogue_profile),
+                ("video profile", game.video_profile),
+                ("CPU profile", game.cpu_profile)):
+            if not 0 <= value <= 0x03:
+                raise ValueError(f"{game.setname}: invalid {label}")
         if game.mra_controls not in (None, *MRA_CONTROL_PROFILES):
             raise ValueError(
                 f"{game.setname}: unsupported MRA controls {game.mra_controls}"

@@ -31,8 +31,8 @@ module s24_video_timing (
                 if (hcount == 10'd655) begin
                     hcount <= 0;
                     hsync_tick <= 1'b1;
-                    vcount <= (vcount == 10'd423) ? 0 : vcount + 1'd1;
-                end else hcount <= hcount + 1'd1;
+                    vcount <= (vcount == 10'd423) ? 10'd0 : vcount + 10'd1;
+                end else hcount <= hcount + 10'd1;
             end
         end
     end

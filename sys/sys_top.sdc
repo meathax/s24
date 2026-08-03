@@ -8,9 +8,11 @@ create_clock -period "10.0 MHz"  [get_pins -compatibility_mode hdmi_i2c|out_clk]
 derive_pll_clocks
 derive_clock_uncertainty
 
-# Decouple different clock groups (to simplify routing)
+# Decouple framework clock groups (the project SDC adds the actual core PLL
+# hierarchy, which is named pll_i rather than the framework's pll wildcard).
+# Keeping the unmatched core wildcard here produced Quartus warning 332174 and
+# left the framework set_clock_groups command with an empty group.
 set_clock_groups -exclusive \
-   -group [get_clocks { *|pll|pll_inst|altera_pll_i|*[*].*|divclk}] \
    -group [get_clocks { pll_hdmi|pll_hdmi_inst|altera_pll_i|*[0].*|divclk}] \
    -group [get_clocks { pll_audio|pll_audio_inst|altera_pll_i|*[0].*|divclk}] \
    -group [get_clocks { hdmi_sck}] \
@@ -55,7 +57,7 @@ set_false_path -to   {FB_BASE[*] FB_BASE[*] FB_WIDTH[*] FB_HEIGHT[*] LFB_HMIN[*]
 set_false_path -from {FB_BASE[*] FB_BASE[*] FB_WIDTH[*] FB_HEIGHT[*] LFB_HMIN[*] LFB_HMAX[*] LFB_VMIN[*] LFB_VMAX[*]}
 set_false_path -to   {vol_att[*] scaler_flt[*] led_overtake[*] led_state[*]}
 set_false_path -from {vol_att[*] scaler_flt[*] led_overtake[*] led_state[*]}
-set_false_path -from {aflt_* acx* acy* areset* arc*}
+set_false_path -from {aflt_* acx* acy* areset*}
 set_false_path -from {arx* ary*}
 set_false_path -from {vs_line*}
 

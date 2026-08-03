@@ -15,6 +15,16 @@ if not screen or not maincpu or not subcpu then
     error("System 24 screen/maincpu/subcpu devices are required")
 end
 
+-- Publish the runtime adapter boundary only after MAME has constructed the
+-- actual System 24 machine and screen device.  The coordinator uses this
+-- handshake to distinguish a live reference from a merely present frame.
+local ready = assert(io.open(root .. "/reference_adapter_ready.json", "wb"))
+ready:write(string.format(
+    '{"mame_version":%q,"screen_tag":"screen_device::pixels()"}\n',
+    emu.app_name() .. " " .. emu.app_version()))
+ready:flush()
+ready:close()
+
 local state_value, exists
 
 local function trace_device(address)
@@ -36,6 +46,7 @@ end
 local trace_frame = 0
 local taps = {}
 local trace_stream = assert(io.open(root .. "/mame_trace.jsonl", "ab"))
+local audio_event_stream = assert(io.open(root .. "/mame_audio_events.jsonl", "ab"))
 local function append_trace(cpu, rw, address, data, mask)
     if exists(root .. "/TRACE_STOP.txt") then return end
     local device = trace_device(address)
@@ -49,6 +60,16 @@ local function append_trace(cpu, rw, address, data, mask)
         "{\"frame\":%d,\"cpu\":%d,\"event\":\"bus\",\"rw\":\"%s\"," ..
         "\"address\":%d,\"data\":%d,\"lanes\":%d,\"device\":%d,\"pc\":%d}\n",
         trace_frame, cpu, rw, address, data, lanes, device, pc))
+    -- MAME's YM window is the authoritative register-write producer.  JT51
+    -- serial samples/timer edges are emitted by the RTL event boundary; this
+    -- event keeps the cross-domain comparison explicit without pretending a
+    -- Lua memory tap can observe the analogue YM3012 pins.
+    if device == 18 and rw == "w" then
+        audio_event_stream:write(string.format(
+            "{\"frame\":%d,\"event\":\"audio\",\"type\":1," ..
+            "\"channel\":0,\"address\":%d,\"value\":%d}\n",
+            trace_frame, address & 1, data & 0xff))
+    end
 end
 
 local function install_trace(cpu, device)
@@ -135,7 +156,9 @@ local function producer()
         while read_token(root .. "/release_frame.txt") < frame do
             if exists(root .. "/STOP.txt") then
                 trace_stream:flush()
+                audio_event_stream:flush()
                 trace_stream:close()
+                audio_event_stream:close()
                 machine:exit()
                 return
             end
@@ -143,7 +166,9 @@ local function producer()
         end
         if exists(root .. "/STOP.txt") then
             trace_stream:flush()
+            audio_event_stream:flush()
             trace_stream:close()
+            audio_event_stream:close()
             machine:exit()
             return
         end

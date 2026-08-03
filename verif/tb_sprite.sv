@@ -86,12 +86,19 @@ module tb_sprite;
         reset=0;
         line_boundary(10'd383); // collect the next frame's list in vblank
         repeat(40) @(posedge clk);
-        assert(dut.state==dut.S_IDLE && dut.list_cache_valid)
-            else $fatal(1,"sprite vblank list collection failed");
-        line_boundary(0); // renders active line 2 into bank zero
+        assert(dut.list_cache_valid)
+            else $fatal(1,"sprite vblank list collection failed state=%0d valid=%0d seen=%0d index=%0d req=%0d ack=%0d epoch=%0d/%0d",
+                        dut.state,dut.list_cache_valid,dut.list_seen,dut.list_index,
+                        mem_req,mem_ack,dut.cache_epoch,dut.frame_epoch);
+        line_boundary(0); // advances the queued producer toward active line 2
         repeat(1200) @(posedge clk);
         assert(dut.state==dut.S_IDLE) else $fatal(1,"sprite renderer overrun state %0d",dut.state);
-        line_boundary(1); // display the completed bank
+        line_boundary(0); // display the completed line-Y-tagged bank
+        $display("sprite queue probe valid=%b display=%0d fill=%0d target=%0d next=%0d bank_y=%0d/%0d/%0d/%0d gen=%0d/%0d/%0d/%0d",
+                 dut.line_valid,dut.display_bank,dut.fill_bank,dut.target_y,
+                 dut.render_next_target,dut.bank_line_y[0],dut.bank_line_y[1],
+                 dut.bank_line_y[2],dut.bank_line_y[3],dut.bank_generation[0],
+                 dut.bank_generation[1],dut.bank_generation[2],dut.bank_generation[3]);
         assert(pixel1==14'h1045 && rank1==0 &&
                pixel0==0 && pixel2==0 && pixel3==0)
             else $fatal(1,"sprite group candidates %h/%h/%h/%h rank=%0d",
@@ -126,8 +133,8 @@ module tb_sprite;
                dut.cache_epoch==dut.frame_epoch)
             else $fatal(1,"sprite descriptor cache did not refresh at frame epoch");
 
-        // SSpirits reaches 1002 normal descriptors behind a full 8192-entry
-        // linked list. Exercise the retained-cache worst case with 48 active
+        // SSpirits reaches 3547 normal descriptors behind the 8192-entry
+        // linked-list traversal bound. Exercise the retained-cache path with 48 active
         // one-tile sprites and prove one scanline still meets 656*3 clocks.
         for(int s=0;s<1024;s++) begin
             if(s[0]) begin
@@ -148,8 +155,9 @@ module tb_sprite;
                 dut.clip_stack_ram.mem_lo[s>>1]=81'd0;
             end
         end
-        dut.stack_head=0;dut.stack_count=11'd1024;
-        dut.list_cache_valid=1;
+        dut.stack_head=0;dut.stack_count=13'd1024;
+        dut.list_cache_valid=1;dut.cache_epoch=dut.frame_epoch;
+        dut.render_next_target=0;dut.line_valid=0;
         line_boundary(0);
         stress_clocks=0;
         while(dut.state!=dut.S_IDLE && stress_clocks<656*3) begin

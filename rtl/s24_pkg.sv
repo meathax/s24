@@ -25,7 +25,60 @@ package s24_pkg;
         logic       has_fd1094;
         logic       has_romboard;
         logic       has_floppy;
+        // Bytes 5..7 are zero in the legacy descriptor.  Version one gives
+        // the loader named board-domain profile fields without changing the
+        // descriptor size or invalidating existing MRAs.
+        logic [7:0] profile_version;
+        logic [3:0] motherboard_revision;
+        logic [1:0] sprite_memory_population;
+        logic [1:0] fdc_timing_profile;
+        logic [1:0] romboard_profile;
+        logic [1:0] analogue_profile;
+        logic [1:0] video_profile;
+        logic [1:0] cpu_profile;
     } board_desc_t;
+
+    // The 315-5295-facing transaction contract.  The physical SDRAM adapter
+    // remains below this boundary; these fields describe the board-visible
+    // cycle that arbitration and device models must observe.
+    typedef enum logic [1:0] {
+        BUS_PHASE_CAPTURE = 2'd0,
+        BUS_PHASE_GRANTED = 2'd1,
+        BUS_PHASE_WAIT    = 2'd2,
+        BUS_PHASE_COMPLETE= 2'd3
+    } bus_phase_t;
+
+    typedef struct packed {
+        logic        valid;
+        logic        requester;     // 0 = CPU-A, 1 = CPU-B
+        logic [23:0] address;
+        logic [1:0]  byte_enable;   // {UDS, LDS}, active lanes are one
+        logic        read_nwrite;
+        logic [2:0]  function_code;
+        logic [15:0] write_data;
+        bus_phase_t  phase;
+        logic        grant;
+        logic        wait_state;
+        logic        complete;
+    } board_transaction_t;
+
+    typedef enum logic [2:0] {
+        AUDIO_EVENT_NONE  = 3'd0,
+        AUDIO_EVENT_YM_WRITE = 3'd1,
+        AUDIO_EVENT_YM_IRQ   = 3'd2,
+        AUDIO_EVENT_YM_SAMPLE= 3'd3,
+        AUDIO_EVENT_DAC      = 3'd4
+    } audio_event_type_t;
+
+    typedef struct packed {
+        logic [2:0]  event_type;
+        logic [1:0]  channel;
+        logic [7:0]  address;
+        logic [15:0] value;
+        logic [15:0] left;
+        logic [15:0] right;
+        logic        valid;
+    } audio_event_t;
 
     localparam logic [7:0] INPUT_GENERIC = 8'd0;
     localparam logic [7:0] INPUT_GGROUND = 8'd1;

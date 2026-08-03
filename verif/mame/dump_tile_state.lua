@@ -6,6 +6,7 @@ local target = tonumber(os.getenv("S24_DUMP_FRAME") or "0")
 local frame = 0
 local coin_frame = tonumber(os.getenv("S24_COIN_FRAME") or "0") or 0
 local start_frame = tonumber(os.getenv("S24_START_FRAME") or "0") or 0
+local action_frame = tonumber(os.getenv("S24_ACTION_FRAME") or "0") or 0
 local input_frames = tonumber(os.getenv("S24_INPUT_FRAMES") or "4") or 4
 
 local function find_fields(wanted)
@@ -30,9 +31,15 @@ local coin_fields = coin_frame > 0 and
 local start_field = start_frame > 0 and find_field({
     ["1 player start"] = true, ["player 1 start"] = true,
     ["start 1"] = true, ["start1"] = true}) or nil
+local action_field = action_frame > 0 and find_field({
+    ["button 1"] = true, ["p1 button 1"] = true,
+    ["p1 button1"] = true, ["p1 fire 1"] = true}) or nil
 if coin_frame > 0 and #coin_fields == 0 then error("Coin 1 input field not found") end
 if start_frame > 0 and not start_field then
     error("Player 1 Start input field not found")
+end
+if action_frame > 0 and not action_field then
+    error("Player 1 Button 1 input field not found")
 end
 
 local function tile_word(offset)
@@ -48,6 +55,10 @@ emu.register_frame_done(function()
     if start_field then
         start_field:set_value(frame >= start_frame and
                               frame < start_frame + input_frames and 1 or 0)
+    end
+    if action_field then
+        action_field:set_value(frame >= action_frame and
+                               frame < action_frame + input_frames and 1 or 0)
     end
     if frame ~= target then return end
 
@@ -229,5 +240,17 @@ emu.register_frame_done(function()
     print(string.format(
         "S24MAME sprite frame=%d cache8_palette=%d/%d cache16_data=%d/%d",
         frame, palette_misses, palette_requests, data_misses, data_requests))
+    local sprite_dump = os.getenv("S24_SPRITE_DUMP_FILE")
+    if sprite_dump and sprite_dump ~= "" then
+        local stream = assert(io.open(sprite_dump, "wb"))
+        for word = 0, 0x1ffff do
+            stream:write(string.format("%04x\n",
+                space:read_u16(0x600000 + word * 2)))
+        end
+        stream:flush()
+        stream:close()
+        print(string.format("S24MAME sprite frame=%d dump=%s words=%d",
+            frame, sprite_dump, 0x20000))
+    end
     machine:exit()
 end, "frame")

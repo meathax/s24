@@ -31,6 +31,13 @@ COORDINATOR = pathlib.Path(
     "C:/Users/meath/.codex/skills/verilator-live-lockstep/scripts/"
     "live_lockstep_compare.py"
 )
+# Keep reference limitations explicit in the preflight manifest.  They affect
+# how a later mismatch is interpreted, but never relax the native-frame or
+# gameplay gates.
+REFERENCE_CAVEATS = {
+    "crkdown": "MAME 0.288 marks Crack Down graphics imperfect",
+}
+
 def sha256(path: pathlib.Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -237,6 +244,9 @@ def main() -> int:
     parser.add_argument("--mame-exe", type=pathlib.Path, default=MAME_EXE)
     parser.add_argument("--mame-roms", type=pathlib.Path,
                         default=pathlib.Path("D:/Arcade/AI/mame/roms"))
+    parser.add_argument("--mame-video", choices=("d3d", "bgfx", "gdi", "opengl"),
+                        default="gdi",
+                        help="native MAME presentation backend; raw screen pixels remain the reference")
     parser.add_argument("--timeout", type=float, default=900.0)
     parser.add_argument("--retain-stride", type=int, default=60,
                         help="after success retain every Nth native screenshot plus first/final/worst; 0 keeps all")
@@ -270,7 +280,11 @@ def main() -> int:
         sys.executable, str(COORDINATOR), str(session),
         "--start-frame", "1", "--frames", str(args.frames),
         "--offset-x", "0", "--offset-y", "0", "--timeout", str(args.timeout),
+        "--reference-dir", "mame",
         "--rtl-extension", "ppm", "--reference-extension", "argb32",
+        "--reference-token", "mame_frame.txt",
+        "--reference-trace", "mame_trace.jsonl",
+        "--reference-state", "mame_state.jsonl",
     ], cwd=REPO, stdout=coordinator_log, stderr=subprocess.STDOUT)
     env = os.environ.copy()
     env["S24_LOCKSTEP_DIR"] = str(session)
@@ -290,7 +304,8 @@ def main() -> int:
         stdout=rtl_out, stderr=rtl_err,
     )
     mame = subprocess.Popen([
-        str(args.mame_exe), args.game, "-window", "-nomaximize", "-skip_gameinfo",
+        str(args.mame_exe), args.game, "-video", args.mame_video,
+        "-noswitchres", "-window", "-nomaximize", "-skip_gameinfo",
         "-rompath", f"{REPO / 'roms'};{args.mame_roms}",
         "-cfg_directory", str(session / "cfg"),
         "-nvram_directory", str(session / "nvram"),

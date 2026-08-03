@@ -11,22 +11,22 @@
 
 localparam MASK_NBITS = 5;
 
-localparam
-		OP_AND = 1,
-		OP_SUB = 2, OP_SUBX = 3, OP_ADD = 4,
-		OP_EXT = 5, OP_SBCD = 6, OP_SUB0 = 7,
-		OP_OR = 8, OP_EOR = 9,
-		OP_SUBC = 10, OP_ADDC = 11, OP_ADDX = 12,
-		OP_ASL = 13,
-		OP_ASR = 14,
-		OP_LSL = 15,
-		OP_LSR = 16,
-		OP_ROL = 17,
-		OP_ROR = 18,
-		OP_ROXL = 19,
-		OP_ROXR = 20,
-		OP_SLAA = 21,
-		OP_ABCD = 22;
+localparam logic [4:0]
+		OP_AND = 5'd1,
+		OP_SUB = 5'd2, OP_SUBX = 5'd3, OP_ADD = 5'd4,
+		OP_EXT = 5'd5, OP_SBCD = 5'd6, OP_SUB0 = 5'd7,
+		OP_OR = 5'd8, OP_EOR = 5'd9,
+		OP_SUBC = 5'd10, OP_ADDC = 5'd11, OP_ADDX = 5'd12,
+		OP_ASL = 5'd13,
+		OP_ASR = 5'd14,
+		OP_LSL = 5'd15,
+		OP_LSR = 5'd16,
+		OP_ROL = 5'd17,
+		OP_ROR = 5'd18,
+		OP_ROXL = 5'd19,
+		OP_ROXR = 5'd20,
+		OP_SLAA = 5'd21,
+		OP_ABCD = 5'd22;
 
 module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
 	input [15:0] ird,
@@ -546,6 +546,7 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_SUB;
 					3: aluOp = OP_SUBC;
 					4,6: aluOp = OP_SLAA;
+					default: aluOp = 'X;
 					endcase
 				
 				row[2]:
@@ -553,6 +554,7 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_ADD;
 					3: aluOp = OP_ADDC;
 					4: aluOp = OP_ASR;
+					default: aluOp = 'X;
 					endcase
 
 				row[3]:
@@ -560,6 +562,7 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_ADDX;
 					3: aluOp = isCorf ? OP_ABCD : OP_ADD;
 					4: aluOp = OP_ASL;
+					default: aluOp = 'X;
 					endcase
                   
 				row[4]:
@@ -571,6 +574,7 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_SUB;
 					3: aluOp = OP_SUBC;
 					4: aluOp = OP_LSR;
+					default: aluOp = 'X;
 					endcase
 				
 				row[7]:					// MUL
@@ -578,6 +582,7 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_SUB;
 					3: aluOp = OP_ADD;
 					4: aluOp = OP_ROXR;
+					default: aluOp = 'X;
 					endcase
                
 				row[8]:
@@ -587,6 +592,7 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_EXT;
 					3: aluOp = OP_AND;
 					4: aluOp = OP_ROXR;
+					default: aluOp = 'X;
 					endcase
                
 				row[9]:
@@ -594,6 +600,7 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_SUBX;
 					3: aluOp = OP_SBCD;
 					4: aluOp = OP_ROL;
+					default: aluOp = 'X;
 					endcase
 
 				row[10]:
@@ -601,6 +608,7 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_SUBX;
 					3: aluOp = OP_SUBC;
 					4: aluOp = OP_ROR;
+					default: aluOp = 'X;
 					endcase
                 
 				row[11]:
@@ -608,12 +616,14 @@ module aluGetOp( input [15:0] row, input [2:0] col, input isCorf,
 					2: aluOp = OP_SUB0;
 					3: aluOp = OP_SUB0;
 					4: aluOp = OP_ROXL;
+					default: aluOp = 'X;
 					endcase
                 
 				row[12]:	aluOp = OP_ADDX;               
 				row[13]:	aluOp = OP_EOR;
 				row[14]:	aluOp = (col == 4) ? OP_EOR : OP_OR;
 				row[15]:	aluOp = (col == 3) ? OP_ADD : OP_OR;		// OP_ADD used by DBcc
+				default: aluOp = 'X;
 				
 			endcase         
 		endcase
@@ -808,7 +818,7 @@ module ccrTable(
 			row[13],
 			row[14]:	ccrMask = KNZ00;
 			row[15]:	ccrMask = 5'b0;			// TAS/Scc, not used in col 3
-			// default:	ccrMask = CUNUSED;
+			default:	ccrMask = CUNUSED;
 			endcase			
 			
 		4:

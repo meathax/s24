@@ -202,6 +202,17 @@ module tb_tile;
             write_character(word_index[15:0],
                             word_index[0] ? 16'h5678 : 16'h1234);
 
+        // The upper mask map is based at 0x6800.  Keep its CPU-visible
+        // boundary tied to the actual worst-case rendered address.
+        force dut.line_layer_q=2'd2;
+        force dut.line_render_y_q=9'd423;
+        force dut.line_x_q=9'd495;#1;
+        if (dut.mask_addr !== 15'h6e9f)
+            $fatal(1,"upper mask address mismatch %h",dut.mask_addr);
+        release dut.line_layer_q;
+        release dut.line_render_y_q;
+        release dut.line_x_q;
+
         for (int layer=0; layer<4; layer++)
             for (int mask=0; mask<2; mask++)
                 for (int category=0; category<2; category++)

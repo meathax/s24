@@ -42,6 +42,7 @@ module s24_mixer (
 
     logic [3:0] best_pri;
     logic [3:0] pri;
+
     logic [2:0] backdrop_pri;
     logic backdrop_found;
     logic pixel_found;
@@ -92,24 +93,28 @@ module s24_mixer (
         // MAME's equal-priority default order leaves lower tile pass numbers
         // above higher ones, hence the reverse evaluation order here.
         if (tile3_valid && tile3_pixel[3:0] != 0) begin
-            best_pri = {1'b0,regs[{1'b0,2'd3,tile3_cat}][2:0]};
+            best_pri = {1'b0,
+                tile3_cat ? regs[7][2:0] : regs[6][2:0]};
             mixed_pixel = {2'b00,tile3_pixel};
             pixel_found = 1;
         end
         if (tile2_valid && tile2_pixel[3:0] != 0) begin
-            pri = {1'b0,regs[{1'b0,2'd2,tile2_cat}][2:0]};
+            pri = {1'b0,
+                tile2_cat ? regs[5][2:0] : regs[4][2:0]};
             if (!pixel_found || pri >= best_pri) begin
                 best_pri=pri; mixed_pixel={2'b00,tile2_pixel}; pixel_found=1;
             end
         end
         if (tile1_valid && tile1_pixel[3:0] != 0) begin
-            pri = {1'b0,regs[{1'b0,2'd1,tile1_cat}][2:0]};
+            pri = {1'b0,
+                tile1_cat ? regs[3][2:0] : regs[2][2:0]};
             if (!pixel_found || pri >= best_pri) begin
                 best_pri=pri; mixed_pixel={2'b00,tile1_pixel}; pixel_found=1;
             end
         end
         if (tile0_valid && tile0_pixel[3:0] != 0) begin
-            pri = {1'b0,regs[{1'b0,2'd0,tile0_cat}][2:0]};
+            pri = {1'b0,
+                tile0_cat ? regs[1][2:0] : regs[0][2:0]};
             if (!pixel_found || pri >= best_pri) begin
                 best_pri=pri; mixed_pixel={2'b00,tile0_pixel}; pixel_found=1;
             end

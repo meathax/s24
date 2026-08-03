@@ -10,44 +10,45 @@ module s24_palette (
         expand5 = {c, c[4:2]};
     endfunction
 
-    // Only 32 expanded component values are possible. Precomputing both
-    // shadow/highlight results removes three combinational divide-by-five
-    // networks while preserving MAME's exact truncation. The intermediate
-    // widths are explicit because the MAME expression is wider than an
-    // 8-bit palette component; relying on implicit truncation made Verilator
-    // report WIDTHTRUNC and obscured the intended floor operation.
-    (* romstyle="MLAB" *) logic [7:0] shade_r [0:63];
-    (* romstyle="MLAB" *) logic [7:0] shade_g [0:63];
-    (* romstyle="MLAB" *) logic [7:0] shade_b [0:63];
-
     function automatic [7:0] shade_value(
         input logic [4:0] component,
         input logic        highlight
     );
-        logic [8:0] expanded;
-        logic [10:0] numerator;
-        logic [10:0] quotient;
-        begin
-            expanded = {1'b0, component, component[4:2]};
-            numerator = highlight
-                      ? 11'd510 + (expanded * 11'd3)
-                      : expanded * 11'd3;
-            quotient = numerator / 11'd5;
-            shade_value = quotient[7:0];
-        end
+        case (component)
+            5'd0: shade_value = highlight ? 8'd102 : 8'd0;
+            5'd1: shade_value = highlight ? 8'd106 : 8'd4;
+            5'd2: shade_value = highlight ? 8'd111 : 8'd9;
+            5'd3: shade_value = highlight ? 8'd116 : 8'd14;
+            5'd4: shade_value = highlight ? 8'd121 : 8'd19;
+            5'd5: shade_value = highlight ? 8'd126 : 8'd24;
+            5'd6: shade_value = highlight ? 8'd131 : 8'd29;
+            5'd7: shade_value = highlight ? 8'd136 : 8'd34;
+            5'd8: shade_value = highlight ? 8'd141 : 8'd39;
+            5'd9: shade_value = highlight ? 8'd146 : 8'd44;
+            5'd10: shade_value = highlight ? 8'd151 : 8'd49;
+            5'd11: shade_value = highlight ? 8'd156 : 8'd54;
+            5'd12: shade_value = highlight ? 8'd161 : 8'd59;
+            5'd13: shade_value = highlight ? 8'd166 : 8'd64;
+            5'd14: shade_value = highlight ? 8'd171 : 8'd69;
+            5'd15: shade_value = highlight ? 8'd175 : 8'd73;
+            5'd16: shade_value = highlight ? 8'd181 : 8'd79;
+            5'd17: shade_value = highlight ? 8'd186 : 8'd84;
+            5'd18: shade_value = highlight ? 8'd190 : 8'd88;
+            5'd19: shade_value = highlight ? 8'd195 : 8'd93;
+            5'd20: shade_value = highlight ? 8'd201 : 8'd99;
+            5'd21: shade_value = highlight ? 8'd205 : 8'd103;
+            5'd22: shade_value = highlight ? 8'd210 : 8'd108;
+            5'd23: shade_value = highlight ? 8'd215 : 8'd113;
+            5'd24: shade_value = highlight ? 8'd220 : 8'd118;
+            5'd25: shade_value = highlight ? 8'd225 : 8'd123;
+            5'd26: shade_value = highlight ? 8'd230 : 8'd128;
+            5'd27: shade_value = highlight ? 8'd235 : 8'd133;
+            5'd28: shade_value = highlight ? 8'd240 : 8'd138;
+            5'd29: shade_value = highlight ? 8'd245 : 8'd143;
+            5'd30: shade_value = highlight ? 8'd250 : 8'd148;
+            default: shade_value = highlight ? 8'd255 : 8'd153;
+        endcase
     endfunction
-
-    integer shade_init;
-    initial begin
-        for (shade_init=0; shade_init<32; shade_init=shade_init+1) begin
-            shade_r[shade_init] = shade_value(shade_init[4:0],1'b0);
-            shade_g[shade_init] = shade_value(shade_init[4:0],1'b0);
-            shade_b[shade_init] = shade_value(shade_init[4:0],1'b0);
-            shade_r[32+shade_init] = shade_value(shade_init[4:0],1'b1);
-            shade_g[32+shade_init] = shade_value(shade_init[4:0],1'b1);
-            shade_b[32+shade_init] = shade_value(shade_init[4:0],1'b1);
-        end
-    end
 
     logic [4:0] r5, g5, b5;
     logic [7:0] r0, g0, b0;
@@ -59,9 +60,9 @@ module s24_palette (
         g0 = expand5(g5);
         b0 = expand5(b5);
         if (shadow_bank) begin
-            red   = shade_r[{palette_word[15],r5}];
-            green = shade_g[{palette_word[15],g5}];
-            blue  = shade_b[{palette_word[15],b5}];
+            red   = shade_value(r5,palette_word[15]);
+            green = shade_value(g5,palette_word[15]);
+            blue  = shade_value(b5,palette_word[15]);
         end else begin
             red = r0; green = g0; blue = b0;
         end

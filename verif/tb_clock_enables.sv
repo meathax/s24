@@ -46,8 +46,9 @@ module tb_clock_enables;
         @(negedge clk);
         reset = 1'b0;
 
-        // At 48 MHz, 48,000 source clocks are exactly 1 ms. The integer
-        // dividers and the 20 MHz phase-event NCO therefore have exact counts.
+        // At the default 48 MHz, 48,000 source clocks are exactly 1 ms. The
+        // fractional accumulators and the 20 MHz phase-event NCO therefore
+        // have exact counts.
         repeat (48000) @(posedge clk);
         #2;
         if (ce16_count != 16000 || ce8_count != 8000 || ce4_count != 4000)

@@ -37,15 +37,20 @@ module s24_char_video_ram (
     genvar bank;
     generate
         for (bank=0; bank<4; bank=bank+1) begin : g_bank
+            localparam logic [1:0] BANK_INDEX = bank[1:0];
             altsyncram ram (
-                .clock0(clk), .address_a(wr_addr[15:2]), .data_a(wr_data),
-                .wren_a(wr_en && wr_addr[1:0] == bank[1:0]), .q_a(),
-                .clock1(clk), .address_b(rd_addr), .data_b(16'h0000),
-                .wren_b(1'b0), .q_b(bank_q[bank]),
+                // Keep the video port in the same read-on-port-A/write-on-
+                // port-B form as the proven sprite RAMs.  In particular,
+                // this makes the registered read latency explicit instead
+                // of relying on a write-capable port with rden_a disabled.
+                .clock0(clk), .address_a(rd_addr), .data_a(16'h0000),
+                .wren_a(1'b0), .q_a(bank_q[bank]),
+                .clock1(clk), .address_b(wr_addr[15:2]), .data_b(wr_data),
+                .wren_b(wr_en && wr_addr[1:0] == BANK_INDEX), .q_b(),
                 .aclr0(1'b0), .aclr1(1'b0), .addressstall_a(1'b0),
-                .addressstall_b(1'b0), .byteena_a(wr_be), .byteena_b(1'b1),
+                .addressstall_b(1'b0), .byteena_a(1'b1), .byteena_b(wr_be),
                 .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
-                .clocken3(1'b1), .eccstatus(), .rden_a(1'b0), .rden_b(1'b1)
+                .clocken3(1'b1), .eccstatus(), .rden_a(1'b1), .rden_b(1'b0)
             );
             defparam
                 ram.operation_mode = "BIDIR_DUAL_PORT",
@@ -58,10 +63,10 @@ module s24_char_video_ram (
                 ram.ram_block_type = "M10K",
                 ram.intended_device_family = "Cyclone V",
                 ram.lpm_type = "altsyncram",
-                ram.outdata_reg_b = "CLOCK1",
+                ram.outdata_reg_a = "CLOCK0",
                 ram.read_during_write_mode_mixed_ports = "OLD_DATA",
-                ram.width_byteena_a = 2,
-                ram.width_byteena_b = 1,
+                ram.width_byteena_a = 1,
+                ram.width_byteena_b = 2,
                 ram.power_up_uninitialized = "FALSE";
         end
     endgenerate
@@ -118,6 +123,22 @@ module s24_tile (
     (* ramstyle = "M10K, no_rw_check" *) logic [7:0] mask_ram_lo [0:4095];
     (* ramstyle = "M10K, no_rw_check" *) logic [7:0] mask_ram_hi [0:4095];
     logic [15:0] control_regs [0:7];
+
+    function automatic logic [15:0] control_reg_value(
+        input logic [2:0] index
+    );
+        case (index)
+            3'd0: control_reg_value = control_regs[0];
+            3'd1: control_reg_value = control_regs[1];
+            3'd2: control_reg_value = control_regs[2];
+            3'd3: control_reg_value = control_regs[3];
+            3'd4: control_reg_value = control_regs[4];
+            3'd5: control_reg_value = control_regs[5];
+            3'd6: control_reg_value = control_regs[6];
+            3'd7: control_reg_value = control_regs[7];
+            default: control_reg_value = 16'h0000;
+        endcase
+    endfunction
     // Preserve the verification bench's diagnostic hierarchy without putting
     // this redundant array into the synthesized design.
     // synthesis translate_off
@@ -235,7 +256,8 @@ module s24_tile (
                     line_scroll_issue_hi[cpu_addr[10:0]] <= cpu_din[15:8];
                 end
             end
-            if (cpu_addr >= 15'h6000 && cpu_addr < 15'h7000) begin
+            if ((cpu_addr >= 15'h6000 && cpu_addr < 15'h66a0) ||
+                (cpu_addr >= 15'h6800 && cpu_addr < 15'h6ea0)) begin
                 if (cpu_be[0]) mask_ram_lo[cpu_addr[11:0]] <= cpu_din[7:0];
                 if (cpu_be[1]) mask_ram_hi[cpu_addr[11:0]] <= cpu_din[15:8];
             end
@@ -265,14 +287,9 @@ module s24_tile (
                             ? {~display_bank,9'd0}
                             : {display_bank,hcount[8:0]+1'd1};
 
-    logic [15:0] hscr_word, vscr_word, ctrl_word, line_hscr_word;
     logic [8:0] source_x, source_y;
     logic selected, disabled;
-    logic chosen_odd, mask_bit;
-    logic [1:0] pair_even_layer;
-    logic [1:0] ctrl_mode;
-    logic [9:0] neg_vscroll;
-    logic [8:0] horizontal_value;
+    logic mask_bit;
     logic [11:0] wanted_char;
     logic [2:0] wanted_row;
     logic [3:0] wanted_pen;
@@ -290,8 +307,9 @@ module s24_tile (
     logic [8:0] lookup_source_x_q,lookup_source_y_q;
     logic [1:0] lookup_ctrl_mode_q;
     logic lookup_disabled_q,lookup_chosen_odd_q;
+    // synthesis translate_off
     logic [14:0] lookup_tile_addr_q,lookup_mask_addr_q;
-    logic [1:0] current_line_layer;
+    // synthesis translate_on
     logic [1:0] issue_layer, issue_pair_even_layer, issue_fetch_layer;
     logic [8:0] issue_x;
     logic [15:0] issue_hscr_word, issue_vscr_word, issue_ctrl_word;
@@ -311,13 +329,6 @@ module s24_tile (
         // tile_word and mask_word are synchronous RAM outputs. Consume them
         // only with metadata registered on the same edge as their addresses;
         // live render/control signals may already describe the next pixel.
-        pair_even_layer = {lookup_layer_q[1],1'b0};
-        hscr_word = 0;
-        vscr_word = 0;
-        ctrl_word = 0;
-        ctrl_mode = lookup_ctrl_mode_q;
-        current_line_layer = lookup_layer_q;
-        line_hscr_word = 0;
         mask_bit = mask_word[15-lookup_x_q[6:3]];
 
         // In normal mode the window RAM selects the physical tilemap within
@@ -329,9 +340,6 @@ module s24_tile (
                    ? (mask_bit == lookup_layer_q[0])
                    : !lookup_layer_q[0];
         disabled = lookup_disabled_q;
-        horizontal_value = 0;
-        neg_vscroll = 0;
-        chosen_odd = lookup_chosen_odd_q;
         source_x = lookup_source_x_q;
         source_y = lookup_source_y_q;
 
@@ -383,7 +391,7 @@ module s24_tile (
         // 5003 and 5004/5005/5006/5007 respectively. Only special modes
         // below collapse the selected physical map onto the even member of
         // its pair, matching MAME's early return for the odd map.
-        issue_hscr_word = control_regs[{1'b0,issue_layer}];
+        issue_hscr_word = control_reg_value({1'b0,issue_layer});
         issue_vscr_word = control_regs[3'd4 + issue_layer];
         issue_ctrl_word = control_regs[3'd4 + {issue_layer[1],1'b0}];
         issue_ctrl_mode = issue_ctrl_word[14:13];
@@ -391,7 +399,7 @@ module s24_tile (
                                                   : issue_pair_even_layer;
         if (issue_ctrl_mode != 0) begin
             issue_hscr_word =
-                control_regs[{1'b0,issue_pair_even_layer}];
+                control_reg_value({1'b0,issue_pair_even_layer});
             issue_vscr_word =
                 control_regs[3'd4 + issue_pair_even_layer];
         end
@@ -512,8 +520,10 @@ module s24_tile (
                 lookup_ctrl_mode_q <= line_ctrl_mode_q;
                 lookup_disabled_q <= line_vscr_q[15];
                 lookup_chosen_odd_q <= issue_chosen_odd;
+                // synthesis translate_off
                 lookup_tile_addr_q <= tile_addr;
                 lookup_mask_addr_q <= mask_addr;
+                // synthesis translate_on
             end
         end
         if (reset) begin
@@ -538,8 +548,10 @@ module s24_tile (
             lookup_ctrl_mode_q <= 0;
             lookup_disabled_q <= 0;
             lookup_chosen_odd_q <= 0;
+            // synthesis translate_off
             lookup_tile_addr_q <= 0;
             lookup_mask_addr_q <= 0;
+            // synthesis translate_on
             cache_valid <= 0;
             cache_char <= 0;
             cache_row <= 0;

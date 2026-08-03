@@ -53,10 +53,10 @@ module s24_fdc (
                 3'd1: bus_dout = track;
                 3'd2: bus_dout = sector;
                 3'd3: bus_dout = data_reg;
-                3'd4: bus_dout = 8'h90 | (irq ? 8'h02 : 0) |
-                                 (drq ? 8'h01 : 0) |
-                                 (physical_track != 0 ? 8'h40 : 0) |
-                                 (index_pulse ? 8'h20 : 0);
+                3'd4: bus_dout = 8'h90 | (irq ? 8'h02 : 8'h00) |
+                                 (drq ? 8'h01 : 8'h00) |
+                                 (physical_track != 8'd0 ? 8'h40 : 8'h00) |
+                                 (index_pulse ? 8'h20 : 8'h00);
                 default: bus_dout = 8'hff;
             endcase
         end

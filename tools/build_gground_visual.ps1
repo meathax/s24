@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$ModelDirectory = 'C:/tmp/s24_obj_gground_visual4',
-    [ValidateRange(1,8)][int]$ModelThreads = 1
+    [ValidateRange(1,8)][int]$ModelThreads = 1,
+    [switch]$RealAudio
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,22 +27,38 @@ function Get-Sha256Hex([string]$Path) {
     }
 }
 $repoSources = @(
-    'rtl/s24_pkg.sv','rtl/s24_clock_enables.sv','rtl/s24_cpu_bus.sv',
+    'rtl/s24_pkg.sv','rtl/s24_clock_enables.sv','rtl/s24_board_arbiter.sv',
+    'rtl/s24_cpu_bus.sv',
     'rtl/io/s24_io_5296.sv','rtl/io/s24_inputs.sv','rtl/io/s24_analog.sv',
     'rtl/prot/s24_magic_latch.sv','rtl/fdc/s24_fdc.sv','rtl/s24_irq.sv',
     'rtl/video/s24_video_timing.sv','rtl/video/s24_palette.sv',
     'rtl/video/s24_tile.sv','rtl/video/s24_sprite.sv','rtl/video/s24_mixer.sv',
     'rtl/cpu/fx68k/fx68kAlu.sv','rtl/cpu/fx68k/uaddrPla.sv',
     'rtl/cpu/fx68k/fx68k.sv','rtl/cpu/s24_fd1094_decrypt.sv',
-    'rtl/cpu/s24_fd1094.sv','verif/jt51_boot_stub.sv','rtl/s24_core.sv',
+    'rtl/cpu/s24_fd1094.sv','rtl/s24_core.sv',
     'verif/tb_gground_boot.sv'
 )
+$jt51Sources = @(
+    'rtl/audio/jt51/jt51_acc.v','rtl/audio/jt51/jt51_eg.v',
+    'rtl/audio/jt51/jt51_exp2lin.v','rtl/audio/jt51/jt51_exprom.v',
+    'rtl/audio/jt51/jt51_kon.v','rtl/audio/jt51/jt51_lfo.v',
+    'rtl/audio/jt51/jt51_lin2exp.v','rtl/audio/jt51/jt51_mmr.v',
+    'rtl/audio/jt51/jt51_mod.v','rtl/audio/jt51/jt51_noise_lfsr.v',
+    'rtl/audio/jt51/jt51_noise.v','rtl/audio/jt51/jt51_op.v',
+    'rtl/audio/jt51/jt51_pg.v','rtl/audio/jt51/jt51_phinc_rom.v',
+    'rtl/audio/jt51/jt51_phrom.v','rtl/audio/jt51/jt51_pm.v',
+    'rtl/audio/jt51/jt51_reg.v','rtl/audio/jt51/jt51_sh.v',
+    'rtl/audio/jt51/jt51_timers.v','rtl/audio/jt51/jt51_reg_ch.v',
+    'rtl/audio/jt51/jt51_csr_op.v','rtl/audio/jt51/jt51.v'
+)
+if($RealAudio) { $repoSources += $jt51Sources }
+else { $repoSources += 'verif/jt51_boot_stub.sv' }
 $exe = Join-Path $ModelDirectory 'Vtb_gground_boot.exe'
 $signaturePath = Join-Path $ModelDirectory 'build.signature'
 $verilatorVersion = & 'C:/Users/meath/bin/verilator.exe' --version
 $signatureParts = @(
     $verilatorVersion, $sdlCflags, $sdlLibs,
-    "tb_gground_boot|S24_VISUAL|no-timing|savable|packed-fx68k-structs|threads=$ModelThreads|OPT_FAST=O3|OPT_SLOW=O2|OPT_GLOBAL=O2|march=native|mtune=native|fomit-frame-pointer|ABI=0"
+    "tb_gground_boot|S24_VISUAL|no-timing|savable|packed-fx68k-structs|real-audio=$RealAudio|threads=$ModelThreads|OPT_FAST=O3|OPT_SLOW=O2|OPT_GLOBAL=O2|march=native|mtune=native|fomit-frame-pointer|ABI=0"
 ) + (@($repoSources + 'verif/s24_visual_main.cpp' | ForEach-Object {
     $file = Join-Path $repoRoot $_
     "$_|$(Get-Sha256Hex $file)"

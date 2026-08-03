@@ -55,6 +55,14 @@ module s24_rom_loader (
         descriptor.track_bytes_lo = desc[2];
         descriptor.track_bytes_hi = desc[3];
         descriptor.input_profile = desc[4];
+        descriptor.profile_version = desc[5];
+        descriptor.motherboard_revision = desc[6][7:4];
+        descriptor.sprite_memory_population = desc[6][3:2];
+        descriptor.fdc_timing_profile = desc[6][1:0];
+        descriptor.romboard_profile = desc[7][7:6];
+        descriptor.analogue_profile = desc[7][5:4];
+        descriptor.video_profile = desc[7][3:2];
+        descriptor.cpu_profile = desc[7][1:0];
     end
 
     always_ff @(posedge clk) begin

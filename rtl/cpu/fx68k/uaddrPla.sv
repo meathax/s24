@@ -8,34 +8,34 @@
 
 `define NMA_BITS   10
 
-`define SFTM1 'h3C7
-`define SRRW1 'h382
-`define SRIW1 'h381
-`define SRRL1 'h386
-`define SRIL1 'h385
-`define BSRI1 'h089
-`define BSRW1 'h0A9
-`define BBCI1 'h308
-`define BBCW1 'h068
-`define RLQL1 'h23B
-`define ADRW1 'h006
-`define PINW1 'h21C
-`define PDCW1 'h103
-`define ADSW1 'h1C2
-`define AIXW0 'h1E3
-`define ABWW1 'h00A
-`define ABLW1 'h1E2
-`define TRAP1 'h1D0
-`define LINK1 'h30B
-`define UNLK1 'h119
-`define LUSP1 'h2F5
-`define SUSP1 'h230
-`define TRPV1 'h06D
-`define RSET1 'h3A6
-`define B 'h363
-`define STOP1 'h3A2
-`define RTR1 'h12A
-`define RTS1 'h126
+`define SFTM1 10'h3C7
+`define SRRW1 10'h382
+`define SRIW1 10'h381
+`define SRRL1 10'h386
+`define SRIL1 10'h385
+`define BSRI1 10'h089
+`define BSRW1 10'h0A9
+`define BBCI1 10'h308
+`define BBCW1 10'h068
+`define RLQL1 10'h23B
+`define ADRW1 10'h006
+`define PINW1 10'h21C
+`define PDCW1 10'h103
+`define ADSW1 10'h1C2
+`define AIXW0 10'h1E3
+`define ABWW1 10'h00A
+`define ABLW1 10'h1E2
+`define TRAP1 10'h1D0
+`define LINK1 10'h30B
+`define UNLK1 10'h119
+`define LUSP1 10'h2F5
+`define SUSP1 10'h230
+`define TRPV1 10'h06D
+`define RSET1 10'h3A6
+`define B 10'h363
+`define STOP1 10'h3A2
+`define RTR1 10'h12A
+`define RTS1 10'h126
 
 
 module pla_lined(

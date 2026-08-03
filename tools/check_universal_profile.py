@@ -15,6 +15,7 @@ import run_game_matrix
 
 REQUIRED_RTL = frozenset((
     "rtl/s24_core.sv",
+    "rtl/s24_board_arbiter.sv",
     "rtl/io/s24_inputs.sv",
     "rtl/io/s24_analog.sv",
     "rtl/prot/s24_magic_latch.sv",
@@ -23,7 +24,7 @@ REQUIRED_RTL = frozenset((
 ))
 
 REQUIRED_QSF_SETTINGS = frozenset((
-    'set_global_assignment -name NUM_PARALLEL_PROCESSORS 6',
+    'set_global_assignment -name NUM_PARALLEL_PROCESSORS 8',
     'set_global_assignment -name FITTER_EFFORT "FAST FIT"',
     'set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL NORMAL',
     'set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC OFF',

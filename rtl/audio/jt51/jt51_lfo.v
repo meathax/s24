@@ -46,7 +46,26 @@ localparam [1:0] SAWTOOTH = 2'd0,
                  TRIANG   = 2'd2,
                  NOISE    = 2'd3;
 
-reg  [14:0] lfo_lut[0:15];
+function automatic [14:0] lfo_lut_value(input [3:0] index);
+    case (index)
+        4'd0: lfo_lut_value = 15'h0000;
+        4'd1: lfo_lut_value = 15'h4000;
+        4'd2: lfo_lut_value = 15'h6000;
+        4'd3: lfo_lut_value = 15'h7000;
+        4'd4: lfo_lut_value = 15'h7800;
+        4'd5: lfo_lut_value = 15'h7c00;
+        4'd6: lfo_lut_value = 15'h7e00;
+        4'd7: lfo_lut_value = 15'h7f00;
+        4'd8: lfo_lut_value = 15'h7f80;
+        4'd9: lfo_lut_value = 15'h7fc0;
+        4'd10: lfo_lut_value = 15'h7fe0;
+        4'd11: lfo_lut_value = 15'h7ff0;
+        4'd12: lfo_lut_value = 15'h7ff8;
+        4'd13: lfo_lut_value = 15'h7ffc;
+        4'd14: lfo_lut_value = 15'h7ffe;
+        default: lfo_lut_value = 15'h7fff;
+    endcase
+endfunction
 
 // counters
 reg  [ 3:0] cnt1, cnt3, bitcnt;
@@ -83,7 +102,7 @@ assign lfo_clk_next = test[2] | next_cnt2[15] | cnt3_step;
 
 always @(*) begin
     if( cnt2_load ) begin
-        next_cnt2 = {1'b0, lfo_lut[ lfo_freq[7:4] ] };
+        next_cnt2 = {1'b0, lfo_lut_value(lfo_freq[7:4]) };
     end else begin
         next_cnt2 = {1'd0,cnt2 } + {15'd0,cnt1_ov[1]|test[3]};
     end
@@ -207,28 +226,6 @@ always @(posedge clk, posedge rst) begin
                 am <= out2b;
         end
     end
-end
-
-initial begin
-    lfo_lut[0] = 15'h0000;
-    lfo_lut[1] = 15'h4000;
-    lfo_lut[2] = 15'h6000;
-    lfo_lut[3] = 15'h7000;
-
-    lfo_lut[4] = 15'h7800;
-    lfo_lut[5] = 15'h7c00;
-    lfo_lut[6] = 15'h7e00;
-    lfo_lut[7] = 15'h7f00;
-
-    lfo_lut[8] = 15'h7f80;
-    lfo_lut[9] = 15'h7fc0;
-    lfo_lut[10] = 15'h7fe0;
-    lfo_lut[11] = 15'h7ff0;
-
-    lfo_lut[12] = 15'h7ff8;
-    lfo_lut[13] = 15'h7ffc;
-    lfo_lut[14] = 15'h7ffe;
-    lfo_lut[15] = 15'h7fff;
 end
 
 endmodule

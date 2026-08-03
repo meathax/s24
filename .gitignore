@@ -40,8 +40,11 @@ __pycache__/
 /screenshots/
 /release_mister/
 /verif/captures/
+/verif/audio/
+/verif/checkpoints/
 /verif/lockstep/
 /c5_pin_model_dump.txt
+/cr_ie_info.json
 /jtag.cdf
 /modelsim.ini
 /quartus-*.log

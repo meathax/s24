@@ -271,3 +271,55 @@ The retry harness now preserves each future attempt as a numbered
 `*-target7-attempt-NNN.log` while retaining the latest attempt at the stable
 `*-target7.log` path used by coverage reporting. This keeps launcher
 interruptions and first-divergence evidence available across retries.
+
+## PCB-accuracy roadmap implementation delta — 2026-08-03
+
+The evidence boundary is now versioned in `docs/online-evidence.json`. It
+records the pinned MAME 0.288 source hashes, public Exodus schematic index,
+board photographs/revision research, decap archives, the user-supplied dossier
+hash, provenance, access date, confidence, and every remaining claim that is
+not provable without a PCB capture. Claims are intentionally split into
+`MAME-conformant` and `online-evidence-backed`; complete PCB cycle accuracy is
+not claimed.
+
+Shared writes and device cycles now cross the typed
+`board_transaction_t` interface in `rtl/s24_board_arbiter.sv`. The dedicated
+arbiter applies deterministic round-robin tie breaking, holds the granted
+address/data/lane/function-code transaction unchanged through wait states, and
+reports completion to the original 68000 front-end. Independent memory reads
+still use the existing SDRAM adapter paths. The new regression
+`verif/tb_board_arbiter.sv` passes one million deterministic cycles, and the
+full-core dual-bus regression passes parallel reads, shared serialization, byte
+lanes, FD1094 sequencing, and A-bus contention.
+
+The eight-byte descriptor remains backward-compatible. Legacy bytes 5–7 decode
+as default profiles; version-one descriptors can name motherboard/RAM revision,
+sprite-memory population, FDC timing, ROM-board/EPLD, analogue, video
+orientation/flip, and CPU/protection profiles. This schema is enforced by the
+MRA/profile validators and is never selected by a set-name conditional.
+
+The core now exports a board-domain `audio_event_t` stream for JT51 register
+writes, YM IRQ edges, serial/sample-boundary events, and port-H R-2R changes.
+The visual RTL producer writes `rtl_audio_events.jsonl`, while the MAME Lua
+producer writes comparable YM register-write events. This improves evidence
+and event-level diagnosis; it does not yet prove YM3012 analogue or cabinet
+amplifier accuracy.
+
+The FRC mode write now resets both the visible divider and IRQ prescaler phase,
+and FDC `side` state is again explicit and observable for the existing track
+transfer contract. The current FDC remains a logical flat-image model, not a
+physical MB89311 rotational/CRC/DRQ model. The current tile implementation is
+MAME-derived for normal and documented special window/scroll modes; the
+315-5292 side-trigger equations and hardware screen-flip behavior remain
+unknown and are not being post-frame approximated.
+
+The latest fit artifact is `output_files/Arcade-SegaSystem24.fit.summary`:
+18,744/41,910 ALMs, 4,105,455/5,662,720 block-memory bits, and 498/553 RAM
+blocks. The matching STA summary still has negative slow-corner setup slack
+(-0.404 ns HDMI PLL and -0.023 ns core PLL generator in the reported corners),
+so the release gate remains blocked pending RAM reduction and timing closure.
+
+The clock-domain regression is now runnable through
+`tools/build_clock_enables_test.ps1` and `tools/run_clock_enables_test.ps1`.
+It passes exact 16/8/4 MHz enable counts, non-overlapping CPU phases, and
+CPU-only pause/resume behavior over the one-millisecond deterministic window.

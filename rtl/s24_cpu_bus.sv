@@ -50,7 +50,9 @@ module s24_cpu_bus (
 );
     logic a_seen, b_seen, a_pending, b_pending;
     logic a_mem_pending, b_mem_pending;
-    logic a_ack, b_ack, active, selected, rr;
+    logic a_ack, b_ack, active;
+    logic a_grant, b_grant, a_complete, b_complete;
+    board_transaction_t a_transaction, b_transaction, arb_transaction;
     logic a_rnw_p, b_rnw_p;
     logic [1:0] a_be_p, b_be_p;
     logic [2:0] a_fc_p, b_fc_p;
@@ -60,13 +62,48 @@ module s24_cpu_bus (
     assign a_dtack_n = ~a_ack;
     assign b_dtack_n = ~b_ack;
     assign bus_req = active;
-    assign bus_cpu = selected;
+    assign bus_cpu = arb_transaction.requester;
+    assign bus_rnw = arb_transaction.read_nwrite;
+    assign bus_be = arb_transaction.byte_enable;
+    assign bus_fc = arb_transaction.function_code;
+    assign bus_addr = arb_transaction.address;
+    assign bus_dout = arb_transaction.write_data;
     assign a_mem_req = a_mem_pending;
     assign b_mem_req = b_mem_pending;
     assign a_mem_fc = a_fc_p;
     assign b_mem_fc = b_fc_p;
     assign a_mem_addr = a_addr_p;
     assign b_mem_addr = b_addr_p;
+
+    always_comb begin
+        a_transaction = '0;
+        a_transaction.valid         = a_pending;
+        a_transaction.requester     = 1'b0;
+        a_transaction.address       = a_addr_p;
+        a_transaction.byte_enable   = a_be_p;
+        a_transaction.read_nwrite   = a_rnw_p;
+        a_transaction.function_code = a_fc_p;
+        a_transaction.write_data    = a_dout_p;
+        a_transaction.phase         = BUS_PHASE_CAPTURE;
+
+        b_transaction = '0;
+        b_transaction.valid         = b_pending;
+        b_transaction.requester     = 1'b1;
+        b_transaction.address       = b_addr_p;
+        b_transaction.byte_enable   = b_be_p;
+        b_transaction.read_nwrite   = b_rnw_p;
+        b_transaction.function_code = b_fc_p;
+        b_transaction.write_data    = b_dout_p;
+        b_transaction.phase         = BUS_PHASE_CAPTURE;
+    end
+
+    s24_board_arbiter board_arbiter(
+        .clk(clk),.reset(reset),
+        .a_transaction(a_transaction),.b_transaction(b_transaction),
+        .a_pending(a_pending),.b_pending(b_pending),
+        .a_grant(a_grant),.b_grant(b_grant),
+        .transaction(arb_transaction),.transaction_valid(active),
+        .completion(bus_ack),.a_complete(a_complete),.b_complete(b_complete));
 
     function automatic logic is_independent_memory(input logic [23:0] addr);
         if (addr < 24'h200000)
@@ -89,13 +126,11 @@ module s24_cpu_bus (
         if (reset) begin
             a_seen <= 0; b_seen <= 0; a_pending <= 0; b_pending <= 0;
             a_mem_pending <= 0; b_mem_pending <= 0;
-            a_ack <= 0; b_ack <= 0; active <= 0; selected <= 0; rr <= 0;
+            a_ack <= 0; b_ack <= 0;
             a_din <= 16'hffff; b_din <= 16'hffff;
             a_rnw_p <= 0; b_rnw_p <= 0; a_be_p <= 0; b_be_p <= 0;
             a_fc_p <= 0; b_fc_p <= 0; a_addr_p <= 0; b_addr_p <= 0;
             a_dout_p <= 0; b_dout_p <= 0;
-            bus_rnw <= 0; bus_be <= 0; bus_fc <= 0;
-            bus_addr <= 0; bus_dout <= 0;
         end else begin
             if (a_as_n) begin a_seen <= 0; a_ack <= 0; end
             else if (a_ack && a_uds_n && a_lds_n) begin
@@ -142,38 +177,13 @@ module s24_cpu_bus (
                 b_dout_p <= b_dout;
             end
 
-            if (!active) begin
-                if (a_pending && b_pending) begin
-                    selected <= rr;
-                    if (rr) begin
-                        b_pending <= 1'b0;
-                        bus_rnw <= b_rnw_p; bus_be <= b_be_p;
-                        bus_fc <= b_fc_p; bus_addr <= b_addr_p;
-                        bus_dout <= b_dout_p;
-                    end else begin
-                        a_pending <= 1'b0;
-                        bus_rnw <= a_rnw_p; bus_be <= a_be_p;
-                        bus_fc <= a_fc_p; bus_addr <= a_addr_p;
-                        bus_dout <= a_dout_p;
-                    end
-                    rr <= ~rr;
-                    active <= 1'b1;
-                end else if (a_pending) begin
-                    selected <= 1'b0; a_pending <= 1'b0; active <= 1'b1;
-                    bus_rnw <= a_rnw_p; bus_be <= a_be_p;
-                    bus_fc <= a_fc_p; bus_addr <= a_addr_p;
-                    bus_dout <= a_dout_p;
-                end else if (b_pending) begin
-                    selected <= 1'b1; b_pending <= 1'b0; active <= 1'b1;
-                    bus_rnw <= b_rnw_p; bus_be <= b_be_p;
-                    bus_fc <= b_fc_p; bus_addr <= b_addr_p;
-                    bus_dout <= b_dout_p;
-                end
-            end else if (bus_ack) begin
-                active <= 1'b0;
-                if (!selected) begin a_din <= bus_din; a_ack <= 1'b1; end
-                else begin b_din <= bus_din; b_ack <= 1'b1; end
-            end
+            // The dedicated arbiter owns grant/completion ordering.  The
+            // front-end retains only the 68000 AS/data-strobe phase and
+            // read-modify-write retirement rules.
+            if (a_grant) a_pending <= 1'b0;
+            if (b_grant) b_pending <= 1'b0;
+            if (a_complete) begin a_din <= bus_din; a_ack <= 1'b1; end
+            if (b_complete) begin b_din <= bus_din; b_ack <= 1'b1; end
 
             if (a_mem_pending && a_mem_ack) begin
                 a_mem_pending <= 1'b0;

@@ -26,6 +26,7 @@ if ($LASTEXITCODE -ne 0) {
 $sources = @(
     'rtl/s24_pkg.sv',
     'rtl/s24_clock_enables.sv',
+    'rtl/s24_board_arbiter.sv',
     'rtl/s24_cpu_bus.sv',
     'rtl/io/s24_io_5296.sv',
     'rtl/io/s24_inputs.sv',

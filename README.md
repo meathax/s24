@@ -62,9 +62,13 @@ clone-prefixed members. The validator follows MiSTer's CRC-first archive lookup.
 complete simulation matrix. ROM, floppy, and key payloads are never tracked by
 this repository.
 
-All local MRAs select the same `s24.rbf`. Their eight-byte runtime descriptor
+All local MRAs select the same `s24.rbf`. Their compatible eight-byte runtime descriptor
 enables only the applicable floppy, ROM-board, FD1094, analog, golf, Hot Rod,
 input-map, and magic-latch behavior without changing the synthesized image.
+Legacy descriptors leave the final three bytes zero. Version-one descriptors
+can name motherboard/RAM, sprite-memory, FDC timing, ROM-board/EPLD,
+analogue, video orientation/flip, and CPU/protection profiles; this metadata is
+decoded by `s24_rom_loader` and remains profile-driven rather than set-name-driven.
 `python tools/check_universal_profile.py` checks that inventory and the shared
 hardware contract. See `docs/game-coverage.md` for the complete set matrix and
 latest fitted resource use.
@@ -128,7 +132,7 @@ full-state serializer to preserve the complete CPU state.
 ## Build policy
 
 Quartus Prime Lite 17.0.2 is the reference toolchain. The QSF deliberately
-uses Fast Fit and the account-wide six-worker limit. Compilation databases are
+uses Fast Fit and the account-wide eight-worker limit. Compilation databases are
 kept for Smart Recompile. A generated programming file must not be deployed
 until all timing reports have been inspected.
 
