@@ -1186,8 +1186,26 @@ module s24_sprite (
         // clear write is needed (and would steal the scanline render slot).
         line_b_clear=1'b0;
         line_b_wren='0;
+        // Port B's occlusion read is one clock ahead of the write it gates
+        // (this state -> S_X_EMIT/S_X_EMIT4 next cycle), exactly like port
+        // A's display_read_addr lookahead just above. Physical lane
+        // line_phys receives destination pixel dest_x+((line_phys-dest_x[1:0])
+        // mod 4) this group; whenever that lane's pixel falls past the
+        // 4-pixel group boundary (line_phys<dest_x[1:0]), its true word is
+        // dest_x[8:2]+1, not the group's base word. Without this carry the
+        // occlusion test for those lanes reads the word 4 columns to the
+        // left -- a stale decision that either wrongly drops an opaque
+        // pixel (word falsely reads occupied) or wrongly lets a pixel
+        // through onto an already-claimed higher-priority word (word
+        // falsely reads free). dest_x[1:0] is fixed for a sprite's whole
+        // render (== its descriptor X origin mod 4), so at dest_x[1:0]==0
+        // this was always correct by coincidence, which is why sprites
+        // placed/moving only in Y (X constant) could look clean while
+        // horizontal motion swept dest_x[1:0] through all four phases and
+        // made the drop/cross-talk pattern change every frame.
         for(line_phys=0;line_phys<4;line_phys=line_phys+1) begin
-            line_b_addr[line_phys]={fill_bank,dest_x[8:2]};
+            line_b_addr[line_phys]={fill_bank,dest_x[8:2] +
+                                    ((line_phys<dest_x[1:0]) ? 7'd1 : 7'd0)};
             line_b_data[line_phys]='0;
             line_b_category[line_phys]=2'd0;
         end
