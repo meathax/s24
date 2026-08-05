@@ -3,9 +3,10 @@
 Sources are ordered by authority for this implementation.
 
 1. Local MAME source supplied for the project:
-   `D:/Arcade/AI/MAMESOURCE/mame/src/mame/sega/segas24.cpp`,
-   `segaic24.cpp`, `315_5296.cpp`, and `fd1094.cpp`. The executable reference
-   is pinned to MAME 0.288 commit
+   `D:/Arcade/AI/mame289/src/mame/sega/segas24.cpp`,
+   `segaic24.cpp`, `315_5296.cpp`, and `fd1094.cpp`. This tree replaces the
+   earlier `D:/Arcade/AI/MAMESOURCE` checkout as the pinned source location.
+   The executable reference is pinned to MAME 0.288 commit
    `affe701f9210d003d2cc5eff311f94053afa679b` (2026-07-21). Reference-file
    SHA-256 values at that revision are:
 
@@ -14,15 +15,16 @@ Sources are ordered by authority for this implementation.
    - `315_5296.cpp`: `FCB77693B9E19B7BE057EAB98910275CD5E1B0502CE56EB9A46D435D7692FF92`
    - `fd1094.cpp`: `41B023A16437E9676517F8D56EF1D4C67DCFE8544B37C36B9D1022E23CEC022F`
 
-   The working source checkout currently has a later repository `HEAD`
-   (`f34f02505e32c1993c6a782b6814232cbfc74e36`, MAME 0.289 metadata), but all
-   four behavioural reference files above are byte-identical to the pinned
-   `affe701f` revision. The executable probes use the separately pinned MAME
-   0.288 binary; the file hashes are the authoritative guard against an
-   accidental source drift. `python tools/check_mame_pin.py` rechecks the
-   executable version, all four hashes, and reports the current source
-   checkout HEAD without treating later repository metadata as behavioral
-   drift.
+   The `mame289` tree is a source snapshot without a `.git` directory, so
+   `tools/check_mame_pin.py` identifies it by an aggregate SHA-256 over every
+   individually pinned behavioral file (a `snapshot:<hash>` identity) instead
+   of a git commit HEAD. All seventeen pinned files, including the four above,
+   are byte-identical to the `affe701f` revision. The executable probes use
+   the separately pinned MAME 0.288 binary at `D:/Arcade/AI/mame/mame.exe`;
+   the file hashes are the authoritative guard against an accidental source
+   drift. `python tools/check_mame_pin.py` rechecks the executable version,
+   all seventeen hashes, and reports the current source snapshot identity
+   without treating the newer MAME 0.289-vintage tree as behavioral drift.
 2. MAME upstream: https://github.com/mamedev/mame
 3. Working local System 32 MiSTer core supplied as the platform reference:
    `D:/Arcade/AI/s32` (MiSTer wrapper, SDRAM conventions, build structure).

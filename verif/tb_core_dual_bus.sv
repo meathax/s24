@@ -34,7 +34,6 @@ module tb_core_dual_bus;
         .p2_req(),.p2_addr(),.p2_data('0),.p2_ack(1'b0),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_data(p3_data),.p3_ack(p3_ack),
         .p4_req(),.p4_addr(),.p4_data('0),.p4_ack(1'b0),
-        .p5_req(),.p5_addr(),.p5_data('0),.p5_ack(1'b0),
         .wr_req(wr_req),.wr_addr(wr_addr),.wr_data(wr_data),
         .wr_be(wr_be),.wr_ack(wr_ack));
 

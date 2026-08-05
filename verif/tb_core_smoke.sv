@@ -16,13 +16,13 @@ module tb_core_smoke;
     logic [7:0] red, green, blue;
     logic [15:0] audio_l, audio_r;
     logic p0_req, p0_ack, p1_req, p1_ack, p2_req, p2_ack;
-    logic p3_req, p3_ack, p4_req, p4_ack, p5_req, p5_ack;
+    logic p3_req, p3_ack, p4_req, p4_ack;
     logic wr_req, wr_ack;
     logic [26:1] p0_addr, p3_addr, p4_addr, wr_addr;
-    logic [26:3] p1_addr, p5_addr;
+    logic [26:3] p1_addr;
     logic [26:4] p2_addr;
     logic [15:0] p0_data, p3_data, p4_data, wr_data;
-    logic [63:0] p1_data, p5_data;
+    logic [63:0] p1_data;
     logic [127:0] p2_data;
     logic [1:0] wr_be;
 
@@ -50,13 +50,12 @@ module tb_core_smoke;
     assign p2_data = '0;
     assign p3_data = 16'hffff;
     assign p4_data = '0;
-    assign p5_data = '0;
 
     // One-clock SDRAM response latency on every independent port.
     always_ff @(posedge clk) begin
         if (reset) begin
             p0_ack <= 0; p1_ack <= 0; p2_ack <= 0; p3_ack <= 0;
-            p4_ack <= 0; p5_ack <= 0; wr_ack <= 0;
+            p4_ack <= 0; wr_ack <= 0;
             boot_reads <= 0;
             instruction_starts <= 0;
             hsync_edges <= 0;
@@ -66,7 +65,6 @@ module tb_core_smoke;
             p2_ack <= p2_req;
             p3_ack <= p3_req;
             p4_ack <= p4_req;
-            p5_ack <= p5_req;
             wr_ack <= wr_req;
 
             if (p0_req && !p0_ack) boot_reads <= boot_reads + 1;
@@ -91,7 +89,6 @@ module tb_core_smoke;
         .p2_req(p2_req), .p2_addr(p2_addr), .p2_data(p2_data), .p2_ack(p2_ack),
         .p3_req(p3_req), .p3_addr(p3_addr), .p3_data(p3_data), .p3_ack(p3_ack),
         .p4_req(p4_req), .p4_addr(p4_addr), .p4_data(p4_data), .p4_ack(p4_ack),
-        .p5_req(p5_req), .p5_addr(p5_addr), .p5_data(p5_data), .p5_ack(p5_ack),
         .wr_req(wr_req), .wr_addr(wr_addr), .wr_data(wr_data),
         .wr_be(wr_be), .wr_ack(wr_ack)
     );

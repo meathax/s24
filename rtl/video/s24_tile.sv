@@ -63,7 +63,15 @@ module s24_char_video_ram (
                 ram.ram_block_type = "M10K",
                 ram.intended_device_family = "Cyclone V",
                 ram.lpm_type = "altsyncram",
-                ram.outdata_reg_a = "CLOCK0",
+                // UNREGISTERED, not CLOCK0.  altsyncram always registers
+                // address_a, so CLOCK0 adds a SECOND register and makes the
+                // synthesized read 2 clocks while the `ifdef VERILATOR model
+                // above (q0 <= mem[..]) is 1 clock.  The consumer pipeline is
+                // built for 1 clock, so on real hardware every character's
+                // pixel bits arrived one clock after the tile/mask/scroll
+                // metadata they pair with -- full-screen corruption on the
+                // FPGA that simulation could never show.
+                ram.outdata_reg_a = "UNREGISTERED",
                 ram.read_during_write_mode_mixed_ports = "OLD_DATA",
                 ram.width_byteena_a = 1,
                 ram.width_byteena_b = 2,

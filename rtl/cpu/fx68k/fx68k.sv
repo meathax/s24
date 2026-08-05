@@ -2510,7 +2510,13 @@ module uRom( input clk, input [UADDR_WIDTH-1:0] microAddr, output logic [UROM_WI
 		ram.ram_block_type = "M10K",
 		ram.intended_device_family = "Cyclone V",
 		ram.lpm_type = "altsyncram",
-		ram.outdata_reg_a = "CLOCK0",
+		// UNREGISTERED, not CLOCK0. altsyncram always registers address_a, so
+		// CLOCK0 adds a second register and makes the synthesized microcode ROM
+		// 2 clocks while the `ifdef SYNTHESIS twin below (and upstream fx68k)
+		// is 1. It survives today only because enT1->enT3 is ~4.8 clocks at
+		// 48 MHz with a 20 MHz phase rate; raise the CPU rate or lower CLK_HZ
+		// so phi separation drops under ~4 clocks and the 68000 dies instantly.
+		ram.outdata_reg_a = "UNREGISTERED",
 		ram.init_file = "rtl/cpu/fx68k/microrom.mif",
 		ram.power_up_uninitialized = "FALSE";
 	assign microOutput = micro_q;
@@ -2545,7 +2551,9 @@ module nanoRom( input clk, input [NADDR_WIDTH-1:0] nanoAddr, output logic [NANO_
 		ram.ram_block_type = "M10K",
 		ram.intended_device_family = "Cyclone V",
 		ram.lpm_type = "altsyncram",
-		ram.outdata_reg_a = "CLOCK0",
+		// See the microcode ROM above: UNREGISTERED keeps the synthesized read
+		// at the 1 clock the sim twin and upstream fx68k implement.
+		ram.outdata_reg_a = "UNREGISTERED",
 		ram.init_file = "rtl/cpu/fx68k/nanorom.mif",
 		ram.power_up_uninitialized = "FALSE";
 	assign nanoOutput = nano_q;

@@ -23,15 +23,26 @@ REQUIRED_RTL = frozenset((
     "rtl/cpu/s24_fd1094.sv",
 ))
 
+# Release-build settings. The fitter effort/router/physical-synthesis entries
+# were raised from the light-load development policy: at 86% ALM / 86% RAM the
+# router reported severe congestion under FAST FIT and left hold violations on
+# the s24_sdram_cdc payload paths. None of these affect hardware behaviour --
+# they trade compile time for placement/routing quality.
+#
+# COMPRESSION_MODE must be ON: the DE10-nano HPS configuration path expects a
+# compressed Cyclone V bitstream, and every shipping MiSTer core is built this
+# way. An uncompressed RBF can assemble and report clean yet fail to configure
+# the fabric on the real device, which presents as a black screen with no
+# diagnostic pointing at the bitstream.
 REQUIRED_QSF_SETTINGS = frozenset((
     'set_global_assignment -name NUM_PARALLEL_PROCESSORS 8',
-    'set_global_assignment -name FITTER_EFFORT "FAST FIT"',
-    'set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL NORMAL',
-    'set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC OFF',
-    'set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION OFF',
+    'set_global_assignment -name FITTER_EFFORT "STANDARD FIT"',
+    'set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM',
+    'set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON',
+    'set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON',
     'set_global_assignment -name SMART_RECOMPILE ON',
     'set_global_assignment -name SAVE_DISK_SPACE OFF',
-    'set_global_assignment -name COMPRESSION_MODE OFF',
+    'set_global_assignment -name COMPRESSION_MODE ON',
 ))
 
 

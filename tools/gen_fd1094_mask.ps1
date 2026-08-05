@@ -1,5 +1,5 @@
 param(
-    [string]$Source = 'D:\Arcade\AI\MAMESOURCE\mame\src\mame\sega\fd1094.cpp',
+    [string]$Source = 'D:\Arcade\AI\mame289\src\mame\sega\fd1094.cpp',
     [string]$Output = 'rtl\cpu\fd1094_masked.mem'
 )
 

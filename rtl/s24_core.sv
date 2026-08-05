@@ -20,6 +20,14 @@ module s24_core #(
     input  logic [7:0]  paddle2,
     input  logic [7:0]  paddle3,
 
+    // Hardware-only debug overlay (see rtl/video/s24_sprite.sv's dbg_* ports
+    // for the sprite-side counters). dbg_reset_events is computed at the top
+    // level, where core_reset and rom_loaded both live, and passed in here
+    // because s24_core only ever sees the already-synchronized `reset`.
+    input  logic        dbg_en,
+    input  logic [3:0]  dbg_sel,
+    input  logic [7:0]  dbg_reset_events,
+
     output logic [2:0]  mahjong_line,
 
     output logic        ce_pixel,
@@ -54,10 +62,6 @@ module s24_core #(
     output logic [26:1] p4_addr,
     input  logic [15:0] p4_data,
     input  logic        p4_ack,
-    output logic        p5_req,
-    output logic [26:3] p5_addr,
-    input  logic [63:0] p5_data,
-    input  logic        p5_ack,
     output logic        wr_req,
     output logic [26:1] wr_addr,
     output logic [15:0] wr_data,
@@ -90,6 +94,9 @@ module s24_core #(
     logic b_instr_start;
     logic [15:0] b_instr_opcode;
     logic [23:1] b_instr_address;
+    logic a_instr_start;
+    logic [15:0] a_instr_opcode;
+    logic [23:1] a_instr_address;
     logic [2:0] io_cnt;
     logic io_cnt1_d;
     logic [3:0] sub_reset_count;
@@ -99,6 +106,37 @@ module s24_core #(
     logic [3:0] gground_pair_index;
     logic gground_pair_enable;
     logic gground_slow;
+
+    // Hardware-only debug counters (paired with rtl/video/s24_sprite.sv's
+    // dbg_* ports): CNT1 is the 315-5296 line that releases CPU B from HALT,
+    // and this session found its release timing runs measurably later than
+    // MAME's reference (see docs/status.md) without yet finding a hardware
+    // cause for Gain Ground's crash-loop. These make both directly visible
+    // on real hardware instead of only in a Verilator trace.
+    logic sub_reset_d;
+    logic [7:0]  dbg_cnt1_count;    // CNT1 low->high transitions since boot;
+                                     // should be exactly 1 per run -- more
+                                     // means CPU B is being re-halted/
+                                     // released repeatedly, which would help
+                                     // explain a reset loop.
+    logic [9:0]  dbg_cnt1_vcount;   // vcount at the most recent transition
+    logic [7:0]  dbg_gground_retrig; // gground_slow_count (re)start count;
+                                      // >1 means the 2-second timing window
+                                      // restarted mid-run
+    logic [15:0] dbg_last_b_opcode; // CPU B's last-fetched opcode at the
+                                     // moment sub_reset asserted
+    logic [23:1] dbg_last_b_pc;     // ...and its program counter -- a cheap
+                                     // breadcrumb for what CPU B was doing
+                                     // immediately before each reset
+    logic [15:0] dbg_last_a_opcode; // CPU A's opcode at the moment of each
+                                     // CNT1 edge -- CPU A is the one WRITING
+                                     // CNT1 repeatedly (confirmed: MAME's
+                                     // driver models no automatic CPU-A retry
+                                     // on a CNT1 write, so repeated writes
+                                     // must be CPU A's own code deciding to
+                                     // write again; this is the missing
+                                     // visibility needed to see why).
+    logic [23:1] dbg_last_a_pc;     // ...and its program counter
 
     // On real System 24/MAME, raising 315-5296 CNT1 releases CPU B from HALT
     // and pulses its RESET input. Preserve state on later CNT1-low halts, but
@@ -120,10 +158,30 @@ module s24_core #(
             gground_slow_count<=0;
             gground_pair_index<=0;
             gground_pair_enable<=1'b1;
+            sub_reset_d<=0;
+            dbg_cnt1_count<=0;dbg_cnt1_vcount<=0;dbg_gground_retrig<=0;
+            dbg_last_b_opcode<=0;dbg_last_b_pc<=0;
+            dbg_last_a_opcode<=0;dbg_last_a_pc<=0;
         end else begin
             io_cnt1_d<=io_cnt[1];
             if(io_cnt[1] && !io_cnt1_d) sub_reset_count<=4'd8;
             else if(sub_reset_count!=0) sub_reset_count<=sub_reset_count-1'b1;
+
+            // Debug counters: CNT1 transitions, breadcrumb CPU B state on
+            // every sub_reset assertion (not just the CNT1-triggered one --
+            // this also catches the top-level `reset` input re-asserting
+            // mid-run, which is exactly what a hardware reset loop would do).
+            if(io_cnt[1] && !io_cnt1_d) begin
+                if(dbg_cnt1_count!=8'hff) dbg_cnt1_count<=dbg_cnt1_count+1'b1;
+                dbg_cnt1_vcount<=vcount;
+                dbg_last_a_opcode<=a_instr_opcode;
+                dbg_last_a_pc<=a_instr_address;
+            end
+            sub_reset_d<=sub_reset;
+            if(sub_reset && !sub_reset_d) begin
+                dbg_last_b_opcode<=b_instr_opcode;
+                dbg_last_b_pc<=b_instr_address;
+            end
 
             if(io_cnt[1] && !io_cnt1_d &&
                board.input_profile==INPUT_GGROUND) begin
@@ -131,6 +189,8 @@ module s24_core #(
                 gground_slow_count<=27'd96000000;
                 gground_pair_index<=0;
                 gground_pair_enable<=1'b1;
+                if(dbg_gground_retrig!=8'hff)
+                    dbg_gground_retrig<=dbg_gground_retrig+1'b1;
             end else begin
                 if(!pause && gground_slow_count!=0)
                     gground_slow_count<=gground_slow_count-1'b1;
@@ -155,7 +215,8 @@ module s24_core #(
         .DTACKn(a_dtack_n),.VPAn(~(&a_fc)),.BERRn(1'b1),.BRn(1'b1),.BGACKn(1'b1),
         .IPL0n(a_ipl_n[0]),.IPL1n(a_ipl_n[1]),.IPL2n(a_ipl_n[2]),
         .iEdb(a_din),.oEdb(a_dout),.eab(a_word_addr),
-        .instr_start(),.instr_opcode(),.instr_address());
+        .instr_start(a_instr_start),.instr_opcode(a_instr_opcode),
+        .instr_address(a_instr_address));
     fx68k cpu_b(
         .clk(clk),.HALTn(io_cnt[1]),.extReset(sub_reset),.pwrUp(reset),
         .enPhi1(b_phi1),.enPhi2(b_phi2),.eRWn(b_rw_n),.ASn(b_as_n),
@@ -232,9 +293,14 @@ module s24_core #(
         .port_d_write(io_port_write[3]),
         .port_d_data(io_port_write_data[31:24]),.line(mahjong_line));
 
-    // Optional 834-6510 daughterboard. Hot Rod uses both encoder counters and
-    // both ADCs; golf cabinets use the first counter when the descriptor says
-    // the analog angle control is fitted.
+    // Optional 834-6510 daughterboard. Hot Rod uses both encoder counters,
+    // but only the first ADC (adc0, IC5/"adc1" in MAME, mapped at 0xc00011)
+    // is wired to PEDAL1-4. The second ADC chip ("adc2" in MAME, 0xc00013,
+    // schematic label "BLAKE") is populated but genuinely unconnected on
+    // real hardware -- MAME's driver notes this explicitly and never assigns
+    // it an input tag, so adc1 below is correctly tied to idle (8'hff), not
+    // dead-wired by omission. Golf cabinets use the first counter when the
+    // descriptor says the analog angle control is fitted.
     logic [7:0] upd0_dout,upd1_dout,adc0_dout,adc1_dout;
     logic adc0_select,adc1_select,adc0_shift,adc1_shift;
     logic [7:0] pedal0,pedal1,pedal2,pedal3;
@@ -377,12 +443,21 @@ module s24_core #(
         .mem_data(p1_data),.mem_ack(p1_ack));
     logic [13:0] sp0,sp1,sp2,sp3,mixed;
     logic [10:0] sr0,sr1,sr2,sr3;
+    logic [15:0] dbg_p2_stall,dbg_line_wr,dbg_mixer_px;
+    logic [13:0] dbg_list_seen;
+    logic [7:0]  dbg_render_pass;
+    logic        dbg_bank_starve;
+    logic [12:0] dbg_max_stack;
     s24_sprite sprite(
         .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
         .pixel0(sp0),.pixel1(sp1),.pixel2(sp2),.pixel3(sp3),
         .rank0(sr0),.rank1(sr1),.rank2(sr2),.rank3(sr3),
         .mem_req(p2_req),.mem_addr(p2_addr),
-        .mem_data(p2_data),.mem_ack(p2_ack));
+        .mem_data(p2_data),.mem_ack(p2_ack),
+        .dbg_p2_stall(dbg_p2_stall),.dbg_list_seen(dbg_list_seen),
+        .dbg_line_wr(dbg_line_wr),.dbg_mixer_px(dbg_mixer_px),
+        .dbg_render_pass(dbg_render_pass),.dbg_bank_starve(dbg_bank_starve),
+        .dbg_max_stack(dbg_max_stack));
 
     logic mixer_wr;
     logic [15:0] mixer_dout;
@@ -432,10 +507,48 @@ module s24_core #(
     end
     s24_palette pal(.palette_word(palette_word),.shadow_bank(palette_shadow_bank),
                     .red(palette_red),.green(palette_green),.blue(palette_blue));
+    // Hardware-only debug overlay: a small on-screen hex readout of the
+    // dbg_* counters above, selectable from the OSD (Arcade-SegaSystem24.sv
+    // wires dbg_en/dbg_sel from status bits). Exists because every bug this
+    // session has actually needed to chase (SDRAM burst corruption, the
+    // Gain Ground reset loop) is hardware-only and invisible to Verilator --
+    // this is real visibility on real silicon with no host/SignalTap needed.
+    logic [23:0] dbg_value;
     always_comb begin
-        red   = (reset || palette_display_blank) ? 8'h00 : palette_red;
-        green = (reset || palette_display_blank) ? 8'h00 : palette_green;
-        blue  = (reset || palette_display_blank) ? 8'h00 : palette_blue;
+        case(dbg_sel)
+            4'h0: dbg_value={16'h0,dbg_reset_events};
+            4'h1: dbg_value={16'h0,dbg_cnt1_count};
+            4'h2: dbg_value={14'h0,dbg_cnt1_vcount};
+            4'h3: dbg_value={16'h0,dbg_gground_retrig};
+            4'h4: dbg_value={dbg_last_b_pc,1'b0};
+            4'h5: dbg_value={8'h0,dbg_last_b_opcode};
+            4'h6: dbg_value={8'h0,dbg_p2_stall};
+            4'h7: dbg_value={10'h0,dbg_list_seen};
+            4'h8: dbg_value={8'h0,dbg_line_wr};
+            4'h9: dbg_value={8'h0,dbg_mixer_px};
+            4'hA: dbg_value={16'h0,dbg_render_pass};
+            4'hB: dbg_value={23'h0,dbg_bank_starve};
+            4'hC: dbg_value={dbg_last_a_pc,1'b0};
+            4'hD: dbg_value={8'h0,dbg_last_a_opcode};
+            4'hE: dbg_value={11'h0,dbg_max_stack};
+            default: dbg_value=24'h0;
+        endcase
+    end
+    logic dbg_overlay_on,dbg_overlay_lit;
+    s24_debug_overlay dbg_ov(
+        .hcount(hcount),.vcount(vcount),.sel(dbg_sel),.value(dbg_value),
+        .overlay_on(dbg_overlay_on),.overlay_lit(dbg_overlay_lit));
+
+    always_comb begin
+        if(dbg_en && dbg_overlay_on) begin
+            red   = dbg_overlay_lit ? 8'hff : 8'h00;
+            green = dbg_overlay_lit ? 8'hff : 8'h00;
+            blue  = dbg_overlay_lit ? 8'hff : 8'h00;
+        end else begin
+            red   = (reset || palette_display_blank) ? 8'h00 : palette_red;
+            green = (reset || palette_display_blank) ? 8'h00 : palette_green;
+            blue  = (reset || palette_display_blank) ? 8'h00 : palette_blue;
+        end
     end
 
     // --------------------------- board interconnect ------------------------
@@ -635,7 +748,7 @@ module s24_core #(
         if(reset) begin
             xs<=X_IDLE;bus_din<=16'h0000;
             cpu_wr_pending<=0;cpu_phys<=0;rom_bank<=0;
-            p5_req<=0;p5_addr<=0;fdc_addr<=0;
+            fdc_addr<=0;
             tile_absel<=0;tile_xhout<=0;tile_xvout<=0;tile_syncmode<=0;
             ym_write_pending<=0;ym_addr_q<=0;ym_data_q<=0;
             irq_read_pending<=0;

@@ -1,7 +1,6 @@
 module emu (
     `include "sys/emu_ports.vh"
 );
-    assign ADC_BUS='Z;
     // This core has no user-I/O protocol. Drive unused open-drain lines low
     // so the board pins have a deterministic output-enable and Quartus does
     // not leave permanently disabled USER_IO output drivers.
@@ -41,16 +40,32 @@ module emu (
         "H1P1O[100:96],CRT H-Size,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
         "H1P1O[85:79],CRT H-Position,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,+32,+33,+34,+35,+36,+37,+38,+39,+40,+41,+42,+43,+44,+45,+46,+47,+48,-48,-47,-46,-45,-44,-43,-42,-41,-40,-39,-38,-37,-36,-35,-34,-33,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
         "H1P1O[78:74],CRT V-Shift,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
+        "O[102],Debug Overlay,Off,On;",
+        "O[106:103],Debug Counter,Reset Events,CNT1 Count,CNT1 VCount,GGround Retrig,Last CPU-B PC,Last CPU-B Op,P2 SDRAM Stall,List Seen,Line Writes,Mixer Pixels,Render Passes,Bank Starve,Last CPU-A PC,Last CPU-A Op,Max Stack Depth;",
         "R[0],Reset;",
         "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test;",
         "V,v",`BUILD_DATE
     };
 
-    logic clk_sys,clk_ram,clk_aux,pll_locked;
+    logic clk_sys,clk_ram,pll_locked;
+    // The generated PLL exposes a fourth helper clock for the framework. It
+    // is intentionally unused by this core, but retaining the net keeps the
+    // generated clock port explicit in the fitted design.
+    logic clk_aux /* synthesis keep */;
+    // outclk2 is clk_ram phase-shifted +180 degrees for the SDRAM interface.
+    // An IOE-DDR-forwarded alternative (altddio_out driven from clk_ram) was
+    // tried and hardware-tested bundled with a falling-edge dq_in capture
+    // change; that build made sprite rendering regress from corrupt-but-
+    // visible to entirely invisible on real hardware. Reverted back to this
+    // direct PLL-tap wiring -- the last hardware-confirmed-good SDRAM_CLK
+    // source -- pending an isolated re-test of DDIO forwarding on its own.
+    // See rtl/mem/sdram.sv's dq_in capture comment for the full account.
+    logic clk_sdram;
     pll pll_i(
         .refclk_clk(CLK_50M),.reset_reset(1'b0),
         .outclk0_clk(clk_ram),.outclk1_clk(clk_sys),
-        .outclk2_clk(SDRAM_CLK),.outclk3_clk(clk_aux),.locked_export(pll_locked));
+        .outclk2_clk(clk_sdram),.outclk3_clk(clk_aux),.locked_export(pll_locked));
+    assign SDRAM_CLK=clk_sdram;
     assign CLK_VIDEO=clk_sys;
 
     logic [1:0] buttons;
@@ -175,14 +190,31 @@ module emu (
     end
     assign core_reset=core_reset_sync[1];
 
-    logic p0_req,p1_req,p2_req,p3_req,p4_req,p5_req;
+    // Hardware-only debug: count core_reset assertions that happen AFTER
+    // rom_loaded has been seen high at least once, so the initial power-on/
+    // media-load reset (which asserts core_reset via ~rom_loaded by design)
+    // is excluded and this counter isolates genuine in-game resets -- i.e.
+    // it directly measures whatever is producing Gain Ground's reset loop,
+    // if the loop is this signal re-asserting at all (rather than a purely
+    // software-driven restart this signal would never see).
+    logic rom_loaded_seen,core_reset_d;
+    logic [7:0] dbg_reset_events;
+    always_ff @(posedge clk_sys) begin
+        if(rom_loaded) rom_loaded_seen<=1'b1;
+        core_reset_d<=core_reset;
+        if(core_reset && !core_reset_d && rom_loaded_seen &&
+           dbg_reset_events!=8'hff)
+            dbg_reset_events<=dbg_reset_events+1'b1;
+    end
+
+    logic p0_req,p1_req,p2_req,p3_req,p4_req;
     logic [26:1] p0_addr,p3_addr,p4_addr;
-    logic [26:3] p1_addr,p5_addr;
+    logic [26:3] p1_addr;
     logic [26:4] p2_addr;
     logic [15:0] p0_data,p3_data,p4_data;
-    logic [63:0] p1_data,p5_data;
+    logic [63:0] p1_data;
     logic [127:0] p2_data;
-    logic p0_ack,p1_ack,p2_ack,p3_ack,p4_ack,p5_ack;
+    logic p0_ack,p1_ack,p2_ack,p3_ack,p4_ack;
     logic cwr_req,cwr_ack;
     logic [26:1] cwr_addr;
     logic [15:0] cwr_data;
@@ -194,6 +226,8 @@ module emu (
     // its exact 656x424 timing instead of inheriting a /3 frequency error.
     s24_core #(.CLK_HZ(48_317_307)) core(
         .clk(clk_sys),.reset(core_reset),.pause(status[6]),.board(descriptor),
+        .dbg_en(status[102]),.dbg_sel(status[106:103]),
+        .dbg_reset_events(dbg_reset_events),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),
         .input_ports(input_ports),
         .spinner0(spinner0),.spinner1(spinner1),
@@ -210,7 +244,6 @@ module emu (
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_data(p3_data),.p3_ack(p3_ack),
         .p4_req(p4_req),.p4_addr(p4_addr),.p4_data(p4_data),.p4_ack(p4_ack),
-        .p5_req(p5_req),.p5_addr(p5_addr),.p5_data(p5_data),.p5_ack(p5_ack),
         .wr_req(cwr_req),.wr_addr(cwr_addr),.wr_data(cwr_data),.wr_be(cwr_be),.wr_ack(cwr_ack));
 
     // CRT Adjust is kept on the core side so the native raster, analog output
@@ -354,14 +387,14 @@ module emu (
     logic [26:1] mwr_addr;
     logic [15:0] mwr_data;
     logic [1:0]  mwr_be;
-    logic mp0_req,mp1_req,mp2_req,mp3_req,mp4_req,mp5_req;
+    logic mp0_req,mp1_req,mp2_req,mp3_req,mp4_req;
     logic [26:1] mp0_addr,mp3_addr,mp4_addr;
-    logic [26:3] mp1_addr,mp5_addr;
+    logic [26:3] mp1_addr;
     logic [26:4] mp2_addr;
     logic [15:0] mp0_data,mp3_data,mp4_data;
-    logic [63:0] mp1_data,mp5_data;
+    logic [63:0] mp1_data;
     logic [127:0] mp2_data;
-    logic mp0_ack,mp1_ack,mp2_ack,mp3_ack,mp4_ack,mp5_ack;
+    logic mp0_ack,mp1_ack,mp2_ack,mp3_ack,mp4_ack;
     logic wr_rsp_unused_src,wr_rsp_unused_dst;
 
     s24_sdram_cdc #(.REQ_WIDTH(44),.RSP_WIDTH(1)) cdc_wr(
@@ -404,13 +437,6 @@ module emu (
         .src_ack(p4_ack),.src_response(p4_data),
         .dst_clk(clk_ram),.dst_req(mp4_req),.dst_payload(mp4_addr),
         .dst_ack(mp4_ack),.dst_response(mp4_data));
-    s24_sdram_cdc #(.REQ_WIDTH(24),.RSP_WIDTH(64)) cdc_p5(
-        .reset(~pll_locked),
-        .src_clk(clk_sys),.src_req(p5_req),.src_payload(p5_addr),
-        .src_ack(p5_ack),.src_response(p5_data),
-        .dst_clk(clk_ram),.dst_req(mp5_req),.dst_payload(mp5_addr),
-        .dst_ack(mp5_ack),.dst_response(mp5_data));
-
     sdram memory(
         .clk(clk_ram),.init(~pll_locked),.ready(sdram_ready),
         .SDRAM_DQ(SDRAM_DQ),.SDRAM_A(SDRAM_A),.SDRAM_BA(SDRAM_BA),
@@ -422,8 +448,7 @@ module emu (
         .p1_req(mp1_req),.p1_addr(mp1_addr),.p1_dout(mp1_data),.p1_ack(mp1_ack),
         .p2_req(mp2_req),.p2_addr(mp2_addr),.p2_dout(mp2_data),.p2_ack(mp2_ack),
         .p3_req(mp3_req),.p3_addr(mp3_addr),.p3_dout(mp3_data),.p3_ack(mp3_ack),
-        .p4_req(mp4_req),.p4_addr(mp4_addr),.p4_dout(mp4_data),.p4_ack(mp4_ack),
-        .p5_req(mp5_req),.p5_addr(mp5_addr),.p5_dout(mp5_data),.p5_ack(mp5_ack));
+        .p4_req(mp4_req),.p4_addr(mp4_addr),.p4_dout(mp4_data),.p4_ack(mp4_ack));
 
     // Present the board's native 16 MHz, 656x424-total raster directly to the
     // MiSTer framework.  This is 496x384 active video at 24.39 kHz horizontal

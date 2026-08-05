@@ -11,11 +11,20 @@ module s24_fd1094_key_ram (
     input  logic [15:0] write_data
 );
 `ifdef VERILATOR
+    // LATENCY CONTRACT: this model must be cycle-identical to the altsyncram
+    // pair below.  altsyncram always registers address_a on clock0 -- the
+    // input registers are mandatory -- so outdata_reg_a="UNREGISTERED" gives
+    // a 1-clock read, not a 0-clock one.  Modelling the read as a
+    // combinational `assign` here made every FD1094 fetch sample a stale key
+    // byte on hardware while simulation passed (same failure previously fixed
+    // in s24_sprite.sv / s24_tile.sv).  Keep this read registered.
     logic [7:0] even_mem [0:4095];
     logic [7:0] odd_mem [0:4095];
-    assign even_q = even_mem[read_addr];
-    assign odd_q = odd_mem[read_addr];
     always_ff @(posedge clk) begin
+        // Read before the write below matches read_during_write_mode_mixed
+        // _ports = "OLD_DATA" on the synthesized banks.
+        even_q <= even_mem[read_addr];
+        odd_q <= odd_mem[read_addr];
         if(write_enable) begin
             even_mem[write_addr] <= write_data[7:0];
             odd_mem[write_addr] <= write_data[15:8];
@@ -108,12 +117,17 @@ module s24_fd1094 #(
         mask_ram.ram_block_type = "M10K",
         mask_ram.intended_device_family = "Cyclone V",
         mask_ram.lpm_type = "altsyncram",
+        // UNREGISTERED keeps this ROM at the 1-clock read latency that the
+        // simulation model below implements. address_a is registered on
+        // clock0 either way, so the read can never be combinational.
         mask_ram.outdata_reg_a = "UNREGISTERED",
         mask_ram.init_file = "rtl/cpu/fd1094_masked.mif",
         mask_ram.power_up_uninitialized = "FALSE";
 `else
+    logic [7:0] mask_q;
     logic [7:0] mask_rom [0:8191];
     initial $readmemh(MASK_FILE,mask_rom);
+    // The registered read is declared after mask_address_l below.
 `endif
 
     logic [7:0] irq_key=0,global_key1=0,global_key2=0,global_key3=0;
@@ -134,7 +148,21 @@ module s24_fd1094 #(
     logic [15:0] fetch_history_data [0:3];
     logic [15:0] cmp_history_high,cmp_history_low;
 
-    typedef enum logic [2:0] {F_IDLE,F_KEY,F_DECRYPT,F_MASK,F_DONE} fstate_t;
+`ifndef SYNTHESIS
+    // LATENCY CONTRACT: mirrors the altsyncram ROM above, whose address_a is
+    // registered on clk (1-clock read).  Declared here so mask_address_l is
+    // already in scope.
+    always_ff @(posedge clk) mask_q <= mask_rom[mask_address_l];
+`endif
+
+    // F_KEY_Q and F_MASK_Q are the wait cycles that pay for the 1-clock read
+    // latency of the key RAM and the mask ROM.  The address is registered at
+    // the edge that enters F_KEY / F_MASK, the memory registers that address
+    // at the edge that leaves it, and the data is only valid -- and only
+    // sampled -- during the following *_Q state.  Do not collapse these.
+    typedef enum logic [2:0] {
+        F_IDLE,F_KEY,F_KEY_Q,F_DECRYPT,F_MASK,F_MASK_Q,F_DONE
+    } fstate_t;
     fstate_t fstate;
 
     function automatic logic history_has(input logic [23:1] sought);
@@ -199,7 +227,11 @@ module s24_fd1094 #(
                     else key_address<=word_address[13:1];
                     fstate<=F_KEY;
                 end
-                F_KEY: begin
+                // key_address was registered on entry to F_KEY; the key RAM
+                // registers it at the end of F_KEY, so its output is only
+                // valid during F_KEY_Q.
+                F_KEY: fstate<=F_KEY_Q;
+                F_KEY_Q: begin
                     mainkey <= key_address[0]
                                ? key_ram_odd_q
                                : key_ram_even_q;
@@ -211,12 +243,13 @@ module s24_fd1094 #(
                     mask_bit_l<=dec_mask_bit;
                     fstate<=F_MASK;
                 end
-                F_MASK: begin
-                    `ifdef SYNTHESIS
+                // mask_address_l was registered on entry to F_MASK; the mask
+                // ROM registers it at the end of F_MASK, so mask_q is only
+                // valid during F_MASK_Q.  Both build paths now read mask_q,
+                // so no `ifdef can reintroduce a latency difference here.
+                F_MASK: fstate<=F_MASK_Q;
+                F_MASK_Q: begin
                     mask_byte<=mask_q;
-                    `else
-                    mask_byte<=mask_rom[mask_address_l];
-                    `endif
                     fstate<=F_DONE;
                 end
                 F_DONE: begin

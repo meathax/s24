@@ -38,6 +38,7 @@ $sources = @(
     'rtl/video/s24_palette.sv',
     'rtl/video/s24_tile.sv',
     'rtl/video/s24_sprite.sv',
+    'rtl/video/s24_debug_overlay.sv',
     'rtl/video/s24_mixer.sv',
     'rtl/cpu/fx68k/fx68kAlu.sv',
     'rtl/cpu/fx68k/uaddrPla.sv',

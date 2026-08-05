@@ -86,7 +86,7 @@ output        AUDIO_S,   // 1 - signed audio samples, 0 - unsigned
 output  [1:0] AUDIO_MIX, // 0 - no mix, 1 - 25%, 2 - 50%, 3 - 100% (mono)
 
 //ADC
-inout   [3:0] ADC_BUS,
+input   [3:0] ADC_BUS,
 
 //SD-SPI
 output        SD_SCK,

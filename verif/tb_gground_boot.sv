@@ -92,12 +92,12 @@ module tb_gground_boot;
     logic [7:0] dsw_value,coinage_value;
     logic [63:0] simulated_inputs;
     logic p0_req,p0_ack,p1_req,p1_ack,p2_req,p2_ack;
-    logic p3_req,p3_ack,p4_req,p4_ack,p5_req,p5_ack,wr_req,wr_ack;
+    logic p3_req,p3_ack,p4_req,p4_ack,wr_req,wr_ack;
     logic [26:1] p0_addr,p3_addr,p4_addr,wr_addr;
-    logic [26:3] p1_addr,p5_addr;
+    logic [26:3] p1_addr;
     logic [26:4] p2_addr;
     logic [15:0] p0_data,p3_data,p4_data,wr_data;
-    logic [63:0] p1_data,p5_data;
+    logic [63:0] p1_data;
     logic [127:0] p2_data;
     logic [1:0] wr_be;
 
@@ -126,6 +126,13 @@ module tb_gground_boot;
     logic [26:0] fdc_track_base_latched=0;
     logic [7:0] fdc_track_number_latched=0;
     logic fdc_track_side_latched=0;
+    // s24_fdc no longer keeps a persistent "current side" register: side is
+    // folded into track_base combinationally at command-issue time (mode 9/b
+    // write, side=bus_din[3]) and then discarded. Shadow that same event here
+    // from the FDC's stable port-level bus_wr/bus_addr/bus_din instead of
+    // reaching into FDC-internal state, so this diagnostic tracks whichever
+    // side the controller was last commanded with.
+    logic fdc_side_shadow=0;
     integer frame_fd=0,frame_pixels=0,frame_nonblack_pixels=0;
     integer frame_requested=0;
     logic frame_capture_active=0,frame_capture_done=0;
@@ -248,7 +255,6 @@ module tb_gground_boot;
     always_comb begin
         p1_data=tile_burst(p1_addr);
         p2_data=sprite_burst(p2_addr);
-        p5_data='0;
     end
 
     integer floppy_fd,seek_result,read_lo,read_hi,floppy_file_bytes;
@@ -291,6 +297,9 @@ module tb_gground_boot;
     end
 `endif
     always @(posedge clk) begin
+        if(dut.fdc.bus_wr && dut.fdc.bus_addr==3'd0 &&
+                (dut.fdc.bus_din[7:4]==4'h9 || dut.fdc.bus_din[7:4]==4'hb))
+            fdc_side_shadow<=dut.fdc.bus_din[3];
         fdc_media_req_d<=dut.fdc_media_req;
         p4_req_d<=p4_req;
         if(!dut.fdc_media_req)
@@ -327,7 +336,7 @@ module tb_gground_boot;
                 fdc_track_checksum<=32'h811c9dc5;
                 fdc_track_base_latched<=dut.fdc.track_base;
                 fdc_track_number_latched<=dut.fdc.physical_track;
-                fdc_track_side_latched<=dut.fdc.side;
+                fdc_track_side_latched<=fdc_side_shadow;
             end else if(fdc_track_active) begin
                 if(dut.fdc_media_addr !=
                         fdc_track_base_latched+fdc_track_bytes)
@@ -340,7 +349,7 @@ module tb_gground_boot;
                            game_name,fdc_track_bytes[15:0],
                            dut.fdc.position);
                 if(dut.fdc.physical_track!=fdc_track_number_latched ||
-                        dut.fdc.side!=fdc_track_side_latched)
+                        fdc_side_shadow!=fdc_track_side_latched)
                     $fatal(1,"%s FDC track/side changed within transfer",
                            game_name);
             end
@@ -374,7 +383,7 @@ module tb_gground_boot;
                 $display("%s FDC transfer=%0d bytes=%0d checksum=%08h side/track=%0d/%0d",
                     game_name,fdc_complete_tracks+1,track_bytes,
                     checksum_byte(fdc_track_checksum,fdc_delivered_byte),
-                    dut.fdc.side,dut.fdc.physical_track);
+                    fdc_side_shadow,dut.fdc.physical_track);
             end else if(fdc_track_active) begin
                 fdc_track_bytes<=fdc_track_bytes+1;
                 fdc_track_checksum<=checksum_byte(
@@ -390,7 +399,6 @@ module tb_gground_boot;
 
         p1_ack<=p1_req;
         p2_ack<=p2_req;
-        p5_ack<=p5_req;
         if(reset) begin
             p4_ack<=0;
             p4_data<=0;
@@ -400,7 +408,7 @@ module tb_gground_boot;
             if(dut.fdc.position==0) begin
                 floppy_track_reads<=floppy_track_reads+1;
                 $display("%s FDC side/track=%0d/%0d image=%0d D0=%h D1=%h D2=%h D4=%h D6=%h D7=%h A0=%h A1=%h",
-                    game_name,dut.fdc.side,dut.fdc.physical_track,
+                    game_name,fdc_side_shadow,dut.fdc.physical_track,
                     floppy_file_bytes,
                     {dut.cpu_a.excUnit.regs68H[0],dut.cpu_a.excUnit.regs68L[0]},
                     {dut.cpu_a.excUnit.regs68H[1],dut.cpu_a.excUnit.regs68L[1]},
@@ -414,7 +422,7 @@ module tb_gground_boot;
             if(floppy_byte_offset<0 || floppy_byte_offset+1>=floppy_file_bytes)
                 $fatal(1,"%s floppy byte read outside image: byte=%h word=%h size=%h side/track=%0d/%0d position=%h span=%h D0=%h D1=%h D2=%h D4=%h D6=%h D7=%h A0=%h A1=%h PC=%h:%h",
                     game_name,floppy_byte_offset,p4_addr,floppy_file_bytes,
-                    dut.fdc.side,dut.fdc.physical_track,dut.fdc.position,
+                    fdc_side_shadow,dut.fdc.physical_track,dut.fdc.position,
                     dut.fdc.span,
                     {dut.cpu_a.excUnit.regs68H[0],dut.cpu_a.excUnit.regs68L[0]},
                     {dut.cpu_a.excUnit.regs68H[1],dut.cpu_a.excUnit.regs68L[1]},
@@ -472,6 +480,13 @@ module tb_gground_boot;
         cnt1_d<=dut.io_cnt[1];
         if(dut.io_cnt[1] && !cnt1_d) begin
             cnt_releases<=cnt_releases+1;
+            // Diagnostic only (no new state): pin down the exact clock of
+            // each CNT1-triggered CPU-B release for direct comparison
+            // against MAME's gground_cnt_trace.lua reference (~688,552,306
+            // clocks for the first release). Does not affect checkpoint
+            // compatibility since it adds no registers.
+            $display("%s CNT1 release #%0d at clocks=%0d",
+                game_name,cnt_releases+1,i);
             // Attract evidence must be produced by the loaded game, not by
             // the BIOS diagnostics shown before the protected CPU releases.
             visible_pixels<=0;
@@ -710,7 +725,6 @@ module tb_gground_boot;
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_data(p3_data),.p3_ack(p3_ack),
         .p4_req(p4_req),.p4_addr(p4_addr),.p4_data(p4_data),.p4_ack(p4_ack),
-        .p5_req(p5_req),.p5_addr(p5_addr),.p5_data(p5_data),.p5_ack(p5_ack),
         .wr_req(wr_req),.wr_addr(wr_addr),.wr_data(wr_data),
         .wr_be(wr_be),.wr_ack(wr_ack));
 
@@ -843,7 +857,7 @@ module tb_gground_boot;
         board.magic_table=magic_table[3:0];
         coinage_value=coinage_arg[7:0];
         dsw_value=dsw_arg[7:0];
-        p0_ack=0;p1_ack=0;p2_ack=0;p3_ack=0;p4_ack=0;p5_ack=0;wr_ack=0;
+        p0_ack=0;p1_ack=0;p2_ack=0;p3_ack=0;p4_ack=0;wr_ack=0;
         for(i=0;i<131072;i++) begin work_a[i]=0;work_b[i]=0;sprite_ram[i]=0;end
         for(i=0;i<65536;i++) char_ram[i]=0;
         for(i=0;i<ROMBOARD_WORDS;i++) romboard_mem[i]=16'hffff;
@@ -904,8 +918,8 @@ module tb_gground_boot;
         // interface below.
         if(board.has_fd1094) begin
             for(i=0;i<4096;i++) begin
-                dut.fd1094.key_ram_even[i]=key_mem[i][7:0];
-                dut.fd1094.key_ram_odd[i]=key_mem[i][15:8];
+                dut.fd1094.key_ram.even_mem[i]=key_mem[i][7:0];
+                dut.fd1094.key_ram.odd_mem[i]=key_mem[i][15:8];
             end
             dut.fd1094.irq_key=key_mem[0][7:0];
             dut.fd1094.global_key1=key_mem[0][15:8];

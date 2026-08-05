@@ -106,9 +106,14 @@ module s24_irq (
                 if (allow_a[IRQ_FRC]) frc_a <= 1'b1;
                 if (allow_b[IRQ_FRC]) frc_b <= 1'b1;
             end
+            // A tick and an ack landing on the same edge must not let the ack
+            // win: that would silently drop the freshly-set interrupt (the
+            // set below runs earlier in program order, so with plain
+            // nonblocking assigns the later ack statement would clobber it).
+            // Suppress the clear on exactly the line(s) being set this cycle.
             if (frc_ack) begin
-                frc_a <= 1'b0;
-                frc_b <= 1'b0;
+                if (!(frc_tick && frc_mode && allow_a[IRQ_FRC])) frc_a <= 1'b0;
+                if (!(frc_tick && frc_mode && allow_b[IRQ_FRC])) frc_b <= 1'b0;
             end
 
             // hsync_tick is registered at the wrap edge, so vcount still
@@ -139,8 +144,11 @@ module s24_irq (
                 timer_zero_read_b <= 1'b1;
             // synthesis translate_on
 
-            if (rd_a && addr == 2) timer_a <= 1'b0;
-            if (rd_b && addr == 3) timer_b <= 1'b0;
+            // Same same-edge set-vs-ack hazard as frc above: a reload that
+            // lands on the exact cycle its own ack is being processed must
+            // not have the ack (later in program order) erase the new flag.
+            if (rd_a && addr == 2 && !(timer_tick && timer_value == 12'hfff)) timer_a <= 1'b0;
+            if (rd_b && addr == 3 && !(timer_tick && timer_value == 12'hfff)) timer_b <= 1'b0;
 
             if (wr) begin
                 case (addr)
@@ -158,11 +166,11 @@ module s24_irq (
                     end
                     2'd2: begin
                         allow_a <= din[5:0];
-                        timer_a <= 1'b0;
+                        if (!(timer_tick && timer_value == 12'hfff)) timer_a <= 1'b0;
                     end
                     2'd3: begin
                         allow_b <= din[5:0];
-                        timer_b <= 1'b0;
+                        if (!(timer_tick && timer_value == 12'hfff)) timer_b <= 1'b0;
                     end
                 endcase
             end

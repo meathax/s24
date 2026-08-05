@@ -22,14 +22,14 @@ module tb_sdram;
     wire wr_ack;
 
     logic p0_req = 0, p1_req = 0, p2_req = 0;
-    logic p3_req = 0, p4_req = 0, p5_req = 0;
+    logic p3_req = 0, p4_req = 0;
     logic [26:1] p0_addr = 0, p3_addr = 0, p4_addr = 0;
-    logic [26:3] p1_addr = 0, p5_addr = 0;
+    logic [26:3] p1_addr = 0;
     logic [26:4] p2_addr = 0;
     wire [15:0] p0_dout, p3_dout, p4_dout;
-    wire [63:0] p1_dout, p5_dout;
+    wire [63:0] p1_dout;
     wire [127:0] p2_dout;
-    wire p0_ack, p1_ack, p2_ack, p3_ack, p4_ack, p5_ack;
+    wire p0_ack, p1_ack, p2_ack, p3_ack, p4_ack;
 
     logic [1:0] read_pipe = 0;
     logic [9:0] col_pipe [0:1];
@@ -73,8 +73,7 @@ module tb_sdram;
         .p1_req(p1_req),.p1_addr(p1_addr),.p1_dout(p1_dout),.p1_ack(p1_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_dout(p2_dout),.p2_ack(p2_ack),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_dout(p3_dout),.p3_ack(p3_ack),
-        .p4_req(p4_req),.p4_addr(p4_addr),.p4_dout(p4_dout),.p4_ack(p4_ack),
-        .p5_req(p5_req),.p5_addr(p5_addr),.p5_dout(p5_dout),.p5_ack(p5_ack));
+        .p4_req(p4_req),.p4_addr(p4_addr),.p4_dout(p4_dout),.p4_ack(p4_ack));
 
     task automatic read_p0(input logic [26:1] a,
                             input logic [15:0] expected);

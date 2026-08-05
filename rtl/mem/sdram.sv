@@ -3,14 +3,20 @@
 //  16-bit SDR SDRAM @ clk_ram (96.6 MHz), CL2, strictly serialized
 //  transactions. ROM-download writes keep a row open for same-row words and
 //  explicitly precharge before row changes, reads, or refreshes.
-//  Six request ports with bounded round-robin arbitration (DESIGN.md §4.2):
+//  Five request ports with bounded round-robin arbitration (DESIGN.md §4.2):
 //    p0: V60 fetch/data (latency critical, 16-bit single)
 //    p1: tile fetch      (64-bit burst = 4 words)
 //    p2: sprite fetch    (128-bit burst = 8 words)
 //    p3: Z80 ROM         (16-bit single, byte laned)
 //    p4: MultiPCM        (16-bit single)
-//    p5: V25 program ROM  (64-bit burst = 4 words)
 //  Write port (ROM download only): highest priority while ioctl_download.
+//
+//  A sixth port (p5, "V25 program ROM") existed here as leftover header text
+//  copied from a sibling Sega System 32 core at this project's first commit.
+//  Real System 24 hardware has no such subsystem (confirmed against a real
+//  PCB schematic) and p5_req/p5_addr were only ever driven to zero -- removed
+//  entirely, along with its s24_sdram_cdc bridge instance and dedicated
+//  64-bit output register, to free fitter resources on an 87%-ALM design.
 //
 //  REQUEST CONTRACT (all ports, including wr): one transaction per req
 //  RISING EDGE; the address (and write data/be) is sampled on that edge.
@@ -73,19 +79,24 @@ module sdram (
     input             p4_req,
     input      [26:1] p4_addr,
     output reg [15:0] p4_dout,
-    output reg        p4_ack,
-
-    // p5: V25 program ROM - 4-word burst, aligned to 8 bytes
-    input             p5_req,
-    input      [26:3] p5_addr,
-    output reg [63:0] p5_dout,
-    output reg        p5_ack
+    output reg        p4_ack
 );
 
 reg [15:0] dq_out;
 reg        dq_oe;
 
-assign SDRAM_CKE  = 1'b1;
+// Keep CKE asserted during the controller's active lifetime, but hold the
+// device in clock-disabled state while the board PLL is still unlocked. This
+// preserves the SDRAM protocol and keeps the physical output driven by the
+// real reset/init boundary instead of collapsing to a constant VCC net.
+// Registered on clk_ram like every other chip control line (cmd/SDRAM_A/
+// chip_sel) rather than combinationally tapping `init` directly: `init` is
+// only single-flop synchronized into this domain (see the init-cnt/state
+// reset below), so an unregistered pin would let CKE glitch independently of
+// the FSM's own registered NOP guarantee.
+reg sdram_cke_r = 1'b0;
+always @(posedge clk) sdram_cke_r <= ~init;
+assign SDRAM_CKE  = sdram_cke_r;
 
 // MiSTer 128 MB module: the two devices' DQML/DQMH pins are SHORTED to A11/A12
 // (verified against Arcade-IremM92_MiSTer rtl/sdram.sv:69 and jtframe's
@@ -127,7 +138,7 @@ reg [9:0]  ref_cnt;
 reg        ref_pend;
 
 typedef enum logic [3:0] {
-    ST_IDLE, ST_DISPATCH, ST_ACT, ST_RCD1, ST_RCD2, ST_RD, ST_RDW,
+    ST_IDLE, ST_DISPATCH, ST_ACT, ST_RCD1, ST_RCD2, ST_RD, ST_RD_GAP, ST_RDW,
     ST_WR, ST_WRRC, ST_PRE_XFER, ST_PRE_REF_B, ST_PRE_REF, ST_REF_B, ST_REFW
 } state_t;
 state_t state = ST_IDLE;
@@ -163,10 +174,9 @@ reg [15:0] din_pipe_d1, din_pipe_d2;   // unused placeholder (kept for clarity)
 // arbitration may delay a lower-priority port long after the producer pulses
 // req or moves on to its next address.  This mirrors the latched per-slot
 // request interfaces used by mature MiSTer SDRAM frameworks.
-reg p0_pend, p1_pend, p2_pend, p3_pend, p4_pend, p5_pend, wr_pend;
+reg p0_pend, p1_pend, p2_pend, p3_pend, p4_pend, wr_pend;
 reg [26:1] p0_addr_p, p3_addr_p, p4_addr_p, wr_addr_p;
 reg [26:3] p1_addr_p;
-reg [26:3] p5_addr_p;
 reg [26:4] p2_addr_p;
 reg [15:0] wr_din_p;
 reg  [1:0] wr_be_p;
@@ -180,12 +190,11 @@ always @* begin
     read_valid = 1'b1;
     read_grant = rr_next;
     case (rr_next)
-        3'd0: if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else read_valid=0;
-        3'd1: if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else read_valid=0;
-        3'd2: if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else read_valid=0;
-        3'd3: if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else read_valid=0;
-        3'd4: if (p4_pend) read_grant=4; else if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else read_valid=0;
-        default: if (p5_pend) read_grant=5; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else read_valid=0;
+        3'd0: if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else read_valid=0;
+        3'd1: if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else read_valid=0;
+        3'd2: if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else read_valid=0;
+        3'd3: if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else read_valid=0;
+        default: if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else read_valid=0;
     endcase
 end
 
@@ -196,12 +205,12 @@ end
 // blocked by the still-clearing pend and whose second is blocked by the
 // stretched ack — the transaction vanished and the port hung forever.  Which
 // transactions hit the window depended on each ack's clk_ram parity, i.e. on
-// arbitration history — so adding V25 p5 traffic could sink the V60 while
-// lighter boards never faulted.  Edge-detection latches exactly once per
+// arbitration history — so heavier read traffic on any port could sink the
+// V60 while lighter boards never faulted.  Edge-detection latches exactly once per
 // request pulse (or per level-request start: the loader holds wr_req until
 // wr_ack) regardless of ack overlap.
-reg p0_req_d, p1_req_d, p2_req_d, p3_req_d, p4_req_d, p5_req_d, wr_req_d;
-reg p0_ack_d2, p1_ack_d2, p2_ack_d2, p3_ack_d2, p4_ack_d2, p5_ack_d2, wr_ack_d2;
+reg p0_req_d, p1_req_d, p2_req_d, p3_req_d, p4_req_d, wr_req_d;
+reg p0_ack_d2, p1_ack_d2, p2_ack_d2, p3_ack_d2, p4_ack_d2, wr_ack_d2;
 always @(posedge clk) begin
     // Completion clears pend on the ack RISING EDGE only, and FIRST, so a
     // same-edge new request edge below overrides it (the later nonblocking
@@ -211,17 +220,16 @@ always @(posedge clk) begin
     // vanishing; (2) the 2-cycle ack stretch must not wipe a request that
     // latched during the stretch window on the stretch's second cycle.
     p0_ack_d2 <= p0_ack; p1_ack_d2 <= p1_ack; p2_ack_d2 <= p2_ack;
-    p3_ack_d2 <= p3_ack; p4_ack_d2 <= p4_ack; p5_ack_d2 <= p5_ack;
+    p3_ack_d2 <= p3_ack; p4_ack_d2 <= p4_ack;
     wr_ack_d2 <= wr_ack;
     if (p0_ack && !p0_ack_d2) p0_pend <= 1'b0;
     if (p1_ack && !p1_ack_d2) p1_pend <= 1'b0;
     if (p2_ack && !p2_ack_d2) p2_pend <= 1'b0;
     if (p3_ack && !p3_ack_d2) p3_pend <= 1'b0;
     if (p4_ack && !p4_ack_d2) p4_pend <= 1'b0;
-    if (p5_ack && !p5_ack_d2) p5_pend <= 1'b0;
     if (wr_ack && !wr_ack_d2) wr_pend <= 1'b0;
     p0_req_d <= p0_req; p1_req_d <= p1_req; p2_req_d <= p2_req;
-    p3_req_d <= p3_req; p4_req_d <= p4_req; p5_req_d <= p5_req;
+    p3_req_d <= p3_req; p4_req_d <= p4_req;
     wr_req_d <= wr_req;
     // Every s32 requester keeps at most one transaction outstanding (pulse, or
     // level held until ack), so an unqualified rising-edge latch is exact.
@@ -240,19 +248,16 @@ always @(posedge clk) begin
     if (p4_req && !p4_req_d) begin
         p4_pend <= 1'b1; p4_addr_p <= p4_addr;
     end
-    if (p5_req && !p5_req_d) begin
-        p5_pend <= 1'b1; p5_addr_p <= p5_addr;
-    end
     if (wr_req && !wr_req_d) begin
         wr_pend <= 1'b1; wr_addr_p <= wr_addr;
         wr_din_p <= wr_din; wr_be_p <= wr_be;
     end
     if (init) begin
-        {p0_pend,p1_pend,p2_pend,p3_pend,p4_pend,p5_pend,wr_pend} <= '0;
-        {p0_req_d,p1_req_d,p2_req_d,p3_req_d,p4_req_d,p5_req_d,wr_req_d} <= '0;
-        {p0_ack_d2,p1_ack_d2,p2_ack_d2,p3_ack_d2,p4_ack_d2,p5_ack_d2,wr_ack_d2} <= '0;
+        {p0_pend,p1_pend,p2_pend,p3_pend,p4_pend,wr_pend} <= '0;
+        {p0_req_d,p1_req_d,p2_req_d,p3_req_d,p4_req_d,wr_req_d} <= '0;
+        {p0_ack_d2,p1_ack_d2,p2_ack_d2,p3_ack_d2,p4_ack_d2,wr_ack_d2} <= '0;
         p0_addr_p <= '0; p1_addr_p <= '0; p2_addr_p <= '0;
-        p3_addr_p <= '0; p4_addr_p <= '0; p5_addr_p <= '0; wr_addr_p <= '0;
+        p3_addr_p <= '0; p4_addr_p <= '0; wr_addr_p <= '0;
         wr_din_p <= '0; wr_be_p <= '0;
     end
 end
@@ -265,12 +270,12 @@ end
 // drop within a few clk_ram of the stretched ack (clk_sys requesters take 2).
 generate
     genvar gi;
-    for (gi = 0; gi < 7; gi = gi + 1) begin : g_reqwatch
+    for (gi = 0; gi < 6; gi = gi + 1) begin : g_reqwatch
         reg [7:0] held;
         wire req_i  = gi==0 ? p0_req  : gi==1 ? p1_req  : gi==2 ? p2_req  :
-                      gi==3 ? p3_req  : gi==4 ? p4_req  : gi==5 ? p5_req  : wr_req;
+                      gi==3 ? p3_req  : gi==4 ? p4_req  : wr_req;
         wire pend_i = gi==0 ? p0_pend : gi==1 ? p1_pend : gi==2 ? p2_pend :
-                      gi==3 ? p3_pend : gi==4 ? p4_pend : gi==5 ? p5_pend : wr_pend;
+                      gi==3 ? p3_pend : gi==4 ? p4_pend : wr_pend;
         always @(posedge clk) begin
             if (init || !req_i || pend_i) held <= 8'd0;
             else if (held != 8'hff) begin
@@ -302,14 +307,37 @@ end
 
 // Centre the SDRAM board interface with SDRAM_CLK forwarded at 180 degrees.
 // Commands and write data launched here have half a cycle of setup at the
-// chip. CL2 read data returns to this direct pin-to-register sample under the
-// SDC input-delay and multicycle constraints, so Quartus can place dq_in in
-// the input IOE. The fourth pipe tap transfers the already-registered word
+// chip. CL2 read data returns to this direct pin-to-register sample; the
+// SDRAM_CLK generated clock and the SDRAM_DQ input delays that bound it live
+// in Arcade-SegaSystem24.sdc, and sys/sys.tcl:95 forces dq_in into the input
+// IOE. The budget is exactly half a clk_ram period (5.21 ns) for tAC(CL2)
+// plus board flight, and back-to-back READs in a burst have no more than
+// that -- unlike an isolated read, whose word stays on the floating bus long
+// after the SDRAM stops driving. The fourth pipe tap transfers the word
 // into the response buffer one cycle later without a pin-to-core critical path.
 reg [15:0] dq_in;
 reg [3:0]  cl_pipe;
 reg [15:0] cap_buf [0:7];
 
+// Capture DQ on the rising clk_ram edge.
+//
+// A falling-edge capture (moving the sample point half a period later, to sit
+// nearer the centre of the tAC(CL2) valid window for burst reads) was tried
+// and hardware-tested bundled with an SDRAM_CLK DDIO-forwarding change in the
+// same build. That build made sprite rendering WORSE on real hardware --
+// sprites went from corrupt-but-visible to entirely invisible, and Gain
+// Ground went to a black screen -- a regression from the last hardware-
+// confirmed-good state (this posedge capture, direct PLL-tap SDRAM_CLK, and
+// the s24_sdram_cdc multicycle constraint). The same test run also revealed
+// rtl/pll/synthesis/submodules/pll_pll_inst.v (generated PLL IP) had been
+// edited to explicitly wire previously-unconnected optional ports -- a
+// change forbidden by this project's own rules and a known real cause of
+// hardware-only failures elsewhere -- and that edit was present for every
+// hardware round this session, so it cannot be ruled out as a contributing
+// cause. Both unproven changes were reverted together rather than guessing
+// which one to keep. Re-attempt falling-edge capture and/or DDIO forwarding
+// only as an isolated, independently hardware-tested change once the design
+// is back to a confirmed-good baseline.
 always @(posedge clk) dq_in <= SDRAM_DQ;
 
 task automatic deliver(input [15:0] final_word);
@@ -322,7 +350,6 @@ task automatic deliver(input [15:0] final_word);
                                 cap_buf[3], cap_buf[2], cap_buf[1], cap_buf[0]}; p2_ack <= 1'b1; end
         3'd3: begin p3_dout <= final_word; p3_ack <= 1'b1; end
         3'd4: begin p4_dout <= final_word; p4_ack <= 1'b1; end
-        3'd5: begin p5_dout <= {final_word, cap_buf[2], cap_buf[1], cap_buf[0]}; p5_ack <= 1'b1; end
         default: ;
     endcase
 endtask
@@ -336,7 +363,7 @@ always @(posedge clk) begin
     if (ack_stretch != 0) ack_stretch <= ack_stretch - 1'd1;
     else begin
         p0_ack <= 1'b0; p1_ack <= 1'b0; p2_ack <= 1'b0;
-        p3_ack <= 1'b0; p4_ack <= 1'b0; p5_ack <= 1'b0; wr_ack <= 1'b0;
+        p3_ack <= 1'b0; p4_ack <= 1'b0; wr_ack <= 1'b0;
     end
 
     if (init) begin
@@ -419,14 +446,13 @@ always @(posedge clk) begin
                 else begin
                     grant <= read_grant;
                     is_write <= 1'b0;
-                    rr_next <= (read_grant == 3'd5) ? 3'd0 : read_grant + 1'd1;
+                    rr_next <= (read_grant == 3'd4) ? 3'd0 : read_grant + 1'd1;
                     case (read_grant)
                         3'd0: begin a = p0_addr_p;           rd_total <= 4'd1; end
                         3'd1: begin a = {p1_addr_p, 2'b00};  rd_total <= 4'd4; end
                         3'd2: begin a = {p2_addr_p, 3'b000}; rd_total <= 4'd8; end
                         3'd3: begin a = p3_addr_p;           rd_total <= 4'd1; end
-                        3'd4: begin a = p4_addr_p;           rd_total <= 4'd1; end
-                        default: begin a = {p5_addr_p, 2'b00}; rd_total <= 4'd4; end
+                        default: begin a = p4_addr_p;        rd_total <= 4'd1; end
                     endcase
                 end
                 xfer_addr <= a;
@@ -435,8 +461,8 @@ always @(posedge clk) begin
                 rd_issued   <= 0;
                 rd_captured <= 0;
                 // Register arbitration before command generation.  The
-                // dedicated dispatch cycle breaks the dense real-V25 path
-                // from p5_pend through the six-port priority mux and row
+                // dedicated dispatch cycle breaks the dense path from any
+                // pend flag through the five-port priority mux and row
                 // decision into cmd[].  Requesters already wait for ack, so
                 // the extra clk_ram cycle changes latency but not semantics.
                 state <= ST_DISPATCH;
@@ -515,7 +541,48 @@ always @(posedge clk) begin
         end
 
         ST_RD: begin
-            // issue one READ per cycle until rd_total issued
+            // Issue one READ, then idle one cycle (ST_RD_GAP) before the
+            // next, instead of one READ every cycle.
+            //
+            // The chip's mode register selects BURST_1 (rtl/mem/sdram.sv
+            // MRS init), so every word of an "8-word burst" is actually an
+            // independent burst-length-1 transaction -- there is no chip-
+            // internal burst counter driving these words out, this FSM
+            // fakes it by re-issuing READ every cycle. Issued back-to-back,
+            // each transaction's CL2 response window landed exactly where
+            // the next transaction's response began driving the bus, which
+            // is the proven root cause of the sole hardware-only corruption
+            // this session traced (see the dq_in capture comment above):
+            // sprites are the only 8-word-burst client, and were the only
+            // corrupt surface on real hardware while every single-word
+            // read -- which floats and holds capacitively with no
+            // contending neighbour -- rendered perfectly.
+            //
+            // A real System 24 PCB has no equivalent bottleneck: its sprite
+            // ASIC (315-5293) owns a dedicated, unshared bank of DRAM with
+            // no arbitration or burst emulation at all (per the System24.pdf
+            // main-board schematic, sheets D-5/12 and D-6/12). This 1-cycle
+            // gap is a MiSTer-only accommodation for sharing one external
+            // SDRAM chip across six ports; it has no hardware timing budget
+            // to preserve and is free to change.
+            //
+            // Spacing issuance out gives each transaction's response the
+            // same uncontended floating-bus window a single isolated read
+            // already gets safely, at the cost of roughly 1.5x the cycles
+            // per burst (~13 clk_ram cycles/burst -> ~20). At 96.6MHz clk_ram
+            // and a 656-cycle-equivalent scanline (~3962 clk_ram cycles),
+            // that is real but not free budget: the documented 1024-
+            // sprites/line cache ceiling already exceeds the per-line cycle
+            // budget before this change (s24_sprite.sv/docs/status.md both
+            // note it is untested against that theoretical maximum), and
+            // this change lowers the realistic sprite-per-line ceiling
+            // further (roughly 152 -> 99 sprites/line by this budget's
+            // math, before other-port arbitration losses). It degrades
+            // safely, not silently: a line bank that isn't ready in time
+            // reads blank for that frame via s24_sprite.sv's line_valid
+            // gate, not a hang or corrupted timing -- worth re-checking
+            // against the heaviest real sprite lists (e.g. Scramble
+            // Spirits) if dropped sprites are ever observed.
             cmd      <= CMD_READ;
             SDRAM_BA <= xfer_addr[24:23];
             // A[12:11] MUST be 00: they are the shorted DQM pins and DQM has
@@ -532,7 +599,17 @@ always @(posedge clk) begin
             rd_issued <= rd_issued + 1'd1;
             if (rd_issued + 1'd1 == rd_total) begin
                 state <= ST_RDW;   // row left open
+            end else begin
+                state <= ST_RD_GAP;
             end
+        end
+        ST_RD_GAP: begin
+            // Idle cycle between burst READs: cmd defaults to CMD_NOP (set
+            // at the top of this always block) and no state here touches
+            // cl_pipe/xfer_addr/rd_issued, so this cycle contributes
+            // nothing to the capture pipeline or address sequencing --
+            // it only widens the gap between consecutive READ commands.
+            state <= ST_RD;
         end
         ST_RDW: begin
             // wait for capture pipeline to finish (delivery in capture logic);
