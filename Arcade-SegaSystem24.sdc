@@ -43,13 +43,21 @@ set_clock_groups -asynchronous \
 #   t=5.208ns  SDRAM samples it (half-period of setup)
 #   t=26.04ns  CL2 data launched by SDRAM (2 SDRAM clocks later)
 #   t=31.25ns  dq_in samples it (cl_pipe[3], 3 clk_ram cycles after the CAS)
-# Both requirements are therefore exactly half a clk_ram period, which is what
-# default single-cycle analysis of a 180-degree generated clock produces.  No
-# multicycle exception belongs here: adding one would hide the real budget.
+#
+# That model is INCOMPLETE, and the earlier claim here that "no multicycle
+# exception belongs" was wrong.  It ignores the latency of SDRAM_CLK itself:
+# the port is fed from outclk2 through general routing and an output buffer,
+# and quartus_sta measures 13.804 ns from the PLL edge to the SDRAM_CLK PIN
+# against only 7.988 ns for clk_ram reaching the dq_in capture flop -- a
+# 5.29-5.82 ns skew, i.e. more than a full half-period, that the sequence
+# above omits.  Once it is included the SDRAM's CL2 word cannot possibly
+# arrive before the default single-cycle capture edge, and all 16
+# SDRAM_DQ -> dq_in paths report about -9 ns.  Those 16 paths were the
+# ENTIRE -142.306 ns TNS of the clk_ram domain and the only failing paths in
+# the core; clk_ram's own Fmax is 108.45 MHz against 96.63 MHz required.
 #
 # The -max input delay is tAC(CL2) plus board flight for the parts on the
-# MiSTer 128 MB module.  Only 5.21ns is available, so this path is expected to
-# be tight or failing -- that is the point of constraining it.
+# MiSTer 128 MB module.
 # SDRAM_CLK is driven directly from PLL outclk2 (general[2]), which the PLL
 # already phase-shifts +180 degrees -- see Arcade-SegaSystem24.sv. An
 # IOE-DDR-forwarded alternative was hardware-tested and reverted after it
@@ -72,6 +80,28 @@ if {[get_collection_size $s24_sdram_src] > 0 && \
     set_output_delay -clock SDRAM_CLK -min -0.8 $s24_sdram_out
     set_input_delay  -clock SDRAM_CLK -max  6.0 $s24_sdram_in
     set_input_delay  -clock SDRAM_CLK -min  2.5 $s24_sdram_in
+
+    # The RTL already waits the extra cycle the forwarding skew demands:
+    # cl_pipe[0] is set at the CAS and the capture happens on cl_pipe[3],
+    # three clk_ram cycles later -- one cycle MORE than a CL2 read needs.
+    # Declaring that to STA describes what the hardware already does; it does
+    # not relax a real requirement.  Measured effect: worst setup on
+    # SDRAM_DQ -> dq_in goes -9.062 -> +1.286 ns (Slow 100C) and the clk_ram
+    # domain TNS to 0.000, while -hold -end 1 keeps the hold check on its
+    # original edge (+11.211 ns Slow / +9.277 ns Fast, both unchanged).
+    #
+    # Do NOT re-reference the input delay to a virtual clock instead: that was
+    # measured too and is wrong -- it credits the design with the internal
+    # clock insertion delay as if the SDRAM saw the internal clock, giving a
+    # physically bogus +7.988 ns skew and a VIOLATED -0.304 ns hold.
+    set s24_dq_capture [get_registers -nowarn {*sdram:*|dq_in[*]}]
+    if {[get_collection_size $s24_dq_capture] > 0} {
+        set_multicycle_path -setup -end 2 -from $s24_sdram_in -to $s24_dq_capture
+        set_multicycle_path -hold  -end 1 -from $s24_sdram_in -to $s24_dq_capture
+    } else {
+        post_message -type critical_warning \
+            "SDRAM dq_in capture registers not found; DQ capture left single-cycle"
+    }
 } else {
     post_message -type critical_warning \
         "SDRAM_CLK generated clock not created; the SDRAM interface is UNCONSTRAINED"

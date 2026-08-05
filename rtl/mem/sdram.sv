@@ -138,7 +138,7 @@ reg [9:0]  ref_cnt;
 reg        ref_pend;
 
 typedef enum logic [3:0] {
-    ST_IDLE, ST_DISPATCH, ST_ACT, ST_RCD1, ST_RCD2, ST_RD, ST_RD_GAP, ST_RDW,
+    ST_IDLE, ST_DISPATCH, ST_ACT, ST_RCD1, ST_RCD2, ST_RD, ST_RDW,
     ST_WR, ST_WRRC, ST_PRE_XFER, ST_PRE_REF_B, ST_PRE_REF, ST_REF_B, ST_REFW
 } state_t;
 state_t state = ST_IDLE;
@@ -541,48 +541,48 @@ always @(posedge clk) begin
         end
 
         ST_RD: begin
-            // Issue one READ, then idle one cycle (ST_RD_GAP) before the
-            // next, instead of one READ every cycle.
+            // Issue one READ per cycle, back-to-back, for the whole burst.
             //
             // The chip's mode register selects BURST_1 (rtl/mem/sdram.sv
             // MRS init), so every word of an "8-word burst" is actually an
             // independent burst-length-1 transaction -- there is no chip-
             // internal burst counter driving these words out, this FSM
-            // fakes it by re-issuing READ every cycle. Issued back-to-back,
-            // each transaction's CL2 response window landed exactly where
-            // the next transaction's response began driving the bus, which
-            // is the proven root cause of the sole hardware-only corruption
-            // this session traced (see the dq_in capture comment above):
-            // sprites are the only 8-word-burst client, and were the only
-            // corrupt surface on real hardware while every single-word
-            // read -- which floats and holds capacitively with no
-            // contending neighbour -- rendered perfectly.
+            // fakes it by re-issuing READ every cycle.
             //
-            // A real System 24 PCB has no equivalent bottleneck: its sprite
-            // ASIC (315-5293) owns a dedicated, unshared bank of DRAM with
-            // no arbitration or burst emulation at all (per the System24.pdf
-            // main-board schematic, sheets D-5/12 and D-6/12). This 1-cycle
-            // gap is a MiSTer-only accommodation for sharing one external
-            // SDRAM chip across six ports; it has no hardware timing budget
-            // to preserve and is free to change.
+            // A one-cycle gap (ST_RD_GAP) was inserted here for a session
+            // that traced hardware-only sprite corruption to this back-to-
+            // back issuance, on the theory that each transaction's CL2
+            // response window landed exactly where the next transaction's
+            // response began driving the bus. That diagnosis did not
+            // survive: quartus_sta against the fitted netlist showed the
+            // capture path (SDRAM_DQ -> dq_in, see the dq_in comment above)
+            // failing setup by -9.062ns/TNS -142.306 at every corner --
+            // the ENTIRE clk_ram-domain timing failure, and unrelated to
+            // burst spacing, since spacing out READs does not change the
+            // clk_ram-edge-to-dq_in relationship for any individual word.
+            // The real defect was the input-delay constraint modelling
+            // capture a full clk_ram cycle before the SDRAM_CLK forwarding
+            // latency makes data available; Arcade-SegaSystem24.sdc now
+            // declares that relationship with set_multicycle_path, which
+            // measured clean at +1.286ns/TNS 0.000 at the same corner with
+            // NO RTL change. The corruption that prompted this gap was
+            // later re-diagnosed as an unrelated RTL bug (sprite descriptor
+            // packing dropping tile_base/palette_base) that produced solid
+            // colour boxes, not per-word bus contention, and was fixed in
+            // rtl/video/s24_sprite.sv's pack_word/unpack_word.
             //
-            // Spacing issuance out gives each transaction's response the
-            // same uncontended floating-bus window a single isolated read
-            // already gets safely, at the cost of roughly 1.5x the cycles
-            // per burst (~13 clk_ram cycles/burst -> ~20). At 96.6MHz clk_ram
-            // and a 656-cycle-equivalent scanline (~3962 clk_ram cycles),
-            // that is real but not free budget: the documented 1024-
-            // sprites/line cache ceiling already exceeds the per-line cycle
-            // budget before this change (s24_sprite.sv/docs/status.md both
-            // note it is untested against that theoretical maximum), and
-            // this change lowers the realistic sprite-per-line ceiling
-            // further (roughly 152 -> 99 sprites/line by this budget's
-            // math, before other-port arbitration losses). It degrades
-            // safely, not silently: a line bank that isn't ready in time
-            // reads blank for that frame via s24_sprite.sv's line_valid
-            // gate, not a hang or corrupted timing -- worth re-checking
-            // against the heaviest real sprite lists (e.g. Scramble
-            // Spirits) if dropped sprites are ever observed.
+            // Back-to-back BURST_1 READs are JEDEC-legal (a seamless read
+            // stream); the chip does not disable its output drivers between
+            // them. The 1-cycle gap bought no capture margin and only cost
+            // throughput -- ~13 clk_ram cycles/burst -> ~20 (docs/status.md,
+            // s24_sprite.sv's 1024-sprites/line cache ceiling), which
+            // measurably slowed 68000 bus cycles that arbitrate against
+            // sprite bursts during gameplay. Removing it restores the
+            // uncontended per-burst cost; the DQ capture margin comes from
+            // the SDC multicycle, not from spacing. If a genuine capture
+            // margin regression is ever observed on hardware, re-add
+            // spacing as its own isolated, hardware-tested change --
+            // do not restore it blind alongside other work.
             cmd      <= CMD_READ;
             SDRAM_BA <= xfer_addr[24:23];
             // A[12:11] MUST be 00: they are the shorted DQM pins and DQM has
@@ -600,16 +600,8 @@ always @(posedge clk) begin
             if (rd_issued + 1'd1 == rd_total) begin
                 state <= ST_RDW;   // row left open
             end else begin
-                state <= ST_RD_GAP;
+                state <= ST_RD;    // next word, back-to-back
             end
-        end
-        ST_RD_GAP: begin
-            // Idle cycle between burst READs: cmd defaults to CMD_NOP (set
-            // at the top of this always block) and no state here touches
-            // cl_pipe/xfer_addr/rd_issued, so this cycle contributes
-            // nothing to the capture pipeline or address sequencing --
-            // it only widens the gap between consecutive READ commands.
-            state <= ST_RD;
         end
         ST_RDW: begin
             // wait for capture pipeline to finish (delivery in capture logic);

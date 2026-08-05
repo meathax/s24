@@ -6,7 +6,19 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name LAST_QUARTUS_VERSION "17.0.2 Lite Edition"
 set_global_assignment -name GENERATE_RBF_FILE ON
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
-set_global_assignment -name SEED 4
+# SEED 1, not 4: widening the sprite descriptor caches (rtl/video/s24_sprite.sv,
+# tile_base/palette_base carried through instead of zero-filled) turned a
+# synthesis-collapsed constant-zero adder operand into a genuine live one on
+# the sprite line-RAM write-enable cone, costing ~0.8ns on clk_sys and, via
+# placement pressure from the wider RAMs, opening a small clk_ram hold
+# violation on cdc_wr. Seed 4's placement failed to close either at
+# STANDARD FIT/MAXIMUM router effort with both physical-synthesis options ON
+# (Analysis & Synthesis is seed-independent; only re-placing with seed 1
+# changed the outcome). Seed 1 closes both cleanly at all 4 PVT corners
+# with margin (clk_sys setup >=+0.608ns, clk_ram hold >=+0.110ns) and does
+# not disturb the clk_ram/SDRAM_CLK/SDRAM_DQ->dq_in timing fixed by the SDC
+# multicycle below. Re-verify both paths before changing this again.
+set_global_assignment -name SEED 1
 
 # Machine-wide safe Quartus policy. Do not override these in build scripts.
 #

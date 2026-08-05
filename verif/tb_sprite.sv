@@ -12,7 +12,8 @@ module tb_sprite;
     integer list_collect_cycles=0;
     integer first_list_collect_cycles;
     integer stress_clocks;
-    logic first_cache_epoch;
+    integer settle_clocks;
+    logic first_frame_epoch;
     localparam logic [26:4] BASE=SDR_SPRITE_BASE[26:4];
 
     always #5 clk=~clk;
@@ -89,7 +90,7 @@ module tb_sprite;
         assert(dut.list_cache_valid)
             else $fatal(1,"sprite vblank list collection failed state=%0d valid=%0d seen=%0d index=%0d req=%0d ack=%0d epoch=%0d/%0d",
                         dut.state,dut.list_cache_valid,dut.list_seen,dut.list_index,
-                        mem_req,mem_ack,dut.cache_epoch,dut.frame_epoch);
+                        mem_req,mem_ack,dut.cache_refresh_pending,dut.frame_epoch);
         line_boundary(0); // advances the queued producer toward active line 2
         repeat(1200) @(posedge clk);
         assert(dut.state==dut.S_IDLE) else $fatal(1,"sprite renderer overrun state %0d",dut.state);
@@ -123,40 +124,53 @@ module tb_sprite;
 
         // Crossing the native frame boundary rebuilds the cache from live
         // descriptor fields and stamps the new epoch.
-        first_cache_epoch=dut.cache_epoch;
+        first_frame_epoch=dut.frame_epoch;
         line_boundary(10'd383);
-        repeat(40) @(posedge clk);
+        // Wait for the renderer to settle rather than a fixed 40 clocks. The
+        // frame boundary re-collects the list AND renders the next line, and
+        // with tile_base/palette_base carried correctly that is real fetch
+        // work (S_DATA_WAIT), not an immediate fall-through. The budget is
+        // still bounded by one scanline, so a genuine overrun still fails.
+        settle_clocks=0;
+        while(dut.state!=dut.S_IDLE && settle_clocks<656*3) begin
+            @(posedge clk);settle_clocks++;
+        end
         assert(dut.state==dut.S_IDLE)
-            else $fatal(1,"next-frame list refresh overrun state %0d",dut.state);
+            else $fatal(1,"next-frame list refresh overrun state %0d clocks=%0d",
+                        dut.state,settle_clocks);
+        // cache_epoch was replaced by cache_refresh_pending/frame_epoch:
+        // the frame boundary toggles frame_epoch and raises the refresh
+        // request, and the rebuild clears it. "cache is current for this
+        // frame" is therefore now !cache_refresh_pending.
         assert(list_collect_cycles>first_list_collect_cycles &&
-               dut.cache_epoch!=first_cache_epoch &&
-               dut.cache_epoch==dut.frame_epoch)
+               dut.frame_epoch!=first_frame_epoch &&
+               !dut.cache_refresh_pending)
             else $fatal(1,"sprite descriptor cache did not refresh at frame epoch");
 
         // SSpirits reaches 3547 normal descriptors behind the 8192-entry
         // linked-list traversal bound. Exercise the retained-cache path with 48 active
         // one-tile sprites and prove one scanline still meets 656*3 clocks.
+        // These poke the stack RAM's storage directly, which holds the PACKED
+        // 81-bit descriptor, not the raw 128-bit record. Packed layout is
+        // [0]=w0[13], [16:1]=w1, [32:17]=w4, [48:33]=w5, [64:49]=w2,
+        // [80:65]=w3 -- keep in step with s24_sprite_pair_ram::pack_word.
         for(int s=0;s<1024;s++) begin
+            automatic logic [80:0] packed_desc = 81'd0;
+            packed_desc[16:1]  = 16'h003f;                        // w1 zoom
+            packed_desc[32:17] = (s<48)?16'h0002:16'h01f4;        // w4 Y/size_y
+            packed_desc[48:33] = 16'(8+(s%48)*8);                 // w5 X/size_x
+            packed_desc[64:49] = 16'h0010;                        // w2 tile base
+            packed_desc[80:65] = 16'h0002;                        // w3 palette base
             if(s[0]) begin
-                dut.descriptor_stack_ram.mem_hi[s>>1]=128'd0;
-                dut.descriptor_stack_ram.mem_hi[s>>1][1*16 +:16]=16'h003f;
-                dut.descriptor_stack_ram.mem_hi[s>>1][2*16 +:16]=16'h0010;
-                dut.descriptor_stack_ram.mem_hi[s>>1][3*16 +:16]=16'h0002;
-                dut.descriptor_stack_ram.mem_hi[s>>1][4*16 +:16]=(s<48)?16'h0002:16'h01f4;
-                dut.descriptor_stack_ram.mem_hi[s>>1][5*16 +:16]=16'(8+(s%48)*8);
-                dut.clip_stack_ram.mem_hi[s>>1]=81'd0;
+                dut.descriptor_stack_ram.mem_hi[s>>1]=packed_desc;
+                dut.clip_stack_ram.mem_hi[s>>1]=38'd0;
             end else begin
-                dut.descriptor_stack_ram.mem_lo[s>>1]=128'd0;
-                dut.descriptor_stack_ram.mem_lo[s>>1][1*16 +:16]=16'h003f;
-                dut.descriptor_stack_ram.mem_lo[s>>1][2*16 +:16]=16'h0010;
-                dut.descriptor_stack_ram.mem_lo[s>>1][3*16 +:16]=16'h0002;
-                dut.descriptor_stack_ram.mem_lo[s>>1][4*16 +:16]=(s<48)?16'h0002:16'h01f4;
-                dut.descriptor_stack_ram.mem_lo[s>>1][5*16 +:16]=16'(8+(s%48)*8);
-                dut.clip_stack_ram.mem_lo[s>>1]=81'd0;
+                dut.descriptor_stack_ram.mem_lo[s>>1]=packed_desc;
+                dut.clip_stack_ram.mem_lo[s>>1]=38'd0;
             end
         end
         dut.stack_head=0;dut.stack_count=13'd1024;
-        dut.list_cache_valid=1;dut.cache_epoch=dut.frame_epoch;
+        dut.list_cache_valid=1;dut.cache_refresh_pending=0;
         dut.render_next_target=0;dut.line_valid=0;
         line_boundary(0);
         stress_clocks=0;

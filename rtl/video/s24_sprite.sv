@@ -89,19 +89,31 @@ module s24_sprite_pair_ram #(
     input logic write_enable,
     input logic write_high
 );
-    // The renderer consumes only four descriptor fields (49 bits) and six
-    // clip fields (38 bits). Packing those fields removes dead q_a bits from
-    // the generated M10K without changing the externally visible record.
+    // The renderer consumes six descriptor fields (81 bits) and six clip
+    // fields (38 bits). Packing those fields removes dead q_a bits from the
+    // generated M10K without changing the externally visible record.
+    //
+    // Descriptor words 2 and 3 carry the sprite's tile-data base and its
+    // indirect-palette base. Both are read at render time via
+    // d2/d3 = burst_word(descriptor,2|3). They were absent from the original
+    // 49-bit packing, so unpack_word's '0 fill silently forced tile_base and
+    // palette_base to zero for every sprite: geometry (w1/w4/w5) stayed
+    // correct while every sprite fetched its pixels and its colour table from
+    // word 0 of sprite RAM -- the descriptor list itself. Because nothing is
+    // transparent unless the INDIRECT colour is zero, that rendered each
+    // sprite as a solid filled box at the right position and size.
     function automatic logic [PACKED_WIDTH-1:0] pack_word(
         input logic [WIDTH-1:0] value
     );
         begin
             pack_word='0;
-            if(PACKED_WIDTH==49) begin
+            if(PACKED_WIDTH==81) begin
                 pack_word[0]=value[13];
                 pack_word[16:1]=value[31:16];
                 pack_word[32:17]=value[79:64];
                 pack_word[48:33]=value[95:80];
+                pack_word[64:49]=value[47:32];   // w2: tile-data base
+                pack_word[80:65]=value[63:48];   // w3: indirect palette base
             end else if(PACKED_WIDTH==38) begin
                 pack_word[0]=value[80];
                 pack_word[1]=value[77];
@@ -120,11 +132,13 @@ module s24_sprite_pair_ram #(
     );
         begin
             unpack_word='0;
-            if(PACKED_WIDTH==49) begin
+            if(PACKED_WIDTH==81) begin
                 unpack_word[13]=value[0];
                 unpack_word[31:16]=value[16:1];
                 unpack_word[79:64]=value[32:17];
                 unpack_word[95:80]=value[48:33];
+                unpack_word[47:32]=value[64:49];   // w2: tile-data base
+                unpack_word[63:48]=value[80:65];   // w3: indirect palette base
             end else if(PACKED_WIDTH==38) begin
                 unpack_word[80]=value[0];
                 unpack_word[77]=value[1];
@@ -223,18 +237,23 @@ module s24_sprite_active_ram #(
     input logic [WIDTH-1:0] write_data,
     input logic write_enable
 );
-    // Active entries use the same 49-bit descriptor and 38-bit clip payloads
-    // as the pair RAM, packed into one 87-bit M10K word.
+    // Active entries use the same 81-bit descriptor and 38-bit clip payloads
+    // as the pair RAM, packed into one 119-bit M10K word.  The descriptor
+    // occupies value[208:81], so word 2 is value[128:113] and word 3 is
+    // value[144:129]; both must be carried or the render-time tile_base and
+    // palette_base collapse to zero (see s24_sprite_pair_ram above).
     function automatic logic [PACKED_WIDTH-1:0] pack_word(
         input logic [WIDTH-1:0] value
     );
         begin
             pack_word='0;
-            if(PACKED_WIDTH==87) begin
+            if(PACKED_WIDTH==119) begin
                 pack_word[0]=value[94];
                 pack_word[16:1]=value[112:97];
                 pack_word[32:17]=value[160:145];
                 pack_word[48:33]=value[176:161];
+                pack_word[102:87]=value[128:113];  // w2: tile-data base
+                pack_word[118:103]=value[144:129]; // w3: indirect palette base
                 pack_word[49]=value[80];
                 pack_word[50]=value[77];
                 pack_word[59:51]=value[56:48];
@@ -252,11 +271,13 @@ module s24_sprite_active_ram #(
     );
         begin
             unpack_word='0;
-            if(PACKED_WIDTH==87) begin
+            if(PACKED_WIDTH==119) begin
                 unpack_word[94]=value[0];
                 unpack_word[112:97]=value[16:1];
                 unpack_word[160:145]=value[32:17];
                 unpack_word[176:161]=value[48:33];
+                unpack_word[128:113]=value[102:87];  // w2: tile-data base
+                unpack_word[144:129]=value[118:103]; // w3: indirect palette base
                 unpack_word[80]=value[49];
                 unpack_word[77]=value[50];
                 unpack_word[56:48]=value[59:51];
@@ -411,7 +432,7 @@ module s24_sprite (
     logic [127:0] descriptor_write_data;
     logic [80:0] clip_write_data;
 
-    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(STACK_BITS-1),.PACKED_WIDTH(49)) descriptor_stack_ram (
+    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(STACK_BITS-1),.PACKED_WIDTH(81)) descriptor_stack_ram (
         .clk(clk),.read_addr(descriptor_read_pair),
         .read_data(descriptor_stack_pair_q),.write_addr(descriptor_write_addr),
         .write_data(descriptor_write_data),.write_enable(descriptor_write_enable),
@@ -424,7 +445,7 @@ module s24_sprite (
     logic [255:0] descriptor_stack_pair2_q;
     logic [161:0] clip_stack_pair2_q;
     logic [STACK_BITS-2:0] descriptor_read_pair2;
-    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(STACK_BITS-1),.PACKED_WIDTH(49)) descriptor_stack_ram2 (
+    s24_sprite_pair_ram #(.WIDTH(128),.ADDR_WIDTH(STACK_BITS-1),.PACKED_WIDTH(81)) descriptor_stack_ram2 (
         .clk(clk),.read_addr(descriptor_read_pair2),
         .read_data(descriptor_stack_pair2_q),.write_addr(descriptor_write_addr),
         .write_data(descriptor_write_data),.write_enable(descriptor_write_enable),
@@ -440,7 +461,7 @@ module s24_sprite (
     logic active_cache_write_enable;
     logic [127:0] active_render_descriptor;
     logic [80:0] active_render_clip;
-    s24_sprite_active_ram #(.ADDR_WIDTH(ACTIVE_BITS),.PACKED_WIDTH(87)) active_cache_ram (
+    s24_sprite_active_ram #(.ADDR_WIDTH(ACTIVE_BITS),.PACKED_WIDTH(119)) active_cache_ram (
         .clk(clk),.read_addr(active_cache_read_addr),
         .read_data(active_cache_q),.write_addr(active_cache_write_addr),
         .write_data(active_cache_write_data),
@@ -514,6 +535,7 @@ module s24_sprite (
     logic fill_candidate_valid;
     logic [9:0] next_display_line;
     integer bank_scan;
+    integer reclaim_scan;
     logic [12:0] list_index;
     logic [13:0] list_seen;
     logic list_cache_valid;
@@ -746,12 +768,27 @@ module s24_sprite (
         end
         // Choose an actually free bank for the producer. Never overwrite the
         // bank currently feeding the raster.
+        //
+        // The old second term ("...!=display_bank || !line_valid[display_
+        // bank]") was tautological: inside a branch that already requires
+        // !line_valid[bank_scan], the bank_scan==display_bank case reduces to
+        // !line_valid[display_bank], which is exactly what the first term just
+        // asserted.  It therefore excluded nothing, and any moment where
+        // display_bank was momentarily invalid - the whole of vertical blank
+        // after the frame-boundary line_valid<='0, and every scanline whose
+        // swap failed - let the producer claim the bank the raster is pointing
+        // at and refill it with a FUTURE line mid-scanline.  The rest-of-line
+        // gate below only re-checks line_valid[display_bank], so the remainder
+        // of that scanline displayed a different raster line.  Exclude
+        // display_bank unconditionally instead: LINE_BANKS-1 banks of
+        // lookahead is far more than the one line the producer must stay ahead
+        // by, and display_bank is released for filling as soon as the raster
+        // moves on.
         fill_candidate = '0;
         fill_candidate_valid = 1'b0;
         for(bank_scan=0;bank_scan<LINE_BANKS;bank_scan=bank_scan+1) begin
             if(!line_valid[bank_scan] &&
-               (bank_scan[LINE_BANK_BITS-1:0]!=display_bank ||
-                !line_valid[display_bank]) &&
+               bank_scan[LINE_BANK_BITS-1:0]!=display_bank &&
                !fill_candidate_valid) begin
                 fill_candidate = bank_scan[LINE_BANK_BITS-1:0];
                 fill_candidate_valid = 1'b1;
@@ -1398,7 +1435,53 @@ module s24_sprite (
                 // queued line-0 result.
                 if(hcount==10'd655) begin
                     if(vcount==10'd423 || vcount<10'd383) begin
-                        line_valid[display_bank]<=0;
+                        // Reclaim by CONTENT, not by pointer.
+                        //
+                        // The old "line_valid[display_bank]<=0" freed exactly
+                        // one bank - whichever one display_bank happened to
+                        // name - regardless of what that bank held, and it did
+                        // so even when the swap below failed and
+                        // next_display_bank fell back to display_bank.  Two
+                        // failures followed from that:
+                        //
+                        //  * Banks the display never consumed were never
+                        //    reclaimed.  next_display_line only evaluates to 0
+                        //    at vcount==422, which this very gate excludes, so
+                        //    line 0 is produced every frame and never
+                        //    requested; its bank kept line_valid=1 for the
+                        //    whole frame and the free pool ran at 7 instead of
+                        //    8 - the exact period of the observed banding.
+                        //  * The bank named by a stale display_bank could hold
+                        //    a line the producer had rendered AHEAD of the
+                        //    raster (all of vertical blank refills banks while
+                        //    display_bank still points at the previous frame's
+                        //    last bank).  Freeing it discarded a line that had
+                        //    already been scheduled and would never be
+                        //    re-rendered, so that raster line came out blank -
+                        //    and the loss re-seeded itself one pool rotation
+                        //    later, producing an unbounded periodic band.
+                        //
+                        // Lines are produced and consumed in strictly
+                        // increasing order, and at every tick of this gate
+                        // next_display_line advances monotonically
+                        // (1 at vcount==423, then vcount+2 for vcount<383), so
+                        // "bank_line_y behind next_display_line" is exactly
+                        // "already displayed, skipped, or orphaned".  Compare
+                        // at full 10-bit width: next_display_line reaches 384,
+                        // which truncates to 0 in bank_line_y's 9 bits.
+                        //
+                        // This keeps the two behaviours the old line provided:
+                        // the outgoing display bank (y == next_display_line-1)
+                        // is still freed on a successful swap, and on a FAILED
+                        // swap display_bank is still invalidated, so the
+                        // rest-of-line gate below still blanks rather than
+                        // repeating the previous line.  The incoming bank
+                        // (y == next_display_line) is never freed, so it stays
+                        // valid for the whole scanline it feeds.
+                        for(reclaim_scan=0;reclaim_scan<LINE_BANKS;
+                            reclaim_scan=reclaim_scan+1)
+                            if({1'b0,bank_line_y[reclaim_scan]}<next_display_line)
+                                line_valid[reclaim_scan]<=0;
                         display_bank<=next_display_bank;
                     end
                     if((vcount==10'd423 || vcount<10'd383) &&
