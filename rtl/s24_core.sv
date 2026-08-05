@@ -46,10 +46,6 @@ module s24_core #(
     output logic [26:1] p0_addr,
     input  logic [15:0] p0_data,
     input  logic        p0_ack,
-    output logic        p1_req,
-    output logic [26:3] p1_addr,
-    input  logic [63:0] p1_data,
-    input  logic        p1_ack,
     output logic        p2_req,
     output logic [26:4] p2_addr,
     input  logic [127:0] p2_data,
@@ -439,8 +435,7 @@ module s24_core #(
         .cpu_dout(tile_dout),.layer0_pixel(t0),.layer1_pixel(t1),
         .layer2_pixel(t2),.layer3_pixel(t3),.layer0_cat(tc0),.layer1_cat(tc1),
         .layer2_cat(tc2),.layer3_cat(tc3),.layer0_valid(tv0),.layer1_valid(tv1),
-        .layer2_valid(tv2),.layer3_valid(tv3),.mem_req(p1_req),.mem_addr(p1_addr),
-        .mem_data(p1_data),.mem_ack(p1_ack));
+        .layer2_valid(tv2),.layer3_valid(tv3));
     logic [13:0] sp0,sp1,sp2,sp3,mixed;
     logic [10:0] sr0,sr1,sr2,sr3;
     logic [15:0] dbg_p2_stall,dbg_line_wr,dbg_mixer_px;

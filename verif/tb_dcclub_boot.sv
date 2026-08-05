@@ -17,13 +17,11 @@ module tb_dcclub_boot;
     logic ce_pixel,hblank,vblank,hsync,vsync;
     logic [7:0] red,green,blue;
     logic [15:0] audio_l,audio_r;
-    logic p0_req,p0_ack,p1_req,p1_ack,p2_req,p2_ack;
+    logic p0_req,p0_ack,p2_req,p2_ack;
     logic p3_req,p3_ack,p4_req,p4_ack,wr_req,wr_ack;
     logic [26:1] p0_addr,p3_addr,p4_addr,wr_addr;
-    logic [26:3] p1_addr;
     logic [26:4] p2_addr;
     logic [15:0] p0_data,p3_data,p4_data,wr_data;
-    logic [63:0] p1_data;
     logic [127:0] p2_data;
     logic [1:0] wr_be;
     integer instructions=0,boot_reads=0,rom_reads=0,cpu_b_reads=0;
@@ -48,7 +46,7 @@ module tb_dcclub_boot;
     endfunction
 
     always_comb begin
-        p1_data='0; p2_data='0; p4_data='0;
+        p2_data='0; p4_data='0;
     end
 
     integer rom_fd,seek_result,read_result;
@@ -63,7 +61,6 @@ module tb_dcclub_boot;
             end else p0_data<=resident_word(p0_addr);
             p0_ack<=1;
         end
-        p1_ack<=p1_req;
         p2_ack<=p2_req;
         if(!p3_req) p3_ack<=0;
         else if(!p3_ack) begin p3_data<=resident_word(p3_addr);p3_ack<=1;end
@@ -124,7 +121,6 @@ module tb_dcclub_boot;
         .hsync(hsync),.vsync(vsync),.red(red),.green(green),.blue(blue),
         .audio_l(audio_l),.audio_r(audio_r),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
-        .p1_req(p1_req),.p1_addr(p1_addr),.p1_data(p1_data),.p1_ack(p1_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_data(p3_data),.p3_ack(p3_ack),
         .p4_req(p4_req),.p4_addr(p4_addr),.p4_data(p4_data),.p4_ack(p4_ack),
@@ -137,7 +133,7 @@ module tb_dcclub_boot;
         board.has_romboard=1;
         board.golf_io=1;
         board.magic_table=MAGIC_DCCLUB;
-        p0_ack=0;p1_ack=0;p2_ack=0;p3_ack=0;p4_ack=0;wr_ack=0;
+        p0_ack=0;p2_ack=0;p3_ack=0;p4_ack=0;wr_ack=0;
         for(i=0;i<131072;i++) begin work_a[i]=0;work_b[i]=0;sprite_ram[i]=0;end
         for(i=0;i<65536;i++) char_ram[i]=0;
         $readmemh("verif/media/dcclub/boot.mem",boot_mem);

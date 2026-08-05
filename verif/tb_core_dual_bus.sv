@@ -30,7 +30,6 @@ module tb_core_dual_bus;
         .mahjong_line(),.ce_pixel(),.hblank(),.vblank(),.hsync(),.vsync(),
         .red(),.green(),.blue(),.audio_l(),.audio_r(),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
-        .p1_req(),.p1_addr(),.p1_data('0),.p1_ack(1'b0),
         .p2_req(),.p2_addr(),.p2_data('0),.p2_ack(1'b0),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_data(p3_data),.p3_ack(p3_ack),
         .p4_req(),.p4_addr(),.p4_data('0),.p4_ack(1'b0),

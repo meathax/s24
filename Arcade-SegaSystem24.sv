@@ -207,14 +207,12 @@ module emu (
             dbg_reset_events<=dbg_reset_events+1'b1;
     end
 
-    logic p0_req,p1_req,p2_req,p3_req,p4_req;
+    logic p0_req,p2_req,p3_req,p4_req;
     logic [26:1] p0_addr,p3_addr,p4_addr;
-    logic [26:3] p1_addr;
     logic [26:4] p2_addr;
     logic [15:0] p0_data,p3_data,p4_data;
-    logic [63:0] p1_data;
     logic [127:0] p2_data;
-    logic p0_ack,p1_ack,p2_ack,p3_ack,p4_ack;
+    logic p0_ack,p2_ack,p3_ack,p4_ack;
     logic cwr_req,cwr_ack;
     logic [26:1] cwr_addr;
     logic [15:0] cwr_data;
@@ -240,7 +238,6 @@ module emu (
         .audio_l(AUDIO_L),.audio_r(AUDIO_R),
         .audio_event(),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
-        .p1_req(p1_req),.p1_addr(p1_addr),.p1_data(p1_data),.p1_ack(p1_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_data(p3_data),.p3_ack(p3_ack),
         .p4_req(p4_req),.p4_addr(p4_addr),.p4_data(p4_data),.p4_ack(p4_ack),
@@ -387,14 +384,12 @@ module emu (
     logic [26:1] mwr_addr;
     logic [15:0] mwr_data;
     logic [1:0]  mwr_be;
-    logic mp0_req,mp1_req,mp2_req,mp3_req,mp4_req;
+    logic mp0_req,mp2_req,mp3_req,mp4_req;
     logic [26:1] mp0_addr,mp3_addr,mp4_addr;
-    logic [26:3] mp1_addr;
     logic [26:4] mp2_addr;
     logic [15:0] mp0_data,mp3_data,mp4_data;
-    logic [63:0] mp1_data;
     logic [127:0] mp2_data;
-    logic mp0_ack,mp1_ack,mp2_ack,mp3_ack,mp4_ack;
+    logic mp0_ack,mp2_ack,mp3_ack,mp4_ack;
     logic wr_rsp_unused_src,wr_rsp_unused_dst;
 
     s24_sdram_cdc #(.REQ_WIDTH(44),.RSP_WIDTH(1)) cdc_wr(
@@ -413,12 +408,6 @@ module emu (
         .src_ack(p0_ack),.src_response(p0_data),
         .dst_clk(clk_ram),.dst_req(mp0_req),.dst_payload(mp0_addr),
         .dst_ack(mp0_ack),.dst_response(mp0_data));
-    s24_sdram_cdc #(.REQ_WIDTH(24),.RSP_WIDTH(64)) cdc_p1(
-        .reset(~pll_locked),
-        .src_clk(clk_sys),.src_req(p1_req),.src_payload(p1_addr),
-        .src_ack(p1_ack),.src_response(p1_data),
-        .dst_clk(clk_ram),.dst_req(mp1_req),.dst_payload(mp1_addr),
-        .dst_ack(mp1_ack),.dst_response(mp1_data));
     s24_sdram_cdc #(.REQ_WIDTH(23),.RSP_WIDTH(128)) cdc_p2(
         .reset(~pll_locked),
         .src_clk(clk_sys),.src_req(p2_req),.src_payload(p2_addr),
@@ -445,7 +434,6 @@ module emu (
         .SDRAM_CKE(SDRAM_CKE),.wr_req(mwr_req),.wr_addr(mwr_addr),
         .wr_din(mwr_data),.wr_be(mwr_be),.wr_ack(mwr_ack),
         .p0_req(mp0_req),.p0_addr(mp0_addr),.p0_dout(mp0_data),.p0_ack(mp0_ack),
-        .p1_req(mp1_req),.p1_addr(mp1_addr),.p1_dout(mp1_data),.p1_ack(mp1_ack),
         .p2_req(mp2_req),.p2_addr(mp2_addr),.p2_dout(mp2_data),.p2_ack(mp2_ack),
         .p3_req(mp3_req),.p3_addr(mp3_addr),.p3_dout(mp3_data),.p3_ack(mp3_ack),
         .p4_req(mp4_req),.p4_addr(mp4_addr),.p4_dout(mp4_data),.p4_ack(mp4_ack));

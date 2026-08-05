@@ -111,11 +111,7 @@ module s24_tile (
     output logic        layer0_valid,
     output logic        layer1_valid,
     output logic        layer2_valid,
-    output logic        layer3_valid,
-    output logic        mem_req,
-    output logic [26:3] mem_addr,
-    input  logic [63:0] mem_data,
-    input  logic        mem_ack
+    output logic        layer3_valid
 );
     import s24_pkg::*;
 
@@ -569,8 +565,6 @@ module s24_tile (
             request_row <= 0;
             request_row_odd <= 0;
             char_read_pending <= 0;
-            mem_req <= 0;
-            mem_addr <= 0;
             layer0_pixel <= 0; layer1_pixel <= 0;
             layer2_pixel <= 0; layer3_pixel <= 0;
             layer0_cat <= 0; layer1_cat <= 0;
@@ -578,10 +572,9 @@ module s24_tile (
             layer0_valid <= 0; layer1_valid <= 0;
             layer2_valid <= 0; layer3_valid <= 0;
         end else begin
-            // Port p1 is retained at the module boundary for compatibility,
-            // but display fetches now use the deterministic local mirror.
-            mem_req <= 1'b0;
-            mem_addr <= '0;
+            // Display fetches use the deterministic local mirror; the SDRAM
+            // tile port (formerly p1) was removed entirely -- it was never
+            // driven to anything but zero.
             // The read address is one pixel ahead because hcount advances on
             // the same edge; the line RAM output is then stable for 3 clocks.
             if (ce_pixel) begin

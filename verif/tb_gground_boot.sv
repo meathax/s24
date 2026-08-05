@@ -91,13 +91,11 @@ module tb_gground_boot;
     audio_event_t audio_event;
     logic [7:0] dsw_value,coinage_value;
     logic [63:0] simulated_inputs;
-    logic p0_req,p0_ack,p1_req,p1_ack,p2_req,p2_ack;
+    logic p0_req,p0_ack,p2_req,p2_ack;
     logic p3_req,p3_ack,p4_req,p4_ack,wr_req,wr_ack;
     logic [26:1] p0_addr,p3_addr,p4_addr,wr_addr;
-    logic [26:3] p1_addr;
     logic [26:4] p2_addr;
     logic [15:0] p0_data,p3_data,p4_data,wr_data;
-    logic [63:0] p1_data;
     logic [127:0] p2_data;
     logic [1:0] wr_be;
 
@@ -230,16 +228,6 @@ module tb_gground_boot;
         else resident_word=16'hffff;
     endfunction
 
-    function automatic [63:0] tile_burst(input logic [26:3] a);
-        integer word_index;
-        begin
-            word_index=(a-SDR_CHAR_BASE[26:3])*4;
-            if(word_index<0 || word_index+3>=65536) tile_burst='0;
-            else tile_burst={char_ram[word_index+3],char_ram[word_index+2],
-                             char_ram[word_index+1],char_ram[word_index]};
-        end
-    endfunction
-
     function automatic [127:0] sprite_burst(input logic [26:4] a);
         integer word_index;
         begin
@@ -253,7 +241,6 @@ module tb_gground_boot;
     endfunction
 
     always_comb begin
-        p1_data=tile_burst(p1_addr);
         p2_data=sprite_burst(p2_addr);
     end
 
@@ -397,7 +384,6 @@ module tb_gground_boot;
         if(!p3_req) p3_ack<=0;
         else if(!p3_ack) begin p3_data<=resident_word(p3_addr);p3_ack<=1;end
 
-        p1_ack<=p1_req;
         p2_ack<=p2_req;
         if(reset) begin
             p4_ack<=0;
@@ -581,7 +567,9 @@ module tb_gground_boot;
                 dut.irq.timer_value,dut.irq.timer_mode,dut.irq.allow_b);
             irq_b_read_log_count<=irq_b_read_log_count+1;
         end
-        if(p1_req && !p1_ack) tile_requests<=tile_requests+1;
+        // p1 (tile SDRAM port) was removed from s24_core entirely; tile_requests
+        // stays permanently 0 (matches its behaviour before removal too --
+        // s24_tile.sv never asserted p1_req).
         if(p2_req && !p2_ack) sprite_requests<=sprite_requests+1;
         if(dut.io_cnt[1] && cnt1_d && ce_pixel && !hblank && !vblank &&
                 (red!=0 || green!=0 || blue!=0))
@@ -721,7 +709,6 @@ module tb_gground_boot;
         .hsync(hsync),.vsync(vsync),.red(red),.green(green),.blue(blue),
         .audio_l(audio_l),.audio_r(audio_r),.audio_event(audio_event),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
-        .p1_req(p1_req),.p1_addr(p1_addr),.p1_data(p1_data),.p1_ack(p1_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_data(p3_data),.p3_ack(p3_ack),
         .p4_req(p4_req),.p4_addr(p4_addr),.p4_data(p4_data),.p4_ack(p4_ack),
@@ -857,7 +844,7 @@ module tb_gground_boot;
         board.magic_table=magic_table[3:0];
         coinage_value=coinage_arg[7:0];
         dsw_value=dsw_arg[7:0];
-        p0_ack=0;p1_ack=0;p2_ack=0;p3_ack=0;p4_ack=0;wr_ack=0;
+        p0_ack=0;p2_ack=0;p3_ack=0;p4_ack=0;wr_ack=0;
         for(i=0;i<131072;i++) begin work_a[i]=0;work_b[i]=0;sprite_ram[i]=0;end
         for(i=0;i<65536;i++) char_ram[i]=0;
         for(i=0;i<ROMBOARD_WORDS;i++) romboard_mem[i]=16'hffff;

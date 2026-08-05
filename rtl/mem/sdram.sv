@@ -3,9 +3,8 @@
 //  16-bit SDR SDRAM @ clk_ram (96.6 MHz), CL2, strictly serialized
 //  transactions. ROM-download writes keep a row open for same-row words and
 //  explicitly precharge before row changes, reads, or refreshes.
-//  Five request ports with bounded round-robin arbitration (DESIGN.md §4.2):
+//  Four request ports with bounded round-robin arbitration (DESIGN.md §4.2):
 //    p0: V60 fetch/data (latency critical, 16-bit single)
-//    p1: tile fetch      (64-bit burst = 4 words)
 //    p2: sprite fetch    (128-bit burst = 8 words)
 //    p3: Z80 ROM         (16-bit single, byte laned)
 //    p4: MultiPCM        (16-bit single)
@@ -17,6 +16,16 @@
 //  PCB schematic) and p5_req/p5_addr were only ever driven to zero -- removed
 //  entirely, along with its s24_sdram_cdc bridge instance and dedicated
 //  64-bit output register, to free fitter resources on an 87%-ALM design.
+//
+//  The p1 tile-fetch port was removed the same way: rtl/video/s24_tile.sv's
+//  display path was switched to an on-chip character-RAM mirror and its
+//  mem_req/mem_addr outputs were left permanently at zero (see git history
+//  for the commit that made that switch) -- so p1_req never asserted on any
+//  build. Removing the port drops its s24_sdram_cdc bridge (REQ_WIDTH 24,
+//  RSP_WIDTH 64) and its round-robin slot. The remaining ports keep their
+//  original numbers (p0, p2, p3, p4) rather than renumbering, matching how
+//  p5 was dropped from the tail; the round-robin below simply skips grant
+//  value 1 instead of ever assigning it.
 //
 //  REQUEST CONTRACT (all ports, including wr): one transaction per req
 //  RISING EDGE; the address (and write data/be) is sampled on that edge.
@@ -56,12 +65,6 @@ module sdram (
     input      [26:1] p0_addr,
     output reg [15:0] p0_dout,
     output reg        p0_ack,
-
-    // p1: tiles — 4-word burst, aligned to 8 bytes
-    input             p1_req,
-    input      [26:3] p1_addr,
-    output reg [63:0] p1_dout,
-    output reg        p1_ack,
 
     // p2: sprites — 8-word burst, aligned to 16 bytes
     input             p2_req,
@@ -174,9 +177,8 @@ reg [15:0] din_pipe_d1, din_pipe_d2;   // unused placeholder (kept for clarity)
 // arbitration may delay a lower-priority port long after the producer pulses
 // req or moves on to its next address.  This mirrors the latched per-slot
 // request interfaces used by mature MiSTer SDRAM frameworks.
-reg p0_pend, p1_pend, p2_pend, p3_pend, p4_pend, wr_pend;
+reg p0_pend, p2_pend, p3_pend, p4_pend, wr_pend;
 reg [26:1] p0_addr_p, p3_addr_p, p4_addr_p, wr_addr_p;
-reg [26:3] p1_addr_p;
 reg [26:4] p2_addr_p;
 reg [15:0] wr_din_p;
 reg  [1:0] wr_be_p;
@@ -184,17 +186,19 @@ reg  [1:0] wr_be_p;
 // Reads rotate after every grant.  This prevents continuous V60 cache misses
 // from starving sprite/audio traffic while retaining the download write port
 // as the sole highest-priority client (game logic is held reset during it).
+// Only four ports remain (p0, p2, p3, p4; p1 was removed -- see the header
+// note), so rr_next cycles 0 -> 2 -> 3 -> 4 -> 0 and grant value 1 is never
+// assigned; the four case selectors below are exactly that cycle's values.
 reg       read_valid;
 reg [2:0] read_grant;
 always @* begin
     read_valid = 1'b1;
     read_grant = rr_next;
     case (rr_next)
-        3'd0: if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else read_valid=0;
-        3'd1: if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else read_valid=0;
-        3'd2: if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else read_valid=0;
-        3'd3: if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else read_valid=0;
-        default: if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p1_pend) read_grant=1; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else read_valid=0;
+        3'd0: if (p0_pend) read_grant=0; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else read_valid=0;
+        3'd2: if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else read_valid=0;
+        3'd3: if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p2_pend) read_grant=2; else read_valid=0;
+        default: if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else read_valid=0;
     endcase
 end
 
@@ -209,8 +213,8 @@ end
 // V60 while lighter boards never faulted.  Edge-detection latches exactly once per
 // request pulse (or per level-request start: the loader holds wr_req until
 // wr_ack) regardless of ack overlap.
-reg p0_req_d, p1_req_d, p2_req_d, p3_req_d, p4_req_d, wr_req_d;
-reg p0_ack_d2, p1_ack_d2, p2_ack_d2, p3_ack_d2, p4_ack_d2, wr_ack_d2;
+reg p0_req_d, p2_req_d, p3_req_d, p4_req_d, wr_req_d;
+reg p0_ack_d2, p2_ack_d2, p3_ack_d2, p4_ack_d2, wr_ack_d2;
 always @(posedge clk) begin
     // Completion clears pend on the ack RISING EDGE only, and FIRST, so a
     // same-edge new request edge below overrides it (the later nonblocking
@@ -219,25 +223,21 @@ always @(posedge clk) begin
     // clears pend — the V60 icache fill pattern — latches instead of
     // vanishing; (2) the 2-cycle ack stretch must not wipe a request that
     // latched during the stretch window on the stretch's second cycle.
-    p0_ack_d2 <= p0_ack; p1_ack_d2 <= p1_ack; p2_ack_d2 <= p2_ack;
+    p0_ack_d2 <= p0_ack; p2_ack_d2 <= p2_ack;
     p3_ack_d2 <= p3_ack; p4_ack_d2 <= p4_ack;
     wr_ack_d2 <= wr_ack;
     if (p0_ack && !p0_ack_d2) p0_pend <= 1'b0;
-    if (p1_ack && !p1_ack_d2) p1_pend <= 1'b0;
     if (p2_ack && !p2_ack_d2) p2_pend <= 1'b0;
     if (p3_ack && !p3_ack_d2) p3_pend <= 1'b0;
     if (p4_ack && !p4_ack_d2) p4_pend <= 1'b0;
     if (wr_ack && !wr_ack_d2) wr_pend <= 1'b0;
-    p0_req_d <= p0_req; p1_req_d <= p1_req; p2_req_d <= p2_req;
+    p0_req_d <= p0_req; p2_req_d <= p2_req;
     p3_req_d <= p3_req; p4_req_d <= p4_req;
     wr_req_d <= wr_req;
     // Every s32 requester keeps at most one transaction outstanding (pulse, or
     // level held until ack), so an unqualified rising-edge latch is exact.
     if (p0_req && !p0_req_d) begin
         p0_pend <= 1'b1; p0_addr_p <= p0_addr;
-    end
-    if (p1_req && !p1_req_d) begin
-        p1_pend <= 1'b1; p1_addr_p <= p1_addr;
     end
     if (p2_req && !p2_req_d) begin
         p2_pend <= 1'b1; p2_addr_p <= p2_addr;
@@ -253,10 +253,10 @@ always @(posedge clk) begin
         wr_din_p <= wr_din; wr_be_p <= wr_be;
     end
     if (init) begin
-        {p0_pend,p1_pend,p2_pend,p3_pend,p4_pend,wr_pend} <= '0;
-        {p0_req_d,p1_req_d,p2_req_d,p3_req_d,p4_req_d,wr_req_d} <= '0;
-        {p0_ack_d2,p1_ack_d2,p2_ack_d2,p3_ack_d2,p4_ack_d2,wr_ack_d2} <= '0;
-        p0_addr_p <= '0; p1_addr_p <= '0; p2_addr_p <= '0;
+        {p0_pend,p2_pend,p3_pend,p4_pend,wr_pend} <= '0;
+        {p0_req_d,p2_req_d,p3_req_d,p4_req_d,wr_req_d} <= '0;
+        {p0_ack_d2,p2_ack_d2,p3_ack_d2,p4_ack_d2,wr_ack_d2} <= '0;
+        p0_addr_p <= '0; p2_addr_p <= '0;
         p3_addr_p <= '0; p4_addr_p <= '0; wr_addr_p <= '0;
         wr_din_p <= '0; wr_be_p <= '0;
     end
@@ -270,12 +270,12 @@ end
 // drop within a few clk_ram of the stretched ack (clk_sys requesters take 2).
 generate
     genvar gi;
-    for (gi = 0; gi < 6; gi = gi + 1) begin : g_reqwatch
+    for (gi = 0; gi < 5; gi = gi + 1) begin : g_reqwatch
         reg [7:0] held;
-        wire req_i  = gi==0 ? p0_req  : gi==1 ? p1_req  : gi==2 ? p2_req  :
-                      gi==3 ? p3_req  : gi==4 ? p4_req  : wr_req;
-        wire pend_i = gi==0 ? p0_pend : gi==1 ? p1_pend : gi==2 ? p2_pend :
-                      gi==3 ? p3_pend : gi==4 ? p4_pend : wr_pend;
+        wire req_i  = gi==0 ? p0_req  : gi==1 ? p2_req  :
+                      gi==2 ? p3_req  : gi==3 ? p4_req  : wr_req;
+        wire pend_i = gi==0 ? p0_pend : gi==1 ? p2_pend :
+                      gi==2 ? p3_pend : gi==3 ? p4_pend : wr_pend;
         always @(posedge clk) begin
             if (init || !req_i || pend_i) held <= 8'd0;
             else if (held != 8'hff) begin
@@ -345,7 +345,6 @@ task automatic deliver(input [15:0] final_word);
         // The final buffer write and delivery share an edge.  Use the staged
         // word directly for the last lane instead of returning stale cap_buf.
         3'd0: begin p0_dout <= final_word; p0_ack <= 1'b1; end
-        3'd1: begin p1_dout <= {final_word, cap_buf[2], cap_buf[1], cap_buf[0]}; p1_ack <= 1'b1; end
         3'd2: begin p2_dout <= {final_word, cap_buf[6], cap_buf[5], cap_buf[4],
                                 cap_buf[3], cap_buf[2], cap_buf[1], cap_buf[0]}; p2_ack <= 1'b1; end
         3'd3: begin p3_dout <= final_word; p3_ack <= 1'b1; end
@@ -362,7 +361,7 @@ always @(posedge clk) begin
     // samples exactly one rising edge with ack high
     if (ack_stretch != 0) ack_stretch <= ack_stretch - 1'd1;
     else begin
-        p0_ack <= 1'b0; p1_ack <= 1'b0; p2_ack <= 1'b0;
+        p0_ack <= 1'b0; p2_ack <= 1'b0;
         p3_ack <= 1'b0; p4_ack <= 1'b0; wr_ack <= 1'b0;
     end
 
@@ -446,10 +445,13 @@ always @(posedge clk) begin
                 else begin
                     grant <= read_grant;
                     is_write <= 1'b0;
-                    rr_next <= (read_grant == 3'd4) ? 3'd0 : read_grant + 1'd1;
+                    // Compact 4-value cycle 0->2->3->4->0 (p1's slot is
+                    // gone; read_grant+1 would land on the dead value 1).
+                    rr_next <= (read_grant == 3'd0) ? 3'd2 :
+                               (read_grant == 3'd2) ? 3'd3 :
+                               (read_grant == 3'd3) ? 3'd4 : 3'd0;
                     case (read_grant)
                         3'd0: begin a = p0_addr_p;           rd_total <= 4'd1; end
-                        3'd1: begin a = {p1_addr_p, 2'b00};  rd_total <= 4'd4; end
                         3'd2: begin a = {p2_addr_p, 3'b000}; rd_total <= 4'd8; end
                         3'd3: begin a = p3_addr_p;           rd_total <= 4'd1; end
                         default: begin a = p4_addr_p;        rd_total <= 4'd1; end

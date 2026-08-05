@@ -76,11 +76,10 @@ module tb_ym_write;
     logic ce_pixel, hblank, vblank, hsync, vsync;
     logic [7:0] red, green, blue;
     logic [15:0] audio_l, audio_r;
-    logic p0_req, p0_ack = 0, p1_req, p1_ack = 0, p2_req, p2_ack = 0;
+    logic p0_req, p0_ack = 0, p2_req, p2_ack = 0;
     logic p3_req, p3_ack = 0, p4_req, p4_ack = 0;
     logic wr_req, wr_ack = 0;
     logic [26:1] p0_addr, p3_addr, p4_addr, wr_addr;
-    logic [26:3] p1_addr;
     logic [26:4] p2_addr;
     logic [15:0] wr_data;
     logic [1:0] wr_be;
@@ -100,7 +99,6 @@ module tb_ym_write;
         .hsync(hsync), .vsync(vsync), .red(red), .green(green), .blue(blue),
         .audio_l(audio_l), .audio_r(audio_r),
         .p0_req(p0_req), .p0_addr(p0_addr), .p0_data(16'h4e71), .p0_ack(p0_ack),
-        .p1_req(p1_req), .p1_addr(p1_addr), .p1_data('0), .p1_ack(p1_ack),
         .p2_req(p2_req), .p2_addr(p2_addr), .p2_data('0), .p2_ack(p2_ack),
         .p3_req(p3_req), .p3_addr(p3_addr), .p3_data(16'hffff), .p3_ack(p3_ack),
         .p4_req(p4_req), .p4_addr(p4_addr), .p4_data('0), .p4_ack(p4_ack),
