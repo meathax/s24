@@ -1,6 +1,7 @@
 /db/
 /incremental_db/
 /output_files/
+/sim_output/
 /verif/obj_*/
 /verif/modelsim_*/
 /verif/media/
