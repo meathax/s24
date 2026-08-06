@@ -2,17 +2,8 @@
 /incremental_db/
 /output_files/
 /sim_output/
-/verif/obj_*/
-/verif/modelsim_*/
-/verif/media/
-/verif/frames/
-/verif/*.log
-/verif/verilator/
-/verif/mame/*/
 /snap/
 /transcript
-__pycache__/
-*.pyc
 /*.rpt
 **/*.rpt
 /*.summary
@@ -30,8 +21,7 @@ __pycache__/
 *.key
 !rtl/cpu/fx68k/*.mem
 
-# Local simulator/checkpoint and deployment output. These are reproducible
-# from the checked-in RTL, media descriptors, and verification scripts.
+# Local simulator/checkpoint and deployment output.
 /.build/
 /.tmp_verilator/
 /*.vltsv
@@ -40,10 +30,6 @@ __pycache__/
 /nvram/
 /screenshots/
 /release_mister/
-/verif/captures/
-/verif/audio/
-/verif/checkpoints/
-/verif/lockstep/
 /c5_pin_model_dump.txt
 /cr_ie_info.json
 /jtag.cdf
