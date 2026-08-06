@@ -629,16 +629,28 @@ module s24_tile (
                     // its frame epoch. A layer whose bit changed on this and
                     // the preceding frame boundary is treated as blinking.
                     if (vcount == 10'd383) begin
+                        // frame_layer is a 32-bit integer loop variable; every
+                        // index into a 4-entry array is sliced to [1:0]
+                        // (bit-identical for the only values the loop bound
+                        // 0..3 ever reaches) so no array is ever indexed by
+                        // an unsliced 32-bit value. Quartus 17.0.2's Verific
+                        // elaborator crashed (Fatal Error: Access Violation,
+                        // freeing a VeriAggregateValue mid-elaboration of
+                        // this exact for loop) when toggle_run alone was
+                        // indexed unsliced while disable_prev/blink_layer/
+                        // control_regs beside it were not -- reproduced twice
+                        // on an otherwise-idle, uncontended system, always
+                        // immediately on entering s24_tile elaboration.
                         for (frame_layer=0; frame_layer<4; frame_layer=frame_layer+1) begin
                             if (control_regs[3'd4 + frame_layer[1:0]][15]
                                 != disable_prev[frame_layer[1:0]]) begin
-                                if (toggle_run[frame_layer] != 2'd3)
-                                    toggle_run[frame_layer]
-                                        <= toggle_run[frame_layer] + 2'd1;
+                                if (toggle_run[frame_layer[1:0]] != 2'd3)
+                                    toggle_run[frame_layer[1:0]]
+                                        <= toggle_run[frame_layer[1:0]] + 2'd1;
                                 blink_layer[frame_layer[1:0]]
-                                    <= (toggle_run[frame_layer] >= 2'd1);
+                                    <= (toggle_run[frame_layer[1:0]] >= 2'd1);
                             end else begin
-                                toggle_run[frame_layer] <= 2'd0;
+                                toggle_run[frame_layer[1:0]] <= 2'd0;
                                 blink_layer[frame_layer[1:0]] <= 1'b0;
                             end
                             disable_prev[frame_layer[1:0]]
