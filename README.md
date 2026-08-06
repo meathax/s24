@@ -70,27 +70,6 @@ The sprite path has additionally been audited against MAME's full draw loop:
 raw pen zero now goes through the indirect palette, large-sprite tile arithmetic
 is explicitly wide, and bounded list overflow keeps the frontmost entries.
 
-The ignored `roms/` folder contains user-supplied archives; the checked-in
-local support inventory currently contains 6 parent sets. Run `python tools/gen_mra.py`
-to validate those archives and regenerate one MRA per supported set. Every generated external ROM region declares
-`type="merged|nonmerged|split"` and retains its CRC, so the same MRA accepts
-full non-merged sets, split parent/clone sets, and merged parent archives with
-clone-prefixed members. The validator follows MiSTer's CRC-first archive lookup.
-`python tools/gen_sim_media.py --all` prepares ignored real-ROM media for the
-complete simulation matrix. ROM, floppy, and key payloads are never tracked by
-this repository.
-
-All local MRAs select the same `s24.rbf`. Their compatible eight-byte runtime descriptor
-enables only the applicable floppy, ROM-board, FD1094, analog, golf, Hot Rod,
-input-map, and magic-latch behavior without changing the synthesized image.
-Legacy descriptors leave the final three bytes zero. Version-one descriptors
-can name motherboard/RAM, sprite-memory, FDC timing, ROM-board/EPLD,
-analogue, video orientation/flip, and CPU/protection profiles; this metadata is
-decoded by `s24_rom_loader` and remains profile-driven rather than set-name-driven.
-`python tools/check_universal_profile.py` checks that inventory and the shared
-hardware contract. See `docs/game-coverage.md` for the complete set matrix and
-latest fitted resource use.
-
 MiSTer's 16-bit HPS download path now captures both bytes of each MRA switch
 payload at address zero, preserving MAME-aligned per-game `FF FD`, `FF FE`,
 and `FF FB` defaults
