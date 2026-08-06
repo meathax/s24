@@ -78,6 +78,8 @@ SUPPORTED_INPUT_PROFILES = frozenset((
 MRA_CONTROL_GENERIC = "generic"
 MRA_CONTROL_HOTROD = "hotrod"
 MRA_CONTROL_GOLF = "golf"
+MRA_CONTROL_CRKDOWN = "crkdown"
+MRA_CONTROL_BNZABROS = "bnzabros"
 
 
 @dataclass(frozen=True)
@@ -138,6 +140,22 @@ MRA_CONTROL_PROFILES = {
          "-", "-",
          "Start", "Coin", "Service", "Test"),
         ("A", "B", "X", "Y", "Start", "Select", "R", "L"),
+    ),
+    # Crack Down: MAME's crkdown has only two per-player fire buttons
+    # (Attack, Smart Bomb); the core's generic Button 3 input is unused.
+    MRA_CONTROL_CRKDOWN: MraControls(
+        "8-way",
+        ("Attack", "Smart Bomb", "-", "-", "-", "-",
+         "Start", "Coin", "Service", "Test"),
+        ("A", "B", "Start", "Select", "R", "L"),
+    ),
+    # Bonanza Bros: MAME's bnzabros has only Fire and Jump; Button 3 is
+    # unused.
+    MRA_CONTROL_BNZABROS: MraControls(
+        "8-way",
+        ("Fire", "Jump", "-", "-", "-", "-",
+         "Start", "Coin", "Service", "Test"),
+        ("A", "B", "Start", "Select", "R", "L"),
     ),
 }
 
@@ -205,14 +223,16 @@ GAMES = (
          dsw="FF FD", input_profile=INPUT_GGROUND),
     Game("crkdown", "Crack Down (World, Floppy Based, FD1094 317-0058-04c)", 1989,
          BOOT_DISK, FLOPPY | FD1094, 0x2D00,
-         floppy=p("ds3-5000-04c.img", "7d97ba5e"), key=p("317-0058-04c.key", "16e978cc")),
+         floppy=p("ds3-5000-04c.img", "7d97ba5e"), key=p("317-0058-04c.key", "16e978cc"),
+         mra_controls=MRA_CONTROL_CRKDOWN),
     Game("roughrac", "Rough Racer (Japan, Floppy Based, FD1094 317-0058-06b)", 1990,
          BOOT_DISK, FLOPPY | FD1094 | UPD4701, 0x2D00, dsw="FF FD",
          floppy=p("ds3-5000-06b.img", "a7fb2149"),
          key=p("317-0058-06b.key", "6a5bf536")),
     Game("bnzabros", "Bonanza Bros (US, Floppy DS3-5000-07d? Based)", 1990,
          BOOT_DISK, FLOPPY | ROMBOARD, 0x2D00, MAGIC_BNZABROS, romboard=BNZA_ROM,
-         floppy=p("ds3-5000-07d.img", "2e70251f"), dsw="FF FE"),
+         floppy=p("ds3-5000-07d.img", "2e70251f"), dsw="FF FE",
+         mra_controls=MRA_CONTROL_BNZABROS),
 )
 
 # MAME-supported sets for which this workspace currently has no local archive.

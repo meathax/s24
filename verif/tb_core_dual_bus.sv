@@ -22,7 +22,7 @@ module tb_core_dual_bus;
     always #5 clk=~clk;
 
     s24_core dut(
-        .clk(clk),.reset(reset),.pause(1'b0),.board(board),
+        .clk(clk),.reset(reset),.pause(1'b0),.flicker_blend(1'b0),.board(board),
         .key_wr(1'b0),.key_word_addr('0),.key_wdata('0),
         .input_ports(64'hffff_ffff_ffff_ffff),
         .spinner0('0),.spinner1('0),.spinner2('0),.spinner3('0),

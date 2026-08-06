@@ -8,7 +8,7 @@ module tb_mixer;
     logic [11:0] t0=0,t1=0,t2=0,t3=0;
     logic c0=0,c1=0,c2=0,c3=0;
     logic v0=0,v1=0,v2=0,v3=0;
-    logic [13:0] sp0=0,sp1=0,sp2=0,sp3=0,mixed;
+    logic [13:0] sp0=0,sp1=0,sp2=0,sp3=0,mixed,mixed_alt;
     logic [10:0] sr0=0,sr1=0,sr2=0,sr3=0;
     logic blank;
     always #5 clk=~clk;
@@ -21,7 +21,8 @@ module tb_mixer;
         .tile0_valid(v0),.tile1_valid(v1),.tile2_valid(v2),.tile3_valid(v3),
         .sprite0_pixel(sp0),.sprite1_pixel(sp1),.sprite2_pixel(sp2),.sprite3_pixel(sp3),
         .sprite0_rank(sr0),.sprite1_rank(sr1),.sprite2_rank(sr2),.sprite3_rank(sr3),
-        .mixed_pixel(mixed),
+        .tile_blink(4'b0000),
+        .mixed_pixel(mixed),.mixed_pixel_alt(mixed_alt),
         .display_blank(blank));
 
     task automatic write_reg(input [3:0] a,input [15:0] d);

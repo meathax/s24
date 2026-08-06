@@ -103,7 +103,26 @@ module s24_fd1094 #(
     output logic        busy,
     output logic        done,
     output logic [15:0] plaintext,
-    output logic [7:0]  current_state
+    output logic [7:0]  current_state,
+    // The state byte the most recent decrypt actually consumed (registered
+    // at F_ARMED, held until the next F_ARMED).  The opcode cache tags its
+    // fill with this, not current_state, so a CMP-driven state change that
+    // lands mid-flight can never tag a line with a state the decrypt did
+    // not use.
+    output logic [7:0]  state_used,
+    // Opcode-cache hit notification.  A cache hit returns a plaintext word
+    // without running the decrypt pipeline, but the CMP/RTE state machine
+    // below observes program fetches in two ways that must not go blind:
+    // the fetch_history scan (a CMPI.L whose operand words were prefetched
+    // before the opcode reached the IR->IRD boundary) and the cmp_phase
+    // walk (operand words fetched after it).  hit_record replays exactly
+    // the F_DONE bookkeeping for a word the cache served, and is never
+    // asserted while a decrypt is in flight -- the CPU-B bus front-end
+    // serialises fetches, and a hit issues no key_start, so fstate is
+    // F_IDLE for the whole transaction.
+    input  logic        hit_record,
+    input  logic [23:1] hit_address,
+    input  logic [15:0] hit_data
 );
     logic [7:0] key_ram_even_q,key_ram_odd_q;
     s24_fd1094_key_ram key_ram (
@@ -203,6 +222,7 @@ module s24_fd1094 #(
 
     assign busy=(fstate!=F_IDLE);
     assign current_state=irq_mode?irq_key:normal_state;
+    assign state_used=decrypt_state;
     assign result_next=mask_byte[mask_bit_l]?16'hffff:preliminary;
     assign cmp_history_high=history_word(instruction_address+23'd1);
     assign cmp_history_low=history_word(instruction_address+23'd2);
@@ -319,6 +339,38 @@ module s24_fd1094 #(
                 end
                 default: fstate<=F_IDLE;
             endcase
+            // A cache-served fetch is still a program fetch: replay F_DONE's
+            // history push and cmp_phase walk for it, in the same program-
+            // order slot (after the case, before instruction_start) so any
+            // same-cycle instruction_start keeps the identical last-write
+            // priority it has against F_DONE.  hit_record and F_DONE are
+            // mutually exclusive by construction (see the port comment).
+            if(hit_record) begin
+                fetch_history_valid<={fetch_history_valid[2:0],1'b1};
+                fetch_history_addr[3]<=fetch_history_addr[2];
+                fetch_history_addr[2]<=fetch_history_addr[1];
+                fetch_history_addr[1]<=fetch_history_addr[0];
+                fetch_history_addr[0]<=hit_address;
+                fetch_history_data[3]<=fetch_history_data[2];
+                fetch_history_data[2]<=fetch_history_data[1];
+                fetch_history_data[1]<=fetch_history_data[0];
+                fetch_history_data[0]<=hit_data;
+                if(cmp_phase==1 && hit_address==cmp_expected) begin
+                    cmp_high<=hit_data;cmp_expected<=hit_address+23'd1;cmp_phase<=2;
+                end else if(cmp_phase==2 && hit_address==cmp_expected) begin
+                    cmp_phase<=0;
+                    if(hit_data==16'hffff) begin
+                        case(cmp_high[9:8])
+                            2'b00: normal_state<=cmp_high[7:0];
+                            2'b01: begin normal_state<=cmp_high[7:0];irq_mode<=0;end
+                            2'b10: irq_mode<=1;
+                            default: irq_mode<=0;
+                        endcase
+                    end
+                end else begin
+                    cmp_phase<=0;
+                end
+            end
             // MAME changes FD1094 state when the 68000 executes these
             // instructions. Qualifying with fx68k's IR->IRD boundary avoids
             // treating a discarded prefetch as an executed RTE or CMPI.L.

@@ -17,10 +17,10 @@ $sources = @(
     'rtl/io/s24_analog.sv','rtl/prot/s24_magic_latch.sv','rtl/fdc/s24_fdc.sv',
     'rtl/s24_irq.sv','rtl/video/s24_video_timing.sv','rtl/video/s24_palette.sv',
     'rtl/video/s24_tile.sv','rtl/video/s24_sprite.sv',
-    'rtl/video/s24_debug_overlay.sv','rtl/video/s24_mixer.sv',
+    'rtl/video/s24_mixer.sv',
     'rtl/cpu/fx68k/fx68kAlu.sv','rtl/cpu/fx68k/uaddrPla.sv',
     'rtl/cpu/fx68k/fx68k.sv','rtl/cpu/s24_fd1094_decrypt.sv',
-    'rtl/cpu/s24_fd1094.sv','verif/jt51_boot_stub.sv','rtl/s24_core.sv',
+    'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_b_opcache.sv','verif/jt51_boot_stub.sv','rtl/s24_core.sv',
     'verif/tb_core_dual_bus.sv'
 )
 $arguments = @(

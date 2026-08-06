@@ -36,12 +36,16 @@ module emu (
         "O[7],Service Mode,Off,On;",
         "O[9:8],Rotation,Normal,Rotate 90 CCW,Rotate 90 CW;",
         "O[12:10],Scaling,Normal,V-Integer,HV-Integer-,HV-Integer+,HV-Integer;",
+        // Listed On first so the default status value of 0 selects it: several
+        // titles (Bonanza Bros' stage intros) obtain translucency by toggling
+        // a tilemap on and off every frame, which a CRT integrates but a
+        // fixed-pixel display shows as a 28.75 Hz flicker. Off gives the raw
+        // alternation the PCB emits.
+        "O[13],Flicker Blend,On,Off;",
         "P1O[101],CRT Adjust,Off,On;",
         "H1P1O[100:96],CRT H-Size,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
         "H1P1O[85:79],CRT H-Position,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,+32,+33,+34,+35,+36,+37,+38,+39,+40,+41,+42,+43,+44,+45,+46,+47,+48,-48,-47,-46,-45,-44,-43,-42,-41,-40,-39,-38,-37,-36,-35,-34,-33,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
         "H1P1O[78:74],CRT V-Shift,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-        "O[102],Debug Overlay,Off,On;",
-        "O[107:103],Debug Counter,Reset Events,CNT1 Count,CNT1 VCount,GGround Retrig,Last CPU-B PC,Last CPU-B Op,P2 SDRAM Stall,List Seen,Line Writes,Mixer Pixels,Render Passes,Bank Starve,Last CPU-A PC,Last CPU-A Op,Max Stack Depth,CPU-A Stall,CPU-B Stall;",
         "R[0],Reset;",
         "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test;",
         "V,v",`BUILD_DATE
@@ -190,23 +194,6 @@ module emu (
     end
     assign core_reset=core_reset_sync[1];
 
-    // Hardware-only debug: count core_reset assertions that happen AFTER
-    // rom_loaded has been seen high at least once, so the initial power-on/
-    // media-load reset (which asserts core_reset via ~rom_loaded by design)
-    // is excluded and this counter isolates genuine in-game resets -- i.e.
-    // it directly measures whatever is producing Gain Ground's reset loop,
-    // if the loop is this signal re-asserting at all (rather than a purely
-    // software-driven restart this signal would never see).
-    logic rom_loaded_seen,core_reset_d;
-    logic [7:0] dbg_reset_events;
-    always_ff @(posedge clk_sys) begin
-        if(rom_loaded) rom_loaded_seen<=1'b1;
-        core_reset_d<=core_reset;
-        if(core_reset && !core_reset_d && rom_loaded_seen &&
-           dbg_reset_events!=8'hff)
-            dbg_reset_events<=dbg_reset_events+1'b1;
-    end
-
     logic p0_req,p2_req,p3_req,p4_req;
     logic [26:1] p0_addr,p3_addr,p4_addr;
     logic [26:4] p2_addr;
@@ -223,9 +210,8 @@ module emu (
     // fractional enables so the board's native 16 MHz PCD raster remains at
     // its exact 656x424 timing instead of inheriting a /3 frequency error.
     s24_core #(.CLK_HZ(48_317_307)) core(
-        .clk(clk_sys),.reset(core_reset),.pause(status[6]),.board(descriptor),
-        .dbg_en(status[102]),.dbg_sel(status[107:103]),
-        .dbg_reset_events(dbg_reset_events),
+        .clk(clk_sys),.reset(core_reset),.pause(status[6]),
+        .flicker_blend(~status[13]),.board(descriptor),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),
         .input_ports(input_ports),
         .spinner0(spinner0),.spinner1(spinner1),
@@ -392,7 +378,16 @@ module emu (
     logic mp0_ack,mp2_ack,mp3_ack,mp4_ack;
     logic wr_rsp_unused_src,wr_rsp_unused_dst;
 
-    s24_sdram_cdc #(.REQ_WIDTH(44),.RSP_WIDTH(1)) cdc_wr(
+    // SYNC_STAGES(1) on every instance below: clk_sys and clk_ram are the same
+    // PLL VCO divided by 26 and 13 -- an exact phase-locked 2:1 pair that
+    // Arcade-SegaSystem24.sdc already keeps in one clock group -- so the second
+    // synchronizer flop resolves no metastability and only adds latency. It
+    // cost 1.5 clk_sys (31 ns) on every SDRAM access, which pushed CPU reads
+    // past the 68000's DTACK deadline and put wait states on every bus cycle.
+    // The payload stability window the SDC's multicycle exception relies on is
+    // unchanged at one stage; see rtl/mem/s24_sdram_cdc.sv's SYNC_STAGES note
+    // before touching this or the PLL ratios.
+    s24_sdram_cdc #(.REQ_WIDTH(44),.RSP_WIDTH(1),.SYNC_STAGES(1)) cdc_wr(
         .reset(~pll_locked),
         .src_clk(clk_sys),.src_req(swr_req),
         .src_payload({swr_addr,swr_data,swr_be}),
@@ -402,25 +397,25 @@ module emu (
         .dst_ack(mwr_ack),.dst_response(wr_rsp_unused_dst));
     assign wr_rsp_unused_dst=1'b0;
 
-    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16)) cdc_p0(
+    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16),.SYNC_STAGES(1)) cdc_p0(
         .reset(~pll_locked),
         .src_clk(clk_sys),.src_req(p0_req),.src_payload(p0_addr),
         .src_ack(p0_ack),.src_response(p0_data),
         .dst_clk(clk_ram),.dst_req(mp0_req),.dst_payload(mp0_addr),
         .dst_ack(mp0_ack),.dst_response(mp0_data));
-    s24_sdram_cdc #(.REQ_WIDTH(23),.RSP_WIDTH(128)) cdc_p2(
+    s24_sdram_cdc #(.REQ_WIDTH(23),.RSP_WIDTH(128),.SYNC_STAGES(1)) cdc_p2(
         .reset(~pll_locked),
         .src_clk(clk_sys),.src_req(p2_req),.src_payload(p2_addr),
         .src_ack(p2_ack),.src_response(p2_data),
         .dst_clk(clk_ram),.dst_req(mp2_req),.dst_payload(mp2_addr),
         .dst_ack(mp2_ack),.dst_response(mp2_data));
-    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16)) cdc_p3(
+    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16),.SYNC_STAGES(1)) cdc_p3(
         .reset(~pll_locked),
         .src_clk(clk_sys),.src_req(p3_req),.src_payload(p3_addr),
         .src_ack(p3_ack),.src_response(p3_data),
         .dst_clk(clk_ram),.dst_req(mp3_req),.dst_payload(mp3_addr),
         .dst_ack(mp3_ack),.dst_response(mp3_data));
-    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16)) cdc_p4(
+    s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16),.SYNC_STAGES(1)) cdc_p4(
         .reset(~pll_locked),
         .src_clk(clk_sys),.src_req(p4_req),.src_payload(p4_addr),
         .src_ack(p4_ack),.src_response(p4_data),

@@ -99,6 +99,16 @@ module s24_tile (
     input  logic [15:0] char_addr,
     input  logic [15:0] char_din,
     input  logic [1:0]  char_be,
+    // Flicker-blend support. Several System 24 titles obtain translucency by
+    // toggling a tilemap's disable bit (vscroll bit 15) every frame, so the
+    // 24 kHz CRT integrates two 57.5 Hz fields into one half-intensity image.
+    // Bonanza Bros does this for the projector light shaft and the stage
+    // intro card. On a fixed-pixel display that reads as a 28.75 Hz flicker
+    // instead. With blend_en set, a layer detected as toggling is rendered on
+    // every frame and reported in layer_blink so the mixer can also resolve
+    // the "layer absent" pixel; the two are averaged downstream.
+    input  logic        blend_en,
+    output logic [3:0]  layer_blink,
     output logic [15:0] cpu_dout,
     output logic [11:0] layer0_pixel,
     output logic [11:0] layer1_pixel,
@@ -330,6 +340,28 @@ module s24_tile (
     logic [1:0] line_ctrl_mode_q;
     logic [9:0] next_render_y;
 
+    // Per-frame view of each physical tilemap's disable bit, plus a saturating
+    // run length of consecutive frame-to-frame changes. Requiring two changes
+    // in a row keeps an ordinary one-off enable/disable transition from
+    // briefly engaging the blend; a 28.75 Hz square wave saturates it at once
+    // and a layer that stops toggling clears it on the very next frame.
+    logic [3:0] disable_prev;
+    logic [1:0] toggle_run [0:3];
+    logic [3:0] blink_layer;
+    logic issue_blink, line_blink_q;
+    integer frame_layer;
+
+    assign layer_blink = blend_en ? blink_layer : 4'b0000;
+
+    function automatic logic blink_of(input logic [1:0] index);
+        case (index)
+            2'd0: blink_of = blink_layer[0];
+            2'd1: blink_of = blink_layer[1];
+            2'd2: blink_of = blink_layer[2];
+            default: blink_of = blink_layer[3];
+        endcase
+    endfunction
+
     // Coordinate and window selection are a direct streaming form of MAME's
     // draw_common(). A mask bit of one selects the odd layer in each pair.
     always_comb begin
@@ -404,11 +436,16 @@ module s24_tile (
         issue_ctrl_mode = issue_ctrl_word[14:13];
         issue_line_layer = (issue_ctrl_mode == 0) ? issue_layer
                                                   : issue_pair_even_layer;
+        // The blink flag follows exactly the scroll word whose bit 15 the
+        // renderer would have obeyed, so the special modes keep using the
+        // even member of the pair here too.
+        issue_blink = blend_en && blink_of(issue_layer);
         if (issue_ctrl_mode != 0) begin
             issue_hscr_word =
                 control_reg_value({1'b0,issue_pair_even_layer});
             issue_vscr_word =
                 control_regs[3'd4 + issue_pair_even_layer];
+            issue_blink = blend_en && blink_of(issue_pair_even_layer);
         end
 
         // Consume the preceding line-scroll result and its registered
@@ -518,6 +555,7 @@ module s24_tile (
             line_hscr_q <= issue_hscr_word;
             line_vscr_q <= issue_vscr_word;
             line_ctrl_mode_q <= issue_ctrl_mode;
+            line_blink_q <= issue_blink;
             lookup_valid <= line_stage_valid;
             if (line_stage_valid) begin
                 lookup_layer_q <= line_layer_q;
@@ -525,7 +563,9 @@ module s24_tile (
                 lookup_source_x_q <= issue_source_x;
                 lookup_source_y_q <= issue_source_y;
                 lookup_ctrl_mode_q <= line_ctrl_mode_q;
-                lookup_disabled_q <= line_vscr_q[15];
+                // A blinking layer keeps rendering on the frames its disable
+                // bit is set; the mixer supplies the matching "absent" pixel.
+                lookup_disabled_q <= line_vscr_q[15] && !line_blink_q;
                 // synthesis translate_off
                 lookup_tile_addr_q <= tile_addr;
                 lookup_mask_addr_q <= mask_addr;
@@ -547,6 +587,11 @@ module s24_tile (
             line_hscr_q <= 0;
             line_vscr_q <= 0;
             line_ctrl_mode_q <= 0;
+            line_blink_q <= 0;
+            disable_prev <= 0;
+            blink_layer <= 0;
+            toggle_run[0] <= 0; toggle_run[1] <= 0;
+            toggle_run[2] <= 0; toggle_run[3] <= 0;
             lookup_layer_q <= 0;
             lookup_x_q <= 0;
             lookup_source_x_q <= 0;
@@ -579,6 +624,27 @@ module s24_tile (
             // the same edge; the line RAM output is then stable for 3 clocks.
             if (ce_pixel) begin
                 if (hcount == 10'd655) begin
+                    // One sample per frame of every tilemap's disable bit, on
+                    // the same 383->384 boundary the rest of the core uses as
+                    // its frame epoch. A layer whose bit changed on this and
+                    // the preceding frame boundary is treated as blinking.
+                    if (vcount == 10'd383) begin
+                        for (frame_layer=0; frame_layer<4; frame_layer=frame_layer+1) begin
+                            if (control_regs[3'd4 + frame_layer[1:0]][15]
+                                != disable_prev[frame_layer[1:0]]) begin
+                                if (toggle_run[frame_layer] != 2'd3)
+                                    toggle_run[frame_layer]
+                                        <= toggle_run[frame_layer] + 2'd1;
+                                blink_layer[frame_layer[1:0]]
+                                    <= (toggle_run[frame_layer] >= 2'd1);
+                            end else begin
+                                toggle_run[frame_layer] <= 2'd0;
+                                blink_layer[frame_layer[1:0]] <= 1'b0;
+                            end
+                            disable_prev[frame_layer[1:0]]
+                                <= control_regs[3'd4 + frame_layer[1:0]][15];
+                        end
+                    end
                     display_bank <= ~display_bank;
                     {layer0_valid,layer0_cat,layer0_pixel} <= line0_q;
                     {layer1_valid,layer1_cat,layer1_pixel} <= line1_q;

@@ -71,7 +71,7 @@ module tb_core_smoke;
     end
 
     s24_core dut (
-        .clk(clk), .reset(reset), .pause(pause), .board(board),
+        .clk(clk), .reset(reset), .pause(pause), .flicker_blend(1'b0),.board(board),
         .key_wr(1'b0), .key_word_addr('0), .key_wdata('0),
         .mahjong_line(),
         .input_ports(64'hffff_ffff_ffff_ffff),

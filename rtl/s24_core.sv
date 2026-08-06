@@ -6,6 +6,11 @@ module s24_core #(
     input  logic        clk,
     input  logic        reset,
     input  logic        pause,
+    // Average the two fields of a frame-rate tilemap blink instead of showing
+    // them alternately (see s24_tile.sv). Off reproduces the raw 28.75 Hz
+    // alternation the PCB emits, which is what the MAME pixel-exact
+    // comparisons expect; on reproduces what its CRT integrated.
+    input  logic        flicker_blend,
     input  board_desc_t board,
     input  logic        key_wr,
     input  logic [11:0] key_word_addr,
@@ -19,14 +24,6 @@ module s24_core #(
     input  logic [7:0]  paddle1,
     input  logic [7:0]  paddle2,
     input  logic [7:0]  paddle3,
-
-    // Hardware-only debug overlay (see rtl/video/s24_sprite.sv's dbg_* ports
-    // for the sprite-side counters). dbg_reset_events is computed at the top
-    // level, where core_reset and rom_loaded both live, and passed in here
-    // because s24_core only ever sees the already-synchronized `reset`.
-    input  logic        dbg_en,
-    input  logic [4:0]  dbg_sel,
-    input  logic [7:0]  dbg_reset_events,
 
     output logic [2:0]  mahjong_line,
 
@@ -103,37 +100,6 @@ module s24_core #(
     logic gground_pair_enable;
     logic gground_slow;
 
-    // Hardware-only debug counters (paired with rtl/video/s24_sprite.sv's
-    // dbg_* ports): CNT1 is the 315-5296 line that releases CPU B from HALT,
-    // and this session found its release timing runs measurably later than
-    // MAME's reference (see docs/status.md) without yet finding a hardware
-    // cause for Gain Ground's crash-loop. These make both directly visible
-    // on real hardware instead of only in a Verilator trace.
-    logic sub_reset_d;
-    logic [7:0]  dbg_cnt1_count;    // CNT1 low->high transitions since boot;
-                                     // should be exactly 1 per run -- more
-                                     // means CPU B is being re-halted/
-                                     // released repeatedly, which would help
-                                     // explain a reset loop.
-    logic [9:0]  dbg_cnt1_vcount;   // vcount at the most recent transition
-    logic [7:0]  dbg_gground_retrig; // gground_slow_count (re)start count;
-                                      // >1 means the 2-second timing window
-                                      // restarted mid-run
-    logic [15:0] dbg_last_b_opcode; // CPU B's last-fetched opcode at the
-                                     // moment sub_reset asserted
-    logic [23:1] dbg_last_b_pc;     // ...and its program counter -- a cheap
-                                     // breadcrumb for what CPU B was doing
-                                     // immediately before each reset
-    logic [15:0] dbg_last_a_opcode; // CPU A's opcode at the moment of each
-                                     // CNT1 edge -- CPU A is the one WRITING
-                                     // CNT1 repeatedly (confirmed: MAME's
-                                     // driver models no automatic CPU-A retry
-                                     // on a CNT1 write, so repeated writes
-                                     // must be CPU A's own code deciding to
-                                     // write again; this is the missing
-                                     // visibility needed to see why).
-    logic [23:1] dbg_last_a_pc;     // ...and its program counter
-
     // On real System 24/MAME, raising 315-5296 CNT1 releases CPU B from HALT
     // and pulses its RESET input. Preserve state on later CNT1-low halts, but
     // provide a bounded reset pulse on every low-to-high transition.
@@ -154,30 +120,10 @@ module s24_core #(
             gground_slow_count<=0;
             gground_pair_index<=0;
             gground_pair_enable<=1'b1;
-            sub_reset_d<=0;
-            dbg_cnt1_count<=0;dbg_cnt1_vcount<=0;dbg_gground_retrig<=0;
-            dbg_last_b_opcode<=0;dbg_last_b_pc<=0;
-            dbg_last_a_opcode<=0;dbg_last_a_pc<=0;
         end else begin
             io_cnt1_d<=io_cnt[1];
             if(io_cnt[1] && !io_cnt1_d) sub_reset_count<=4'd8;
             else if(sub_reset_count!=0) sub_reset_count<=sub_reset_count-1'b1;
-
-            // Debug counters: CNT1 transitions, breadcrumb CPU B state on
-            // every sub_reset assertion (not just the CNT1-triggered one --
-            // this also catches the top-level `reset` input re-asserting
-            // mid-run, which is exactly what a hardware reset loop would do).
-            if(io_cnt[1] && !io_cnt1_d) begin
-                if(dbg_cnt1_count!=8'hff) dbg_cnt1_count<=dbg_cnt1_count+1'b1;
-                dbg_cnt1_vcount<=vcount;
-                dbg_last_a_opcode<=a_instr_opcode;
-                dbg_last_a_pc<=a_instr_address;
-            end
-            sub_reset_d<=sub_reset;
-            if(sub_reset && !sub_reset_d) begin
-                dbg_last_b_opcode<=b_instr_opcode;
-                dbg_last_b_pc<=b_instr_address;
-            end
 
             if(io_cnt[1] && !io_cnt1_d &&
                board.input_profile==INPUT_GGROUND) begin
@@ -185,8 +131,6 @@ module s24_core #(
                 gground_slow_count<=27'd96000000;
                 gground_pair_index<=0;
                 gground_pair_enable<=1'b1;
-                if(dbg_gground_retrig!=8'hff)
-                    dbg_gground_retrig<=dbg_gground_retrig+1'b1;
             end else begin
                 if(!pause && gground_slow_count!=0)
                     gground_slow_count<=gground_slow_count-1'b1;
@@ -250,6 +194,12 @@ module s24_core #(
     logic fd_start,fd_key_start,fd_busy,fd_done,fd_irq_enter,b_iack_seen;
     logic [15:0] fd_ciphertext,fd_plaintext;
     logic [7:0] fd_state;
+    logic [7:0]  fd_state_used;
+    logic        bc_hit_record;
+    logic        bc_window,bc_q_valid,bc_hit;
+    logic [15:0] bc_hit_data;
+    logic        bc_fill,bc_snoop;
+    logic [26:0] cpu_phys;
     s24_fd1094 fd1094(
         .clk(clk),.reset(sub_reset),.key_wr(key_wr),.key_word_addr(key_word_addr),
         .key_wdata(key_wdata),.start(fd_start),.key_start(fd_key_start),
@@ -257,7 +207,27 @@ module s24_core #(
         .encrypted(fd_ciphertext),.irq_enter(fd_irq_enter),.busy(fd_busy),
         .instruction_start(b_instr_start),.instruction_opcode(b_instr_opcode),
         .instruction_address(b_instr_address),
-        .done(fd_done),.plaintext(fd_plaintext),.current_state(fd_state));
+        .done(fd_done),.plaintext(fd_plaintext),.current_state(fd_state),
+        .state_used(fd_state_used),
+        .hit_record(bc_hit_record),.hit_address(b_mem_addr[23:1]),
+        .hit_data(b_mem_din));
+
+    // CPU-B decrypted-opcode cache.  See rtl/cpu/s24_b_opcache.sv for the
+    // full rationale (measured 40-50%-of-frame CPU-B memory stalls on
+    // hardware).  Lookup window matches the FD1094 decrypt qualification
+    // exactly, minus the vector words; non-FD1094 boards cache raw fetches
+    // under a constant zero state tag.
+    assign bc_window = b_mem_fc[1] && b_mem_addr<24'h100000 &&
+                       b_mem_addr[23:1]>23'd3;
+    s24_b_opcache bcache(
+        .clk(clk),.reset(reset),
+        .address(b_mem_addr[23:1]),.fetch_window(bc_window),
+        .state_now(board.has_fd1094 ? fd_state : 8'd0),
+        .lookup_q_valid(bc_q_valid),.hit(bc_hit),.hit_data(bc_hit_data),
+        .fill(bc_fill),.fill_address(b_mem_addr[23:1]),
+        .fill_state(board.has_fd1094 ? fd_state_used : 8'd0),
+        .fill_data(b_mem_din),
+        .snoop(bc_snoop),.snoop_phys(cpu_phys));
 
     always_ff @(posedge clk) begin
         fd_irq_enter<=1'b0;
@@ -416,7 +386,6 @@ module s24_core #(
     logic tile_wr;
     logic [15:0] tile_dout;
     logic cpu_wr_pending;
-    logic [26:0] cpu_phys;
     logic char_shadow_wr;
     assign char_shadow_wr = cpu_wr_pending
                             && cpu_phys[26:17] == SDR_CHAR_BASE[26:17];
@@ -428,33 +397,25 @@ module s24_core #(
     logic [11:0] t0,t1,t2,t3;
     logic tc0,tc1,tc2,tc3;
     logic tv0,tv1,tv2,tv3;
+    logic [3:0] tile_blink;
     s24_tile tile(
         .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
         .cpu_wr(tile_wr),.cpu_addr(bus_addr[15:1]),.cpu_din(bus_dout),.cpu_be(bus_be),
         .char_wr(char_shadow_wr),.char_addr(cpu_phys[16:1]),
         .char_din(bus_dout),.char_be(bus_be),
+        .blend_en(flicker_blend),.layer_blink(tile_blink),
         .cpu_dout(tile_dout),.layer0_pixel(t0),.layer1_pixel(t1),
         .layer2_pixel(t2),.layer3_pixel(t3),.layer0_cat(tc0),.layer1_cat(tc1),
         .layer2_cat(tc2),.layer3_cat(tc3),.layer0_valid(tv0),.layer1_valid(tv1),
         .layer2_valid(tv2),.layer3_valid(tv3));
-    logic [13:0] sp0,sp1,sp2,sp3,mixed;
+    logic [13:0] sp0,sp1,sp2,sp3,mixed,mixed_alt;
     logic [10:0] sr0,sr1,sr2,sr3;
-    logic [23:0] dbg_p2_stall;
-    logic [15:0] dbg_line_wr,dbg_mixer_px;
-    logic [13:0] dbg_list_seen;
-    logic [7:0]  dbg_render_pass;
-    logic        dbg_bank_starve;
-    logic [12:0] dbg_max_stack;
     s24_sprite sprite(
         .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
         .pixel0(sp0),.pixel1(sp1),.pixel2(sp2),.pixel3(sp3),
         .rank0(sr0),.rank1(sr1),.rank2(sr2),.rank3(sr3),
         .mem_req(p2_req),.mem_addr(p2_addr),
-        .mem_data(p2_data),.mem_ack(p2_ack),
-        .dbg_p2_stall(dbg_p2_stall),.dbg_list_seen(dbg_list_seen),
-        .dbg_line_wr(dbg_line_wr),.dbg_mixer_px(dbg_mixer_px),
-        .dbg_render_pass(dbg_render_pass),.dbg_bank_starve(dbg_bank_starve),
-        .dbg_max_stack(dbg_max_stack));
+        .mem_data(p2_data),.mem_ack(p2_ack));
 
     logic mixer_wr;
     logic [15:0] mixer_dout;
@@ -467,7 +428,8 @@ module s24_core #(
         .tile0_valid(tv0),.tile1_valid(tv1),.tile2_valid(tv2),.tile3_valid(tv3),
         .sprite0_pixel(sp0),.sprite1_pixel(sp1),.sprite2_pixel(sp2),.sprite3_pixel(sp3),
         .sprite0_rank(sr0),.sprite1_rank(sr1),.sprite2_rank(sr2),.sprite3_rank(sr3),
-        .mixed_pixel(mixed),
+        .tile_blink(tile_blink),
+        .mixed_pixel(mixed),.mixed_pixel_alt(mixed_alt),
         .display_blank(display_blank));
 
     // Keep the byte lanes separate so Quartus can infer byte-enabled true
@@ -476,9 +438,11 @@ module s24_core #(
     (* ramstyle="M10K, no_rw_check" *) logic [7:0] palette_ram_lo [0:8191];
     (* ramstyle="M10K, no_rw_check" *) logic [7:0] palette_ram_hi [0:8191];
     logic palette_wr;
-    logic [15:0] palette_word, palette_cpu_word;
-    logic palette_shadow_bank, palette_display_blank;
+    logic [15:0] palette_word, palette_cpu_word, palette_word_alt;
+    logic palette_shadow_bank, palette_display_blank, palette_shadow_bank_alt;
     logic [7:0] palette_red, palette_green, palette_blue;
+    logic [7:0] palette_red_alt, palette_green_alt, palette_blue_alt;
+    logic palette_blend_q;
     integer palette_init;
     initial begin
         // Quartus 17 rejects a single elaboration loop above 5000 iterations.
@@ -491,6 +455,18 @@ module s24_core #(
         palette_word <= {palette_ram_hi[mixed[12:0]],
                          palette_ram_lo[mixed[12:0]]};
         palette_shadow_bank <= mixed[13];
+        // Second, independent read of the same palette for the "blinking
+        // layer absent" pixel. Quartus duplicates the M10K contents for the
+        // extra read port; the array is only 8192x16, so the cost is small
+        // and it avoids retiming the existing one-clock lookup.
+        palette_word_alt <= {palette_ram_hi[mixed_alt[12:0]],
+                             palette_ram_lo[mixed_alt[12:0]]};
+        palette_shadow_bank_alt <= mixed_alt[13];
+        // Blend only while a tilemap is actually blinking, so an unaffected
+        // scene keeps the exact original pixel rather than an average of two
+        // identical values (identical inputs already average to themselves,
+        // but this keeps the intent explicit and the mux cheap).
+        palette_blend_q <= flicker_blend && (tile_blink != 4'b0000);
         // The palette lookup is synchronous, so delay the 315-5294 display
         // blank by the same cycle.  Blanking the palette index alone is not
         // sufficient because software can program palette entry zero.
@@ -504,50 +480,28 @@ module s24_core #(
     end
     s24_palette pal(.palette_word(palette_word),.shadow_bank(palette_shadow_bank),
                     .red(palette_red),.green(palette_green),.blue(palette_blue));
-    // Hardware-only debug overlay: a small on-screen hex readout of the
-    // dbg_* counters above, selectable from the OSD (Arcade-SegaSystem24.sv
-    // wires dbg_en/dbg_sel from status bits). Exists because every bug this
-    // session has actually needed to chase (SDRAM burst corruption, the
-    // Gain Ground reset loop) is hardware-only and invisible to Verilator --
-    // this is real visibility on real silicon with no host/SignalTap needed.
-    logic [23:0] dbg_value;
-    always_comb begin
-        case(dbg_sel)
-            4'h0: dbg_value={16'h0,dbg_reset_events};
-            4'h1: dbg_value={16'h0,dbg_cnt1_count};
-            4'h2: dbg_value={14'h0,dbg_cnt1_vcount};
-            4'h3: dbg_value={16'h0,dbg_gground_retrig};
-            4'h4: dbg_value={dbg_last_b_pc,1'b0};
-            4'h5: dbg_value={8'h0,dbg_last_b_opcode};
-            4'h6: dbg_value=dbg_p2_stall;
-            4'h7: dbg_value={10'h0,dbg_list_seen};
-            4'h8: dbg_value={8'h0,dbg_line_wr};
-            4'h9: dbg_value={8'h0,dbg_mixer_px};
-            4'hA: dbg_value={16'h0,dbg_render_pass};
-            4'hB: dbg_value={23'h0,dbg_bank_starve};
-            4'hC: dbg_value={dbg_last_a_pc,1'b0};
-            4'hD: dbg_value={8'h0,dbg_last_a_opcode};
-            4'hE: dbg_value={11'h0,dbg_max_stack};
-            4'hF: dbg_value=dbg_a_stall;
-            5'h10: dbg_value=dbg_b_stall;
-            default: dbg_value=24'h0;
-        endcase
-    end
-    logic dbg_overlay_on,dbg_overlay_lit;
-    s24_debug_overlay dbg_ov(
-        .hcount(hcount),.vcount(vcount),.sel(dbg_sel),.value(dbg_value),
-        .overlay_on(dbg_overlay_on),.overlay_lit(dbg_overlay_lit));
+    s24_palette pal_alt(
+        .palette_word(palette_word_alt),.shadow_bank(palette_shadow_bank_alt),
+        .red(palette_red_alt),.green(palette_green_alt),.blue(palette_blue_alt));
 
+    // The two fields differ only by the blinking tilemap, so their mean is
+    // exactly the steady image the original CRT produced from them.
+    logic [7:0] blended_red, blended_green, blended_blue;
     always_comb begin
-        if(dbg_en && dbg_overlay_on) begin
-            red   = dbg_overlay_lit ? 8'hff : 8'h00;
-            green = dbg_overlay_lit ? 8'hff : 8'h00;
-            blue  = dbg_overlay_lit ? 8'hff : 8'h00;
-        end else begin
-            red   = (reset || palette_display_blank) ? 8'h00 : palette_red;
-            green = (reset || palette_display_blank) ? 8'h00 : palette_green;
-            blue  = (reset || palette_display_blank) ? 8'h00 : palette_blue;
-        end
+        blended_red   = palette_blend_q
+                      ? 8'((({1'b0,palette_red}   + {1'b0,palette_red_alt})   >> 1))
+                      : palette_red;
+        blended_green = palette_blend_q
+                      ? 8'((({1'b0,palette_green} + {1'b0,palette_green_alt}) >> 1))
+                      : palette_green;
+        blended_blue  = palette_blend_q
+                      ? 8'((({1'b0,palette_blue}  + {1'b0,palette_blue_alt})  >> 1))
+                      : palette_blue;
+    end
+    always_comb begin
+        red   = (reset || palette_display_blank) ? 8'h00 : blended_red;
+        green = (reset || palette_display_blank) ? 8'h00 : blended_green;
+        blue  = (reset || palette_display_blank) ? 8'h00 : blended_blue;
     end
 
     // --------------------------- board interconnect ------------------------
@@ -619,44 +573,19 @@ module s24_core #(
         else physical=SDR_ROMBOARD_BASE+{5'd0,bank,a[17:0]};
     endfunction
 
-    // Hardware-only debug counters: cycles each CPU's SDRAM-bridged memory
-    // request (a_mem_req/b_mem_req below) sat unacknowledged. Added because
-    // dbg_p2_stall/dbg_bank_starve show the sprite side is healthy and
-    // winning arbitration, which leaves "is the CPU itself stalling on the
-    // same SDRAM" as the only unmeasured candidate for a load-dependent
-    // slowdown. Every CPU-A access -- including plain work RAM -- crosses
-    // the p0 SDRAM CDC bridge (below), unlike real System 24 hardware where
-    // that RAM is zero-wait-state. Latched once per frame at the same
-    // 655/383 boundary s24_sprite.sv uses, so every dbg_* counter shares one
-    // epoch and none ever shows a mid-count value. 24 bits wide: see
-    // dbg_p2_stall's note on 16-bit saturation ambiguity.
-    logic [23:0] dbg_a_stall, dbg_b_stall;
-    logic [23:0] a_stall_live, b_stall_live;
-    always_ff @(posedge clk) begin
-        if (reset) begin
-            a_stall_live<=0; b_stall_live<=0;
-            dbg_a_stall<=0;  dbg_b_stall<=0;
-        end else begin
-            if (a_mem_req && !a_mem_ack) a_stall_live<=a_stall_live+1'b1;
-            if (b_mem_req && !b_mem_ack) b_stall_live<=b_stall_live+1'b1;
-            if (ce16 && hcount==10'd655 && vcount==10'd383) begin
-                dbg_a_stall<=a_stall_live; a_stall_live<=0;
-                dbg_b_stall<=b_stall_live; b_stall_live<=0;
-            end
-        end
-    end
-
     // Each physical CPU bus has its own read path into SDRAM. Keep a request
     // occupied until the CPU front-end has observed the completion pulse, so
     // its level-held AS cycle cannot be launched twice. CPU-B opcode reads add
     // the FD1094 stage after p3 returns the encrypted word.
-    typedef enum logic [1:0] {MR_IDLE,MR_SDRAM,MR_DECRYPT,MR_DROP} mrstate_t;
+    typedef enum logic [2:0] {MR_IDLE,MR_LOOKUP,MR_SDRAM,MR_DECRYPT,MR_DROP} mrstate_t;
     mrstate_t a_mrstate,b_mrstate;
     always_ff @(posedge clk) begin
         a_mem_ack<=1'b0;
         b_mem_ack<=1'b0;
         fd_start<=1'b0;
         fd_key_start<=1'b0;
+        bc_hit_record<=1'b0;
+        bc_fill<=1'b0;
         if(reset) begin
             a_mrstate<=MR_IDLE;
             b_mrstate<=MR_IDLE;
@@ -685,19 +614,37 @@ module s24_core #(
             endcase
 
             case(b_mrstate)
-                MR_IDLE: if(b_mem_req) begin
-                    p3_addr<=word_address(physical(1'b1,b_mem_addr,rom_bank[3:0]));
-                    p3_req<=1'b1;
-                    // Same predicate the MR_SDRAM arm below uses to raise
-                    // fd_start, evaluated on the identical registered
-                    // b_mem_* values (s24_cpu_bus holds them for the whole
-                    // transaction). Kicking the key-RAM read off here lets
-                    // it retire behind the SDRAM round trip instead of
-                    // adding its latency on top -- see s24_fd1094.sv's
-                    // key_start port comment.
-                    if(board.has_fd1094 && b_mem_fc[1] &&
-                       b_mem_addr<24'h100000) fd_key_start<=1'b1;
-                    b_mrstate<=MR_SDRAM;
+                // One lookup cycle before the SDRAM launch: the opcode
+                // cache's tag/data RAMs register the fetch address at the
+                // end of this cycle, so the hit decision is valid during
+                // MR_LOOKUP.  A hit acknowledges in ~4 clk_sys from AS
+                // instead of ~18; a miss pays one extra cycle, which a hit
+                // rate above ~6% repays.
+                MR_IDLE: if(b_mem_req) b_mrstate<=MR_LOOKUP;
+                MR_LOOKUP: begin
+                    if(bc_hit) begin
+                        b_mem_din<=bc_hit_data;
+                        b_mem_ack<=1'b1;
+                        // Replay the fetch into the FD1094 CMP/history
+                        // tracker, which this hit bypassed.  A hit issues
+                        // no key_start, so the decryptor stays in F_IDLE
+                        // for the whole transaction.
+                        bc_hit_record<=board.has_fd1094;
+                        b_mrstate<=MR_DROP;
+                    end else begin
+                        p3_addr<=word_address(physical(1'b1,b_mem_addr,rom_bank[3:0]));
+                        p3_req<=1'b1;
+                        // Same predicate the MR_SDRAM arm below uses to raise
+                        // fd_start, evaluated on the identical registered
+                        // b_mem_* values (s24_cpu_bus holds them for the whole
+                        // transaction). Kicking the key-RAM read off here lets
+                        // it retire behind the SDRAM round trip instead of
+                        // adding its latency on top -- see s24_fd1094.sv's
+                        // key_start port comment.
+                        if(board.has_fd1094 && b_mem_fc[1] &&
+                           b_mem_addr<24'h100000) fd_key_start<=1'b1;
+                        b_mrstate<=MR_SDRAM;
+                    end
                 end
                 MR_SDRAM: if(p3_ack) begin
                     p3_req<=1'b0;
@@ -709,12 +656,19 @@ module s24_core #(
                     end else begin
                         b_mem_din<=p3_data;
                         b_mem_ack<=1'b1;
+                        // In-window plain fetch (non-FD1094 board): cache
+                        // the raw word under the constant zero state tag.
+                        bc_fill<=bc_window;
                         b_mrstate<=MR_DROP;
                     end
                 end
                 MR_DECRYPT: if(fd_done) begin
                     b_mem_din<=fd_plaintext;
                     b_mem_ack<=1'b1;
+                    // Cache the decrypted word under the state the decrypt
+                    // consumed (fd_state_used), never current_state -- a
+                    // CMP-driven state change can land mid-flight.
+                    bc_fill<=bc_window;
                     b_mrstate<=MR_DROP;
                 end
                 MR_DROP: if(!b_mem_req) b_mrstate<=MR_IDLE;
@@ -780,7 +734,7 @@ module s24_core #(
         bus_ack<=0;io_rd<=0;io_wr<=0;irq_rd_a<=0;irq_rd_b<=0;irq_wr<=0;
         magic_wr<=0;tile_wr<=0;mixer_wr<=0;palette_wr<=0;fdc_rd<=0;fdc_wr<=0;
         adc0_select<=0;adc1_select<=0;adc0_shift<=0;adc1_shift<=0;
-        frc_mode_write<=0;frc_ack_write<=0;
+        frc_mode_write<=0;frc_ack_write<=0;bc_snoop<=0;
         if(reset) begin
             xs<=X_IDLE;bus_din<=16'h0000;
             cpu_wr_pending<=0;cpu_phys<=0;rom_bank<=0;
@@ -804,6 +758,12 @@ module s24_core #(
                     cpu_phys<=physical(bus_cpu,bus_addr,rom_bank[3:0]);
                     if(!bus_rnw && is_writable(bus_cpu,bus_addr)) begin
                         cpu_wr_pending<=1;xs<=X_WRITE;
+                        // Invalidate any opcode-cache line this store may
+                        // cover.  Both CPUs' stores funnel through here with
+                        // the PHYSICAL address, so CPU-A patching CPU-B's
+                        // program through its f00000/f80000 windows is
+                        // caught; the cache filters to WORKA/WORKB itself.
+                        bc_snoop<=1;
                     end else begin bus_din<=16'h0000;xs<=X_LOCAL; end
                 end else if(is_tile_window(bus_addr)) begin
                     if(bus_rnw) xs<=X_TILE;

@@ -695,8 +695,10 @@ module tb_gground_boot;
         .mahjong_matrix(64'hffff_ffff_ffff_ffff),
         .ports(simulated_inputs));
 
+    logic flicker_blend_opt = 1'b0;
     s24_core dut(
-        .clk(clk),.reset(reset),.pause(pause),.board(board),
+        .clk(clk),.reset(reset),.pause(pause),
+        .flicker_blend(flicker_blend_opt),.board(board),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),
         .input_ports(simulated_inputs),
         .spinner0('0),.spinner1('0),.spinner2('0),.spinner3('0),
@@ -817,6 +819,9 @@ module tb_gground_boot;
         magic_table=MAGIC_NONE;
         coinage_arg=8'hff;
         dsw_arg=8'hff;
+        // Default 0: the MAME pixel-exact comparisons must see the raw
+        // field alternation, not the CRT-integrated average.
+        if ($test$plusargs("BLEND")) flicker_blend_opt = 1'b1;
         void'($value$plusargs("GAME=%s",game_name));
         void'($value$plusargs("BOOT=%s",boot_file));
         void'($value$plusargs("ROMBOARD=%s",romboard_file));

@@ -3,7 +3,7 @@
 module tb_fd1094;
     logic clk=0;
     always #10 clk=~clk;
-    logic reset=1,key_wr=0,start=0,irq_enter=0,instruction_start=0;
+    logic reset=1,key_wr=0,start=0,key_start=0,irq_enter=0,instruction_start=0;
     logic [11:0] key_word_addr=0;
     logic [15:0] key_wdata=0,encrypted=0,plaintext;
     logic [23:1] word_address=0;
@@ -12,14 +12,29 @@ module tb_fd1094;
     logic [15:0] instruction_opcode=0;
     logic [23:1] instruction_address=0;
     logic [23:1] state_test_address=23'h000200;
+    logic [7:0]  state_used;
+    logic        hit_record=0;
+    logic [23:1] hit_address=0;
+    logic [15:0] hit_data=0;
 
     s24_fd1094 #(.MASK_FILE("rtl/cpu/fd1094_masked.mem")) dut(
         .clk(clk),.reset(reset),.key_wr(key_wr),.key_word_addr(key_word_addr),
-        .key_wdata(key_wdata),.start(start),.word_address(word_address),
+        .key_wdata(key_wdata),.start(start),.key_start(key_start),
+        .word_address(word_address),
         .encrypted(encrypted),.irq_enter(irq_enter),.busy(busy),.done(done),
         .instruction_start(instruction_start),.instruction_opcode(instruction_opcode),
         .instruction_address(instruction_address),
-        .plaintext(plaintext),.current_state(current_state));
+        .plaintext(plaintext),.current_state(current_state),
+        .state_used(state_used),
+        .hit_record(hit_record),.hit_address(hit_address),.hit_data(hit_data));
+
+    task automatic hit_record_pulse(input logic [23:1] addr,
+                                     input logic [15:0] data);
+        begin
+            @(negedge clk); hit_address=addr; hit_data=data; hit_record=1;
+            @(negedge clk); hit_record=0;
+        end
+    endtask
 
     task automatic load_word(input logic [11:0] address,input logic [15:0] data);
         begin
@@ -34,7 +49,20 @@ module tb_fd1094;
         input logic [15:0] expected
     );
         begin
-            @(negedge clk);word_address=address;encrypted=cipher;start=1;
+            // key_start kicks off the key-RAM lookup (F_IDLE->F_KEY->
+            // F_KEY_Q->F_ARMED, 2 cycles). Real callers (rtl/s24_core.sv)
+            // raise it when the SDRAM read is issued and start only once
+            // the SDRAM round trip returns the word many cycles later, so
+            // start normally arrives after fstate has already settled in
+            // F_ARMED and is caught directly there -- start_pending exists
+            // only for the rare case start beats the 2-cycle key lookup.
+            // Match that ordering: wait for F_ARMED before raising start,
+            // instead of racing the two together and hitting the
+            // start_pending path (a corner case, not the norm) by accident.
+            @(negedge clk);word_address=address;encrypted=cipher;key_start=1;
+            @(negedge clk);key_start=0;
+            while(dut.fstate!==dut.F_ARMED) @(negedge clk);
+            start=1;
             @(negedge clk);start=0;
             while(!done) @(negedge clk);
             if(plaintext!==expected)
@@ -124,6 +152,33 @@ module tb_fd1094;
         if(current_state!==8'h00)
             $fatal(1,"FD1094 reset did not select state 00");
         check_decrypt(23'h000007,16'h013a,16'hffff); // aggressive mask ROM
+
+        // hit_record must replay F_DONE's bookkeeping identically for a word
+        // the opcode cache served instead of the decrypt pipeline: the
+        // cmp_phase 1->2->apply walk and the fetch_history push. Drive the
+        // 00xx CMPI.L two-word sequence entirely through hit_record, with
+        // cmp_phase seeded as execute_state_command's instruction_start path
+        // would have left it after the opcode word, and confirm the FD1094
+        // state selects exactly as a real hardware decrypt would.
+        dut.cmp_phase=1; dut.cmp_expected=23'h000401;
+        hit_record_pulse(23'h000401,16'h0077); // high word -> cmp_high, phase 2
+        if(dut.cmp_phase!==2 || dut.cmp_high!==16'h0077)
+            $fatal(1,"hit_record phase1->2 walk incorrect: phase=%0d cmp_high=%h",
+                   dut.cmp_phase,dut.cmp_high);
+        hit_record_pulse(23'h000402,16'hffff); // low word $ffff -> apply state
+        if(current_state!==8'h77)
+            $fatal(1,"hit_record phase-2 walk did not select state: current=%h",
+                   current_state);
+        if(!dut.fetch_history_valid[0] || dut.fetch_history_addr[0]!==23'h000402
+           || dut.fetch_history_data[0]!==16'hffff)
+            $fatal(1,"hit_record did not push fetch_history");
+        // A non-$ffff low word must not select a state, same as F_DONE.
+        dut.cmp_phase=1; dut.cmp_expected=23'h000501;
+        hit_record_pulse(23'h000501,16'h0099);
+        hit_record_pulse(23'h000502,16'h1234);
+        if(current_state!==8'h77)
+            $fatal(1,"hit_record applied a state from a non-$ffff low word");
+
         $display("PASS FD1094 MAME vectors and mask ROM");
         $finish;
     end

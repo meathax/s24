@@ -17,6 +17,37 @@ module tb_inputs;
         if(ports[7:0]!==8'hfe)$fatal(1,"generic B3 mapping mismatch");
         joy0=0;joy0[5]=1;#1;
         if(ports[7:0]!==8'hfb)$fatal(1,"generic B2 mapping mismatch");
+        // Direction mapping, verified against MAME segas24.cpp
+        // system24_generic: P1 0x80=JOYSTICK_LEFT, 0x40=JOYSTICK_RIGHT,
+        // 0x20=JOYSTICK_UP, 0x10=JOYSTICK_DOWN, all active low. MiSTer
+        // supplies {right,left,down,up} at joy[0],[1],[2],[3]. Every
+        // direction is checked on both players and one at a time, so a
+        // swapped or dropped direction cannot pass -- the whole nibble was
+        // previously untested, which is exactly the mapping a controller
+        // complaint ("right does not work") would implicate first.
+        joy0=0;joy0[0]=1;#1;
+        if(ports[7:0]!==8'hbf)
+            $fatal(1,"P1 RIGHT should clear only port bit 6, got %02h",ports[7:0]);
+        joy0=0;joy0[1]=1;#1;
+        if(ports[7:0]!==8'h7f)
+            $fatal(1,"P1 LEFT should clear only port bit 7, got %02h",ports[7:0]);
+        joy0=0;joy0[3]=1;#1;
+        if(ports[7:0]!==8'hdf)
+            $fatal(1,"P1 UP should clear only port bit 5, got %02h",ports[7:0]);
+        joy0=0;joy0[2]=1;#1;
+        if(ports[7:0]!==8'hef)
+            $fatal(1,"P1 DOWN should clear only port bit 4, got %02h",ports[7:0]);
+        // Diagonals must combine, not alias onto one another.
+        joy0=0;joy0[0]=1;joy0[3]=1;#1;
+        if(ports[7:0]!==8'h9f)
+            $fatal(1,"P1 UP+RIGHT diagonal mismatch %02h",ports[7:0]);
+        // P1 directions must not disturb P2 and vice versa.
+        joy0=0;joy1[0]=1;#1;
+        if(ports[15:8]!==8'hbf || ports[7:0]!==8'hff)
+            $fatal(1,"P2 RIGHT mapping/bleed mismatch %02h/%02h",
+                   ports[15:8],ports[7:0]);
+        joy1=0;
+
         joy0=0;joy0[12]=1;joy1[12]=1;#1;
         if(ports[7:0]!==8'hf7 || ports[15:8]!==8'hf7)
             $fatal(1,"per-player service switch mapping mismatch");

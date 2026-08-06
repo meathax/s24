@@ -5,7 +5,15 @@
 // The clocks deliberately have unrelated periods and a non-zero phase offset.
 // Each transaction changes the live source payload after launch, proving that
 // the bundled-data holding register (rather than the live bus) crosses domains.
-module tb_sdram_cdc;
+// SYNC_STAGES is overridable at elaboration (Verilator -GSYNC_STAGES=1,
+// ModelSim -gSYNC_STAGES=1) so the same scenario covers both the asynchronous
+// two-flop default and the SYNC_STAGES(1) related-clock depth the core ships.
+// The handshake protocol is identical at either depth -- only latency differs
+// -- so passing here proves the protocol; the 2:1 edge alignment that makes
+// depth 1 legal is a static-timing argument, not a simulation one.
+module tb_sdram_cdc #(
+    parameter integer SYNC_STAGES = 2
+);
     localparam integer REQ_WIDTH = 16;
     localparam integer RSP_WIDTH = 12;
 
@@ -36,7 +44,8 @@ module tb_sdram_cdc;
 
     s24_sdram_cdc #(
         .REQ_WIDTH(REQ_WIDTH),
-        .RSP_WIDTH(RSP_WIDTH)
+        .RSP_WIDTH(RSP_WIDTH),
+        .SYNC_STAGES(SYNC_STAGES)
     ) dut (
         .reset(reset),
         .src_clk(src_clk),

@@ -355,49 +355,7 @@ module s24_sprite (
     output logic         mem_req,
     output logic [26:4]  mem_addr,
     input  logic [127:0] mem_data,
-    input  logic         mem_ack,
-
-    // Hardware-only debug counters (see the CLAUDE.md differential-testing
-    // notes on this session's SDRAM burst corruption): Verilator cannot
-    // reproduce the corruption these are meant to help localize on real
-    // hardware, since it models no SDRAM pad/routing timing at all. Each is
-    // a snapshot of the PREVIOUS completed frame (latched at the frame
-    // boundary this module already tracks), so the on-screen readout never
-    // shows a mid-count, still-changing value.
-    output logic [23:0]  dbg_p2_stall,    // cycles p2 mem_req was asserted
-                                           // waiting for mem_ack last frame --
-                                           // directly measures SDRAM
-                                           // arbitration/contention time on
-                                           // the burst port this session's
-                                           // corruption theory targets.
-                                           // 24 bits: a 16-bit counter was
-                                           // observed pinned near 0xFFFF on
-                                           // real hardware during gameplay,
-                                           // making saturation vs. a genuine
-                                           // near-ceiling value ambiguous.
-    output logic [13:0]  dbg_list_seen,   // descriptor list entries walked
-    output logic [15:0]  dbg_line_wr,     // line-buffer pixel writes
-    output logic [15:0]  dbg_mixer_px,    // nonzero pixel0..3 emitted toward
-                                           // the mixer (opaque sprite pixel
-                                           // volume actually reaching scan-out)
-    output logic [7:0]   dbg_render_pass, // S_CLEAR entries (one per raster
-                                           // line the renderer actually
-                                           // processed last frame, saturating
-                                           // at 255; a healthy frame should
-                                           // stay near the visible line
-                                           // count -- far lower means the
-                                           // renderer is falling behind)
-    output logic         dbg_bank_starve, // sticky: all LINE_BANKS empty for
-                                           // a full frame (early warning for
-                                           // the bank-starvation bug class
-                                           // already fixed twice this session)
-    output logic [12:0]  dbg_max_stack    // sticky high-water mark of
-                                           // stack_count across the whole
-                                           // session (never reset except on
-                                           // module reset) -- real usage data
-                                           // to decide whether STACK_DEPTH=
-                                           // 4096 has safe slack to shrink,
-                                           // instead of guessing
+    input  logic         mem_ack
 );
     import s24_pkg::*;
 
@@ -1205,6 +1163,18 @@ module s24_sprite (
     // Port B performs the renderer write or the inactive-bank clear. Port A
     // always consumes/clears the currently displayed bank on a pixel edge.
     logic line_b_clear;
+    // Generation tags reject stale pixels only until bank_generation wraps
+    // (2^LINE_GEN_WIDTH fills of a bank, ~23 s at 48 fills/bank/frame). A
+    // word never rewritten in that whole window then matches its old tag
+    // again, and as the counter keeps advancing the match sweeps through the
+    // stored history: the line buffers replay ~23-second-old sprite pixels in
+    // every scene, animated purely by the free-running fill counters -- even
+    // with the CPU paused. Scrubbing one rotating word of the fill bank per
+    // fill bounds any word's unwritten lifetime to 128 fills (~3 frames),
+    // far inside the wrap horizon, so no stale tag can survive to a wrap.
+    logic scrub_req;
+    logic [9:0] scrub_addr;
+    logic [6:0] bank_scrub [0:LINE_BANKS-1];
     always_comb begin
         // Generation tags invalidate the previous bank contents; no bulk
         // clear write is needed (and would steal the scanline render slot).
@@ -1293,6 +1263,19 @@ module s24_sprite (
                 endcase
             end
         end
+        // The scrub cycle is the one immediately after a fill is claimed in
+        // S_IDLE. That cycle is never an emit state and never the
+        // occlusion-lookahead cycle before one, so overriding port B here
+        // cannot disturb a render write or the read-ahead that gates it.
+        // line_b_clear routes the zero write through all four category RAMs.
+        if(scrub_req) begin
+            line_b_clear=1'b1;
+            line_b_wren=4'b1111;
+            for(line_phys=0;line_phys<4;line_phys=line_phys+1) begin
+                line_b_addr[line_phys]=scrub_addr;
+                line_b_data[line_phys]='0;
+            end
+        end
     end
 
     genvar line_lane;
@@ -1361,17 +1344,6 @@ module s24_sprite (
         end
     end
 
-    // Debug counter live accumulators (see the dbg_* port comments): each
-    // accumulates during the current frame and is snapshotted into its
-    // dbg_* output at the frame_epoch boundary below, then cleared for the
-    // next frame. Kept as plain registers, not wired into anything but the
-    // overlay -- cannot affect synthesizable behaviour.
-    logic [23:0] p2_stall_live;
-    logic [15:0] line_wr_live;
-    logic [15:0] mixer_px_live;
-    logic [7:0]  render_pass_live;
-    logic        line_valid_ever_live;
-
     always_ff @(posedge clk) begin
         if(reset) begin
             state<=S_IDLE;display_bank<=0;fill_bank<=0;line_valid<=0;
@@ -1384,6 +1356,11 @@ module s24_sprite (
             bank_line_y[2]<=9'h1ff;bank_line_y[3]<=9'h1ff;
             bank_line_y[4]<=9'h1ff;bank_line_y[5]<=9'h1ff;
             bank_line_y[6]<=9'h1ff;bank_line_y[7]<=9'h1ff;
+            scrub_req<=0;scrub_addr<=0;
+            bank_scrub[0]<=0;bank_scrub[1]<=0;
+            bank_scrub[2]<=0;bank_scrub[3]<=0;
+            bank_scrub[4]<=0;bank_scrub[5]<=0;
+            bank_scrub[6]<=0;bank_scrub[7]<=0;
             target_y<=0;render_next_target<=0;
             list_index<=0;list_seen<=0;list_cache_valid<=0;
             cache_refresh_pending<=0;
@@ -1416,21 +1393,7 @@ module s24_sprite (
             scan_quad_pending_clip[2]<=0;
             dest_y<=0;dest_x<=0;flipx<=0;flipy<=0;size_x_tiles<=1;
             size_y_tiles<=1;
-            p2_stall_live<=0;line_wr_live<=0;mixer_px_live<=0;
-            render_pass_live<=0;line_valid_ever_live<=0;
-            dbg_p2_stall<=0;dbg_list_seen<=0;dbg_line_wr<=0;
-            dbg_mixer_px<=0;dbg_render_pass<=0;dbg_bank_starve<=0;
-            dbg_max_stack<=0;
         end else begin
-            // Debug counters: live per-cycle accumulation, unconditional on
-            // ce_pixel so cycle-level events (like an SDRAM stall) aren't
-            // missed between pixel enables.
-            if(mem_req && !mem_ack) p2_stall_live<=p2_stall_live+1'b1;
-            line_wr_live<=line_wr_live+16'(line_b_wren[0])+16'(line_b_wren[1])
-                                       +16'(line_b_wren[2])+16'(line_b_wren[3]);
-            mixer_px_live<=mixer_px_live+16'(pixel0!=0)+16'(pixel1!=0)
-                                         +16'(pixel2!=0)+16'(pixel3!=0);
-            if(line_valid!='0) line_valid_ever_live<=1'b1;
             // Toggle the frame epoch at the last visible-line boundary even
             // if the renderer is still busy there. Defer list-cache refresh
             // until the current queued frame has drained; a long sprite
@@ -1438,17 +1401,6 @@ module s24_sprite (
             if(ce_pixel && hcount==10'd655 && vcount==10'd383) begin
                 frame_epoch<=~frame_epoch;
                 cache_refresh_pending<=1;
-                // Debug counters: snapshot the frame that just ended into
-                // the dbg_* outputs (so the overlay always shows a stable,
-                // fully-completed value, never a mid-count one), then clear
-                // the live accumulators for the new frame.
-                dbg_p2_stall<=p2_stall_live;      p2_stall_live<=0;
-                dbg_list_seen<=list_seen;
-                dbg_line_wr<=line_wr_live;        line_wr_live<=0;
-                dbg_mixer_px<=mixer_px_live;      mixer_px_live<=0;
-                dbg_render_pass<=render_pass_live; render_pass_live<=0;
-                if(!line_valid_ever_live) dbg_bank_starve<=1'b1;
-                line_valid_ever_live<=1'b0;
                 // A bank's line_valid means "pre-rendered content for a
                 // specific line of THIS frame, not yet consumed by display."
                 // The fill side can legitimately race ahead of the display
@@ -1596,6 +1548,7 @@ module s24_sprite (
                 end
             end
 
+            scrub_req<=0;
             case(state)
                 S_IDLE: begin
                     // Keep the current descriptor cache alive until every
@@ -1604,7 +1557,6 @@ module s24_sprite (
                     // line render and repeatedly reset render_next_target.
                     if(!list_cache_valid ||
                        (ce_pixel && hcount==10'd655 && vcount==10'd383)) begin
-                        if(stack_count>dbg_max_stack) dbg_max_stack<=stack_count;
                         list_index<=0;list_seen<=0;stack_count<=0;
                         stack_head<=0;current_clip_valid<=0;
                         list_cache_valid<=0;render_next_target<=0;
@@ -1624,7 +1576,6 @@ module s24_sprite (
                     // boundary above already retires all queued lines, so
                     // there is no partially-scheduled frame worth preserving.
                     end else if(cache_refresh_pending) begin
-                        if(stack_count>dbg_max_stack) dbg_max_stack<=stack_count;
                         list_index<=0;list_seen<=0;stack_count<=0;
                         stack_head<=0;current_clip_valid<=0;
                         list_cache_valid<=0;render_next_target<=0;
@@ -1641,6 +1592,10 @@ module s24_sprite (
                             bank_generation[fill_candidate]+1'b1;
                         bank_line_y[fill_candidate]<=render_next_target;
                         line_valid[fill_candidate]<=0;
+                        scrub_req<=1;
+                        scrub_addr<={fill_candidate,bank_scrub[fill_candidate]};
+                        bank_scrub[fill_candidate]<=
+                            bank_scrub[fill_candidate]+1'b1;
                         target_y<=render_next_target;
                         render_next_target<=render_next_target+1'b1;
                         scan_pos<=0;
@@ -1656,8 +1611,6 @@ module s24_sprite (
                         end else begin
                             active_count<=0;
                             state<=S_CLEAR;
-                            if(render_pass_live!=8'hff)
-                                render_pass_live<=render_pass_live+1'b1;
                         end
                     end
                 end
@@ -1667,7 +1620,6 @@ module s24_sprite (
                     // exactly as before, but the renderer can use the saved
                     // line budget for the long SSpirits sprite list.
                     if(!list_cache_valid) begin
-                        if(stack_count>dbg_max_stack) dbg_max_stack<=stack_count;
                         list_index<=0;list_seen<=0;stack_count<=0;
                         stack_head<=0;current_clip_valid<=0;
                         state<=S_LIST_REQ;

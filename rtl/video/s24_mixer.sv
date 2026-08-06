@@ -30,7 +30,13 @@ module s24_mixer (
     input  logic [10:0] sprite1_rank,
     input  logic [10:0] sprite2_rank,
     input  logic [10:0] sprite3_rank,
+    // Tilemaps whose disable bit is toggling every frame (see s24_tile.sv).
+    // Such a layer is now rendered on every frame, so mixed_pixel_alt repeats
+    // the priority resolve with it removed. Averaging the two downstream
+    // reproduces what the original CRT integrated out of the two fields.
+    input  logic [3:0]  tile_blink,
     output logic [13:0] mixed_pixel,
+    output logic [13:0] mixed_pixel_alt,
     output logic        display_blank
 );
     import s24_pkg::*;
@@ -40,19 +46,29 @@ module s24_mixer (
     assign cpu_dout = regs[cpu_addr];
     assign display_blank = regs[13][0];
 
-    logic [3:0] best_pri;
-    logic [3:0] pri;
-
-    logic [2:0] backdrop_pri;
-    logic backdrop_found;
-    logic pixel_found;
-    logic sprite0_ok,sprite1_ok,sprite2_ok,sprite3_ok;
-    logic left_sprite_valid,right_sprite_valid;
-    logic [10:0] left_sprite_rank,right_sprite_rank;
-    logic [1:0] left_sprite_choice,right_sprite_choice;
-    logic [13:0] chosen_sprite_pixel;
-    always_comb begin
-        mixed_pixel = 14'h0000;
+    // One evaluation of the 315-5294 priority chain. The tile validity inputs
+    // are arguments so the same logic can be re-evaluated with a blinking
+    // tilemap withheld; everything else is unchanged from the single-pass
+    // version this replaced.
+    function automatic logic [13:0] resolve_pixel(
+        input logic valid0,
+        input logic valid1,
+        input logic valid2,
+        input logic valid3
+    );
+        logic [3:0] best_pri;
+        logic [3:0] pri;
+        logic [2:0] backdrop_pri;
+        logic backdrop_found;
+        logic pixel_found;
+        logic sprite0_ok,sprite1_ok,sprite2_ok,sprite3_ok;
+        logic left_sprite_valid,right_sprite_valid;
+        logic [10:0] left_sprite_rank,right_sprite_rank;
+        logic [1:0] left_sprite_choice,right_sprite_choice;
+        logic [13:0] chosen_sprite_pixel;
+        logic [13:0] result;
+    begin
+        result = 14'h0000;
         backdrop_pri = 0;
         backdrop_found = 0;
 
@@ -62,27 +78,27 @@ module s24_mixer (
         // the lowest-priority selected physical layer regardless of the
         // current tile's category. Equal priorities leave the higher-numbered
         // layer underneath. Raw tile pixels retain palette color zero here.
-        if (tile0_valid) begin
+        if (valid0) begin
             backdrop_pri = regs[0][2:0];
-            mixed_pixel = {2'b00,tile0_pixel};
+            result = {2'b00,tile0_pixel};
             backdrop_found = 1;
         end
-        if (tile1_valid &&
+        if (valid1 &&
                 (!backdrop_found || regs[2][2:0] <= backdrop_pri)) begin
             backdrop_pri = regs[2][2:0];
-            mixed_pixel = {2'b00,tile1_pixel};
+            result = {2'b00,tile1_pixel};
             backdrop_found = 1;
         end
-        if (tile2_valid &&
+        if (valid2 &&
                 (!backdrop_found || regs[4][2:0] <= backdrop_pri)) begin
             backdrop_pri = regs[4][2:0];
-            mixed_pixel = {2'b00,tile2_pixel};
+            result = {2'b00,tile2_pixel};
             backdrop_found = 1;
         end
-        if (tile3_valid &&
+        if (valid3 &&
                 (!backdrop_found || regs[6][2:0] <= backdrop_pri)) begin
             backdrop_pri = regs[6][2:0];
-            mixed_pixel = {2'b00,tile3_pixel};
+            result = {2'b00,tile3_pixel};
             backdrop_found = 1;
         end
 
@@ -92,31 +108,31 @@ module s24_mixer (
 
         // MAME's equal-priority default order leaves lower tile pass numbers
         // above higher ones, hence the reverse evaluation order here.
-        if (tile3_valid && tile3_pixel[3:0] != 0) begin
+        if (valid3 && tile3_pixel[3:0] != 0) begin
             best_pri = {1'b0,
                 tile3_cat ? regs[7][2:0] : regs[6][2:0]};
-            mixed_pixel = {2'b00,tile3_pixel};
+            result = {2'b00,tile3_pixel};
             pixel_found = 1;
         end
-        if (tile2_valid && tile2_pixel[3:0] != 0) begin
+        if (valid2 && tile2_pixel[3:0] != 0) begin
             pri = {1'b0,
                 tile2_cat ? regs[5][2:0] : regs[4][2:0]};
             if (!pixel_found || pri >= best_pri) begin
-                best_pri=pri; mixed_pixel={2'b00,tile2_pixel}; pixel_found=1;
+                best_pri=pri; result={2'b00,tile2_pixel}; pixel_found=1;
             end
         end
-        if (tile1_valid && tile1_pixel[3:0] != 0) begin
+        if (valid1 && tile1_pixel[3:0] != 0) begin
             pri = {1'b0,
                 tile1_cat ? regs[3][2:0] : regs[2][2:0]};
             if (!pixel_found || pri >= best_pri) begin
-                best_pri=pri; mixed_pixel={2'b00,tile1_pixel}; pixel_found=1;
+                best_pri=pri; result={2'b00,tile1_pixel}; pixel_found=1;
             end
         end
-        if (tile0_valid && tile0_pixel[3:0] != 0) begin
+        if (valid0 && tile0_pixel[3:0] != 0) begin
             pri = {1'b0,
                 tile0_cat ? regs[1][2:0] : regs[0][2:0]};
             if (!pixel_found || pri >= best_pri) begin
-                best_pri=pri; mixed_pixel={2'b00,tile0_pixel}; pixel_found=1;
+                best_pri=pri; result={2'b00,tile0_pixel}; pixel_found=1;
             end
         end
         // Each group supplies its frontmost candidate. Reject candidates that
@@ -170,11 +186,25 @@ module s24_mixer (
         if (left_sprite_valid || right_sprite_valid) begin
             // Indirect color 1 is the sprite shadow pen. MAME ORs the
             // shadow-bank bit into the already selected tile/background color.
-            if (chosen_sprite_pixel == 14'h2000) mixed_pixel[13] = 1'b1;
-            else mixed_pixel = chosen_sprite_pixel;
+            if (chosen_sprite_pixel == 14'h2000) result[13] = 1'b1;
+            else result = chosen_sprite_pixel;
             pixel_found = 1;
         end
-        if (display_blank) mixed_pixel = 0;
+        if (display_blank) result = 0;
+        resolve_pixel = result;
+    end
+    endfunction
+
+    always_comb begin
+        mixed_pixel = resolve_pixel(tile0_valid,tile1_valid,
+                                    tile2_valid,tile3_valid);
+        // Withholding the blinking tilemap reproduces the field in which the
+        // game had that layer disabled. With tile_blink all zero this is
+        // bit-identical to mixed_pixel, so the downstream average is a no-op.
+        mixed_pixel_alt = resolve_pixel(tile0_valid & ~tile_blink[0],
+                                        tile1_valid & ~tile_blink[1],
+                                        tile2_valid & ~tile_blink[2],
+                                        tile3_valid & ~tile_blink[3]);
     end
 
     always_ff @(posedge clk) begin

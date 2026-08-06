@@ -118,11 +118,18 @@ if {[get_collection_size $s24_sdram_src] > 0 && \
 # single-cycle synchronous path. The payload registers are NOT single-cycle:
 # rtl/mem/s24_sdram_cdc.sv writes req_hold/rsp_hold on the same edge that
 # flips its req_toggle/rsp_toggle, and the opposite domain only samples the
-# payload after that toggle has traversed BOTH synchroniser stages
-# (req_sync_m -> req_sync_s, rsp_sync_m -> rsp_sync_s). The payload is
-# therefore provably stable for at least two destination-clock periods before
-# any capture, and is held until the transaction completes because the
-# producer is gated by src_busy/dst_busy.
+# payload one clock AFTER it has observed that toggle through its synchroniser.
+# The core instantiates the crossing at SYNC_STAGES(1) because the two clocks
+# are an exact phase-locked 2:1 pair (VCO/26 and VCO/13), which puts the
+# capture two destination-clock periods after the write in both directions:
+#   request  launch clk_sys t=0      -> req_sync_m t=10.348 -> capture t=20.696
+#   response launch clk_ram t=10.348 -> rsp_sync_m t=20.696 -> capture t=41.392
+# i.e. 2 x 10.348 ns against clk_ram and 31.044 ns against clk_sys, exactly the
+# windows the -setup -end 2 below asks for. The payload is therefore provably
+# stable for at least two destination-clock periods before any capture, and is
+# held until the transaction completes because the producer is gated by
+# src_busy/dst_busy. Dropping to SYNC_STAGES(0) would halve both windows and
+# make this exception a lie -- see that module's SYNC_STAGES comment.
 #
 # Without this exception the fitter inserted >2.3 us of hold-fixing routing
 # delay across these buses (notably the 128-bit cdc_p2 sprite response),
@@ -131,8 +138,8 @@ if {[get_collection_size $s24_sdram_src] > 0 && \
 # same way.
 #
 # Scope is exactly the bundled payload registers -- the toggle bits, the
-# synchroniser chains, the handshake/busy flags and every other path stay
-# fully timed, so the crossing's correctness still rests on the synchronisers
+# synchroniser registers, the handshake/busy flags and every other path stay
+# fully timed, so the crossing's correctness still rests on the handshake
 # rather than on this exception.
 # Constrain these as MULTICYCLE, never false_path. The payload is genuinely
 # relaxed -- but it is NOT unconstrained, and the difference matters on
