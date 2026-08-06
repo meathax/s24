@@ -26,9 +26,27 @@ controller, dual-fx68k integration, JT51, MAME-derived device RTL, and
 verification scaffolding. All nineteen deterministic chip/module regressions
 pass. A full-core synthetic boot test also loads both fx68k control stores and
 proves CPU-A reset-vector fetch, instruction execution, shared memory traffic,
-and video line progress. Attract mode and MAME frame/audio comparison remain
-incomplete, so no RBF is considered deployable. See `docs/status.md` for the
-exact implementation boundary.
+and video line progress. `s24.rbf` now builds cleanly through Quartus Prime
+17.0.2 Build 602 -- zero errors, zero critical warnings, and closed timing
+(no negative slack on any of the 8 corner/model combinations) -- but attract
+mode and MAME frame/audio comparison remain incomplete, so build-readiness is
+not the same claim as behavioral accuracy. See `docs/status.md` for the exact
+implementation boundary.
+
+CPU-B (the FD1094-encrypted side on protected sets) now caches decrypted
+opcode fetches in a small physically-snooped, FD1094-state-tagged BRAM
+(`rtl/cpu/s24_b_opcache.sv`), and the CPU-SDRAM clock-domain-crossing bridge
+runs at its correct related-clock depth (`clk_sys`/`clk_ram` are the same PLL
+VCO at an exact phase-locked 2:1 ratio, not independent clocks) instead of an
+unnecessary two-stage asynchronous synchronizer. Both were measured on
+hardware to matter: CPU-B was stalled on memory for 40-50% of every frame
+before these landed. Block-memory-bit usage is tight after this work -- 545 of
+553 M10K blocks (99%) -- which is a real constraint on any future feature
+that needs BRAM; a resource audit is the next planned pass. Several games also
+get a flicker-blend option: titles that obtain translucency by toggling a
+tilemap's disable bit every frame (a CRT integrates it; a fixed-pixel display
+shows a 28.75 Hz flicker) can instead render every frame and let the mixer
+resolve the "layer absent" pixel, at the user's choice from the OSD.
 
 The real protected Gain Ground path now passes a complete contiguous 11,520-byte
 floppy track after loading the complete 8 KB FD1094 key. The deterministic MCP
@@ -135,6 +153,23 @@ Quartus Prime Lite 17.0.2 is the reference toolchain. The QSF deliberately
 uses Fast Fit and the account-wide eight-worker limit. Compilation databases are
 kept for Smart Recompile. A generated programming file must not be deployed
 until all timing reports have been inspected.
+
+## Credits
+
+- **Jorge Cwik** -- `fx68k`, the 68000-compatible CPU core.
+- **Jose Tejada Gomez (jotego)** -- `JT51`, the YM2151 core.
+- **Till Harbaum** and **Alexey Melnikov (Sorgelig)**, and the wider MiSTer
+  project -- the MiSTer platform framework this core targets (`hps_io`,
+  `sys_top`, `ascal`, the SDRAM/HPS bridge, and the rest of `sys/`).
+- The **MAME project** -- `segas24.cpp`, `segaic24.cpp`, `315_5296.cpp`, and
+  `fd1094.cpp` are this core's behavioral reference; no MAME source is copied
+  into this tree, only independently reimplemented from observed and
+  documented behavior.
+- Sega System 24 hardware documentation and prior community research into the
+  FD1094 encryption scheme.
+- Development on this core, including its RTL, verification harnesses, and
+  differential-testing workflow, has been substantially AI-assisted using
+  Claude Code (Anthropic), under human direction and review.
 
 ## Licensing
 
