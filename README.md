@@ -1,7 +1,7 @@
 # Sega System 24 for MiSTer
 
 An FPGA recreation of Sega System 24 targeting the MiSTer DE10-Nano with one
-128 MB SDRAM module. The eventual release bitstream is `s24.rbf`; one bitstream
+128 MB SDRAM module. The eventual release bitstream is `segas24.rbf`; one bitstream
 is intended to support every System 24 set represented by the project MRAs.
 
 This is an accuracy-first work in progress. MAME's current `segas24.cpp`,
