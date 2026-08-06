@@ -26,7 +26,19 @@ set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 # Any future change to rtl/mem/sdram.sv or the sprite descriptor RAMs'
 # width/shape should re-verify cdc_wr:req_hold->dst_payload hold margin
 # before assuming this seed still closes it.
-set_global_assignment -name SEED 2
+#  - 2026-08-06: adding two 24-bit CPU-stall debug counters + widening
+#    dbg_p2_stall/dbg_value (rtl/s24_core.sv, rtl/video/s24_debug_overlay.sv;
+#    no touch to sdram.sv or the sprite descriptor RAMs) reopened the SAME
+#    sprite line-RAM WE setup cone AND cdc_wr hold path under seed 2 anyway
+#    -- confirmed via get_timing_paths that both failing paths are entirely
+#    pre-existing (size_y_tiles/source_row -> line RAM WE; cdc_wr req_hold->
+#    dst_payload), not touched by the new counters. This design is
+#    apparently seed-sensitive to placement perturbation from ANY added
+#    logic, not just sdram.sv/sprite-RAM changes as previously scoped.
+#    SEED 3 improved but did not close it: Slow 1100mV -40C corner, worst
+#    setup -0.158ns (TNS -0.503) on clk_sys, same sprite-line-RAM WE cone.
+#    Trying SEED 5 next; re-narrow this note once one closes cleanly.
+set_global_assignment -name SEED 5
 
 # Machine-wide safe Quartus policy. Do not override these in build scripts.
 #

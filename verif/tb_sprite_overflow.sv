@@ -2,7 +2,20 @@
 
 // MAME retains all 0x2000 linked-list descriptors and renders the list in
 // reverse.  The bounded FPGA cache must therefore retain the newest/frontmost
-// 1024 descriptors when a pathological list exceeds its storage budget.
+// STACK_DEPTH descriptors when a pathological list exceeds its storage budget.
+//
+// STACK_DEPTH is 4096: `stack_write_slot` appends while stack_count <
+// STACK_COUNT_LIMIT, then overwrites at `stack_head` and advances it, so the
+// retained window is always the newest 4096 entries in list order. Feeding
+// exactly 4097 normal descriptors leaves head=1, drops logical entry 0, and
+// wraps the newest entry into physical slot 0 -- the odd-head case the paired
+// descriptor RAM has to scan correctly.
+//
+// Descriptors are no longer held in a flat `sprite_stack` index array; they
+// live packed inside `descriptor_stack_ram` (81-bit payload, word 2 at bits
+// 64:49) and are copied into `active_cache_ram` (119-bit payload, word 2 at
+// bits 102:87) by the per-line vertical filter. Word 2 carries a unique
+// payload here so every check can name the descriptor it found.
 module tb_sprite_overflow;
     import s24_pkg::*;
 
@@ -14,10 +27,11 @@ module tb_sprite_overflow;
     logic [26:4] mem_addr;
     logic [127:0] mem_data;
     logic [22:0] descriptor_index;
-    logic track_render=0;
-    integer render_count=0;
-    logic [9:0] render_order [0:2];
     localparam logic [26:4] BASE=SDR_SPRITE_BASE[26:4];
+    localparam int LAST=4096;          // 4097 entries -> overflow by exactly 1
+    localparam int TEST_LINE=2;
+
+    integer wait_cycles;
 
     always #5 clk=~clk;
     assign mem_ack=mem_req;
@@ -25,25 +39,19 @@ module tb_sprite_overflow;
 
     always_comb begin
         mem_data=128'd0;
-        if(descriptor_index<=23'd1024) begin
-            mem_data[0 +:16]=(descriptor_index==23'd1024)
+        if(descriptor_index<=23'(LAST)) begin
+            mem_data[0 +:16]=(descriptor_index==23'(LAST))
                               ? 16'd0 : descriptor_index[15:0]+16'd1;
             // A unique payload proves which descriptor occupies each slot.
             mem_data[2*16 +:16]=descriptor_index[15:0];
-            mem_data[1*16 +:16]=16'h003f;
-            // Only logical descriptors 1, 2 and 1024 intersect target line 2.
+            mem_data[1*16 +:16]=16'h003f;   // zoom 0x3f -> 1:1 step 0x40
+            // Only logical descriptors 1, 2 and LAST intersect the test line.
             mem_data[4*16 +:16]=
                 (descriptor_index==23'd1 || descriptor_index==23'd2 ||
-                 descriptor_index==23'd1024) ? 16'd2 : 16'd500;
+                 descriptor_index==23'(LAST)) ? 16'(TEST_LINE) : 16'd500;
             mem_data[5*16 +:16]=16'h0800; // safely offscreen
         end
     end
-
-    always @(posedge clk)
-        if(track_render && dut.state==dut.S_RENDER_WAIT && render_count<3) begin
-            render_order[render_count]<=dut.sprite_stack_q;
-            render_count<=render_count+1;
-        end
 
     s24_sprite dut(
         .clk(clk),.reset(reset),.ce_pixel(ce_pixel),
@@ -53,48 +61,99 @@ module tb_sprite_overflow;
         .mem_req(mem_req),.mem_addr(mem_addr),
         .mem_data(mem_data),.mem_ack(mem_ack));
 
+    // s24_video_timing advances hcount inside `if (ce_pixel)`, so at the edge
+    // the sprite module samples it the count still names the OLD pixel. Hold
+    // hcount/vcount at the pre-increment value across the enabled edge to
+    // reproduce that phase exactly.
+    task automatic raster_edge(input [9:0] line,input [9:0] column);
+        begin
+            @(negedge clk); hcount=column; vcount=line; ce_pixel=1;
+            @(posedge clk); #1; ce_pixel=0;
+        end
+    endtask
+
+    // ---- render-order capture ---------------------------------------------
+    // The renderer consumes one descriptor at S_RENDER_WAIT (the newest active
+    // entry) and one at every S_NEXT_SPRITE with render_pos!=0, walking the
+    // active list backwards exactly like MAME's `for(countspr--; ...)`. Every
+    // descriptor here is rejected on X before it draws, which is precisely the
+    // path that must still consume each entry once and only once.
+    logic [15:0] render_order [0:3];
+    logic [15:0] active_slot [0:2];
+    integer render_count=0;
+    logic captured=0;
+    logic consumed;
+
+    always_comb consumed = (dut.state==dut.S_RENDER_WAIT) ||
+                           (dut.state==dut.S_NEXT_SPRITE && dut.render_pos!=0);
+
+    always @(posedge clk)
+        if(!reset && !captured && dut.target_y==9'(TEST_LINE)) begin
+            if(consumed) begin
+                if(render_count<4)
+                    render_order[render_count]<=dut.active_render_descriptor[47:32];
+                render_count<=render_count+1;
+            end
+            if(dut.state==dut.S_RENDER_WAIT) begin
+                active_slot[0]<=dut.active_cache_ram.mem[0][102:87];
+                active_slot[1]<=dut.active_cache_ram.mem[1][102:87];
+                active_slot[2]<=dut.active_cache_ram.mem[2][102:87];
+            end
+            if(dut.state==dut.S_NEXT_SPRITE && dut.render_pos==0) captured<=1;
+        end
+
     initial begin
         repeat(3) @(posedge clk);
         reset=0;
-        @(negedge clk);
-        vcount=10'd383;hcount=10'd655;ce_pixel=1;
-        @(posedge clk);#1;ce_pixel=0;
+        raster_edge(10'd383,10'd655);   // frame boundary: arm the list refresh
 
-        repeat(2200) @(posedge clk);
+        // 4097 entries at two clocks each, plus scan/render slack.
+        wait_cycles=0;
+        while(!(dut.state==dut.S_IDLE && dut.list_cache_valid) &&
+              wait_cycles<40000) begin
+            @(posedge clk); wait_cycles=wait_cycles+1;
+        end
         assert(dut.state==dut.S_IDLE && dut.list_cache_valid)
-            else $fatal(1,"1025-entry sprite list did not finish");
-        assert(dut.stack_count==11'd1024)
-            else $fatal(1,"bounded sprite count %0d",dut.stack_count);
-        assert(dut.stack_head==10'd1 &&
-               dut.descriptor_stack_ram.mem_lo[0][2*16 +:16]==16'd1024)
-            else $fatal(1,
-                "overflow kept oldest descriptors: head=%0d slot0=%0d expected newest descriptor 1024",
-                dut.stack_head,dut.descriptor_stack_ram.mem_lo[0][2*16 +:16]);
+            else $fatal(1,"%0d-entry sprite list did not finish (state=%0d after %0d clocks)",
+                        LAST+1,dut.state,wait_cycles);
+        assert(dut.stack_count==13'd4096)
+            else $fatal(1,"bounded sprite count %0d, expected 4096",dut.stack_count);
+        assert(dut.stack_head==12'd1)
+            else $fatal(1,"overflow kept oldest descriptors: head=%0d, expected 1",
+                        dut.stack_head);
+        // The newest descriptor wrapped into the low half of physical pair
+        // word zero. Word 2 sits at bits 64:49 of the 81-bit packed payload.
+        assert(dut.descriptor_stack_ram.mem_lo[0][64:49]==16'(LAST))
+            else $fatal(1,"physical slot 0 holds descriptor %0d, expected newest %0d",
+                        dut.descriptor_stack_ram.mem_lo[0][64:49],LAST);
 
-        // Head 1 means the oldest logical entry is slot 1. The newest
-        // descriptor wrapped into the low half of physical pair word zero.
-        // Logical scanning must resume at physical slot 2, wrap at slot 1023,
-        // and finally consume slot 0 by itself.
-        track_render=1;
-        @(negedge clk);
-        vcount=10'd0;hcount=10'd655;ce_pixel=1;
-        @(posedge clk);#1;ce_pixel=0;
-        repeat(2200) @(posedge clk);
-        assert(dut.state==dut.S_IDLE && render_count==3)
+        // Head 1 means the oldest retained entry is physical slot 1, so the
+        // logical scan peels one upper-half entry, resumes paired scanning at
+        // slot 2, wraps at slot 4095, and finally consumes slot 0 by itself.
+        // The renderer self-schedules lines from 0, so the test line is
+        // reached without pumping the raster.
+        wait_cycles=0;
+        while(!captured && wait_cycles<200000) begin
+            @(posedge clk); wait_cycles=wait_cycles+1;
+        end
+        assert(captured && render_count==3)
             else $fatal(1,"odd-head scan/render did not finish count=%0d state=%0d",
                         render_count,dut.state);
-        assert(dut.sprite_stack[0]==10'd1 &&
-               dut.sprite_stack[1]==10'd2 &&
-               dut.sprite_stack[2]==10'd0)
-            else $fatal(1,"odd-head logical scan order %0d,%0d,%0d",
-                        dut.sprite_stack[0],dut.sprite_stack[1],
-                        dut.sprite_stack[2]);
-        assert(render_order[0]==10'd0 && render_order[1]==10'd2 &&
-               render_order[2]==10'd1)
-            else $fatal(1,"odd-head reverse render order %0d,%0d,%0d",
-                        render_order[0],render_order[1],render_order[2]);
 
-        $display("PASS sprite overflow retains newest/frontmost 1024 and odd-head order");
+        // Vertical filter output, in list order.
+        assert(active_slot[0]==16'd1 && active_slot[1]==16'd2 &&
+               active_slot[2]==16'(LAST))
+            else $fatal(1,"odd-head logical scan order %0d,%0d,%0d expected 1,2,%0d",
+                        active_slot[0],active_slot[1],active_slot[2],LAST);
+
+        // MAME's reverse walk: newest first, and no entry duplicated or lost
+        // even though all three are rejected off-screen before drawing.
+        assert(render_order[0]==16'(LAST) && render_order[1]==16'd2 &&
+               render_order[2]==16'd1)
+            else $fatal(1,"odd-head reverse render order %0d,%0d,%0d expected %0d,2,1",
+                        render_order[0],render_order[1],render_order[2],LAST);
+
+        $display("PASS sprite overflow retains newest/frontmost 4096, odd-head order, and consumes every rejected descriptor once");
         $finish;
     end
 endmodule

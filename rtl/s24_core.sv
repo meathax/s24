@@ -25,7 +25,7 @@ module s24_core #(
     // level, where core_reset and rom_loaded both live, and passed in here
     // because s24_core only ever sees the already-synchronized `reset`.
     input  logic        dbg_en,
-    input  logic [3:0]  dbg_sel,
+    input  logic [4:0]  dbg_sel,
     input  logic [7:0]  dbg_reset_events,
 
     output logic [2:0]  mahjong_line,
@@ -247,12 +247,13 @@ module s24_core #(
         .b_mem_req(b_mem_req),.b_mem_fc(b_mem_fc),.b_mem_addr(b_mem_addr),
         .b_mem_din(b_mem_din),.b_mem_ack(b_mem_ack));
 
-    logic fd_start,fd_busy,fd_done,fd_irq_enter,b_iack_seen;
+    logic fd_start,fd_key_start,fd_busy,fd_done,fd_irq_enter,b_iack_seen;
     logic [15:0] fd_ciphertext,fd_plaintext;
     logic [7:0] fd_state;
     s24_fd1094 fd1094(
         .clk(clk),.reset(sub_reset),.key_wr(key_wr),.key_word_addr(key_word_addr),
-        .key_wdata(key_wdata),.start(fd_start),.word_address(b_mem_addr[23:1]),
+        .key_wdata(key_wdata),.start(fd_start),.key_start(fd_key_start),
+        .word_address(b_mem_addr[23:1]),
         .encrypted(fd_ciphertext),.irq_enter(fd_irq_enter),.busy(fd_busy),
         .instruction_start(b_instr_start),.instruction_opcode(b_instr_opcode),
         .instruction_address(b_instr_address),
@@ -438,7 +439,8 @@ module s24_core #(
         .layer2_valid(tv2),.layer3_valid(tv3));
     logic [13:0] sp0,sp1,sp2,sp3,mixed;
     logic [10:0] sr0,sr1,sr2,sr3;
-    logic [15:0] dbg_p2_stall,dbg_line_wr,dbg_mixer_px;
+    logic [23:0] dbg_p2_stall;
+    logic [15:0] dbg_line_wr,dbg_mixer_px;
     logic [13:0] dbg_list_seen;
     logic [7:0]  dbg_render_pass;
     logic        dbg_bank_starve;
@@ -517,7 +519,7 @@ module s24_core #(
             4'h3: dbg_value={16'h0,dbg_gground_retrig};
             4'h4: dbg_value={dbg_last_b_pc,1'b0};
             4'h5: dbg_value={8'h0,dbg_last_b_opcode};
-            4'h6: dbg_value={8'h0,dbg_p2_stall};
+            4'h6: dbg_value=dbg_p2_stall;
             4'h7: dbg_value={10'h0,dbg_list_seen};
             4'h8: dbg_value={8'h0,dbg_line_wr};
             4'h9: dbg_value={8'h0,dbg_mixer_px};
@@ -526,6 +528,8 @@ module s24_core #(
             4'hC: dbg_value={dbg_last_a_pc,1'b0};
             4'hD: dbg_value={8'h0,dbg_last_a_opcode};
             4'hE: dbg_value={11'h0,dbg_max_stack};
+            4'hF: dbg_value=dbg_a_stall;
+            5'h10: dbg_value=dbg_b_stall;
             default: dbg_value=24'h0;
         endcase
     end
@@ -615,6 +619,33 @@ module s24_core #(
         else physical=SDR_ROMBOARD_BASE+{5'd0,bank,a[17:0]};
     endfunction
 
+    // Hardware-only debug counters: cycles each CPU's SDRAM-bridged memory
+    // request (a_mem_req/b_mem_req below) sat unacknowledged. Added because
+    // dbg_p2_stall/dbg_bank_starve show the sprite side is healthy and
+    // winning arbitration, which leaves "is the CPU itself stalling on the
+    // same SDRAM" as the only unmeasured candidate for a load-dependent
+    // slowdown. Every CPU-A access -- including plain work RAM -- crosses
+    // the p0 SDRAM CDC bridge (below), unlike real System 24 hardware where
+    // that RAM is zero-wait-state. Latched once per frame at the same
+    // 655/383 boundary s24_sprite.sv uses, so every dbg_* counter shares one
+    // epoch and none ever shows a mid-count value. 24 bits wide: see
+    // dbg_p2_stall's note on 16-bit saturation ambiguity.
+    logic [23:0] dbg_a_stall, dbg_b_stall;
+    logic [23:0] a_stall_live, b_stall_live;
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            a_stall_live<=0; b_stall_live<=0;
+            dbg_a_stall<=0;  dbg_b_stall<=0;
+        end else begin
+            if (a_mem_req && !a_mem_ack) a_stall_live<=a_stall_live+1'b1;
+            if (b_mem_req && !b_mem_ack) b_stall_live<=b_stall_live+1'b1;
+            if (ce16 && hcount==10'd655 && vcount==10'd383) begin
+                dbg_a_stall<=a_stall_live; a_stall_live<=0;
+                dbg_b_stall<=b_stall_live; b_stall_live<=0;
+            end
+        end
+    end
+
     // Each physical CPU bus has its own read path into SDRAM. Keep a request
     // occupied until the CPU front-end has observed the completion pulse, so
     // its level-held AS cycle cannot be launched twice. CPU-B opcode reads add
@@ -625,6 +656,7 @@ module s24_core #(
         a_mem_ack<=1'b0;
         b_mem_ack<=1'b0;
         fd_start<=1'b0;
+        fd_key_start<=1'b0;
         if(reset) begin
             a_mrstate<=MR_IDLE;
             b_mrstate<=MR_IDLE;
@@ -656,6 +688,15 @@ module s24_core #(
                 MR_IDLE: if(b_mem_req) begin
                     p3_addr<=word_address(physical(1'b1,b_mem_addr,rom_bank[3:0]));
                     p3_req<=1'b1;
+                    // Same predicate the MR_SDRAM arm below uses to raise
+                    // fd_start, evaluated on the identical registered
+                    // b_mem_* values (s24_cpu_bus holds them for the whole
+                    // transaction). Kicking the key-RAM read off here lets
+                    // it retire behind the SDRAM round trip instead of
+                    // adding its latency on top -- see s24_fd1094.sv's
+                    // key_start port comment.
+                    if(board.has_fd1094 && b_mem_fc[1] &&
+                       b_mem_addr<24'h100000) fd_key_start<=1'b1;
                     b_mrstate<=MR_SDRAM;
                 end
                 MR_SDRAM: if(p3_ack) begin

@@ -364,12 +364,17 @@ module s24_sprite (
     // a snapshot of the PREVIOUS completed frame (latched at the frame
     // boundary this module already tracks), so the on-screen readout never
     // shows a mid-count, still-changing value.
-    output logic [15:0]  dbg_p2_stall,    // cycles p2 mem_req was asserted
+    output logic [23:0]  dbg_p2_stall,    // cycles p2 mem_req was asserted
                                            // waiting for mem_ack last frame --
                                            // directly measures SDRAM
                                            // arbitration/contention time on
                                            // the burst port this session's
                                            // corruption theory targets.
+                                           // 24 bits: a 16-bit counter was
+                                           // observed pinned near 0xFFFF on
+                                           // real hardware during gameplay,
+                                           // making saturation vs. a genuine
+                                           // near-ceiling value ambiguous.
     output logic [13:0]  dbg_list_seen,   // descriptor list entries walked
     output logic [15:0]  dbg_line_wr,     // line-buffer pixel writes
     output logic [15:0]  dbg_mixer_px,    // nonzero pixel0..3 emitted toward
@@ -833,9 +838,28 @@ module s24_sprite (
             // Read that entry during the prefetch cycle; render-time reads
             // below intentionally stay one entry ahead for S_NEXT_SPRITE.
             active_cache_read_addr=render_pos[ACTIVE_BITS-1:0];
-        else if(state==S_RENDER_WAIT)
-            active_cache_read_addr=render_pos[ACTIVE_BITS-1:0];
+        else if(state==S_NEXT_SPRITE)
+            // S_NEXT_SPRITE consumes entry render_pos-1 and decrements
+            // render_pos in the SAME cycle, so the entry it must read next is
+            // render_pos-2, not render_pos-1.  With the -1 form a rejected
+            // sprite (MAME simply draws nothing for an off-screen one and
+            // moves on to sprd[countspr-1]) left S_NEXT_SPRITE asserted for a
+            // second cycle, which re-read the entry just consumed: that
+            // duplicate advanced render_pos without visiting a new descriptor,
+            // permanently biasing the read pointer by one, and the next
+            // accepted sprite then skipped its neighbour entirely. The dropped
+            // entry is always the one BEHIND the rejected sprite in list
+            // order, so a single off-screen descriptor silently deleted a
+            // visible sprite from that scanline -- visible as horizontal
+            // slices missing from sprites whose neighbours cross a screen or
+            // clip-window edge.
+            active_cache_read_addr=(render_pos>13'd1)
+                ? render_pos[ACTIVE_BITS-1:0]-{{(ACTIVE_BITS-2){1'b0}},2'd2}
+                : '0;
         else if(render_pos!=0)
+            // Every other render state (including S_RENDER_WAIT, whose own
+            // entry was already fetched by S_RENDER_PREFETCH) prefetches the
+            // entry S_NEXT_SPRITE will consume.
             active_cache_read_addr=render_pos[ACTIVE_BITS-1:0]-1'b1;
         else
             active_cache_read_addr='0;
@@ -1342,7 +1366,7 @@ module s24_sprite (
     // dbg_* output at the frame_epoch boundary below, then cleared for the
     // next frame. Kept as plain registers, not wired into anything but the
     // overlay -- cannot affect synthesizable behaviour.
-    logic [15:0] p2_stall_live;
+    logic [23:0] p2_stall_live;
     logic [15:0] line_wr_live;
     logic [15:0] mixer_px_live;
     logic [7:0]  render_pass_live;

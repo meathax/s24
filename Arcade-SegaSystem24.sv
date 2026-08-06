@@ -41,7 +41,7 @@ module emu (
         "H1P1O[85:79],CRT H-Position,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,+32,+33,+34,+35,+36,+37,+38,+39,+40,+41,+42,+43,+44,+45,+46,+47,+48,-48,-47,-46,-45,-44,-43,-42,-41,-40,-39,-38,-37,-36,-35,-34,-33,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
         "H1P1O[78:74],CRT V-Shift,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
         "O[102],Debug Overlay,Off,On;",
-        "O[106:103],Debug Counter,Reset Events,CNT1 Count,CNT1 VCount,GGround Retrig,Last CPU-B PC,Last CPU-B Op,P2 SDRAM Stall,List Seen,Line Writes,Mixer Pixels,Render Passes,Bank Starve,Last CPU-A PC,Last CPU-A Op,Max Stack Depth;",
+        "O[107:103],Debug Counter,Reset Events,CNT1 Count,CNT1 VCount,GGround Retrig,Last CPU-B PC,Last CPU-B Op,P2 SDRAM Stall,List Seen,Line Writes,Mixer Pixels,Render Passes,Bank Starve,Last CPU-A PC,Last CPU-A Op,Max Stack Depth,CPU-A Stall,CPU-B Stall;",
         "R[0],Reset;",
         "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test;",
         "V,v",`BUILD_DATE
@@ -224,7 +224,7 @@ module emu (
     // its exact 656x424 timing instead of inheriting a /3 frequency error.
     s24_core #(.CLK_HZ(48_317_307)) core(
         .clk(clk_sys),.reset(core_reset),.pause(status[6]),.board(descriptor),
-        .dbg_en(status[102]),.dbg_sel(status[106:103]),
+        .dbg_en(status[102]),.dbg_sel(status[107:103]),
         .dbg_reset_events(dbg_reset_events),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),
         .input_ports(input_ports),

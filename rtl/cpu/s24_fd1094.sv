@@ -84,6 +84,16 @@ module s24_fd1094 #(
     input  logic [11:0] key_word_addr,
     input  logic [15:0] key_wdata,
     input  logic        start,
+    // Asserted one cycle when the SDRAM read for this opcode fetch is
+    // ISSUED, well before `start` (which waits for the data to return).
+    // The key-RAM lookup depends only on the address, which s24_cpu_bus
+    // holds stable for the whole transaction, so it is started here and
+    // completes behind the SDRAM round trip instead of serializing after
+    // it.  On real hardware the FD1094's decryption sits inside the CPU
+    // package and adds no bus-cycle latency at all, so removing this
+    // artificial serialization moves the core toward the hardware, not
+    // away from it.
+    input  logic        key_start,
     input  logic [23:1] word_address,
     input  logic [15:0] encrypted,
     input  logic        irq_enter,
@@ -161,9 +171,16 @@ module s24_fd1094 #(
     // at the edge that leaves it, and the data is only valid -- and only
     // sampled -- during the following *_Q state.  Do not collapse these.
     typedef enum logic [2:0] {
-        F_IDLE,F_KEY,F_KEY_Q,F_DECRYPT,F_MASK,F_MASK_Q,F_DONE
+        F_IDLE,F_KEY,F_KEY_Q,F_ARMED,F_DECRYPT,F_MASK,F_MASK_Q,F_DONE
     } fstate_t;
     fstate_t fstate;
+    // Safety net only: the SDRAM round trip is an order of magnitude longer
+    // than the three cycles the key lookup needs, so `start` realistically
+    // cannot arrive before F_ARMED.  If it ever does, latch it -- together
+    // with the state it was raised in, so the sampled decrypt state stays
+    // bit-identical to the pre-overlap behaviour.
+    logic start_pending;
+    logic [7:0] pending_state;
 
     function automatic logic history_has(input logic [23:1] sought);
         history_has = ((fstate==F_DONE) && address_l==sought) ||
@@ -205,6 +222,7 @@ module s24_fd1094 #(
             address_l<=0;vector_l<=0;mask_address_l<=0;mask_bit_l<=0;
             mask_byte<=0;preliminary<=0;cmp_phase<=0;cmp_expected<=0;
             cmp_high<=0;
+            start_pending<=0;pending_state<=0;
             fetch_history_valid<=0;
             fetch_history_addr[0]<=0;fetch_history_addr[1]<=0;
             fetch_history_addr[2]<=0;fetch_history_addr[3]<=0;
@@ -212,12 +230,16 @@ module s24_fd1094 #(
             fetch_history_data[2]<=0;fetch_history_data[3]<=0;
         end else begin
             if(irq_enter) irq_mode<=1'b1;
+            // See start_pending's declaration: this only fires if a fetch
+            // ever completes faster than the three-cycle key lookup.
+            if(start && (fstate==F_KEY || fstate==F_KEY_Q)) begin
+                start_pending<=1'b1;
+                pending_state<=current_state;
+            end
             case(fstate)
-                F_IDLE: if(start) begin
-                    address_l<=word_address;
-                    encrypted_l<=encrypted;
-                    vector_l<=(word_address<=3);
-                    decrypt_state<=current_state;
+                // Entered when the SDRAM read is issued, not when it
+                // returns: only the address is needed to pick the key.
+                F_IDLE: if(key_start) begin
                     // word_address is a packed [23:1] bus address, so
                     // [13:1] is the numeric low 13-bit MAME word address.
                     // This matches decrypt_one()'s address & 0x1fff and its
@@ -225,6 +247,7 @@ module s24_fd1094 #(
                     if((word_address[12:3]==0)&&(word_address>=4))
                         key_address<=word_address[13:1]|13'h1000;
                     else key_address<=word_address[13:1];
+                    start_pending<=1'b0;
                     fstate<=F_KEY;
                 end
                 // key_address was registered on entry to F_KEY; the key RAM
@@ -235,6 +258,19 @@ module s24_fd1094 #(
                     mainkey <= key_address[0]
                                ? key_ram_odd_q
                                : key_ram_even_q;
+                    fstate<=F_ARMED;
+                end
+                // The key is ready; wait here for the SDRAM data.  Sampling
+                // address/ciphertext/state at this point -- the moment the
+                // fetched word actually arrives -- keeps every value that
+                // feeds the decrypt identical to the pre-overlap ordering.
+                F_ARMED: if(start || start_pending) begin
+                    address_l<=word_address;
+                    encrypted_l<=encrypted;
+                    vector_l<=(word_address<=3);
+                    decrypt_state<=start_pending ? pending_state
+                                                 : current_state;
+                    start_pending<=1'b0;
                     fstate<=F_DECRYPT;
                 end
                 F_DECRYPT: begin

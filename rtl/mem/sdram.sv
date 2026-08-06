@@ -3,11 +3,12 @@
 //  16-bit SDR SDRAM @ clk_ram (96.6 MHz), CL2, strictly serialized
 //  transactions. ROM-download writes keep a row open for same-row words and
 //  explicitly precharge before row changes, reads, or refreshes.
-//  Four request ports with bounded round-robin arbitration (DESIGN.md §4.2):
-//    p0: V60 fetch/data (latency critical, 16-bit single)
-//    p2: sprite fetch    (128-bit burst = 8 words)
-//    p3: Z80 ROM         (16-bit single, byte laned)
-//    p4: MultiPCM        (16-bit single)
+//  Four request ports, CPU-tier-over-AV-tier priority (see the read_grant
+//  comment below for why):
+//    p0: V60 fetch/data (latency critical, 16-bit single)  -- CPU tier
+//    p3: Z80 ROM         (16-bit single, byte laned)         -- CPU tier
+//    p2: sprite fetch    (128-bit burst = 8 words)          -- AV tier
+//    p4: MultiPCM        (16-bit single)                     -- AV tier
 //  Write port (ROM download only): highest priority while ioctl_download.
 //
 //  A sixth port (p5, "V25 program ROM") existed here as leftover header text
@@ -147,7 +148,10 @@ typedef enum logic [3:0] {
 state_t state = ST_IDLE;
 
 reg [2:0]  grant;
-reg [2:0]  rr_next;
+reg        cpu_turn;   // 0=p0(CPU-A) preferred, 1=p3(CPU-B) preferred,
+                       // used only when both are pending simultaneously
+reg        av_turn;    // 0=p2(sprite) preferred, 1=p4(audio) preferred,
+                       // used only when both are pending and no CPU is
 reg [3:0]  rd_total;        // words to read (1/4/8)
 reg [3:0]  rd_issued;
 reg [3:0]  rd_captured;
@@ -183,23 +187,37 @@ reg [26:4] p2_addr_p;
 reg [15:0] wr_din_p;
 reg  [1:0] wr_be_p;
 
-// Reads rotate after every grant.  This prevents continuous V60 cache misses
-// from starving sprite/audio traffic while retaining the download write port
-// as the sole highest-priority client (game logic is held reset during it).
-// Only four ports remain (p0, p2, p3, p4; p1 was removed -- see the header
-// note), so rr_next cycles 0 -> 2 -> 3 -> 4 -> 0 and grant value 1 is never
-// assigned; the four case selectors below are exactly that cycle's values.
+// CPU ports (p0, p3) get strict priority over sprite/audio (p2, p4).
+//
+// Real System 24 hardware gives each 68000 zero-wait-state work RAM; every
+// CPU access here instead crosses into shared SDRAM, and a granted p2 burst
+// (8 words, ~13 clk_ram cycles, back-to-back BURST_1 reads that cannot be
+// preempted mid-burst -- see ST_RD below) previously could sit ahead of a
+// pending CPU read under the old flat round-robin. That round-robin was
+// deliberately fair "to prevent continuous V60 cache misses from starving
+// sprite/audio traffic" (see prior revision) -- backwards for this core:
+// hardware CPU-A/CPU-B stall counters (rtl/s24_core.sv's dbg_a_stall/
+// dbg_b_stall) measured CPU-B blocked ~45% of every frame during real
+// gameplay versus CPU-A's ~6%, while the sprite renderer's own dbg_bank_
+// starve counter stayed 0 throughout -- i.e. sprite/audio had slack this
+// fairness was spending on the CPUs' behalf. Tie-breaking between the two
+// CPUs (cpu_turn) and between sprite/audio (av_turn) keeps the previous
+// fairness *within* each tier so neither starves its peer; only the
+// cross-tier ordering changes.
 reg       read_valid;
 reg [2:0] read_grant;
 always @* begin
     read_valid = 1'b1;
-    read_grant = rr_next;
-    case (rr_next)
-        3'd0: if (p0_pend) read_grant=0; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else read_valid=0;
-        3'd2: if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else read_valid=0;
-        3'd3: if (p3_pend) read_grant=3; else if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p2_pend) read_grant=2; else read_valid=0;
-        default: if (p4_pend) read_grant=4; else if (p0_pend) read_grant=0; else if (p2_pend) read_grant=2; else if (p3_pend) read_grant=3; else read_valid=0;
-    endcase
+    if (p0_pend && p3_pend)      read_grant = cpu_turn ? 3'd3 : 3'd0;
+    else if (p0_pend)            read_grant = 3'd0;
+    else if (p3_pend)            read_grant = 3'd3;
+    else if (p2_pend && p4_pend) read_grant = av_turn ? 3'd4 : 3'd2;
+    else if (p2_pend)            read_grant = 3'd2;
+    else if (p4_pend)            read_grant = 3'd4;
+    else begin
+        read_grant = 3'd0;
+        read_valid = 1'b0;
+    end
 end
 
 // Latch each port on the RISING EDGE of its request.  The previous
@@ -377,7 +395,8 @@ always @(posedge clk) begin
         chip_sel <= 1'b0;
         cl_pipe  <= 4'b0000;
         ack_stretch <= 0;
-        rr_next <= 3'd0;
+        cpu_turn <= 1'b0;
+        av_turn  <= 1'b0;
     end
     else if (!ready) begin
         init_cnt <= init_cnt - 1'd1;
@@ -445,11 +464,14 @@ always @(posedge clk) begin
                 else begin
                     grant <= read_grant;
                     is_write <= 1'b0;
-                    // Compact 4-value cycle 0->2->3->4->0 (p1's slot is
-                    // gone; read_grant+1 would land on the dead value 1).
-                    rr_next <= (read_grant == 3'd0) ? 3'd2 :
-                               (read_grant == 3'd2) ? 3'd3 :
-                               (read_grant == 3'd3) ? 3'd4 : 3'd0;
+                    // Flip only the tie-breaker for the tier that was just
+                    // granted, so a lone repeatedly-pending port (the usual
+                    // case) is unaffected and fairness only kicks in when
+                    // its tier-mate is actually contending too.
+                    if (read_grant == 3'd0 || read_grant == 3'd3)
+                        cpu_turn <= ~cpu_turn;
+                    else
+                        av_turn <= ~av_turn;
                     case (read_grant)
                         3'd0: begin a = p0_addr_p;           rd_total <= 4'd1; end
                         3'd2: begin a = {p2_addr_p, 3'b000}; rd_total <= 4'd8; end
