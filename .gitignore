@@ -55,3 +55,8 @@
 # Curated release MRAs -- the ones actually meant to be published -- live in
 # /releases/ instead and are tracked normally.
 /mra/
+
+# Keep only the curated release MRAs tracked; ignore local additions.
+/releases/*.mra
+!/releases/Bonanza Bros.mra
+!/releases/Crack Down.mra
