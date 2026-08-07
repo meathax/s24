@@ -4,7 +4,7 @@
 // bridge into SDRAM, and opcode fetches additionally pay the FD1094 decrypt
 // pipeline -- ~18 clk_sys from AS to DTACK against the 68000's ~9.7 clk_sys
 // zero-wait deadline, i.e. 2-3 wait states on every single fetch.  Measured
-// on hardware (Crack Down, debug overlay): CPU-B sat stalled on memory for
+// on hardware (Crack Down): CPU-B sat stalled on memory for
 // 40-50% of every frame while CPU-A idled at ~3% waiting for it, and the
 // frame-locked game loop quantized that deficit into a uniform half-speed
 // game with occasional normal-speed bursts when the workload briefly fit.

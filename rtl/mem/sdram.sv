@@ -196,10 +196,9 @@ reg  [1:0] wr_be_p;
 // pending CPU read under the old flat round-robin. That round-robin was
 // deliberately fair "to prevent continuous V60 cache misses from starving
 // sprite/audio traffic" (see prior revision) -- backwards for this core:
-// hardware CPU-A/CPU-B stall counters (rtl/s24_core.sv's dbg_a_stall/
-// dbg_b_stall) measured CPU-B blocked ~45% of every frame during real
-// gameplay versus CPU-A's ~6%, while the sprite renderer's own dbg_bank_
-// starve counter stayed 0 throughout -- i.e. sprite/audio had slack this
+// Hardware measurements showed CPU-B blocked ~45% of every frame during real
+// gameplay versus CPU-A's ~6%, while the sprite renderer's bank-starve
+// counter stayed 0 throughout -- i.e. sprite/audio had slack this
 // fairness was spending on the CPUs' behalf. Tie-breaking between the two
 // CPUs (cpu_turn) and between sprite/audio (av_turn) keeps the previous
 // fairness *within* each tier so neither starves its peer; only the

@@ -17,7 +17,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_palette.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_tile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_sprite.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_mixer.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/crt_adjust.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/s24_rom_loader.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/s24_sdram_cdc.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/sdram.sv

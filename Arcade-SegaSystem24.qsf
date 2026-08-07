@@ -26,17 +26,6 @@ set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 # Any future change to rtl/mem/sdram.sv or the sprite descriptor RAMs'
 # width/shape should re-verify cdc_wr:req_hold->dst_payload hold margin
 # before assuming this seed still closes it.
-#  - 2026-08-06: adding two 24-bit CPU-stall debug counters + widening
-#    dbg_p2_stall/dbg_value (rtl/s24_core.sv, rtl/video/s24_debug_overlay.sv;
-#    no touch to sdram.sv or the sprite descriptor RAMs) reopened the SAME
-#    sprite line-RAM WE setup cone AND cdc_wr hold path under seed 2 anyway
-#    -- confirmed via get_timing_paths that both failing paths are entirely
-#    pre-existing (size_y_tiles/source_row -> line RAM WE; cdc_wr req_hold->
-#    dst_payload), not touched by the new counters. This design is
-#    apparently seed-sensitive to placement perturbation from ANY added
-#    logic, not just sdram.sv/sprite-RAM changes as previously scoped.
-#    SEED 3 improved but did not close it: Slow 1100mV -40C corner, worst
-#    setup -0.158ns (TNS -0.503) on clk_sys, same sprite-line-RAM WE cone.
 #  - SEED 5 (2026-08-06, after the ALM/RAM-block resource-pressure fix in
 #    commit 67a8059, 18,744/41,910 ALMs = 44.7%): closes BOTH the sprite
 #    line-RAM WE setup cone and the cdc_wr:req_hold->dst_payload hold path
@@ -315,9 +304,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_video_timing.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_palette.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_tile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_sprite.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_debug_overlay.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_mixer.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/crt_adjust.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/s24_rom_loader.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/s24_sdram_cdc.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/sdram.sv

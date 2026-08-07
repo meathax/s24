@@ -72,24 +72,6 @@ package s24_pkg;
         logic        complete;
     } board_transaction_t;
 
-    typedef enum logic [2:0] {
-        AUDIO_EVENT_NONE  = 3'd0,
-        AUDIO_EVENT_YM_WRITE = 3'd1,
-        AUDIO_EVENT_YM_IRQ   = 3'd2,
-        AUDIO_EVENT_YM_SAMPLE= 3'd3,
-        AUDIO_EVENT_DAC      = 3'd4
-    } audio_event_type_t;
-
-    typedef struct packed {
-        logic [2:0]  event_type;
-        logic [1:0]  channel;
-        logic [7:0]  address;
-        logic [15:0] value;
-        logic [15:0] left;
-        logic [15:0] right;
-        logic        valid;
-    } audio_event_t;
-
     localparam logic [7:0] INPUT_GENERIC = 8'd0;
     localparam logic [7:0] INPUT_GGROUND = 8'd1;
     // Additional MAME System 24 cabinet/input families.  Keep these as

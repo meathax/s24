@@ -39,8 +39,6 @@ module s24_core #(
     output logic [7:0]  blue,
     output logic [15:0] audio_l,
     output logic [15:0] audio_r,
-    output audio_event_t audio_event,
-
     output logic        p0_req,
     output logic [26:1] p0_addr,
     input  logic [15:0] p0_data,
@@ -943,39 +941,4 @@ module s24_core #(
     assign audio_l=pause?16'sd0:mix_sat(ym_l,dac_sample);
     assign audio_r=pause?16'sd0:mix_sat(ym_r,dac_sample);
 
-    // Board-domain audio observability.  YM writes are emitted only at the
-    // same cen_p1 edge presented to JT51; sample pulses expose the serial-DAC
-    // boundary, IRQ edges expose the timer/key-on interrupt boundary, and a
-    // DAC event is emitted when port-H's R-2R value changes.  The stream is a
-    // diagnostic interface and does not alter the audio datapath.
-    logic signed [15:0] dac_sample_q;
-    always_ff @(posedge clk) begin
-        audio_event <= '0;
-        if (reset) begin
-            ym_irq_q <= 1'b0;
-            dac_sample_q <= '0;
-        end else begin
-            if (ym_wr) begin
-                audio_event.valid <= 1'b1;
-                audio_event.event_type <= AUDIO_EVENT_YM_WRITE;
-                audio_event.address <= {7'd0,ym_addr_q};
-                audio_event.value <= {ym_data_q,8'h00};
-            end else if (ym_sample) begin
-                audio_event.valid <= 1'b1;
-                audio_event.event_type <= AUDIO_EVENT_YM_SAMPLE;
-                audio_event.left <= ym_l;
-                audio_event.right <= ym_r;
-            end else if (!ym_irq_n && ym_irq_q) begin
-                audio_event.valid <= 1'b1;
-                audio_event.event_type <= AUDIO_EVENT_YM_IRQ;
-                audio_event.value[0] <= 1'b1;
-            end else if (dac_sample != dac_sample_q) begin
-                audio_event.valid <= 1'b1;
-                audio_event.event_type <= AUDIO_EVENT_DAC;
-                audio_event.value <= dac_sample;
-            end
-            ym_irq_q <= ~ym_irq_n;
-            dac_sample_q <= dac_sample;
-        end
-    end
 endmodule
