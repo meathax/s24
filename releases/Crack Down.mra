@@ -7,6 +7,7 @@
   <year>1989</year>
   <manufacturer>Sega</manufacturer>
   <rbf>Arcade-SegaSystem24</rbf>
+  <resolution>15kHz</resolution>
   <rotation>horizontal</rotation>
   <joystick>8-way</joystick>
   <buttons default="A,B,Start,Select,R,L" names="Attack,Smart Bomb,-,-,-,-,Start,Coin,Service,Test"/>

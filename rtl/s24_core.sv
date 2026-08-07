@@ -9,7 +9,9 @@ module s24_core #(
     // Average the two fields of a frame-rate tilemap blink instead of showing
     // them alternately (see s24_tile.sv). Off reproduces the raw 28.75 Hz
     // alternation the PCB emits, which is what the MAME pixel-exact
-    // comparisons expect; on reproduces what its CRT integrated.
+    // comparisons expect; on reproduces what its CRT integrated. The user
+    // menu toggle is further gated per board below (blend_capable) -- see
+    // that signal's comment for why.
     input  logic        flicker_blend,
     input  board_desc_t board,
     input  logic        key_wr,
@@ -398,12 +400,26 @@ module s24_core #(
     logic tc0,tc1,tc2,tc3;
     logic tv0,tv1,tv2,tv3;
     logic [3:0] tile_blink;
+    // s24_tile's blink heuristic renders a "disabled" layer's current
+    // tile/scroll data instead of leaving it blank whenever it sees that
+    // layer's disable bit toggle two frames running. That is exactly right
+    // for Bonanza Bros' intentional translucency blink -- the only set this
+    // was verified against -- but it is a real regression for any other
+    // game whose disable bit toggles every frame for an unrelated reason:
+    // the heuristic then shows whatever stale content that physical
+    // tilemap currently holds, which reads as one viewport bleeding into
+    // another (observed on Crack Down's radar/window layers). Restrict the
+    // heuristic to boards that opted into it; every other board keeps the
+    // raw MAME-faithful "disabled means blank" behavior regardless of the
+    // user's menu toggle.
+    logic blend_capable;
+    assign blend_capable = board.video_profile[0];
     s24_tile tile(
         .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
         .cpu_wr(tile_wr),.cpu_addr(bus_addr[15:1]),.cpu_din(bus_dout),.cpu_be(bus_be),
         .char_wr(char_shadow_wr),.char_addr(cpu_phys[16:1]),
         .char_din(bus_dout),.char_be(bus_be),
-        .blend_en(flicker_blend),.layer_blink(tile_blink),
+        .blend_en(flicker_blend && blend_capable),.layer_blink(tile_blink),
         .cpu_dout(tile_dout),.layer0_pixel(t0),.layer1_pixel(t1),
         .layer2_pixel(t2),.layer3_pixel(t3),.layer0_cat(tc0),.layer1_cat(tc1),
         .layer2_cat(tc2),.layer3_cat(tc3),.layer0_valid(tv0),.layer1_valid(tv1),

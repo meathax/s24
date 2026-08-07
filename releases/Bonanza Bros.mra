@@ -7,6 +7,7 @@
   <year>1990</year>
   <manufacturer>Sega</manufacturer>
   <rbf>Arcade-SegaSystem24</rbf>
+  <resolution>15kHz</resolution>
   <rotation>horizontal</rotation>
   <joystick>8-way</joystick>
   <buttons default="A,B,Start,Select,R,L" names="Fire,Jump,-,-,-,-,Start,Coin,Service,Test"/>
@@ -40,7 +41,7 @@
     <part repeat="253952">00</part>
   </rom>
   <rom index="0">
-    <part>0307002D00000000</part>
+    <part>0307002D00010004</part>
   </rom>
   <mratimestamp>20260806</mratimestamp>
 </misterromdescription>

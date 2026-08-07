@@ -42,6 +42,14 @@ module emu (
         // fixed-pixel display shows as a 28.75 Hz flicker. Off gives the raw
         // alternation the PCB emits.
         "O[13],Flicker Blend,On,Off;",
+        // Wheel titles (Hot Rod, Rough Racer) read their steering wheel
+        // through a uPD4701 quadrature decoder -- a RELATIVE control, same
+        // as a spinner -- so the left analog stick's deflection is turned
+        // into a stream of incremental turns rather than an absolute
+        // position. This tunes how much stick deflection maps to how much
+        // turn per update. A real MiSTer spinner peripheral, if attached,
+        // keeps working side by side with this (see s24_wheel_input.sv).
+        "O[15:14],Steering Sensitivity,Low,Normal,High;",
         "P1O[101],CRT Adjust,Off,On;",
         "H1P1O[100:96],CRT H-Size,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
         "H1P1O[85:79],CRT H-Position,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,+32,+33,+34,+35,+36,+37,+38,+39,+40,+41,+42,+43,+44,+45,+46,+47,+48,-48,-47,-46,-45,-44,-43,-42,-41,-40,-39,-38,-37,-36,-35,-34,-33,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
@@ -75,7 +83,9 @@ module emu (
     logic [1:0] buttons;
     logic [31:0] joy0,joy1,joy2,joy3;
     logic [8:0] spinner0,spinner1,spinner2,spinner3;
+    logic [8:0] hps_spinner0,hps_spinner1,hps_spinner2,hps_spinner3;
     logic [7:0] paddle0,paddle1,paddle2,paddle3;
+    logic [15:0] stick_l0,stick_l1,stick_l2,stick_l3;
     logic forced_scandoubler;
     logic ioctl_download,ioctl_upload,ioctl_wr,ioctl_rd,ioctl_wait;
     logic [15:0] ioctl_index;
@@ -90,8 +100,8 @@ module emu (
         .status_menumask({14'd0,~status[101],1'b0}),.joystick_0(joy0),.joystick_1(joy1),
         .joystick_2(joy2),.joystick_3(joy3),
         .joystick_4(),.joystick_5(),
-        .joystick_l_analog_0(),.joystick_l_analog_1(),
-        .joystick_l_analog_2(),.joystick_l_analog_3(),
+        .joystick_l_analog_0(stick_l0),.joystick_l_analog_1(stick_l1),
+        .joystick_l_analog_2(stick_l2),.joystick_l_analog_3(stick_l3),
         .joystick_l_analog_4(),.joystick_l_analog_5(),
         .joystick_r_analog_0(),.joystick_r_analog_1(),
         .joystick_r_analog_2(),.joystick_r_analog_3(),
@@ -102,8 +112,8 @@ module emu (
         .paddle_0(paddle0),.paddle_1(paddle1),
         .paddle_2(paddle2),.paddle_3(paddle3),
         .paddle_4(),.paddle_5(),
-        .spinner_0(spinner0),.spinner_1(spinner1),
-        .spinner_2(spinner2),.spinner_3(spinner3),
+        .spinner_0(hps_spinner0),.spinner_1(hps_spinner1),
+        .spinner_2(hps_spinner2),.spinner_3(hps_spinner3),
         .spinner_4(),.spinner_5(),
         .ps2_kbd_clk_out(),.ps2_kbd_data_out(),
         .ps2_kbd_clk_in(1'b0),.ps2_kbd_data_in(1'b0),
@@ -147,6 +157,48 @@ module emu (
         mahjong_matrix[39:32] = {7'h7f,~joy0[10]};
         mahjong_matrix[47:40] = {5'h1f,~joy2[8],~joy1[8],~joy0[8]};
     end
+
+    // Wheel-title steering (Hot Rod, Rough Racer): left analog stick X ->
+    // synthesized wheel turns, merged with a real MiSTer spinner peripheral
+    // if one is attached. See rtl/io/s24_wheel_input.sv for the relative-
+    // control rationale. wheel_tick is a free-running ~57.5 Hz update rate;
+    // exact phase to the raster does not matter; the counters this ends up
+    // driving are read asynchronously to it by the 68000s.
+    logic [23:0] wheel_tick_count;
+    logic wheel_tick;
+    localparam int unsigned WHEEL_TICK_PERIOD = 24'd840_293; // CLK_HZ/57.524
+    always_ff @(posedge clk_sys) begin
+        wheel_tick<=1'b0;
+        if(wheel_tick_count>=WHEEL_TICK_PERIOD-1) begin
+            wheel_tick_count<=0;wheel_tick<=1'b1;
+        end else wheel_tick_count<=wheel_tick_count+1'b1;
+    end
+    s24_wheel_input wheel0(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
+        .stick_x(stick_l0[7:0]),.sensitivity(status[15:14]),
+        .spinner_in(hps_spinner0),.spinner_out(spinner0));
+    s24_wheel_input wheel1(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
+        .stick_x(stick_l1[7:0]),.sensitivity(status[15:14]),
+        .spinner_in(hps_spinner1),.spinner_out(spinner1));
+    s24_wheel_input wheel2(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
+        .stick_x(stick_l2[7:0]),.sensitivity(status[15:14]),
+        .spinner_in(hps_spinner2),.spinner_out(spinner2));
+    s24_wheel_input wheel3(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
+        .stick_x(stick_l3[7:0]),.sensitivity(status[15:14]),
+        .spinner_in(hps_spinner3),.spinner_out(spinner3));
+
+    // Wheel-title pedal (Hot Rod): a digital "accelerator" button (default
+    // Fire1/B1/A, matching this core's existing player() convention for
+    // that bit) forces full pedal depth regardless of what the analog
+    // paddle_N input reports, so the game is playable on a plain digital
+    // pad without requiring MiSTer's own analog-trigger-to-paddle mapping.
+    // paddle0..3 stay unmerged (raw hps_io paddle) for s24_inputs' golf
+    // swing meter below, which must not see a synthetic full-scale value.
+    logic [7:0] pedal_merged0,pedal_merged1,pedal_merged2,pedal_merged3;
+    assign pedal_merged0=joy0[4]?8'hff:paddle0;
+    assign pedal_merged1=joy1[4]?8'hff:paddle1;
+    assign pedal_merged2=joy2[4]?8'hff:paddle2;
+    assign pedal_merged3=joy3[4]?8'hff:paddle3;
+
     s24_inputs inputs(.joy0(joy0),.joy1(joy1),.joy2(joy2),.joy3(joy3),
         .dsw(dsw),.coinage(coinage),.paddle(paddle0),.test_mode(status[7]),
         .golf_io(descriptor.golf_io),.hotrod_io(descriptor.hotrod_io),
@@ -216,8 +268,8 @@ module emu (
         .input_ports(input_ports),
         .spinner0(spinner0),.spinner1(spinner1),
         .spinner2(spinner2),.spinner3(spinner3),
-        .paddle0(paddle0),.paddle1(paddle1),
-        .paddle2(paddle2),.paddle3(paddle3),
+        .paddle0(pedal_merged0),.paddle1(pedal_merged1),
+        .paddle2(pedal_merged2),.paddle3(pedal_merged3),
         .mahjong_line(mahjong_line),
         .ce_pixel(core_ce),.hblank(hblank),.vblank(vblank),
         .hsync(hsync),.vsync(vsync),.red(r),.green(g),.blue(b),

@@ -36,6 +36,21 @@
 /modelsim.ini
 /quartus-*.log
 
+# Standard MiSTer template build outputs.
+/build_id.v
+/*.cdf
+*.qdf
+*.qws
+*.ppf
+*.ddb
+*.csv
+*.cmp
+*.sip
+*.spd
+*.bsf
+*.sopcinfo
+*.f
+
 # Local MRA staging/regeneration output (tools/gen_mra.py --out-dir default).
 # Curated release MRAs -- the ones actually meant to be published -- live in
 # /releases/ instead and are tracked normally.

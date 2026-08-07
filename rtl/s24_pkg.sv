@@ -34,6 +34,16 @@ package s24_pkg;
         logic [1:0] fdc_timing_profile;
         logic [1:0] romboard_profile;
         logic [1:0] analogue_profile;
+        // Bit 0: this game's tilemaps intentionally toggle a layer's disable
+        // bit every frame to fake CRT-integrated translucency (Bonanza
+        // Bros' projector beam and stage intro card), so s24_tile's
+        // flicker-blend heuristic is safe to engage for it. Left clear for
+        // every other set: that heuristic was verified against Bonanza Bros
+        // only, and forcing it on for a game whose disable-bit toggling
+        // means something else (e.g. Crack Down's window/radar layer
+        // management) renders stale tile/scroll data instead of nothing,
+        // which reads as one viewport bleeding into another. See
+        // s24_core.sv's blend_capable and s24_tile.sv's blend_en.
         logic [1:0] video_profile;
         logic [1:0] cpu_profile;
     } board_desc_t;
