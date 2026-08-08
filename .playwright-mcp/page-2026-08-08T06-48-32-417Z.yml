@@ -1,0 +1,587 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - link "Skip to content" [ref=e4] [cursor=pointer]:
+        - /url: "#start-of-content"
+      - banner [ref=e8]:
+        - heading "Navigation Menu" [level=2] [ref=e9]
+        - generic [ref=e10]:
+          - link "Homepage" [ref=e12] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e15]:
+            - navigation "Global" [ref=e16]:
+              - list [ref=e17]:
+                - listitem [ref=e18]:
+                  - button "Platform" [ref=e20] [cursor=pointer]
+                - listitem [ref=e23]:
+                  - button "Solutions" [ref=e25] [cursor=pointer]
+                - listitem [ref=e28]:
+                  - button "Resources" [ref=e30] [cursor=pointer]
+                - listitem [ref=e33]:
+                  - button "Open Source" [ref=e35] [cursor=pointer]
+                - listitem [ref=e38]:
+                  - button "Enterprise" [ref=e40] [cursor=pointer]
+                - listitem [ref=e43]:
+                  - link "Pricing" [ref=e44] [cursor=pointer]:
+                    - /url: https://github.com/pricing
+            - generic [ref=e46]:
+              - button "Search or jump to, type / to search" [ref=e48] [cursor=pointer]
+              - link "Sign in" [ref=e52] [cursor=pointer]:
+                - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fmitchedberg%2Fmister-pipeline%2Ftree%2Fmaster%2Fchips
+              - link "Sign up" [ref=e53] [cursor=pointer]:
+                - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Ffiles%2Fdisambiguate&source=header-repo&source_repo=mitchedberg%2Fmister-pipeline
+              - button "Appearance settings" [ref=e54] [cursor=pointer]
+    - main [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e64]:
+            - link "mitchedberg" [ref=e68] [cursor=pointer]:
+              - /url: /mitchedberg
+            - generic [ref=e69]: /
+            - strong [ref=e70]:
+              - link "mister-pipeline" [ref=e71] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline
+            - generic [ref=e72]: Public
+          - generic [ref=e73]:
+            - list:
+              - listitem [ref=e74]:
+                - link "You must be signed in to change notification settings" [ref=e75] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Notifications
+              - listitem [ref=e78]:
+                - link "Fork 0" [ref=e79] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Fork
+                  - generic "0" [ref=e82]
+              - listitem [ref=e83]:
+                - link "You must be signed in to star a repository" [ref=e85] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Star
+                  - generic "0 users starred this repository" [ref=e88]: "0"
+        - navigation "Repository" [ref=e89]:
+          - list [ref=e90]:
+            - listitem [ref=e91]:
+              - link "Code" [ref=e92] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline
+            - listitem [ref=e96]:
+              - link "Issues" [ref=e97] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/issues
+            - listitem [ref=e102]:
+              - link "Pull requests" [ref=e103] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/pulls
+            - listitem [ref=e107]:
+              - link "Actions" [ref=e108] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/actions
+            - listitem [ref=e112]:
+              - link "Projects" [ref=e113] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/projects
+            - listitem [ref=e117]:
+              - link "Security and quality" [ref=e118] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/security
+            - listitem [ref=e122]:
+              - link "Insights" [ref=e123] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/pulse
+      - generic [ref=e137]:
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - heading "Expand file tree" [level=2] [ref=e144]:
+              - button "Expand file tree" [ref=e145] [cursor=pointer]
+            - button "master branch" [ref=e150] [cursor=pointer]:
+              - generic [ref=e151]: master
+            - generic [ref=e156]:
+              - navigation [ref=e157]:
+                - heading "Breadcrumbs" [level=2] [ref=e158]
+                - list [ref=e159]:
+                  - listitem [ref=e160]:
+                    - link "mister-pipeline" [ref=e161] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master
+              - generic [ref=e162]:
+                - text: /
+                - heading "chips" [level=1] [ref=e163]
+                - text: /
+              - button "Copy path" [ref=e164] [cursor=pointer]
+          - generic [ref=e170]:
+            - heading "Directory actions" [level=2] [ref=e171]
+            - combobox "Go to file" [ref=e178]
+            - heading "More options" [level=2] [ref=e179]
+            - button "More options" [ref=e180] [cursor=pointer]
+        - generic [ref=e183]:
+          - generic [ref=e185]:
+            - heading "Latest commit" [level=2] [ref=e186]
+            - generic [ref=e189]:
+              - heading "History" [level=2] [ref=e190]
+              - link "History" [ref=e191] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/commits/master/chips
+          - generic [ref=e194]:
+            - generic [ref=e195]:
+              - heading "Folders and files" [level=2] [ref=e196]
+              - table "Folders and files" [ref=e197]:
+                - rowgroup [ref=e198]:
+                  - row [ref=e199]:
+                    - columnheader "Name" [ref=e200]
+                    - columnheader "Last commit message" [ref=e201]
+                    - columnheader "Last commit date" [ref=e203]
+                - rowgroup [ref=e205]:
+                  - row [ref=e206]:
+                    - cell [ref=e207]:
+                      - heading "parent directory" [level=3] [ref=e208]
+                      - link "Parent directory" [ref=e209] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master
+                        - generic [ref=e210]: ..
+                  - row "cps1_obj, (Directory)" [ref=e213]:
+                    - cell [ref=e214]:
+                      - link "cps1_obj, (Directory)" [ref=e221] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/cps1_obj
+                        - text: cps1_obj
+                    - cell [ref=e222]
+                    - cell [ref=e224]
+                  - row "dashboard, (Directory)" [ref=e227]:
+                    - cell [ref=e228]:
+                      - link "dashboard, (Directory)" [ref=e235] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/dashboard
+                        - text: dashboard
+                    - cell [ref=e236]
+                    - cell [ref=e238]
+                  - row "deco16, (Directory)" [ref=e241]:
+                    - cell [ref=e242]:
+                      - link "deco16, (Directory)" [ref=e249] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/deco16
+                        - text: deco16
+                    - cell [ref=e250]
+                    - cell [ref=e252]
+                  - row "deco16_arcade, (Directory)" [ref=e255]:
+                    - cell [ref=e256]:
+                      - link "deco16_arcade, (Directory)" [ref=e263] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/deco16_arcade
+                        - text: deco16_arcade
+                    - cell [ref=e264]
+                    - cell [ref=e266]
+                  - row "deco32, (Directory)" [ref=e269]:
+                    - cell [ref=e270]:
+                      - link "deco32, (Directory)" [ref=e277] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/deco32
+                        - text: deco32
+                    - cell [ref=e278]
+                    - cell [ref=e280]
+                  - row "es5506, (Directory)" [ref=e283]:
+                    - cell [ref=e284]:
+                      - link "es5506, (Directory)" [ref=e291] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/es5506
+                        - text: es5506
+                    - cell [ref=e292]
+                    - cell [ref=e294]
+                  - row "esd_arcade, (Directory)" [ref=e297]:
+                    - cell [ref=e298]:
+                      - link "esd_arcade, (Directory)" [ref=e305] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/esd_arcade
+                        - text: esd_arcade
+                    - cell [ref=e306]
+                    - cell [ref=e308]
+                  - row "gp9001, (Directory)" [ref=e311]:
+                    - cell [ref=e312]:
+                      - link "gp9001, (Directory)" [ref=e319] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/gp9001
+                        - text: gp9001
+                    - cell [ref=e320]
+                    - cell [ref=e322]
+                  - row "jts16_scr_calibration, (Directory)" [ref=e325]:
+                    - cell [ref=e326]:
+                      - link "jts16_scr_calibration, (Directory)" [ref=e333] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/jts16_scr_calibration
+                        - text: jts16_scr_calibration
+                    - cell [ref=e334]
+                    - cell [ref=e336]
+                  - row "kaneko, (Directory)" [ref=e339]:
+                    - cell [ref=e340]:
+                      - link "kaneko, (Directory)" [ref=e347] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/kaneko
+                        - text: kaneko
+                    - cell [ref=e348]
+                    - cell [ref=e350]
+                  - row "kaneko_arcade, (Directory)" [ref=e353]:
+                    - cell [ref=e354]:
+                      - link "kaneko_arcade, (Directory)" [ref=e361] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/kaneko_arcade
+                        - text: kaneko_arcade
+                    - cell [ref=e362]
+                    - cell [ref=e364]
+                  - row "m68000, (Directory)" [ref=e367]:
+                    - cell [ref=e368]:
+                      - link "m68000, (Directory)" [ref=e375] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/m68000
+                        - text: m68000
+                    - cell [ref=e376]
+                    - cell [ref=e378]
+                  - row "m68020, (Directory)" [ref=e381]:
+                    - cell [ref=e382]:
+                      - link "m68020, (Directory)" [ref=e389] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/m68020
+                        - text: m68020
+                    - cell [ref=e390]
+                    - cell [ref=e392]
+                  - row "nichibutsu, (Directory)" [ref=e395]:
+                    - cell [ref=e396]:
+                      - link "nichibutsu, (Directory)" [ref=e403] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/nichibutsu
+                        - text: nichibutsu
+                    - cell [ref=e404]
+                    - cell [ref=e406]
+                  - row "nmk, (Directory)" [ref=e409]:
+                    - cell [ref=e410]:
+                      - link "nmk, (Directory)" [ref=e417] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/nmk
+                        - text: nmk
+                    - cell [ref=e418]
+                    - cell [ref=e420]
+                  - row "nmk_arcade, (Directory)" [ref=e423]:
+                    - cell [ref=e424]:
+                      - link "nmk_arcade, (Directory)" [ref=e431] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/nmk_arcade
+                        - text: nmk_arcade
+                    - cell [ref=e432]
+                    - cell [ref=e434]
+                  - row "psikyo, (Directory)" [ref=e437]:
+                    - cell [ref=e438]:
+                      - link "psikyo, (Directory)" [ref=e445] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/psikyo
+                        - text: psikyo
+                    - cell [ref=e446]
+                    - cell [ref=e448]
+                  - row "psikyo_arcade, (Directory)" [ref=e451]:
+                    - cell [ref=e452]:
+                      - link "psikyo_arcade, (Directory)" [ref=e459] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/psikyo_arcade
+                        - text: psikyo_arcade
+                    - cell [ref=e460]
+                    - cell [ref=e462]
+                  - row "raizing_arcade, (Directory)" [ref=e465]:
+                    - cell [ref=e466]:
+                      - link "raizing_arcade, (Directory)" [ref=e473] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/raizing_arcade
+                        - text: raizing_arcade
+                    - cell [ref=e474]
+                    - cell [ref=e476]
+                  - row "segas32_arcade, (Directory)" [ref=e479]:
+                    - cell [ref=e480]:
+                      - link "segas32_arcade, (Directory)" [ref=e487] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/segas32_arcade
+                        - text: segas32_arcade
+                    - cell [ref=e488]
+                    - cell [ref=e490]
+                  - row "seta_arcade, (Directory)" [ref=e493]:
+                    - cell [ref=e494]:
+                      - link "seta_arcade, (Directory)" [ref=e501] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/seta_arcade
+                        - text: seta_arcade
+                    - cell [ref=e502]
+                    - cell [ref=e504]
+                  - row "taito_b, (Directory)" [ref=e507]:
+                    - cell [ref=e508]:
+                      - link "taito_b, (Directory)" [ref=e515] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/taito_b
+                        - text: taito_b
+                    - cell [ref=e516]
+                    - cell [ref=e518]
+                  - row "taito_f3, (Directory)" [ref=e521]:
+                    - cell [ref=e522]:
+                      - link "taito_f3, (Directory)" [ref=e529] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/taito_f3
+                        - text: taito_f3
+                    - cell [ref=e530]
+                    - cell [ref=e532]
+                  - row "taito_support, (Directory)" [ref=e535]:
+                    - cell [ref=e536]:
+                      - link "taito_support, (Directory)" [ref=e543] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/taito_support
+                        - text: taito_support
+                    - cell [ref=e544]
+                    - cell [ref=e546]
+                  - row "taito_x, (Directory)" [ref=e549]:
+                    - cell [ref=e550]:
+                      - link "taito_x, (Directory)" [ref=e557] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/taito_x
+                        - text: taito_x
+                    - cell [ref=e558]
+                    - cell [ref=e560]
+                  - row "taito_z, (Directory)" [ref=e563]:
+                    - cell [ref=e564]:
+                      - link "taito_z, (Directory)" [ref=e571] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/taito_z
+                        - text: taito_z
+                    - cell [ref=e572]
+                    - cell [ref=e574]
+                  - row "tc0100scn, (Directory)" [ref=e577]:
+                    - cell [ref=e578]:
+                      - link "tc0100scn, (Directory)" [ref=e585] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0100scn
+                        - text: tc0100scn
+                    - cell [ref=e586]
+                    - cell [ref=e588]
+                  - row "tc0110pcr, (Directory)" [ref=e591]:
+                    - cell [ref=e592]:
+                      - link "tc0110pcr, (Directory)" [ref=e599] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0110pcr
+                        - text: tc0110pcr
+                    - cell [ref=e600]
+                    - cell [ref=e602]
+                  - row "tc0150rod, (Directory)" [ref=e605]:
+                    - cell [ref=e606]:
+                      - link "tc0150rod, (Directory)" [ref=e613] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0150rod
+                        - text: tc0150rod
+                    - cell [ref=e614]
+                    - cell [ref=e616]
+                  - row "tc0180vcu, (Directory)" [ref=e619]:
+                    - cell [ref=e620]:
+                      - link "tc0180vcu, (Directory)" [ref=e627] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0180vcu
+                        - text: tc0180vcu
+                    - cell [ref=e628]
+                    - cell [ref=e630]
+                  - row "tc0200obj, (Directory)" [ref=e633]:
+                    - cell [ref=e634]:
+                      - link "tc0200obj, (Directory)" [ref=e641] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0200obj
+                        - text: tc0200obj
+                    - cell [ref=e642]
+                    - cell [ref=e644]
+                  - row "tc0360pri, (Directory)" [ref=e647]:
+                    - cell [ref=e648]:
+                      - link "tc0360pri, (Directory)" [ref=e655] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0360pri
+                        - text: tc0360pri
+                    - cell [ref=e656]
+                    - cell [ref=e658]
+                  - row "tc0370mso, (Directory)" [ref=e661]:
+                    - cell [ref=e662]:
+                      - link "tc0370mso, (Directory)" [ref=e669] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0370mso
+                        - text: tc0370mso
+                    - cell [ref=e670]
+                    - cell [ref=e672]
+                  - row "tc0480scp, (Directory)" [ref=e675]:
+                    - cell [ref=e676]:
+                      - link "tc0480scp, (Directory)" [ref=e683] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0480scp
+                        - text: tc0480scp
+                    - cell [ref=e684]
+                    - cell [ref=e686]
+                  - row "tc0630fdp, (Directory)" [ref=e689]:
+                    - cell [ref=e690]:
+                      - link "tc0630fdp, (Directory)" [ref=e697] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0630fdp
+                        - text: tc0630fdp
+                    - cell [ref=e698]
+                    - cell [ref=e700]
+                  - row "tc0650fda, (Directory)" [ref=e703]:
+                    - cell [ref=e704]:
+                      - link "tc0650fda, (Directory)" [ref=e711] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/tc0650fda
+                        - text: tc0650fda
+                    - cell [ref=e712]
+                    - cell [ref=e714]
+                  - row "toaplan, (Directory)" [ref=e717]:
+                    - cell [ref=e718]:
+                      - link "toaplan, (Directory)" [ref=e725] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/toaplan
+                        - text: toaplan
+                    - cell [ref=e726]
+                    - cell [ref=e728]
+                  - row "toaplan_v2, (Directory)" [ref=e731]:
+                    - cell [ref=e732]:
+                      - link "toaplan_v2, (Directory)" [ref=e739] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/toaplan_v2
+                        - text: toaplan_v2
+                    - cell [ref=e740]
+                    - cell [ref=e742]
+                  - row "v60, (Directory)" [ref=e745]:
+                    - cell [ref=e746]:
+                      - link "v60, (Directory)" [ref=e753] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/v60
+                        - text: v60
+                    - cell [ref=e754]
+                    - cell [ref=e756]
+                  - row "validate, (Directory)" [ref=e759]:
+                    - cell [ref=e760]:
+                      - link "validate, (Directory)" [ref=e767] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/validate
+                        - text: validate
+                    - cell [ref=e768]
+                    - cell [ref=e770]
+                  - row "COMMUNITY_PATTERNS.md, (File)" [ref=e773]:
+                    - cell [ref=e774]:
+                      - link "COMMUNITY_PATTERNS.md, (File)" [ref=e781] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/COMMUNITY_PATTERNS.md
+                        - text: COMMUNITY_PATTERNS.md
+                    - cell [ref=e782]
+                    - cell [ref=e784]
+                  - row "COMMUNITY_SYNTHESIS_GUIDE.md, (File)" [ref=e787]:
+                    - cell [ref=e788]:
+                      - link "COMMUNITY_SYNTHESIS_GUIDE.md, (File)" [ref=e795] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/COMMUNITY_SYNTHESIS_GUIDE.md
+                        - text: COMMUNITY_SYNTHESIS_GUIDE.md
+                    - cell [ref=e796]
+                    - cell [ref=e798]
+                  - row "GUARDRAILS.md, (File)" [ref=e801]:
+                    - cell [ref=e802]:
+                      - link "GUARDRAILS.md, (File)" [ref=e809] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/GUARDRAILS.md
+                        - text: GUARDRAILS.md
+                    - cell [ref=e810]
+                    - cell [ref=e812]
+                  - row "OPTIMIZATION_TECHNIQUES.md, (File)" [ref=e815]:
+                    - cell [ref=e816]:
+                      - link "OPTIMIZATION_TECHNIQUES.md, (File)" [ref=e823] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/OPTIMIZATION_TECHNIQUES.md
+                        - text: OPTIMIZATION_TECHNIQUES.md
+                    - cell [ref=e824]
+                    - cell [ref=e826]
+                  - row "PROJECT_STATUS.md, (File)" [ref=e829]:
+                    - cell [ref=e830]:
+                      - link "PROJECT_STATUS.md, (File)" [ref=e837] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/PROJECT_STATUS.md
+                        - text: PROJECT_STATUS.md
+                    - cell [ref=e838]
+                    - cell [ref=e840]
+                  - row "QUARTUS_PORTING_NOTES.md, (File)" [ref=e843]:
+                    - cell [ref=e844]:
+                      - link "QUARTUS_PORTING_NOTES.md, (File)" [ref=e851] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/QUARTUS_PORTING_NOTES.md
+                        - text: QUARTUS_PORTING_NOTES.md
+                    - cell [ref=e852]
+                    - cell [ref=e854]
+                  - row "README.md, (File)" [ref=e857]:
+                    - cell [ref=e858]:
+                      - link "README.md, (File)" [ref=e865] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/README.md
+                        - text: README.md
+                    - cell [ref=e866]
+                    - cell [ref=e868]
+                  - row "SYSTEM32_FEASIBILITY.md, (File)" [ref=e871]:
+                    - cell [ref=e872]:
+                      - link "SYSTEM32_FEASIBILITY.md, (File)" [ref=e879] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/SYSTEM32_FEASIBILITY.md
+                        - text: SYSTEM32_FEASIBILITY.md
+                    - cell [ref=e880]
+                    - cell [ref=e882]
+                  - row "TASK_BOARD.md, (File)" [ref=e885]:
+                    - cell [ref=e886]:
+                      - link "TASK_BOARD.md, (File)" [ref=e893] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/TASK_BOARD.md
+                        - text: TASK_BOARD.md
+                    - cell [ref=e894]
+                    - cell [ref=e896]
+                  - row "check_rtl.sh, (File)" [ref=e899]:
+                    - cell [ref=e900]:
+                      - link "check_rtl.sh, (File)" [ref=e907] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/check_rtl.sh
+                        - text: check_rtl.sh
+                    - cell [ref=e908]
+                    - cell [ref=e910]
+                  - row "fx68k_integration_reference.md, (File)" [ref=e913]:
+                    - cell [ref=e914]:
+                      - link "fx68k_integration_reference.md, (File)" [ref=e921] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/fx68k_integration_reference.md
+                        - text: fx68k_integration_reference.md
+                    - cell [ref=e922]
+                    - cell [ref=e924]
+                  - row "pattern-ledger.md, (File)" [ref=e927]:
+                    - cell [ref=e928]:
+                      - link "pattern-ledger.md, (File)" [ref=e935] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/pattern-ledger.md
+                        - text: pattern-ledger.md
+                    - cell [ref=e936]
+                    - cell [ref=e938]
+            - generic [ref=e942]:
+              - generic [ref=e943]:
+                - heading [level=2] [ref=e944]:
+                  - link "README.md" [ref=e945] [cursor=pointer]:
+                    - /url: "#readme"
+                - button "Outline" [ref=e946] [cursor=pointer]
+              - article [ref=e950]:
+                - generic [ref=e951]:
+                  - heading "chips/ — Per-Chip RTL Directory" [level=1] [ref=e952]
+                  - 'link "Permalink: chips/ — Per-Chip RTL Directory" [ref=e953] [cursor=pointer]':
+                    - /url: "#chips--per-chip-rtl-directory"
+                - paragraph [ref=e956]: "One subdirectory per chip target. Each directory contains:"
+                - generic [ref=e957]:
+                  - code [ref=e959]: chips/<CHIPNAME>/ <CHIPNAME>.sv ← generated RTL (top-level module) <CHIPNAME>_tb.sv ← optional SV testbench (for gate1) vectors/ tier1_reset.jsonl ← reset/power-on vectors (gate1) tier2_functional.jsonl ← state coverage vectors (gate1) tier3_mame.jsonl ← MAME-derived ground truth (gate4) quartus/ ← Quartus project files (gate3b, Linux only) notes.md ← chip research notes, MAME source refs, quirks
+                  - button "Copy code to clipboard" [ref=e961] [cursor=pointer]
+                - generic [ref=e965]:
+                  - heading "Adding a New Chip" [level=2] [ref=e966]
+                  - 'link "Permalink: Adding a New Chip" [ref=e967] [cursor=pointer]':
+                    - /url: "#adding-a-new-chip"
+                - list [ref=e970]:
+                  - listitem [ref=e971]: "Research the chip: find MAME source, datasheet, schematic"
+                  - listitem [ref=e972]:
+                    - text: Fill in Sections 1 and 2 of
+                    - code [ref=e973]: templates/generation_prompt.md
+                  - listitem [ref=e974]: Run the filled prompt through the AI (Claude Opus/Sonnet recommended)
+                  - listitem [ref=e975]:
+                    - text: Save output to
+                    - code [ref=e976]: chips/<CHIPNAME>/<CHIPNAME>.sv
+                  - listitem [ref=e977]:
+                    - text: "Run gates:"
+                    - code [ref=e978]: gates/run_gates.sh chips/<CHIPNAME>/<CHIPNAME>.sv chips/<CHIPNAME>/vectors
+                  - listitem [ref=e979]: Fix failures by updating the prompt or templates — never hand-patch RTL
+                  - listitem [ref=e980]: Add tier3 MAME vectors and run gate4
+                - generic [ref=e981]:
+                  - heading "Naming Convention" [level=2] [ref=e982]
+                  - 'link "Permalink: Naming Convention" [ref=e983] [cursor=pointer]':
+                    - /url: "#naming-convention"
+                - paragraph [ref=e986]: "Use the chip part number as the directory name where possible:"
+                - list [ref=e987]:
+                  - listitem [ref=e988]:
+                    - code [ref=e989]: mc6845/
+                    - text: — Motorola MC6845 CRTC
+                  - listitem [ref=e990]:
+                    - code [ref=e991]: ay8910/
+                    - text: — General Instrument AY-3-8910 PSG
+                  - listitem [ref=e992]:
+                    - code [ref=e993]: namco_wsg/
+                    - text: — Namco WSG (custom, use function name)
+                  - listitem [ref=e994]:
+                    - code [ref=e995]: z80_cpm/
+                    - text: — test board (use descriptive name)
+                - generic [ref=e996]:
+                  - heading "Current Chips" [level=2] [ref=e997]
+                  - 'link "Permalink: Current Chips" [ref=e998] [cursor=pointer]':
+                    - /url: "#current-chips"
+                - paragraph [ref=e1001]:
+                  - emphasis [ref=e1002]: (none yet — first chip is added after gate infrastructure is validated)
+    - contentinfo [ref=e1004]:
+      - heading "Footer" [level=2] [ref=e1005]
+      - generic [ref=e1006]:
+        - generic [ref=e1007]:
+          - link "GitHub Homepage" [ref=e1008] [cursor=pointer]:
+            - /url: https://github.com
+          - generic [ref=e1011]: © 2026 GitHub, Inc.
+        - navigation "Footer" [ref=e1012]:
+          - heading "Footer navigation" [level=3] [ref=e1013]
+          - list "Footer navigation" [ref=e1014]:
+            - listitem [ref=e1015]:
+              - link "Terms" [ref=e1016] [cursor=pointer]:
+                - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+            - listitem [ref=e1017]:
+              - link "Privacy" [ref=e1018] [cursor=pointer]:
+                - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+            - listitem [ref=e1019]:
+              - link "Security" [ref=e1020] [cursor=pointer]:
+                - /url: https://github.com/security
+            - listitem [ref=e1021]:
+              - link "Status" [ref=e1022] [cursor=pointer]:
+                - /url: https://www.githubstatus.com/
+            - listitem [ref=e1023]:
+              - link "Community" [ref=e1024] [cursor=pointer]:
+                - /url: https://github.community/
+            - listitem [ref=e1025]:
+              - link "Docs" [ref=e1026] [cursor=pointer]:
+                - /url: https://docs.github.com/
+            - listitem [ref=e1027]:
+              - link "Contact" [ref=e1028] [cursor=pointer]:
+                - /url: https://support.github.com?tags=dotcom-footer
+            - listitem [ref=e1029]:
+              - button "Manage cookies" [ref=e1031] [cursor=pointer]
+            - listitem [ref=e1032]:
+              - button "Do not share my personal information" [ref=e1034] [cursor=pointer]
+  - alert [ref=e1037]

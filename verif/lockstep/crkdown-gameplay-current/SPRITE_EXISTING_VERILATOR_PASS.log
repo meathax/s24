@@ -1,0 +1,5 @@
+PASS sprite list, reverse buffer, zoom, palette and 4bpp fetch stress_clocks=1354
+- verif\tb_sprite.sv:211: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 34us; walltime 0.002 s; speed 16.685 ms/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 5 MB

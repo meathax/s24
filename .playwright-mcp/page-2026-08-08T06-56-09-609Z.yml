@@ -1,0 +1,660 @@
+- generic [active] [ref=f14e1]:
+  - generic [ref=f14e2]:
+    - generic [ref=f14e3]:
+      - link "Skip to content" [ref=f14e4] [cursor=pointer]:
+        - /url: "#start-of-content"
+      - banner [ref=f14e8]:
+        - heading "Navigation Menu" [level=2] [ref=f14e9]
+        - generic [ref=f14e10]:
+          - link "Homepage" [ref=f14e12] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f14e15]:
+            - navigation "Global" [ref=f14e16]:
+              - list [ref=f14e17]:
+                - listitem [ref=f14e18]:
+                  - button "Platform" [ref=f14e20] [cursor=pointer]
+                - listitem [ref=f14e23]:
+                  - button "Solutions" [ref=f14e25] [cursor=pointer]
+                - listitem [ref=f14e28]:
+                  - button "Resources" [ref=f14e30] [cursor=pointer]
+                - listitem [ref=f14e33]:
+                  - button "Open Source" [ref=f14e35] [cursor=pointer]
+                - listitem [ref=f14e38]:
+                  - button "Enterprise" [ref=f14e40] [cursor=pointer]
+                - listitem [ref=f14e43]:
+                  - link "Pricing" [ref=f14e44] [cursor=pointer]:
+                    - /url: https://github.com/pricing
+            - generic [ref=f14e46]:
+              - button "Search or jump to, type / to search" [ref=f14e48] [cursor=pointer]
+              - link "Sign in" [ref=f14e52] [cursor=pointer]:
+                - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fmitchedberg%2Fmister-pipeline%2Fblob%2Fmaster%2Fchips%2Fm68000%2Frtl%2Ffx68k_dtack_cen.sv
+              - link "Sign up" [ref=f14e53] [cursor=pointer]:
+                - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Fblob%2Fshow&source=header-repo&source_repo=mitchedberg%2Fmister-pipeline
+              - button "Appearance settings" [ref=f14e54] [cursor=pointer]
+    - main [ref=f14e60]:
+      - generic [ref=f14e61]:
+        - generic [ref=f14e62]:
+          - generic [ref=f14e64]:
+            - link "mitchedberg" [ref=f14e68] [cursor=pointer]:
+              - /url: /mitchedberg
+            - generic [ref=f14e69]: /
+            - strong [ref=f14e70]:
+              - link "mister-pipeline" [ref=f14e71] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline
+            - generic [ref=f14e72]: Public
+          - generic [ref=f14e73]:
+            - list:
+              - listitem [ref=f14e74]:
+                - link "You must be signed in to change notification settings" [ref=f14e75] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Notifications
+              - listitem [ref=f14e78]:
+                - link "Fork 0" [ref=f14e79] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Fork
+                  - generic "0" [ref=f14e82]
+              - listitem [ref=f14e83]:
+                - link "You must be signed in to star a repository" [ref=f14e85] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Star
+                  - generic "0 users starred this repository" [ref=f14e88]: "0"
+        - navigation "Repository" [ref=f14e89]:
+          - list [ref=f14e90]:
+            - listitem [ref=f14e91]:
+              - link "Code" [ref=f14e92] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline
+            - listitem [ref=f14e96]:
+              - link "Issues" [ref=f14e97] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/issues
+            - listitem [ref=f14e102]:
+              - link "Pull requests" [ref=f14e103] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/pulls
+            - listitem [ref=f14e107]:
+              - link "Actions" [ref=f14e108] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/actions
+            - listitem [ref=f14e112]:
+              - link "Projects" [ref=f14e113] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/projects
+            - listitem [ref=f14e117]:
+              - link "Security and quality" [ref=f14e118] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/security
+            - listitem [ref=f14e122]:
+              - link "Insights" [ref=f14e123] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/pulse
+      - generic [ref=f14e137]:
+        - generic [ref=f14e141]:
+          - generic [ref=f14e142]:
+            - heading "Expand file tree" [level=2] [ref=f14e144]:
+              - button "Expand file tree" [ref=f14e145] [cursor=pointer]
+            - button "master branch" [ref=f14e150] [cursor=pointer]:
+              - generic [ref=f14e151]: master
+            - generic [ref=f14e156]:
+              - navigation [ref=f14e157]:
+                - heading "Breadcrumbs" [level=2] [ref=f14e158]
+                - list [ref=f14e159]:
+                  - listitem [ref=f14e160]:
+                    - link "mister-pipeline" [ref=f14e161] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master
+                  - listitem [ref=f14e162]:
+                    - text: /
+                    - link "chips" [ref=f14e163] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master/chips
+                  - listitem [ref=f14e164]:
+                    - text: /
+                    - link "m68000" [ref=f14e165] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master/chips/m68000
+                  - listitem [ref=f14e166]:
+                    - text: /
+                    - link "rtl" [ref=f14e167] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master/chips/m68000/rtl
+              - generic [ref=f14e168]:
+                - text: /
+                - heading "fx68k_dtack_cen.sv" [level=1] [ref=f14e169]
+              - button "Copy path" [ref=f14e170] [cursor=pointer]
+          - generic [ref=f14e176]:
+            - combobox "Go to file" [ref=f14e183]
+            - button "More file actions" [ref=f14e184] [cursor=pointer]
+        - generic [ref=f14e187]:
+          - generic [ref=f14e189]:
+            - heading "Latest commit" [level=2] [ref=f14e190]
+            - generic [ref=f14e193]:
+              - heading "History" [level=2] [ref=f14e194]
+              - link "History" [ref=f14e195] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/commits/master/chips/m68000/rtl/fx68k_dtack_cen.sv
+          - generic [ref=f14e199]:
+            - generic [ref=f14e201]:
+              - heading "File metadata and controls" [level=2] [ref=f14e202]
+              - generic [ref=f14e203]:
+                - list "File view" [ref=f14e204]:
+                  - listitem [ref=f14e205]:
+                    - button "Code" [pressed] [ref=f14e206] [cursor=pointer]
+                  - listitem [ref=f14e209]:
+                    - button "Blame" [ref=f14e210] [cursor=pointer]
+                - generic "3.81 KB" [ref=f14e215]: 97 lines (86 loc) · 3.81 KB
+              - generic [ref=f14e216]:
+                - generic [ref=f14e218]:
+                  - link "Raw" [ref=f14e220] [cursor=pointer]:
+                    - /url: https://github.com/mitchedberg/mister-pipeline/raw/refs/heads/master/chips/m68000/rtl/fx68k_dtack_cen.sv
+                  - button "Copy raw file" [ref=f14e224] [cursor=pointer]
+                  - button "Download raw file" [ref=f14e229] [cursor=pointer]
+                - button "Open symbols panel" [ref=f14e233] [cursor=pointer]
+            - region [ref=f14e237]:
+              - generic [ref=f14e242]:
+                - generic [ref=f14e243]:
+                  - generic [ref=f14e244] [cursor=pointer]: "1"
+                  - generic [ref=f14e245] [cursor=pointer]: "2"
+                  - generic [ref=f14e246] [cursor=pointer]: "3"
+                  - generic [ref=f14e247] [cursor=pointer]: "4"
+                  - generic [ref=f14e248] [cursor=pointer]: "5"
+                  - generic [ref=f14e249] [cursor=pointer]: "6"
+                  - generic [ref=f14e250] [cursor=pointer]: "7"
+                  - generic [ref=f14e251] [cursor=pointer]: "8"
+                  - generic [ref=f14e252] [cursor=pointer]: "9"
+                  - generic [ref=f14e253] [cursor=pointer]: "10"
+                  - generic [ref=f14e254] [cursor=pointer]: "11"
+                  - generic [ref=f14e255] [cursor=pointer]: "12"
+                  - generic [ref=f14e256] [cursor=pointer]: "13"
+                  - generic [ref=f14e257] [cursor=pointer]: "14"
+                  - generic [ref=f14e258] [cursor=pointer]: "15"
+                  - generic [ref=f14e259] [cursor=pointer]: "16"
+                  - generic [ref=f14e260] [cursor=pointer]: "17"
+                  - generic [ref=f14e261] [cursor=pointer]: "18"
+                  - generic [ref=f14e262] [cursor=pointer]: "19"
+                  - generic [ref=f14e263] [cursor=pointer]: "20"
+                  - generic [ref=f14e264] [cursor=pointer]: "21"
+                  - generic [ref=f14e265] [cursor=pointer]: "22"
+                  - generic [ref=f14e266] [cursor=pointer]: "23"
+                  - generic [ref=f14e267] [cursor=pointer]: "24"
+                  - generic [ref=f14e268] [cursor=pointer]: "25"
+                  - generic [ref=f14e269] [cursor=pointer]: "26"
+                  - generic [ref=f14e270] [cursor=pointer]: "27"
+                  - generic [ref=f14e271] [cursor=pointer]: "28"
+                  - generic [ref=f14e272] [cursor=pointer]: "29"
+                  - generic [ref=f14e273] [cursor=pointer]: "30"
+                  - generic [ref=f14e274] [cursor=pointer]: "31"
+                  - generic [ref=f14e275] [cursor=pointer]: "32"
+                  - generic [ref=f14e276] [cursor=pointer]: "33"
+                  - generic [ref=f14e277] [cursor=pointer]: "34"
+                  - generic [ref=f14e278] [cursor=pointer]: "35"
+                  - generic [ref=f14e279] [cursor=pointer]: "36"
+                  - generic [ref=f14e280] [cursor=pointer]: "37"
+                  - generic [ref=f14e281] [cursor=pointer]: "38"
+                  - generic [ref=f14e282] [cursor=pointer]: "39"
+                  - generic [ref=f14e283] [cursor=pointer]: "40"
+                  - generic [ref=f14e284] [cursor=pointer]: "41"
+                  - generic [ref=f14e285] [cursor=pointer]: "42"
+                  - generic [ref=f14e286] [cursor=pointer]: "43"
+                  - generic [ref=f14e287] [cursor=pointer]: "44"
+                  - generic [ref=f14e288] [cursor=pointer]: "45"
+                  - generic [ref=f14e289] [cursor=pointer]: "46"
+                  - generic [ref=f14e290] [cursor=pointer]: "47"
+                  - generic [ref=f14e291] [cursor=pointer]: "48"
+                  - generic [ref=f14e292] [cursor=pointer]: "49"
+                  - generic [ref=f14e293] [cursor=pointer]: "50"
+                  - generic [ref=f14e294] [cursor=pointer]: "51"
+                  - generic [ref=f14e295] [cursor=pointer]: "52"
+                  - generic [ref=f14e296] [cursor=pointer]: "53"
+                  - generic [ref=f14e297] [cursor=pointer]: "54"
+                  - generic [ref=f14e298] [cursor=pointer]: "55"
+                  - generic [ref=f14e299] [cursor=pointer]: "56"
+                  - generic [ref=f14e300] [cursor=pointer]: "57"
+                  - generic [ref=f14e301] [cursor=pointer]: "58"
+                  - generic [ref=f14e302] [cursor=pointer]: "59"
+                  - generic [ref=f14e303] [cursor=pointer]: "60"
+                  - generic [ref=f14e304] [cursor=pointer]: "61"
+                  - generic [ref=f14e305] [cursor=pointer]: "62"
+                  - generic [ref=f14e306] [cursor=pointer]: "63"
+                  - generic [ref=f14e307] [cursor=pointer]: "64"
+                  - generic [ref=f14e308] [cursor=pointer]: "65"
+                  - generic [ref=f14e309] [cursor=pointer]: "66"
+                  - generic [ref=f14e310] [cursor=pointer]: "67"
+                  - generic [ref=f14e311] [cursor=pointer]: "68"
+                  - generic [ref=f14e312] [cursor=pointer]: "69"
+                  - generic [ref=f14e313] [cursor=pointer]: "70"
+                  - generic [ref=f14e314] [cursor=pointer]: "71"
+                  - generic [ref=f14e315] [cursor=pointer]: "72"
+                  - generic [ref=f14e316] [cursor=pointer]: "73"
+                  - generic [ref=f14e317] [cursor=pointer]: "74"
+                  - generic [ref=f14e318] [cursor=pointer]: "75"
+                  - generic [ref=f14e319] [cursor=pointer]: "76"
+                  - generic [ref=f14e320] [cursor=pointer]: "77"
+                  - generic [ref=f14e321] [cursor=pointer]: "78"
+                  - generic [ref=f14e322] [cursor=pointer]: "79"
+                  - generic [ref=f14e323] [cursor=pointer]: "80"
+                  - generic [ref=f14e324] [cursor=pointer]: "81"
+                  - generic [ref=f14e325] [cursor=pointer]: "82"
+                  - generic [ref=f14e326] [cursor=pointer]: "83"
+                  - generic [ref=f14e327] [cursor=pointer]: "84"
+                  - generic [ref=f14e328] [cursor=pointer]: "85"
+                  - generic [ref=f14e329] [cursor=pointer]: "86"
+                  - generic [ref=f14e330] [cursor=pointer]: "87"
+                  - generic [ref=f14e331] [cursor=pointer]: "88"
+                  - generic [ref=f14e332] [cursor=pointer]: "89"
+                  - generic [ref=f14e333] [cursor=pointer]: "90"
+                  - generic [ref=f14e334] [cursor=pointer]: "91"
+                  - generic [ref=f14e335] [cursor=pointer]: "92"
+                  - generic [ref=f14e336] [cursor=pointer]: "93"
+                  - generic [ref=f14e337] [cursor=pointer]: "94"
+                  - generic [ref=f14e338] [cursor=pointer]: "95"
+                  - generic [ref=f14e339] [cursor=pointer]: "96"
+                  - generic [ref=f14e340] [cursor=pointer]: "97"
+                - generic [ref=f14e341]:
+                  - generic [ref=f14e344]:
+                    - generic [ref=f14e345]: "`default_nettype"
+                    - generic [ref=f14e346]: none
+                  - generic [ref=f14e350]:
+                    - generic [ref=f14e351]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e355]:
+                    - generic [ref=f14e356]: //
+                    - text: fx68k_dtack_cen.sv — DTACK-aware clock enable generator for fx68k
+                  - generic [ref=f14e357]: //
+                  - generic [ref=f14e365]:
+                    - generic [ref=f14e366]: //
+                    - text: Clean-room implementation of the "stall CPU clock during bus wait" pattern
+                  - generic [ref=f14e370]:
+                    - generic [ref=f14e371]: //
+                    - text: used by all production MiSTer 68000 cores. Without this, the CPU's enPhi2
+                  - generic [ref=f14e375]:
+                    - generic [ref=f14e376]: //
+                    - text: can fire before DTACK (and therefore before SDRAM data arrives), causing the
+                  - generic [ref=f14e380]:
+                    - generic [ref=f14e381]: //
+                    - text: CPU to latch stale data from the previous bus cycle.
+                  - generic [ref=f14e382]: //
+                  - generic [ref=f14e390]:
+                    - generic [ref=f14e391]: //
+                    - text: "Behavior:"
+                  - generic [ref=f14e395]:
+                    - generic [ref=f14e396]: //
+                    - text: "- Generates enPhi1 / enPhi2 at the target CPU frequency using a fractional"
+                  - generic [ref=f14e400]:
+                    - generic [ref=f14e401]: //
+                    - text: accumulator (num/den ratio of clk_sys).
+                  - generic [ref=f14e405]:
+                    - generic [ref=f14e406]: //
+                    - text: "- When a bus cycle is active (ASn=0) and DTACK hasn't fired yet (DTACKn=1),"
+                  - generic [ref=f14e410]:
+                    - generic [ref=f14e411]: //
+                    - text: the clock enable generation is STALLED. No enPhi1 or enPhi2 pulses are
+                  - generic [ref=f14e415]:
+                    - generic [ref=f14e416]: //
+                    - text: emitted until DTACKn goes low, ensuring the CPU only advances when valid
+                  - generic [ref=f14e420]:
+                    - generic [ref=f14e421]: //
+                    - text: data is on the bus.
+                  - generic [ref=f14e425]:
+                    - generic [ref=f14e426]: //
+                    - text: "- After DTACK fires, clock generation resumes normally."
+                  - generic [ref=f14e427]: //
+                  - generic [ref=f14e435]:
+                    - generic [ref=f14e436]: //
+                    - text: "Parameters:"
+                  - generic [ref=f14e440]:
+                    - generic [ref=f14e441]: //
+                    - text: "NUM, DEN — fractional divider: CPU freq = clk_sys * NUM / DEN / 2"
+                  - generic [ref=f14e445]:
+                    - generic [ref=f14e446]: //
+                    - text: (the /2 is because enPhi1 and enPhi2 alternate)
+                  - generic [ref=f14e450]:
+                    - generic [ref=f14e451]: //
+                    - text: "Example: 40 MHz clk_sys, NUM=1, DEN=2 → 10 MHz CPU"
+                  - generic [ref=f14e455]:
+                    - generic [ref=f14e456]: //
+                    - text: 48 MHz clk_sys, NUM=5, DEN=24 → 10 MHz CPU
+                  - generic [ref=f14e457]: //
+                  - generic [ref=f14e465]:
+                    - generic [ref=f14e466]: //
+                    - text: "Ports:"
+                  - generic [ref=f14e470]:
+                    - generic [ref=f14e471]: //
+                    - text: enPhi1, enPhi2 — connect directly to fx68k
+                  - generic [ref=f14e475]:
+                    - generic [ref=f14e476]: //
+                    - text: DTACKn, ASn — directly from fx68k outputs (active-low)
+                  - generic [ref=f14e477]: //
+                  - generic [ref=f14e485]:
+                    - generic [ref=f14e486]: //
+                    - text: Based on the documented behavior of the jtframe_68kdtack module used in
+                  - generic [ref=f14e490]:
+                    - generic [ref=f14e491]: //
+                    - text: jotego cores (GPL-3.0). This is an independent implementation.
+                  - generic [ref=f14e495]:
+                    - generic [ref=f14e496]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e502]:
+                    - generic [ref=f14e503]: module
+                    - generic [ref=f14e504]: fx68k_dtack_cen
+                    - generic [ref=f14e505]: "#"
+                    - text: (
+                  - generic [ref=f14e508]:
+                    - generic [ref=f14e509]: parameter
+                    - generic [ref=f14e510]: NUM
+                    - generic [ref=f14e511]: =
+                    - generic [ref=f14e512]: "1"
+                    - text: ","
+                    - generic [ref=f14e513]:
+                      - generic [ref=f14e514]: //
+                      - text: fractional numerator
+                  - generic [ref=f14e517]:
+                    - generic [ref=f14e518]: parameter
+                    - generic [ref=f14e519]: DEN
+                    - generic [ref=f14e520]: =
+                    - generic [ref=f14e521]: "2"
+                    - generic [ref=f14e522]:
+                      - generic [ref=f14e523]: //
+                      - text: fractional denominator
+                  - generic [ref=f14e524]: )(
+                  - generic [ref=f14e529]:
+                    - generic [ref=f14e530]: input
+                    - generic [ref=f14e531]: logic
+                    - text: clk,
+                  - generic [ref=f14e534]:
+                    - generic [ref=f14e535]: input
+                    - generic [ref=f14e536]: logic
+                    - text: rst,
+                  - generic [ref=f14e543]:
+                    - generic [ref=f14e544]: //
+                    - text: fx68k bus signals (directly from CPU)
+                  - generic [ref=f14e547]:
+                    - generic [ref=f14e548]: input
+                    - generic [ref=f14e549]: logic
+                    - text: ASn,
+                  - generic [ref=f14e552]:
+                    - generic [ref=f14e553]: input
+                    - generic [ref=f14e554]: logic
+                    - text: DTACKn,
+                  - generic [ref=f14e561]:
+                    - generic [ref=f14e562]: //
+                    - text: Clock enables — connect to fx68k enPhi1 / enPhi2
+                  - generic [ref=f14e565]:
+                    - generic [ref=f14e566]: output
+                    - generic [ref=f14e567]: logic
+                    - text: enPhi1,
+                  - generic [ref=f14e570]:
+                    - generic [ref=f14e571]: output
+                    - generic [ref=f14e572]: logic
+                    - text: enPhi2
+                  - generic [ref=f14e573]: );
+                  - generic [ref=f14e582]:
+                    - generic [ref=f14e583]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e587]:
+                    - generic [ref=f14e588]: //
+                    - text: Fractional accumulator
+                  - generic [ref=f14e592]:
+                    - generic [ref=f14e593]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e597]:
+                    - generic [ref=f14e598]: //
+                    - text: Generates a base "tick" at the rate clk_sys * NUM / DEN.
+                  - generic [ref=f14e602]:
+                    - generic [ref=f14e603]: //
+                    - text: Each tick alternates between enPhi1 and enPhi2.
+                  - generic [ref=f14e609]:
+                    - generic [ref=f14e610]: localparam
+                    - generic [ref=f14e611]: ACCW
+                    - generic [ref=f14e612]: =
+                    - generic [ref=f14e613]: $clog2
+                    - text: (
+                    - generic [ref=f14e614]: DEN
+                    - text: )
+                    - generic [ref=f14e615]: +
+                    - generic [ref=f14e616]: "2"
+                    - text: ;
+                    - generic [ref=f14e617]:
+                      - generic [ref=f14e618]: //
+                      - text: accumulator width
+                  - generic [ref=f14e624]:
+                    - generic [ref=f14e625]: logic
+                    - text: "["
+                    - generic [ref=f14e626]: ACCW
+                    - generic [ref=f14e627]: "-"
+                    - generic [ref=f14e628]: "1"
+                    - generic [ref=f14e629]: ":"
+                    - generic [ref=f14e630]: "0"
+                    - text: "] acc;"
+                  - generic [ref=f14e633]:
+                    - generic [ref=f14e634]: logic
+                    - text: tick;
+                  - generic [ref=f14e637]:
+                    - generic [ref=f14e638]: logic
+                    - text: phase;
+                    - generic [ref=f14e639]:
+                      - generic [ref=f14e640]: //
+                      - text: 0 = next tick is enPhi1, 1 = next tick is enPhi2
+                  - generic [ref=f14e647]:
+                    - generic [ref=f14e648]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e652]:
+                    - generic [ref=f14e653]: //
+                    - text: Bus stall detection
+                  - generic [ref=f14e657]:
+                    - generic [ref=f14e658]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e662]:
+                    - generic [ref=f14e663]: //
+                    - text: Stall when AS is asserted (bus cycle active) and DTACK hasn't fired yet.
+                  - generic [ref=f14e667]:
+                    - generic [ref=f14e668]: //
+                    - text: Once DTACK fires (DTACKn=0), resume. Also resume when AS deasserts.
+                  - generic [ref=f14e671]:
+                    - generic [ref=f14e672]: logic
+                    - text: stall;
+                  - generic [ref=f14e675]:
+                    - generic [ref=f14e676]: assign
+                    - text: stall
+                    - generic [ref=f14e677]: =
+                    - generic [ref=f14e678]: "!"
+                    - text: ASn
+                    - generic [ref=f14e679]: "&&"
+                    - text: DTACKn;
+                  - generic [ref=f14e686]:
+                    - generic [ref=f14e687]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e691]:
+                    - generic [ref=f14e692]: //
+                    - text: Accumulator + tick generation
+                  - generic [ref=f14e696]:
+                    - generic [ref=f14e697]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e700]:
+                    - generic [ref=f14e701]: always_ff
+                    - generic [ref=f14e702]: "@"
+                    - text: (
+                    - generic [ref=f14e703]: posedge
+                    - text: clk
+                    - generic [ref=f14e704]: or
+                    - generic [ref=f14e705]: posedge
+                    - text: rst)
+                    - generic [ref=f14e706]: begin
+                  - generic [ref=f14e709]:
+                    - generic [ref=f14e710]: if
+                    - text: (rst)
+                    - generic [ref=f14e711]: begin
+                  - generic [ref=f14e714]:
+                    - text: acc
+                    - generic [ref=f14e715]: <=
+                    - generic [ref=f14e716]: "'0"
+                    - text: ;
+                  - generic [ref=f14e719]:
+                    - text: phase
+                    - generic [ref=f14e720]: <=
+                    - generic [ref=f14e721]: 1'b0
+                    - text: ;
+                    - generic [ref=f14e722]:
+                      - generic [ref=f14e723]: //
+                      - text: first tick after reset = enPhi1
+                  - generic [ref=f14e726]:
+                    - generic [ref=f14e727]: end
+                    - generic [ref=f14e728]: else
+                    - generic [ref=f14e729]: if
+                    - text: (
+                    - generic [ref=f14e730]: "!"
+                    - text: stall)
+                    - generic [ref=f14e731]: begin
+                  - generic [ref=f14e734]:
+                    - generic [ref=f14e735]: if
+                    - text: (acc
+                    - generic [ref=f14e736]: +
+                    - generic [ref=f14e737]: NUM
+                    - text: "["
+                    - generic [ref=f14e738]: ACCW
+                    - generic [ref=f14e739]: "-"
+                    - generic [ref=f14e740]: "1"
+                    - generic [ref=f14e741]: ":"
+                    - generic [ref=f14e742]: "0"
+                    - text: "]"
+                    - generic [ref=f14e743]: ">="
+                    - generic [ref=f14e744]: DEN
+                    - text: "["
+                    - generic [ref=f14e745]: ACCW
+                    - generic [ref=f14e746]: "-"
+                    - generic [ref=f14e747]: "1"
+                    - generic [ref=f14e748]: ":"
+                    - generic [ref=f14e749]: "0"
+                    - text: "])"
+                    - generic [ref=f14e750]: begin
+                  - generic [ref=f14e753]:
+                    - text: acc
+                    - generic [ref=f14e754]: <=
+                    - text: acc
+                    - generic [ref=f14e755]: +
+                    - generic [ref=f14e756]: NUM
+                    - text: "["
+                    - generic [ref=f14e757]: ACCW
+                    - generic [ref=f14e758]: "-"
+                    - generic [ref=f14e759]: "1"
+                    - generic [ref=f14e760]: ":"
+                    - generic [ref=f14e761]: "0"
+                    - text: "]"
+                    - generic [ref=f14e762]: "-"
+                    - generic [ref=f14e763]: DEN
+                    - text: "["
+                    - generic [ref=f14e764]: ACCW
+                    - generic [ref=f14e765]: "-"
+                    - generic [ref=f14e766]: "1"
+                    - generic [ref=f14e767]: ":"
+                    - generic [ref=f14e768]: "0"
+                    - text: "];"
+                  - generic [ref=f14e771]:
+                    - text: phase
+                    - generic [ref=f14e772]: <=
+                    - generic [ref=f14e773]: ~
+                    - text: phase;
+                  - generic [ref=f14e776]:
+                    - generic [ref=f14e777]: end
+                    - generic [ref=f14e778]: else
+                    - generic [ref=f14e779]: begin
+                  - generic [ref=f14e782]:
+                    - text: acc
+                    - generic [ref=f14e783]: <=
+                    - text: acc
+                    - generic [ref=f14e784]: +
+                    - generic [ref=f14e785]: NUM
+                    - text: "["
+                    - generic [ref=f14e786]: ACCW
+                    - generic [ref=f14e787]: "-"
+                    - generic [ref=f14e788]: "1"
+                    - generic [ref=f14e789]: ":"
+                    - generic [ref=f14e790]: "0"
+                    - text: "];"
+                  - generic [ref=f14e791]: end
+                  - generic [ref=f14e795]: end
+                  - generic [ref=f14e802]:
+                    - generic [ref=f14e803]: //
+                    - text: "When stalled: acc and phase hold, no ticks generated"
+                  - generic [ref=f14e804]: end
+                  - generic [ref=f14e814]:
+                    - generic [ref=f14e815]: //
+                    - text: Tick fires on the overflow cycle (when acc wraps)
+                  - generic [ref=f14e818]:
+                    - generic [ref=f14e819]: assign
+                    - text: tick
+                    - generic [ref=f14e820]: =
+                    - generic [ref=f14e821]: "!"
+                    - text: stall
+                    - generic [ref=f14e822]: "&&"
+                    - text: (acc
+                    - generic [ref=f14e823]: +
+                    - generic [ref=f14e824]: NUM
+                    - text: "["
+                    - generic [ref=f14e825]: ACCW
+                    - generic [ref=f14e826]: "-"
+                    - generic [ref=f14e827]: "1"
+                    - generic [ref=f14e828]: ":"
+                    - generic [ref=f14e829]: "0"
+                    - text: "]"
+                    - generic [ref=f14e830]: ">="
+                    - generic [ref=f14e831]: DEN
+                    - text: "["
+                    - generic [ref=f14e832]: ACCW
+                    - generic [ref=f14e833]: "-"
+                    - generic [ref=f14e834]: "1"
+                    - generic [ref=f14e835]: ":"
+                    - generic [ref=f14e836]: "0"
+                    - text: "]);"
+                  - generic [ref=f14e843]:
+                    - generic [ref=f14e844]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e848]:
+                    - generic [ref=f14e849]: //
+                    - text: "Output: mutually exclusive enPhi1 / enPhi2"
+                  - generic [ref=f14e853]:
+                    - generic [ref=f14e854]: //
+                    - text: =============================================================================
+                  - generic [ref=f14e858]:
+                    - generic [ref=f14e859]: //
+                    - text: First tick after reset is enPhi1 (phase=0 before toggle).
+                  - generic [ref=f14e862]:
+                    - generic [ref=f14e863]: assign
+                    - text: enPhi1
+                    - generic [ref=f14e864]: =
+                    - text: tick
+                    - generic [ref=f14e865]: "&"
+                    - generic [ref=f14e866]: ~
+                    - text: phase;
+                  - generic [ref=f14e869]:
+                    - generic [ref=f14e870]: assign
+                    - text: enPhi2
+                    - generic [ref=f14e871]: =
+                    - text: tick
+                    - generic [ref=f14e872]: "&"
+                    - text: phase;
+                  - generic [ref=f14e876]: endmodule
+    - contentinfo [ref=f14e881]:
+      - heading "Footer" [level=2] [ref=f14e882]
+      - generic [ref=f14e883]:
+        - generic [ref=f14e884]:
+          - link "GitHub Homepage" [ref=f14e885] [cursor=pointer]:
+            - /url: https://github.com
+          - generic [ref=f14e888]: © 2026 GitHub, Inc.
+        - navigation "Footer" [ref=f14e889]:
+          - heading "Footer navigation" [level=3] [ref=f14e890]
+          - list "Footer navigation" [ref=f14e891]:
+            - listitem [ref=f14e892]:
+              - link "Terms" [ref=f14e893] [cursor=pointer]:
+                - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+            - listitem [ref=f14e894]:
+              - link "Privacy" [ref=f14e895] [cursor=pointer]:
+                - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+            - listitem [ref=f14e896]:
+              - link "Security" [ref=f14e897] [cursor=pointer]:
+                - /url: https://github.com/security
+            - listitem [ref=f14e898]:
+              - link "Status" [ref=f14e899] [cursor=pointer]:
+                - /url: https://www.githubstatus.com/
+            - listitem [ref=f14e900]:
+              - link "Community" [ref=f14e901] [cursor=pointer]:
+                - /url: https://github.community/
+            - listitem [ref=f14e902]:
+              - link "Docs" [ref=f14e903] [cursor=pointer]:
+                - /url: https://docs.github.com/
+            - listitem [ref=f14e904]:
+              - link "Contact" [ref=f14e905] [cursor=pointer]:
+                - /url: https://support.github.com?tags=dotcom-footer
+            - listitem [ref=f14e906]:
+              - button "Manage cookies" [ref=f14e908] [cursor=pointer]
+            - listitem [ref=f14e909]:
+              - button "Do not share my personal information" [ref=f14e911] [cursor=pointer]
+  - alert [ref=f14e914]

@@ -1,0 +1,52 @@
+{
+  "schema": "rtl-mame-gameplay-comparison-v1",
+  "result": "pass_close_match",
+  "game": "bnzabros",
+  "parent": "bnzabros",
+  "clone": false,
+  "rtl": {
+    "source": "visible Verilator 5.050 native framebuffer",
+    "frame": 1800,
+    "path": "verif/frames/current-parent-audit/bnzabros-gameplay-final-1800.png",
+    "raw_rgb_sha256": "d557f1f80e2faa8202167aa684a65f8a62eb1f2b0b226b9b299eb275f917b6cd",
+    "visible_hwnd_verified": true,
+    "runtime_exit_code": 0,
+    "window_closed": true
+  },
+  "mame": {
+    "version": "0.288 (mame0288)",
+    "frame": 1800,
+    "path": "verif/frames/current-parent-audit/bnzabros-gameplay-mame-1800.png",
+    "raw_rgb_sha256": "28a123e3a0585f079e0f9e0fd6dff12e1b0934567dae0e7953d8ad5798993090"
+  },
+  "alignment": {
+    "native_size": [496, 384],
+    "crop": [0, 0, 496, 384],
+    "orientation": "ROT0",
+    "offset": [0, 0]
+  },
+  "metrics": {
+    "total_pixels": 190464,
+    "exact_pixels": 183486,
+    "different_pixels": 6978,
+    "exact_ratio": 0.9633631552419355,
+    "rgb_mae": 3.8561162914426523,
+    "gaussian_radius_2_rgb_mae": 2.14969233030914
+  },
+  "input_packet": [
+    {"frame": 900, "control": "coin1", "duration_frames": 4},
+    {"frame": 950, "control": "start1", "duration_frames": 4},
+    {"frame": 1000, "control": "button1", "duration_frames": 4}
+  ],
+  "acceptance": {
+    "unmistakable_gameplay": true,
+    "matched_scene": ["actors", "timer", "HUD", "map", "obstacles", "training state"],
+    "residual": "small moving-actor and palette animation phase"
+  },
+  "checkpoint": {
+    "path": "bnzabros-final.vltsv",
+    "native_frame": 1800,
+    "size": 9765929,
+    "sha256": "b00a6b764d67d4fb9318dbd02a26c2f1a822b9d6e98742b1cb1a3dacc5c37009"
+  }
+}

@@ -1,0 +1,274 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - link "Skip to content" [ref=f1e4] [cursor=pointer]:
+        - /url: "#start-of-content"
+      - banner [ref=f1e8]:
+        - heading "Navigation Menu" [level=2] [ref=f1e9]
+        - generic [ref=f1e10]:
+          - link "Homepage" [ref=f1e12] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f1e15]:
+            - navigation "Global" [ref=f1e16]:
+              - list [ref=f1e17]:
+                - listitem [ref=f1e18]:
+                  - button "Platform" [ref=f1e20] [cursor=pointer]
+                - listitem [ref=f1e23]:
+                  - button "Solutions" [ref=f1e25] [cursor=pointer]
+                - listitem [ref=f1e28]:
+                  - button "Resources" [ref=f1e30] [cursor=pointer]
+                - listitem [ref=f1e33]:
+                  - button "Open Source" [ref=f1e35] [cursor=pointer]
+                - listitem [ref=f1e38]:
+                  - button "Enterprise" [ref=f1e40] [cursor=pointer]
+                - listitem [ref=f1e43]:
+                  - link "Pricing" [ref=f1e44] [cursor=pointer]:
+                    - /url: https://github.com/pricing
+            - generic [ref=f1e46]:
+              - button "Search or jump to, type / to search" [ref=f1e48] [cursor=pointer]
+              - link "Sign in" [ref=f1e52] [cursor=pointer]:
+                - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fmitchedberg%2Fmister-pipeline%2Fblob%2Fmaster%2Fchips%2FREADME.md
+              - link "Sign up" [ref=f1e53] [cursor=pointer]:
+                - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Fblob%2Fshow&source=header-repo&source_repo=mitchedberg%2Fmister-pipeline
+              - button "Appearance settings" [ref=f1e54] [cursor=pointer]
+    - main [ref=f1e60]:
+      - generic [ref=f1e61]:
+        - generic [ref=f1e62]:
+          - generic [ref=f1e64]:
+            - link "mitchedberg" [ref=f1e68] [cursor=pointer]:
+              - /url: /mitchedberg
+            - generic [ref=f1e69]: /
+            - strong [ref=f1e70]:
+              - link "mister-pipeline" [ref=f1e71] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline
+            - generic [ref=f1e72]: Public
+          - generic [ref=f1e73]:
+            - list:
+              - listitem [ref=f1e74]:
+                - link "You must be signed in to change notification settings" [ref=f1e75] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Notifications
+              - listitem [ref=f1e78]:
+                - link "Fork 0" [ref=f1e79] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Fork
+                  - generic "0" [ref=f1e82]
+              - listitem [ref=f1e83]:
+                - link "You must be signed in to star a repository" [ref=f1e85] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Star
+                  - generic "0 users starred this repository" [ref=f1e88]: "0"
+        - navigation "Repository" [ref=f1e89]:
+          - list [ref=f1e90]:
+            - listitem [ref=f1e91]:
+              - link "Code" [ref=f1e92] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline
+            - listitem [ref=f1e96]:
+              - link "Issues" [ref=f1e97] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/issues
+            - listitem [ref=f1e102]:
+              - link "Pull requests" [ref=f1e103] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/pulls
+            - listitem [ref=f1e107]:
+              - link "Actions" [ref=f1e108] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/actions
+            - listitem [ref=f1e112]:
+              - link "Projects" [ref=f1e113] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/projects
+            - listitem [ref=f1e117]:
+              - link "Security and quality" [ref=f1e118] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/security
+            - listitem [ref=f1e122]:
+              - link "Insights" [ref=f1e123] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/pulse
+      - generic [ref=f1e134]:
+        - generic [ref=f1e136]:
+          - generic [ref=f1e139]:
+            - generic [ref=f1e140]:
+              - generic [ref=f1e141]:
+                - heading "Collapse file tree" [level=2] [ref=f1e142]:
+                  - button "Collapse file tree" [expanded] [ref=f1e143] [cursor=pointer]
+                - heading "Files" [level=2] [ref=f1e147]
+              - generic [ref=f1e148]:
+                - button "master branch" [ref=f1e150] [cursor=pointer]:
+                  - generic [ref=f1e151]: master
+                - button "Search this repository (forward slash)" [ref=f1e156] [cursor=pointer]
+            - combobox "Go to file" [ref=f1e164]
+            - navigation "File Tree Navigation" [ref=f1e170]:
+              - tree "Files" [ref=f1e172]:
+                - treeitem ".github" [level=1] [ref=f1e173]
+                - treeitem ".shared" [level=1] [ref=f1e185]
+                - treeitem "chips" [expanded] [level=1] [ref=f1e197]:
+                  - group "chips" [ref=f1e209]:
+                    - treeitem "cps1_obj" [level=2] [ref=f1e210]
+                    - treeitem "dashboard" [level=2] [ref=f1e225]
+                    - treeitem "deco16" [level=2] [ref=f1e240]
+                    - treeitem "deco16_arcade" [level=2] [ref=f1e255]
+                    - treeitem "deco32" [level=2] [ref=f1e270]
+                    - treeitem "es5506" [level=2] [ref=f1e285]
+                    - treeitem "esd_arcade" [level=2] [ref=f1e300]
+                    - treeitem "gp9001" [level=2] [ref=f1e315]
+                    - treeitem "jts16_scr_calibration" [level=2] [ref=f1e330]
+                    - treeitem "kaneko" [level=2] [ref=f1e345]
+                    - treeitem "kaneko_arcade" [level=2] [ref=f1e360]
+                    - treeitem "m68000" [level=2] [ref=f1e375]
+                    - treeitem "m68020" [level=2] [ref=f1e390]
+                    - treeitem "nichibutsu" [level=2] [ref=f1e405]
+                    - treeitem "nmk" [level=2] [ref=f1e420]
+                    - treeitem "nmk_arcade" [level=2] [ref=f1e435]
+                    - treeitem "psikyo" [level=2] [ref=f1e450]
+                    - treeitem "psikyo_arcade" [level=2] [ref=f1e465]
+                    - treeitem "raizing_arcade" [level=2] [ref=f1e480]
+                    - treeitem "segas32_arcade" [level=2] [ref=f1e495]
+                    - treeitem "seta_arcade" [level=2] [ref=f1e510]
+                    - treeitem "taito_b" [level=2] [ref=f1e525]
+                    - treeitem "taito_f3" [level=2] [ref=f1e540]
+                    - treeitem "taito_support" [level=2] [ref=f1e555]
+                    - treeitem "taito_x" [level=2] [ref=f1e570]
+                    - treeitem "taito_z" [level=2] [ref=f1e585]
+                    - treeitem "tc0100scn" [level=2] [ref=f1e600]
+                    - treeitem "tc0110pcr" [level=2] [ref=f1e615]
+                    - treeitem "tc0150rod" [level=2] [ref=f1e630]
+                    - treeitem "tc0180vcu" [level=2] [ref=f1e645]
+                    - treeitem "tc0200obj" [level=2] [ref=f1e660]
+                    - treeitem "tc0360pri" [level=2] [ref=f1e675]
+                    - treeitem "tc0370mso" [level=2] [ref=f1e690]
+                    - treeitem "tc0480scp" [level=2] [ref=f1e705]
+                    - treeitem "tc0630fdp" [level=2] [ref=f1e720]
+                    - treeitem "tc0650fda" [level=2] [ref=f1e735]
+                    - treeitem "toaplan" [level=2] [ref=f1e750]
+                    - treeitem "toaplan_v2" [level=2] [ref=f1e765]
+                    - treeitem "v60" [level=2] [ref=f1e780]
+                    - treeitem "validate" [level=2] [ref=f1e795]
+                    - treeitem "COMMUNITY_PATTERNS.md" [level=2] [ref=f1e810]
+                    - treeitem "COMMUNITY_SYNTHESIS_GUIDE.md" [level=2] [ref=f1e821]
+                    - treeitem "GUARDRAILS.md" [level=2] [ref=f1e832]
+                    - treeitem "OPTIMIZATION_TECHNIQUES.md" [level=2] [ref=f1e843]
+                    - treeitem "PROJECT_STATUS.md" [level=2] [ref=f1e854]
+                    - treeitem "QUARTUS_PORTING_NOTES.md" [level=2] [ref=f1e865]
+                    - treeitem "README.md" [level=2] [ref=f1e876]
+                    - treeitem "SYSTEM32_FEASIBILITY.md" [level=2] [ref=f1e887]
+                    - treeitem "TASK_BOARD.md" [level=2] [ref=f1e898]
+                    - treeitem "check_rtl.sh" [level=2] [ref=f1e909]
+                    - treeitem "fx68k_integration_reference.md" [level=2] [ref=f1e920]
+                    - treeitem "pattern-ledger.md" [level=2] [ref=f1e931]
+                - treeitem "delphi-ledger" [level=1] [ref=f1e942]
+                - treeitem "gates" [level=1] [ref=f1e954]
+                - treeitem "pipeline" [level=1] [ref=f1e966]
+                - treeitem "research" [level=1] [ref=f1e978]
+                - treeitem "templates" [level=1] [ref=f1e990]
+                - treeitem "test_modules" [level=1] [ref=f1e1002]
+                - treeitem "vectors" [level=1] [ref=f1e1014]
+                - treeitem "vendor" [level=1] [ref=f1e1026]
+                - treeitem ".gitignore" [level=1] [ref=f1e1038]
+                - treeitem ".gitmodules" [level=1] [ref=f1e1046]
+                - treeitem "ARCADE_CHIP_BOM.md" [level=1] [ref=f1e1054]
+                - treeitem "ARCADE_TARGETS_RANKED.md" [level=1] [ref=f1e1062]
+                - treeitem "BUILD_ROADMAP.md" [level=1] [ref=f1e1070]
+                - treeitem "CLAUDE.md" [level=1] [ref=f1e1078]
+                - treeitem "CONTRIBUTING.md" [level=1] [ref=f1e1086]
+                - treeitem "CREDITS.md" [level=1] [ref=f1e1094]
+                - treeitem "INDEX_ARCADE_RESEARCH.md" [level=1] [ref=f1e1102]
+                - treeitem "LICENSE" [level=1] [ref=f1e1110]
+                - treeitem "RESEARCH_SUMMARY.txt" [level=1] [ref=f1e1118]
+          - slider "Draggable pane splitter" [ref=f1e1127]
+        - generic [ref=f1e1130]:
+          - generic [ref=f1e1134]:
+            - generic [ref=f1e1136]:
+              - navigation [ref=f1e1137]:
+                - heading "Breadcrumbs" [level=2] [ref=f1e1138]
+                - list [ref=f1e1139]:
+                  - listitem [ref=f1e1140]:
+                    - link "mister-pipeline" [ref=f1e1141] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master
+                  - listitem [ref=f1e1142]:
+                    - text: /
+                    - link "chips" [ref=f1e1143] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master/chips
+              - generic [ref=f1e1144]:
+                - text: /
+                - heading "README.md" [level=1] [ref=f1e1145]
+              - button "Copy path" [ref=f1e1146] [cursor=pointer]
+            - button "More file actions" [ref=f1e1153] [cursor=pointer]
+          - generic [ref=f1e1156]:
+            - generic [ref=f1e1158]:
+              - heading "Latest commit" [level=2] [ref=f1e1159]
+              - generic [ref=f1e1162]:
+                - heading "History" [level=2] [ref=f1e1163]
+                - link "History" [ref=f1e1164] [cursor=pointer]:
+                  - /url: /mitchedberg/mister-pipeline/commits/master/chips/README.md
+            - generic [ref=f1e1168]:
+              - generic "1.41 KB" [ref=f1e1172]: 37 lines (29 loc) · 1.41 KB
+              - generic [ref=f1e1174]:
+                - heading "File metadata and controls" [level=2] [ref=f1e1175]
+                - list "File view" [ref=f1e1177]:
+                  - listitem [ref=f1e1178]:
+                    - button "Preview" [pressed] [ref=f1e1179] [cursor=pointer]
+                  - listitem [ref=f1e1182]:
+                    - button "Code" [ref=f1e1183] [cursor=pointer]
+                  - listitem [ref=f1e1186]:
+                    - button "Blame" [ref=f1e1187] [cursor=pointer]
+                - generic [ref=f1e1190]:
+                  - generic [ref=f1e1191]:
+                    - generic [ref=f1e1192]:
+                      - link "Raw" [ref=f1e1194] [cursor=pointer]:
+                        - /url: https://github.com/mitchedberg/mister-pipeline/raw/refs/heads/master/chips/README.md
+                      - button "Copy raw file" [ref=f1e1198] [cursor=pointer]
+                      - button "Download raw file" [ref=f1e1203] [cursor=pointer]
+                    - generic [ref=f1e1207]:
+                      - button "You must be signed in to make or propose changes" [disabled] [ref=f1e1209]
+                      - button "More edit options" [ref=f1e1213] [cursor=pointer]
+                  - button "Outline" [ref=f1e1216] [cursor=pointer]
+              - region "README.md" [ref=f1e1220]:
+                - article [ref=f1e1222]:
+                  - generic [ref=f1e1223]:
+                    - heading "chips/ — Per-Chip RTL Directory" [level=1] [ref=f1e1224]
+                    - 'link "Permalink: chips/ — Per-Chip RTL Directory" [ref=f1e1225] [cursor=pointer]':
+                      - /url: "#chips--per-chip-rtl-directory"
+                  - paragraph [ref=f1e1228]: "One subdirectory per chip target. Each directory contains:"
+                  - generic [ref=f1e1229]:
+                    - code [ref=f1e1231]: chips/<CHIPNAME>/ <CHIPNAME>.sv ← generated RTL (top-level module) <CHIPNAME>_tb.sv ← optional SV testbench (for gate1) vectors/ tier1_reset.jsonl ← reset/power-on vectors (gate1) tier2_functional.jsonl ← state coverage vectors (gate1) tier3_mame.jsonl ← MAME-derived ground truth (gate4) quartus/ ← Quartus project files (gate3b, Linux only) notes.md ← chip research notes, MAME source refs, quirks
+                    - button "Copy code to clipboard" [ref=f1e1233] [cursor=pointer]
+                  - generic [ref=f1e1237]:
+                    - heading "Adding a New Chip" [level=2] [ref=f1e1238]
+                    - 'link "Permalink: Adding a New Chip" [ref=f1e1239] [cursor=pointer]':
+                      - /url: "#adding-a-new-chip"
+                  - list [ref=f1e1242]:
+                    - listitem [ref=f1e1243]: "Research the chip: find MAME source, datasheet, schematic"
+                    - listitem [ref=f1e1244]:
+                      - text: Fill in Sections 1 and 2 of
+                      - code [ref=f1e1245]: templates/generation_prompt.md
+                    - listitem [ref=f1e1246]: Run the filled prompt through the AI (Claude Opus/Sonnet recommended)
+                    - listitem [ref=f1e1247]:
+                      - text: Save output to
+                      - code [ref=f1e1248]: chips/<CHIPNAME>/<CHIPNAME>.sv
+                    - listitem [ref=f1e1249]:
+                      - text: "Run gates:"
+                      - code [ref=f1e1250]: gates/run_gates.sh chips/<CHIPNAME>/<CHIPNAME>.sv chips/<CHIPNAME>/vectors
+                    - listitem [ref=f1e1251]: Fix failures by updating the prompt or templates — never hand-patch RTL
+                    - listitem [ref=f1e1252]: Add tier3 MAME vectors and run gate4
+                  - generic [ref=f1e1253]:
+                    - heading "Naming Convention" [level=2] [ref=f1e1254]
+                    - 'link "Permalink: Naming Convention" [ref=f1e1255] [cursor=pointer]':
+                      - /url: "#naming-convention"
+                  - paragraph [ref=f1e1258]: "Use the chip part number as the directory name where possible:"
+                  - list [ref=f1e1259]:
+                    - listitem [ref=f1e1260]:
+                      - code [ref=f1e1261]: mc6845/
+                      - text: — Motorola MC6845 CRTC
+                    - listitem [ref=f1e1262]:
+                      - code [ref=f1e1263]: ay8910/
+                      - text: — General Instrument AY-3-8910 PSG
+                    - listitem [ref=f1e1264]:
+                      - code [ref=f1e1265]: namco_wsg/
+                      - text: — Namco WSG (custom, use function name)
+                    - listitem [ref=f1e1266]:
+                      - code [ref=f1e1267]: z80_cpm/
+                      - text: — test board (use descriptive name)
+                  - generic [ref=f1e1268]:
+                    - heading "Current Chips" [level=2] [ref=f1e1269]
+                    - 'link "Permalink: Current Chips" [ref=f1e1270] [cursor=pointer]':
+                      - /url: "#current-chips"
+                  - paragraph [ref=f1e1273]:
+                    - emphasis [ref=f1e1274]: (none yet — first chip is added after gate infrastructure is validated)
+  - alert [ref=f1e1278]

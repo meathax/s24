@@ -76,14 +76,10 @@ module s24_b_opcache (
 
     // --- physical -> cached-logical translation for the snoop port -------
     logic snoop_in_workb, snoop_in_worka;
-    logic [19:12] snoop_tag_addr;
     logic [11:1]  snoop_index;
     always_comb begin
         snoop_in_workb = (snoop_phys[26:18] == SDR_WORKB_BASE[26:18]);
         snoop_in_worka = (snoop_phys[26:18] == SDR_WORKA_BASE[26:18]);
-        // WORKB offset o maps to logical o (bits [19:18] = 00); WORKA offset
-        // o maps to logical 0x080000+o (bit [19] = 1, bit [18] = 0).
-        snoop_tag_addr = {snoop_in_worka, 1'b0, snoop_phys[17:12]};
         snoop_index    = snoop_phys[11:1];
     end
     wire snoop_hits_window = snoop && (snoop_in_workb || snoop_in_worka);

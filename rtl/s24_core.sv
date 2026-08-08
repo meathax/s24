@@ -147,12 +147,18 @@ module s24_core #(
         end
     end
 
+    // VPA is only valid during an active CPU-space bus cycle.  Qualifying
+    // FC=111 with AS prevents the autovector acknowledge input from being
+    // asserted while the CPU is between bus cycles.
+    wire a_vpa_n = ~&{a_fc[2],a_fc[1],a_fc[0],~a_as_n};
+    wire b_vpa_n = ~&{b_fc[2],b_fc[1],b_fc[0],~b_as_n};
+
     fx68k cpu_a(
         .clk(clk),.HALTn(1'b1),.extReset(reset),.pwrUp(reset),
         .enPhi1(phi1),.enPhi2(phi2),.eRWn(a_rw_n),.ASn(a_as_n),
         .LDSn(a_lds_n),.UDSn(a_uds_n),.E(),.VMAn(),
         .FC0(a_fc[0]),.FC1(a_fc[1]),.FC2(a_fc[2]),.BGn(),.oRESETn(),.oHALTEDn(),
-        .DTACKn(a_dtack_n),.VPAn(~(&a_fc)),.BERRn(1'b1),.BRn(1'b1),.BGACKn(1'b1),
+        .DTACKn(a_dtack_n),.VPAn(a_vpa_n),.BERRn(1'b1),.BRn(1'b1),.BGACKn(1'b1),
         .IPL0n(a_ipl_n[0]),.IPL1n(a_ipl_n[1]),.IPL2n(a_ipl_n[2]),
         .iEdb(a_din),.oEdb(a_dout),.eab(a_word_addr),
         .instr_start(a_instr_start),.instr_opcode(a_instr_opcode),
@@ -162,7 +168,7 @@ module s24_core #(
         .enPhi1(b_phi1),.enPhi2(b_phi2),.eRWn(b_rw_n),.ASn(b_as_n),
         .LDSn(b_lds_n),.UDSn(b_uds_n),.E(),.VMAn(),
         .FC0(b_fc[0]),.FC1(b_fc[1]),.FC2(b_fc[2]),.BGn(),.oRESETn(),.oHALTEDn(),
-        .DTACKn(b_dtack_n),.VPAn(~(&b_fc)),.BERRn(1'b1),.BRn(1'b1),.BGACKn(1'b1),
+        .DTACKn(b_dtack_n),.VPAn(b_vpa_n),.BERRn(1'b1),.BRn(1'b1),.BGACKn(1'b1),
         .IPL0n(b_ipl_n[0]),.IPL1n(b_ipl_n[1]),.IPL2n(b_ipl_n[2]),
         .iEdb(b_din),.oEdb(b_dout),.eab(b_word_addr),
         .instr_start(b_instr_start),.instr_opcode(b_instr_opcode),
@@ -220,7 +226,10 @@ module s24_core #(
     assign bc_window = b_mem_fc[1] && b_mem_addr<24'h100000 &&
                        b_mem_addr[23:1]>23'd3;
     s24_b_opcache bcache(
-        .clk(clk),.reset(reset),
+        // A CNT1 release pulses CPU-B/FD1094 reset. Flush plaintext cache
+        // lines on that same reset so a retry cannot execute words decrypted
+        // under the previous protected-CPU run.
+        .clk(clk),.reset(sub_reset),
         .address(b_mem_addr[23:1]),.fetch_window(bc_window),
         .state_now(board.has_fd1094 ? fd_state : 8'd0),
         .lookup_q_valid(bc_q_valid),.hit(bc_hit),.hit_data(bc_hit_data),

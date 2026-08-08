@@ -1,0 +1,86 @@
+{
+  "schema": "rtl-mame-gameplay-preflight-v2",
+  "result": "pass",
+  "game": "crkdown",
+  "parent": "crkdown",
+  "clone": false,
+  "reference": {
+    "executable": "D:\\Arcade\\AI\\mame\\mame.exe",
+    "version": "0.288 (mame0288)",
+    "behavioral_source_audit": "D:\\Arcade\\AI\\mame289",
+    "behavioral_source_head": "snapshot:3549a038a3d595264a60c626d88995bbb7eab1ff4834dd7743dab6cd787dc624",
+    "segas24_cpp_sha256": "ef5c780edb731233530729e31e832f6adf4575ea931d6add023daf39d5756db6",
+    "segaic24_cpp_sha256": "d37dec05ace5470719336704e7706e4800da73854a0783e169f3bed534b48ee7",
+    "fd1094_cpp_sha256": "41b023a16437e9676517f8d56ef1d4c67dcfe8544b37c36b9d1022e23cec022f",
+    "source_note": "The audited System 24 files in mame289 hash-identically to the pinned 0.288 behavioral files used by the executable reference."
+  },
+  "media": {
+    "archive": {
+      "path": "roms/crkdown.zip",
+      "size": 946932,
+      "sha256": "dbd39d668560668cf286f76ca243c41352b9ac52330680818972de9c531a5909"
+    },
+    "rtl_regions": [
+      {"path": "verif/media/crkdown/boot.mem", "size": 786432, "sha256": "607f4842ab6e7fe14713cd2e2183675b174244a2836094a19bb8e8c8bc80c525"},
+      {"path": "verif/media/crkdown/floppy.bin", "size": 2097152, "sha256": "e37902458d75073f01e143f2a8618153919513acf3ba7974d218f5ec0c28c2b4"},
+      {"path": "verif/media/crkdown/key.mem", "size": 24576, "sha256": "68d5bd747d651cc59ff46f93ca18804ae9258241d7a9d57ca46fb30e22632fb2"},
+      {"path": "verif/media/crkdown/descriptor.hex", "size": 18, "sha256": "46314a18e54f6d1f83b31370f39f13d83b7ff101db8cec427a0c61c8386a5eb9"}
+    ],
+    "provenance": "MAME CRC-declared archive parts are deterministically interleaved/padded into the RTL regions; container hashes are not expected to match."
+  },
+  "configuration": {
+    "flags": 5,
+    "track_bytes": 11520,
+    "magic_selector": 0,
+    "input_profile": 0,
+    "rtl_dips": {"COINAGE": 255, "DSW": 255},
+    "mame_default_dips": {"COINAGE": 255, "DSW": 255},
+    "cabinet": "set default",
+    "analog": "all generic channels neutral; unassigned ADC channels 255",
+    "sound": "enabled; RTL JT51 boot-model limitation retained as non-pixel coverage caveat",
+    "mame_cfg": ".build/mame-gameplay/crkdown-match-band/cfg",
+    "mame_nvram": ".build/mame-gameplay/crkdown-match-band/nvram",
+    "mame_state": ".build/mame-gameplay/crkdown-match-band/state",
+    "mame_snap": ".build/mame-gameplay/crkdown-match-band/snap"
+  },
+  "input_packet": {
+    "identity": "crkdown-gameplay-v1",
+    "owner": "deterministic global parent profile",
+    "events": [
+      {"frame": 1050, "control": "coin1", "duration_frames": 4},
+      {"frame": 1380, "control": "start1", "duration_frames": 4}
+    ],
+    "action": "neutral",
+    "capture_frame": 2260
+  },
+  "video": {
+    "rtl_native": [496, 384],
+    "mame_raw_visible": [496, 384],
+    "rtl_boundary": "completed surface at registered vblank-to-active raster advance",
+    "mame_boundary": "screen_device::pixels() after frame update",
+    "crop": [0, 0, 496, 384],
+    "orientation": "ROT0 native hardware raster",
+    "fixed_alignment": [0, 0]
+  },
+  "rtl": {
+    "top": "tb_gground_boot",
+    "executable": "C:\\tmp\\s24_obj_gground_visual15\\Vtb_gground_boot.exe",
+    "executable_sha256": "40d900eb681f2e42fdaed6515bdde6c956d59d1b78e411f0b86179d18d948688",
+    "tile_source_sha256": "585ccf5a364592177e1ff2ac87a939fb7deaf58b9bf9ac2684d24dd92605caf1",
+    "staged_source_count": 23,
+    "repository_source_match": true,
+    "checkpoint": {
+      "path": "crkdown-fixed-chain.vltsv",
+      "size": 9765917,
+      "sha256": "f5f79a575021abc8759c66a5708e5749bc518bd9cd1d5ace1ea7940f43dca937",
+      "native_frame": 2260,
+      "applied_events": [
+        {"frame": 1050, "control": "coin1", "duration_frames": 4},
+        {"frame": 1380, "control": "start1", "duration_frames": 4}
+      ],
+      "root_check": "fc4f49fde2503652",
+      "trailer": "vltsaved"
+    }
+  },
+  "mismatches": []
+}

@@ -1,0 +1,251 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e2]:
+    - generic [ref=f4e3]:
+      - link "Skip to content" [ref=f4e4] [cursor=pointer]:
+        - /url: "#start-of-content"
+      - banner [ref=f4e8]:
+        - heading "Navigation Menu" [level=2] [ref=f4e9]
+        - generic [ref=f4e10]:
+          - link "Homepage" [ref=f4e12] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f4e15]:
+            - navigation "Global" [ref=f4e16]:
+              - list [ref=f4e17]:
+                - listitem [ref=f4e18]:
+                  - button "Platform" [ref=f4e20] [cursor=pointer]
+                - listitem [ref=f4e23]:
+                  - button "Solutions" [ref=f4e25] [cursor=pointer]
+                - listitem [ref=f4e28]:
+                  - button "Resources" [ref=f4e30] [cursor=pointer]
+                - listitem [ref=f4e33]:
+                  - button "Open Source" [ref=f4e35] [cursor=pointer]
+                - listitem [ref=f4e38]:
+                  - button "Enterprise" [ref=f4e40] [cursor=pointer]
+                - listitem [ref=f4e43]:
+                  - link "Pricing" [ref=f4e44] [cursor=pointer]:
+                    - /url: https://github.com/pricing
+            - generic [ref=f4e46]:
+              - button "Search or jump to, type / to search" [ref=f4e48] [cursor=pointer]
+              - link "Sign in" [ref=f4e52] [cursor=pointer]:
+                - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fmitchedberg%2Fmister-pipeline%2Ftree%2Fmaster%2Fchips%2Fm68000%2Frtl
+              - link "Sign up" [ref=f4e53] [cursor=pointer]:
+                - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Ffiles%2Fdisambiguate&source=header-repo&source_repo=mitchedberg%2Fmister-pipeline
+              - button "Appearance settings" [ref=f4e54] [cursor=pointer]
+    - main [ref=f4e60]:
+      - generic [ref=f4e61]:
+        - generic [ref=f4e62]:
+          - generic [ref=f4e64]:
+            - link "mitchedberg" [ref=f4e68] [cursor=pointer]:
+              - /url: /mitchedberg
+            - generic [ref=f4e69]: /
+            - strong [ref=f4e70]:
+              - link "mister-pipeline" [ref=f4e71] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline
+            - generic [ref=f4e72]: Public
+          - generic [ref=f4e73]:
+            - list:
+              - listitem [ref=f4e74]:
+                - link "You must be signed in to change notification settings" [ref=f4e75] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Notifications
+              - listitem [ref=f4e78]:
+                - link "Fork 0" [ref=f4e79] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Fork
+                  - generic "0" [ref=f4e82]
+              - listitem [ref=f4e83]:
+                - link "You must be signed in to star a repository" [ref=f4e85] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fmitchedberg%2Fmister-pipeline
+                  - text: Star
+                  - generic "0 users starred this repository" [ref=f4e88]: "0"
+        - navigation "Repository" [ref=f4e89]:
+          - list [ref=f4e90]:
+            - listitem [ref=f4e91]:
+              - link "Code" [ref=f4e92] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline
+            - listitem [ref=f4e96]:
+              - link "Issues" [ref=f4e97] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/issues
+            - listitem [ref=f4e102]:
+              - link "Pull requests" [ref=f4e103] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/pulls
+            - listitem [ref=f4e107]:
+              - link "Actions" [ref=f4e108] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/actions
+            - listitem [ref=f4e112]:
+              - link "Projects" [ref=f4e113] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/projects
+            - listitem [ref=f4e117]:
+              - link "Security and quality" [ref=f4e118] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/security
+            - listitem [ref=f4e122]:
+              - link "Insights" [ref=f4e123] [cursor=pointer]:
+                - /url: /mitchedberg/mister-pipeline/pulse
+      - generic [ref=f4e134]:
+        - generic [ref=f4e136]:
+          - generic [ref=f4e139]:
+            - generic [ref=f4e140]:
+              - generic [ref=f4e141]:
+                - heading "Collapse file tree" [level=2] [ref=f4e142]:
+                  - button "Collapse file tree" [expanded] [ref=f4e143] [cursor=pointer]
+                - heading "Files" [level=2] [ref=f4e147]
+              - generic [ref=f4e148]:
+                - button "master branch" [ref=f4e150] [cursor=pointer]:
+                  - generic [ref=f4e151]: master
+                - button "Search this repository (forward slash)" [ref=f4e156] [cursor=pointer]
+            - combobox "Go to file" [ref=f4e164]
+            - navigation "File Tree Navigation" [ref=f4e170]:
+              - tree "Files" [ref=f4e172]:
+                - treeitem ".github" [level=1] [ref=f4e173]
+                - treeitem ".shared" [level=1] [ref=f4e185]
+                - treeitem "chips" [expanded] [level=1] [ref=f4e197]:
+                  - group "chips" [ref=f4e209]:
+                    - treeitem "cps1_obj" [level=2] [ref=f4e210]
+                    - treeitem "dashboard" [level=2] [ref=f4e225]
+                    - treeitem "deco16" [level=2] [ref=f4e240]
+                    - treeitem "deco16_arcade" [level=2] [ref=f4e255]
+                    - treeitem "deco32" [level=2] [ref=f4e270]
+                    - treeitem "es5506" [level=2] [ref=f4e285]
+                    - treeitem "esd_arcade" [level=2] [ref=f4e300]
+                    - treeitem "gp9001" [level=2] [ref=f4e315]
+                    - treeitem "jts16_scr_calibration" [level=2] [ref=f4e330]
+                    - treeitem "kaneko" [level=2] [ref=f4e345]
+                    - treeitem "kaneko_arcade" [level=2] [ref=f4e360]
+                    - treeitem "m68000" [expanded] [level=2] [ref=f4e375]:
+                      - group "m68000" [ref=f4e390]:
+                        - treeitem "hdl" [level=3] [ref=f4e391]
+                        - treeitem "rtl" [expanded] [level=3] [ref=f4e407]:
+                          - group "rtl" [ref=f4e423]:
+                            - treeitem "fx68k_adapter.sv" [level=4] [ref=f4e424]
+                            - treeitem "fx68k_dtack_cen.sv" [level=4] [ref=f4e437]
+                            - treeitem "tg68k_adapter_m68k.sv" [level=4] [ref=f4e450]
+                    - treeitem "m68020" [level=2] [ref=f4e463]
+                    - treeitem "nichibutsu" [level=2] [ref=f4e478]
+                    - treeitem "nmk" [level=2] [ref=f4e493]
+                    - treeitem "nmk_arcade" [level=2] [ref=f4e508]
+                    - treeitem "psikyo" [level=2] [ref=f4e523]
+                    - treeitem "psikyo_arcade" [level=2] [ref=f4e538]
+                    - treeitem "raizing_arcade" [level=2] [ref=f4e553]
+                    - treeitem "segas32_arcade" [level=2] [ref=f4e568]
+                    - treeitem "seta_arcade" [level=2] [ref=f4e583]
+                    - treeitem "taito_b" [level=2] [ref=f4e598]
+                    - treeitem "taito_f3" [level=2] [ref=f4e613]
+                    - treeitem "taito_support" [level=2] [ref=f4e628]
+                    - treeitem "taito_x" [level=2] [ref=f4e643]
+                    - treeitem "taito_z" [level=2] [ref=f4e658]
+                    - treeitem "tc0100scn" [level=2] [ref=f4e673]
+                    - treeitem "tc0110pcr" [level=2] [ref=f4e688]
+                    - treeitem "tc0150rod" [level=2] [ref=f4e703]
+                    - treeitem "tc0180vcu" [level=2] [ref=f4e718]
+                    - treeitem "tc0200obj" [level=2] [ref=f4e733]
+                    - treeitem "tc0360pri" [level=2] [ref=f4e748]
+                    - treeitem "tc0370mso" [level=2] [ref=f4e763]
+                    - treeitem "tc0480scp" [level=2] [ref=f4e778]
+                    - treeitem "tc0630fdp" [level=2] [ref=f4e793]
+                    - treeitem "tc0650fda" [level=2] [ref=f4e808]
+                    - treeitem "toaplan" [level=2] [ref=f4e823]
+                    - treeitem "toaplan_v2" [level=2] [ref=f4e838]
+                    - treeitem "v60" [level=2] [ref=f4e853]
+                    - treeitem "validate" [level=2] [ref=f4e868]
+                    - treeitem "COMMUNITY_PATTERNS.md" [level=2] [ref=f4e883]
+                    - treeitem "COMMUNITY_SYNTHESIS_GUIDE.md" [level=2] [ref=f4e894]
+                    - treeitem "GUARDRAILS.md" [level=2] [ref=f4e905]
+                    - treeitem "OPTIMIZATION_TECHNIQUES.md" [level=2] [ref=f4e916]
+                    - treeitem "PROJECT_STATUS.md" [level=2] [ref=f4e927]
+                    - treeitem "QUARTUS_PORTING_NOTES.md" [level=2] [ref=f4e938]
+                    - treeitem "README.md" [level=2] [ref=f4e949]
+                    - treeitem "SYSTEM32_FEASIBILITY.md" [level=2] [ref=f4e960]
+                    - treeitem "TASK_BOARD.md" [level=2] [ref=f4e971]
+                    - treeitem "check_rtl.sh" [level=2] [ref=f4e982]
+                    - treeitem "fx68k_integration_reference.md" [level=2] [ref=f4e993]
+                    - treeitem "pattern-ledger.md" [level=2] [ref=f4e1004]
+                - treeitem "delphi-ledger" [level=1] [ref=f4e1015]
+                - treeitem "gates" [level=1] [ref=f4e1027]
+                - treeitem "pipeline" [level=1] [ref=f4e1039]
+                - treeitem "research" [level=1] [ref=f4e1051]
+                - treeitem "templates" [level=1] [ref=f4e1063]
+                - treeitem "test_modules" [level=1] [ref=f4e1075]
+                - treeitem "vectors" [level=1] [ref=f4e1087]
+                - treeitem "vendor" [level=1] [ref=f4e1099]
+                - treeitem ".gitignore" [level=1] [ref=f4e1111]
+                - treeitem ".gitmodules" [level=1] [ref=f4e1119]
+                - treeitem "ARCADE_CHIP_BOM.md" [level=1] [ref=f4e1127]
+                - treeitem "ARCADE_TARGETS_RANKED.md" [level=1] [ref=f4e1135]
+                - treeitem "BUILD_ROADMAP.md" [level=1] [ref=f4e1143]
+                - treeitem "CLAUDE.md" [level=1] [ref=f4e1151]
+                - treeitem "CONTRIBUTING.md" [level=1] [ref=f4e1159]
+                - treeitem "CREDITS.md" [level=1] [ref=f4e1167]
+                - treeitem "INDEX_ARCADE_RESEARCH.md" [level=1] [ref=f4e1175]
+                - treeitem "LICENSE" [level=1] [ref=f4e1183]
+                - treeitem "RESEARCH_SUMMARY.txt" [level=1] [ref=f4e1191]
+          - slider "Draggable pane splitter" [ref=f4e1200]
+        - generic [ref=f4e1203]:
+          - generic [ref=f4e1207]:
+            - generic [ref=f4e1209]:
+              - navigation [ref=f4e1210]:
+                - heading "Breadcrumbs" [level=2] [ref=f4e1211]
+                - list [ref=f4e1212]:
+                  - listitem [ref=f4e1213]:
+                    - link "mister-pipeline" [ref=f4e1214] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master
+                  - listitem [ref=f4e1215]:
+                    - text: /
+                    - link "chips" [ref=f4e1216] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master/chips
+                  - listitem [ref=f4e1217]:
+                    - text: /
+                    - link "m68000" [ref=f4e1218] [cursor=pointer]:
+                      - /url: /mitchedberg/mister-pipeline/tree/master/chips/m68000
+              - generic [ref=f4e1219]:
+                - text: /
+                - heading "rtl" [level=1] [ref=f4e1220]
+                - text: /
+              - button "Copy path" [ref=f4e1221] [cursor=pointer]
+            - generic [ref=f4e1227]:
+              - heading "Directory actions" [level=2] [ref=f4e1228]
+              - heading "More options" [level=2] [ref=f4e1229]
+              - button "More options" [ref=f4e1230] [cursor=pointer]
+          - generic [ref=f4e1233]:
+            - generic [ref=f4e1235]:
+              - heading "Latest commit" [level=2] [ref=f4e1236]
+              - generic [ref=f4e1239]:
+                - heading "History" [level=2] [ref=f4e1240]
+                - link "History" [ref=f4e1241] [cursor=pointer]:
+                  - /url: /mitchedberg/mister-pipeline/commits/master/chips/m68000/rtl
+            - generic [ref=f4e1245]:
+              - heading "Folders and files" [level=2] [ref=f4e1246]
+              - table "Folders and files" [ref=f4e1247]:
+                - rowgroup [ref=f4e1248]:
+                  - row [ref=f4e1249]:
+                    - columnheader "Name" [ref=f4e1250]
+                    - columnheader "Last commit message" [ref=f4e1251]
+                    - columnheader "Last commit date" [ref=f4e1253]
+                - rowgroup [ref=f4e1255]:
+                  - row [ref=f4e1256]:
+                    - cell [ref=f4e1257]:
+                      - heading "parent directory" [level=3] [ref=f4e1258]
+                      - link "Parent directory" [ref=f4e1259] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/tree/master/chips/m68000
+                        - generic [ref=f4e1260]: ..
+                  - row "fx68k_adapter.sv, (File)" [ref=f4e1263]:
+                    - cell [ref=f4e1264]:
+                      - link "fx68k_adapter.sv, (File)" [ref=f4e1271] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/m68000/rtl/fx68k_adapter.sv
+                        - text: fx68k_adapter.sv
+                    - cell [ref=f4e1272]
+                    - cell [ref=f4e1274]
+                  - row "fx68k_dtack_cen.sv, (File)" [ref=f4e1277]:
+                    - cell [ref=f4e1278]:
+                      - link "fx68k_dtack_cen.sv, (File)" [ref=f4e1285] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/m68000/rtl/fx68k_dtack_cen.sv
+                        - text: fx68k_dtack_cen.sv
+                    - cell [ref=f4e1286]
+                    - cell [ref=f4e1288]
+                  - row "tg68k_adapter_m68k.sv, (File)" [ref=f4e1291]:
+                    - cell [ref=f4e1292]:
+                      - link "tg68k_adapter_m68k.sv, (File)" [ref=f4e1299] [cursor=pointer]:
+                        - /url: /mitchedberg/mister-pipeline/blob/master/chips/m68000/rtl/tg68k_adapter_m68k.sv
+                        - text: tg68k_adapter_m68k.sv
+                    - cell [ref=f4e1300]
+                    - cell [ref=f4e1302]
+  - alert [ref=f4e1308]

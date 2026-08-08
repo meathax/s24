@@ -202,7 +202,11 @@ module s24_fd1094 #(
     logic [7:0] pending_state;
 
     function automatic logic history_has(input logic [23:1] sought);
-        history_has = ((fstate==F_DONE) && address_l==sought) ||
+        // hit_record can coincide with fx68k's IR->IRD boundary. Include
+        // that architecturally-earlier fetch combinationally; its registered
+        // history push below is not visible until after this clock edge.
+        history_has = (hit_record && hit_address==sought) ||
+                      ((fstate==F_DONE) && address_l==sought) ||
                       (fetch_history_valid[0] && fetch_history_addr[0]==sought) ||
                       (fetch_history_valid[1] && fetch_history_addr[1]==sought) ||
                       (fetch_history_valid[2] && fetch_history_addr[2]==sought) ||
@@ -210,7 +214,8 @@ module s24_fd1094 #(
     endfunction
 
     function automatic logic [15:0] history_word(input logic [23:1] sought);
-        if((fstate==F_DONE) && address_l==sought) history_word=result_next;
+        if(hit_record && hit_address==sought) history_word=hit_data;
+        else if((fstate==F_DONE) && address_l==sought) history_word=result_next;
         else if(fetch_history_valid[0] && fetch_history_addr[0]==sought)
             history_word=fetch_history_data[0];
         else if(fetch_history_valid[1] && fetch_history_addr[1]==sought)

@@ -36,20 +36,16 @@ module emu (
         "O[7],Service Mode,Off,On;",
         "O[9:8],Rotation,Normal,Rotate 90 CCW,Rotate 90 CW;",
         "O[12:10],Scaling,Normal,V-Integer,HV-Integer-,HV-Integer+,HV-Integer;",
+        "P1O[101],CRT Adjust,Off,On;",
+        "H1P1O[100:96],CRT H-Size,0,+1,+2,...,+15,-16,...,-1;",
+        "H1P1O[85:79],CRT H-Position,0,+1,+2,...,+48,-48,...,-1;",
+        "H1P1O[78:74],CRT V-Shift,0,+1,+2,...,+15,-16,...,-1;",
         // Listed On first so the default status value of 0 selects it: several
         // titles (Bonanza Bros' stage intros) obtain translucency by toggling
         // a tilemap on and off every frame, which a CRT integrates but a
         // fixed-pixel display shows as a 28.75 Hz flicker. Off gives the raw
         // alternation the PCB emits.
         "O[13],Flicker Blend,On,Off;",
-        // Wheel titles (Hot Rod, Rough Racer) read their steering wheel
-        // through a uPD4701 quadrature decoder -- a RELATIVE control, same
-        // as a spinner -- so the left analog stick's deflection is turned
-        // into a stream of incremental turns rather than an absolute
-        // position. This tunes how much stick deflection maps to how much
-        // turn per update. A real MiSTer spinner peripheral, if attached,
-        // keeps working side by side with this (see s24_wheel_input.sv).
-        "O[15:14],Steering Sensitivity,Low,Normal,High;",
         "R[0],Reset;",
         "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test;",
         "V,v",`BUILD_DATE
@@ -93,7 +89,7 @@ module emu (
         .clk_sys(clk_sys),.HPS_BUS(HPS_BUS),.EXT_BUS(),.gamma_bus(),
         .forced_scandoubler(forced_scandoubler),.buttons(buttons),.status(status),
         .video_rotated(video_rotated),.new_vmode(1'b0),
-        .status_menumask(15'd0),.joystick_0(joy0),.joystick_1(joy1),
+        .status_menumask({14'd0,~status[101],1'b0}),.joystick_0(joy0),.joystick_1(joy1),
         .joystick_2(joy2),.joystick_3(joy3),
         .joystick_4(),.joystick_5(),
         .joystick_l_analog_0(stick_l0),.joystick_l_analog_1(stick_l1),
@@ -162,35 +158,41 @@ module emu (
     // driving are read asynchronously to it by the 68000s.
     logic [23:0] wheel_tick_count;
     logic wheel_tick;
-    localparam int unsigned WHEEL_TICK_PERIOD = 24'd840_293; // CLK_HZ/57.524
+    localparam logic [23:0] WHEEL_TICK_PERIOD = 24'd840_293; // CLK_HZ/57.524
     always_ff @(posedge clk_sys) begin
-        wheel_tick<=1'b0;
-        if(wheel_tick_count>=WHEEL_TICK_PERIOD-1) begin
-            wheel_tick_count<=0;wheel_tick<=1'b1;
-        end else wheel_tick_count<=wheel_tick_count+1'b1;
+        if(!pll_locked) begin
+            wheel_tick_count<=0;
+            wheel_tick<=1'b0;
+        end else begin
+            wheel_tick<=1'b0;
+            if(wheel_tick_count>=WHEEL_TICK_PERIOD-1'b1) begin
+                wheel_tick_count<=0;wheel_tick<=1'b1;
+            end else wheel_tick_count<=wheel_tick_count+1'b1;
+        end
     end
     s24_wheel_input wheel0(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
-        .stick_x(stick_l0[7:0]),.sensitivity(status[15:14]),
+        .stick_x(stick_l0[7:0]),
         .spinner_in(hps_spinner0),.spinner_out(spinner0));
     s24_wheel_input wheel1(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
-        .stick_x(stick_l1[7:0]),.sensitivity(status[15:14]),
+        .stick_x(stick_l1[7:0]),
         .spinner_in(hps_spinner1),.spinner_out(spinner1));
     s24_wheel_input wheel2(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
-        .stick_x(stick_l2[7:0]),.sensitivity(status[15:14]),
+        .stick_x(stick_l2[7:0]),
         .spinner_in(hps_spinner2),.spinner_out(spinner2));
     s24_wheel_input wheel3(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
-        .stick_x(stick_l3[7:0]),.sensitivity(status[15:14]),
+        .stick_x(stick_l3[7:0]),
         .spinner_in(hps_spinner3),.spinner_out(spinner3));
 
-    // Wheel-title controls (Hot Rod): left-stick X is converted to steering
-    // above; digital left/right and A provide full accelerator; MiSTer's RT
-    // analogue value arrives through paddle_N and provides variable pedal
-    // depth. This keeps the mapping useful with either a gamepad or wheel.
+    // Hot Rod controls: left-stick X is converted to relative steering above;
+    // left-stick Y is deliberately unused. A is the digital full-accelerator
+    // input, while MiSTer's RT analogue value arrives through paddle_N and
+    // provides variable pedal depth. Do not let this Hot Rod convenience
+    // mapping alter ADC inputs for other System 24 titles.
     logic [7:0] pedal_merged0,pedal_merged1,pedal_merged2,pedal_merged3;
-    assign pedal_merged0=(joy0[0] || joy0[1] || joy0[4]) ? 8'hff : paddle0;
-    assign pedal_merged1=(joy1[0] || joy1[1] || joy1[4]) ? 8'hff : paddle1;
-    assign pedal_merged2=(joy2[0] || joy2[1] || joy2[4]) ? 8'hff : paddle2;
-    assign pedal_merged3=(joy3[0] || joy3[1] || joy3[4]) ? 8'hff : paddle3;
+    assign pedal_merged0=(descriptor.hotrod_io && joy0[4]) ? 8'hff : paddle0;
+    assign pedal_merged1=(descriptor.hotrod_io && joy1[4]) ? 8'hff : paddle1;
+    assign pedal_merged2=(descriptor.hotrod_io && joy2[4]) ? 8'hff : paddle2;
+    assign pedal_merged3=(descriptor.hotrod_io && joy3[4]) ? 8'hff : paddle3;
 
     s24_inputs inputs(.joy0(joy0),.joy1(joy1),.joy2(joy2),.joy3(joy3),
         .dsw(dsw),.coinage(coinage),.paddle(paddle0),.test_mode(status[7]),
@@ -274,13 +276,99 @@ module emu (
         .wr_req(cwr_req),.wr_addr(cwr_addr),.wr_data(cwr_data),.wr_be(cwr_be),.wr_ack(cwr_ack));
 
     wire native_de = ~(hblank|vblank);
-    wire video_ce = core_ce;
-    wire [7:0] video_r = r;
-    wire [7:0] video_g = g;
-    wire [7:0] video_b = b;
-    wire video_hs = hsync;
-    wire video_vs = vsync;
-    wire video_de = native_de;
+
+    // Core-side CRT Adjust. The native System 24 raster is 656x424 total at
+    // roughly 3 clk_sys cycles per 16 MHz pixel. Use 192 sixteenth-quarter
+    // units as the nominal period and four units per OSD H-Size step (1/16
+    // clk_sys), keeping the full -16..+15 range inside one native line.
+    // H-Size 0 deliberately uses core_ce for an exact native-rate baseline.
+    logic crt_on;
+    logic signed [4:0] crt_hsize;
+    logic [6:0] crt_hpos;
+    logic signed [5:0] crt_vshift;
+    logic signed [8:0] crt_hoffset;
+    logic signed [9:0] crt_hsize_quarter16;
+    logic signed [9:0] crt_rd_period_raw;
+    logic [9:0] crt_rd_period;
+    logic [9:0] crt_rd_acc;
+    logic crt_hs_ref_d;
+    logic crt_native_de_d;
+    logic crt_str_active_d;
+    logic crt_de_osd;
+    wire [7:0] crt_r,crt_g,crt_b;
+    wire crt_hs,crt_vs,crt_hb,crt_vb,crt_hs_ref;
+
+    always_ff @(posedge clk_sys) begin
+        if(core_reset) begin
+            crt_on<=1'b0;
+            crt_hsize<='0;
+            crt_hpos<='0;
+            crt_vshift<='0;
+        end else if(core_ce) begin
+            crt_on<=status[101];
+            crt_hsize<=$signed(status[100:96]);
+            crt_hpos<=status[85:79];
+            crt_vshift<=$signed(status[78:74]);
+        end
+    end
+
+    always_comb begin
+        if(crt_hpos<=7'd48)
+            crt_hoffset=$signed({2'b00,crt_hpos});
+        else crt_hoffset=$signed({2'b00,crt_hpos})-9'sd128;
+        crt_hsize_quarter16=$signed({{5{crt_hsize[4]}},crt_hsize}) <<< 2;
+        crt_rd_period_raw=10'sd192+crt_hsize_quarter16;
+        crt_rd_period=(crt_rd_period_raw<10'sd1) ? 10'd1 : crt_rd_period_raw;
+    end
+
+    wire crt_rd_tick=(crt_rd_acc+10'd64)>={1'b0,crt_rd_period};
+    wire crt_hs_ref_rise=crt_hs_ref & ~crt_hs_ref_d;
+    always_ff @(posedge clk_sys) begin
+        if(core_reset) begin
+            crt_hs_ref_d<=1'b0;
+            crt_rd_acc<=10'd0;
+        end else if(crt_hs_ref_rise) begin
+            crt_hs_ref_d<=crt_hs_ref;
+            crt_rd_acc<=10'd0;
+        end else begin
+            crt_hs_ref_d<=crt_hs_ref;
+            if(crt_rd_tick) crt_rd_acc<=crt_rd_acc+10'd64-crt_rd_period;
+            else crt_rd_acc<=crt_rd_acc+10'd64;
+        end
+    end
+
+    wire crt_rd_ce=crt_on ? ((crt_hsize==0) ? core_ce : crt_rd_tick) : core_ce;
+    crt_adjust #(.VTOTAL(424),.HTOTAL(656),.HPOS_MODE(0)) crt_adjust_i(
+        .clk(clk_sys),.pxl_cen(core_ce),.pxl2_cen(crt_rd_ce),.active(crt_on),
+        .hsize(crt_hsize),.hoffset(crt_hoffset),.voffset(crt_vshift),
+        .r_in(r),.g_in(g),.b_in(b),.hs_in(hsync),.vs_in(vsync),
+        .hb_in(hblank|vblank),.vb_in(vblank),
+        .r_out(crt_r),.g_out(crt_g),.b_out(crt_b),.hs_out(crt_hs),.vs_out(crt_vs),
+        .hb_out(crt_hb),.vb_out(crt_vb),.hs_ref_out(crt_hs_ref));
+
+    // Keep the framework OSD anchored to the native active-window start while
+    // CRT Adjust changes the content width or horizontal position.
+    always_ff @(posedge clk_sys) begin
+        if(core_reset) begin
+            crt_native_de_d<=1'b0;
+            crt_str_active_d<=1'b0;
+            crt_de_osd<=1'b0;
+        end else begin
+            if(core_ce) crt_native_de_d<=native_de;
+            if(crt_rd_ce) crt_str_active_d<=~crt_hb;
+            if(!crt_on) crt_de_osd<=native_de;
+            else if(native_de && !crt_native_de_d) crt_de_osd<=1'b1;
+            else if(crt_str_active_d && crt_hb) crt_de_osd<=1'b0;
+        end
+    end
+
+    wire video_ce=crt_on ? crt_rd_ce : core_ce;
+    wire [7:0] video_r=crt_on ? crt_r : r;
+    wire [7:0] video_g=crt_on ? crt_g : g;
+    wire [7:0] video_b=crt_on ? crt_b : b;
+    wire video_hs=crt_on ? crt_hs : hsync;
+    wire video_vs=crt_on ? crt_vs : vsync;
+    wire video_de=crt_on ? (crt_de_osd & ~crt_vb) : native_de;
     wire video_de_freak;
     video_freak video_freak_i (
         .CLK_VIDEO(clk_sys),

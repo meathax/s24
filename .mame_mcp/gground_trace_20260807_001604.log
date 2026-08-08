@@ -1,0 +1,10 @@
+# mame_mcp memory access trace
+# frames 6600
+# range reg13 $40401A-$40401B
+W   0005CE   40401A   reg13                1   $01
+W   00062A   40401A   reg13                1   $00
+W   0800DC   40401A   reg13                1   $01
+
+# MAME_MCP_SUMMARY_BEGIN
+# unique_accesses 3
+# MAME_MCP_SUMMARY_END

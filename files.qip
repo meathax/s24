@@ -13,6 +13,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/prot/s24_magic_latch.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/fdc/s24_fdc.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/s24_irq.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_video_timing.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/crt_adjust.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_palette.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_tile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/s24_sprite.sv
