@@ -472,6 +472,15 @@ module s24_sprite (
 
     logic [LINE_BANK_BITS-1:0] display_bank,fill_bank;
     logic [LINE_BANKS-1:0] line_valid;
+    // Explicit ownership state for the producer. line_valid is deliberately
+    // cleared while a bank is being rendered, but keeping ownership separate
+    // prevents a boundary/reclaim decision from treating an in-flight bank as
+    // free on FPGA RAM implementations with different read timing.
+    logic [LINE_BANKS-1:0] bank_filling;
+    // Epoch captured when the producer claims a bank. A long line may finish
+    // after the visible-frame boundary has retired every queued line; never
+    // resurrect that previous-frame result as valid in the new frame.
+    logic fill_epoch;
     logic [9:0] display_read_addr;
     logic [LINE_WIDTH-1:0] line0_display_q [0:3];
     logic [LINE_WIDTH-1:0] line1_display_q [0:3];
@@ -504,6 +513,7 @@ module s24_sprite (
     logic list_cache_valid;
     logic cache_refresh_pending;
     logic frame_epoch;
+    logic frame_boundary;
     logic [15:0] current_clip_flags,current_clip_top,current_clip_left;
     logic [15:0] current_clip_bottom,current_clip_right;
     logic current_clip_valid;
@@ -661,6 +671,7 @@ module s24_sprite (
     // retains MAME's newest/frontmost list entries.
     assign stack_write_slot=(stack_count<STACK_COUNT_LIMIT)
                             ? stack_count[STACK_BITS-1:0] : stack_head;
+    assign frame_boundary=ce_pixel && hcount==10'd655 && vcount==10'd383;
     assign stack_scan_slot=stack_head+scan_pos[STACK_BITS-1:0];
     // Packed descriptor RAM supplies two logical entries per clock whenever
     // the ring cursor is physically even.  An odd head peels one upper-half
@@ -723,7 +734,7 @@ module s24_sprite (
         next_display_bank = display_bank;
         next_display_ready = 1'b0;
         for(bank_scan=0;bank_scan<LINE_BANKS;bank_scan=bank_scan+1) begin
-            if(line_valid[bank_scan] &&
+            if(line_valid[bank_scan] && !bank_filling[bank_scan] &&
                bank_line_y[bank_scan]==next_display_line[8:0]) begin
                 next_display_bank = bank_scan[LINE_BANK_BITS-1:0];
                 next_display_ready = 1'b1;
@@ -750,7 +761,7 @@ module s24_sprite (
         fill_candidate = '0;
         fill_candidate_valid = 1'b0;
         for(bank_scan=0;bank_scan<LINE_BANKS;bank_scan=bank_scan+1) begin
-            if(!line_valid[bank_scan] &&
+            if(!line_valid[bank_scan] && !bank_filling[bank_scan] &&
                bank_scan[LINE_BANK_BITS-1:0]!=display_bank &&
                !fill_candidate_valid) begin
                 fill_candidate = bank_scan[LINE_BANK_BITS-1:0];
@@ -1347,6 +1358,8 @@ module s24_sprite (
     always_ff @(posedge clk) begin
         if(reset) begin
             state<=S_IDLE;display_bank<=0;fill_bank<=0;line_valid<=0;
+            bank_filling<=0;
+            fill_epoch<=0;
             fill_generation<=0;
             bank_generation[0]<=0;bank_generation[1]<=0;
             bank_generation[2]<=0;bank_generation[3]<=0;
@@ -1398,7 +1411,7 @@ module s24_sprite (
             // if the renderer is still busy there. Defer list-cache refresh
             // until the current queued frame has drained; a long sprite
             // line may legally span this boundary.
-            if(ce_pixel && hcount==10'd655 && vcount==10'd383) begin
+            if(frame_boundary) begin
                 frame_epoch<=~frame_epoch;
                 cache_refresh_pending<=1;
                 // A bank's line_valid means "pre-rendered content for a
@@ -1474,7 +1487,8 @@ module s24_sprite (
                         // valid for the whole scanline it feeds.
                         for(reclaim_scan=0;reclaim_scan<LINE_BANKS;
                             reclaim_scan=reclaim_scan+1)
-                            if({1'b0,bank_line_y[reclaim_scan]}<next_display_line)
+                            if(!bank_filling[reclaim_scan] &&
+                               {1'b0,bank_line_y[reclaim_scan]}<next_display_line)
                                 line_valid[reclaim_scan]<=0;
                         display_bank<=next_display_bank;
                     end
@@ -1591,6 +1605,8 @@ module s24_sprite (
                         bank_generation[fill_candidate]<=
                             bank_generation[fill_candidate]+1'b1;
                         bank_line_y[fill_candidate]<=render_next_target;
+                        bank_filling[fill_candidate]<=1;
+                        fill_epoch<=frame_epoch;
                         line_valid[fill_candidate]<=0;
                         scrub_req<=1;
                         scrub_addr<={fill_candidate,bank_scrub[fill_candidate]};
@@ -1602,6 +1618,7 @@ module s24_sprite (
                         data_cache_valid<=0;palette_cache_valid<=0;
                         if(active_list_valid && !line_boundary[render_next_target]) begin
                             if(active_count==0) begin
+                                bank_filling[fill_candidate]<=0;
                                 line_valid[fill_candidate]<=1;
                                 state<=S_IDLE;
                             end else begin
@@ -1625,7 +1642,10 @@ module s24_sprite (
                         state<=S_LIST_REQ;
                     end else if(stack_count==0) begin
                         active_list_valid<=1;
-                        line_valid[fill_bank]<=1;state<=S_IDLE;
+                        bank_filling[fill_bank]<=0;
+                        line_valid[fill_bank]<=fill_epoch==frame_epoch &&
+                                                   !frame_boundary;
+                        state<=S_IDLE;
                     end else begin
                         // The frame cache contains every vertically eligible
                         // descriptor, not just the current scanline's
@@ -1726,7 +1746,10 @@ module s24_sprite (
                                 render_pos<=active_count-1'b1;
                                 state<=S_RENDER_PREFETCH;
                             end else begin
-                                line_valid[fill_bank]<=1;state<=S_IDLE;
+                                bank_filling[fill_bank]<=0;
+                                line_valid[fill_bank]<=fill_epoch==frame_epoch &&
+                                                           !frame_boundary;
+                                state<=S_IDLE;
                             end
                         end else begin
                             scan_pos<=scan_next_pos;
@@ -1753,7 +1776,10 @@ module s24_sprite (
                                 render_pos<=active_count-1'b1;
                                 state<=S_RENDER_PREFETCH;
                             end else begin
-                                line_valid[fill_bank]<=1;state<=S_IDLE;
+                                bank_filling[fill_bank]<=0;
+                                line_valid[fill_bank]<=fill_epoch==frame_epoch &&
+                                                           !frame_boundary;
+                                state<=S_IDLE;
                             end
                         end else begin
                             scan_pos<=scan_next_pos;
@@ -2000,7 +2026,12 @@ module s24_sprite (
                     end
                 end
                 S_NEXT_SPRITE: begin
-                    if(render_pos==0) begin line_valid[fill_bank]<=1;state<=S_IDLE;end
+                    if(render_pos==0) begin
+                        bank_filling[fill_bank]<=0;
+                        line_valid[fill_bank]<=fill_epoch==frame_epoch &&
+                                                   !frame_boundary;
+                        state<=S_IDLE;
+                    end
                     else begin
                         // The active-cache port has been reading the next
                         // reverse-order descriptor throughout the current
@@ -2059,8 +2090,37 @@ module s24_sprite (
                         end
                     end
                 end
-                default: state<=S_IDLE;
+                default: begin
+                    // Recover conservatively from an illegal state: cancel
+                    // the producer transaction instead of leaking ownership
+                    // forever or publishing a partially rendered line.
+                    mem_req<=0;
+                    bank_filling<='0;
+                    line_valid[fill_bank]<=0;
+                    active_list_valid<=0;
+                    state<=S_IDLE;
+                end
             endcase
         end
     end
+
+`ifdef VERILATOR
+    // Bank ownership is deliberately simulation-checked here rather than
+    // exposed through a debug menu or synthesized telemetry.
+    always_ff @(posedge clk) if(!reset) begin
+        assert((line_valid & bank_filling)=='0)
+            else $fatal(1,"sprite bank simultaneously filling and valid");
+        assert($onehot0(bank_filling))
+            else $fatal(1,"multiple sprite line banks owned by producer");
+        if(|bank_filling) begin
+            assert(bank_filling[fill_bank])
+                else $fatal(1,"sprite fill_bank does not name owned bank");
+            assert(fill_bank!=display_bank)
+                else $fatal(1,"sprite producer overwrote display bank");
+        end
+        if(state==S_IDLE)
+            assert(bank_filling=='0)
+                else $fatal(1,"sprite bank ownership leaked into idle");
+    end
+`endif
 endmodule
