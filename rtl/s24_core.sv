@@ -382,14 +382,17 @@ module s24_core #(
     logic fdc_read_ack,fdc_write_ack;
     logic [2:0] fdc_addr;
     logic [7:0] fdc_dout,fdc_media_wdata,fdc_media_rdata;
+    logic [7:0] fdc_media_rdata_bus;
     logic [26:0] fdc_media_addr;
     s24_fdc fdc(
         .clk(clk),.reset(reset),.track_size({board.track_bytes_hi,board.track_bytes_lo}),
         .index_pulse(index_count!=0),.bus_rd(fdc_rd),.bus_wr(fdc_wr),.bus_addr(fdc_addr),
         .bus_din(bus_dout[7:0]),.bus_dout(fdc_dout),.bus_wait(fdc_wait),
         .media_req(fdc_media_req),.media_wr(fdc_media_wr),.media_addr(fdc_media_addr),
-        .media_wdata(fdc_media_wdata),.media_rdata(fdc_media_rdata),.media_ack(fdc_media_ack));
-    assign fdc_media_ack = fdc_read_ack | fdc_write_ack;
+        .media_wdata(fdc_media_wdata),.media_rdata(fdc_media_rdata_bus),.media_ack(fdc_media_ack));
+    assign fdc_media_ack = fdc_read_ack | fdc_write_ack |
+        (fdc_media_req && !fdc_media_wr &&
+         !fdc_read_busy && (fdc_cache_hit || fdc_fifo_hit));
 
     // ------------------------------- video --------------------------------
     logic tile_wr;
@@ -705,9 +708,48 @@ module s24_core #(
     xstate_t xs;
     logic [7:0] rom_bank;
     logic fdc_read_busy;
+    // The MB89311 exposes a local data register. Keep the complete SDRAM
+    // word returned for a floppy byte so the immediately following byte
+    // read (the other lane) does not become a second media transaction.
+    logic fdc_cache_valid;
+    logic [26:0] fdc_cache_addr;
+    logic [15:0] fdc_cache_data;
+    logic fdc_cache_hit;
+    localparam integer FDC_PREFETCH_DEPTH = 64;
+    logic [15:0] fdc_pf_data [0:FDC_PREFETCH_DEPTH-1];
+    logic [26:0] fdc_pf_addr [0:FDC_PREFETCH_DEPTH-1];
+    logic [5:0] fdc_pf_rd,fdc_pf_wr;
+    logic [6:0] fdc_pf_count;
+    logic fdc_p4_prefetch,fdc_pf_have_stream,fdc_pf_discard;
+    logic [26:0] fdc_pf_next_addr;
+    logic fdc_fifo_hit;
+    logic fdc_pf_push,fdc_pf_pop;
+
+    assign fdc_cache_hit = fdc_cache_valid &&
+                           (fdc_cache_addr ==
+                            word_address(SDR_FLOPPY_BASE+fdc_media_addr));
+    assign fdc_fifo_hit = (fdc_pf_count != 0) &&
+                          (fdc_pf_addr[fdc_pf_rd] ==
+                           word_address(SDR_FLOPPY_BASE+fdc_media_addr));
+    assign fdc_pf_push = p4_ack && p4_req && fdc_p4_prefetch &&
+                         !fdc_pf_discard;
+    assign fdc_pf_pop = fdc_media_req && !fdc_media_wr &&
+                        !fdc_read_busy && !fdc_cache_hit && fdc_fifo_hit;
+    assign fdc_media_rdata_bus = fdc_cache_hit ?
+                                  (fdc_media_addr[0] ?
+                                   fdc_cache_data[15:8] : fdc_cache_data[7:0]) :
+                                  fdc_fifo_hit ?
+                                  (fdc_media_addr[0] ?
+                                   fdc_pf_data[fdc_pf_rd][15:8] :
+                                   fdc_pf_data[fdc_pf_rd][7:0]) :
+                                  fdc_media_rdata;
     logic fdc_read_odd;
 
     // FDC read service uses p4; write service shares the SDRAM write port.
+    // The MB89311 has a local data register.  Once the first word of a
+    // sequential read has returned, prefetch following words into a bounded
+    // FIFO so the CPU-B floppy stream is not charged one SDRAM round trip per
+    // byte.  A mismatch (new command, track change or write) flushes it.
     always_ff @(posedge clk) begin
         fdc_read_ack<=0;
         if(reset) begin
@@ -716,22 +758,116 @@ module s24_core #(
             fdc_media_rdata<=0;
             fdc_read_busy<=0;
             fdc_read_odd<=0;
+            fdc_cache_valid<=0;
+            fdc_cache_addr<=0;
+            fdc_cache_data<=0;
+            fdc_pf_rd<=0;
+            fdc_pf_wr<=0;
+            fdc_pf_count<=0;
+            fdc_p4_prefetch<=0;
+            fdc_pf_have_stream<=0;
+            fdc_pf_discard<=0;
+            fdc_pf_next_addr<=0;
         end
         else begin
-            // The FDC holds media_req through the cycle in which it observes
-            // media_ack. Keep a separate transaction guard so the still-high
-            // request cannot be mistaken for the following byte after p4_req
-            // drops. Also retain the requested byte lane with the address.
-            if(fdc_media_req && !fdc_media_wr && !fdc_read_busy) begin
+            // A media write invalidates all read-ahead state.  Do not cancel
+            // an already accepted p4 cycle; discard its result on completion.
+            if(fdc_media_req && fdc_media_wr) begin
+                fdc_cache_valid<=0;
+                fdc_pf_count<=0;
+                fdc_pf_rd<=0;
+                fdc_pf_wr<=0;
+                fdc_pf_have_stream<=0;
+                if(p4_req)
+                    fdc_pf_discard<=1;
+            end
+
+            // A cached FIFO word is consumed combinationally as the FDC
+            // acknowledges the byte.  Promote it to the one-word cache so
+            // the opposite byte lane is still a zero-latency hit.
+            if(fdc_pf_pop) begin
+                fdc_cache_valid<=1;
+                fdc_cache_addr<=fdc_pf_addr[fdc_pf_rd];
+                fdc_cache_data<=fdc_pf_data[fdc_pf_rd];
+                fdc_pf_rd<=fdc_pf_rd+1'b1;
+            end
+
+            // A request that is not covered by either read cache starts one
+            // demand read.  If a speculative read is in flight for another
+            // word, let it finish and discard it before issuing this read.
+            if(fdc_media_req && !fdc_media_wr && !fdc_read_busy &&
+               !fdc_cache_hit && !fdc_fifo_hit && !p4_req) begin
                 p4_req<=1;
                 p4_addr<=word_address(SDR_FLOPPY_BASE+fdc_media_addr);
                 fdc_read_odd<=fdc_media_addr[0];
                 fdc_read_busy<=1;
+                fdc_p4_prefetch<=0;
+                fdc_cache_valid<=0;
+                fdc_pf_count<=0;
+                fdc_pf_rd<=0;
+                fdc_pf_wr<=0;
+                fdc_pf_have_stream<=0;
+                fdc_pf_discard<=0;
+                fdc_pf_next_addr<=word_address(SDR_FLOPPY_BASE+fdc_media_addr)+1'b1;
             end
-            if(p4_ack&&p4_req) begin
-                p4_req<=0;fdc_read_ack<=1;
-                fdc_media_rdata<=fdc_read_odd?p4_data[15:8]:p4_data[7:0];
+            else if(fdc_media_req && !fdc_media_wr && !fdc_read_busy &&
+                    !fdc_cache_hit && !fdc_fifo_hit && p4_req &&
+                    fdc_p4_prefetch &&
+                    p4_addr != word_address(SDR_FLOPPY_BASE+fdc_media_addr)) begin
+                fdc_pf_discard<=1;
             end
+
+            if(p4_ack && p4_req) begin
+                p4_req<=0;
+                fdc_p4_prefetch<=0;
+                if(fdc_p4_prefetch) begin
+                    if(fdc_pf_discard) begin
+                        fdc_pf_count<=0;
+                        fdc_pf_rd<=0;
+                        fdc_pf_wr<=0;
+                        fdc_pf_have_stream<=0;
+                        fdc_pf_discard<=0;
+                    end
+                    else begin
+                        fdc_pf_data[fdc_pf_wr]<=p4_data;
+                        fdc_pf_addr[fdc_pf_wr]<=p4_addr;
+                        fdc_pf_wr<=fdc_pf_wr+1'b1;
+                    end
+                end
+                else begin
+                    fdc_read_ack<=1;
+                    fdc_media_rdata<=fdc_read_odd?p4_data[15:8]:p4_data[7:0];
+                    fdc_cache_valid<=1;
+                    fdc_cache_addr<=p4_addr;
+                    fdc_cache_data<=p4_data;
+                    fdc_pf_have_stream<=1;
+                    fdc_pf_next_addr<=p4_addr+1'b1;
+                end
+            end
+
+            // Keep filling only while the FDC is idle and the FIFO has room.
+            // One p4 request is shared by demand reads and this read-ahead.
+            // Sprite bursts have a hard scanline deadline; floppy read-ahead
+            // is speculative and may use only vertical-blank AV bandwidth.
+            // Merely checking p2_req is insufficient: a one-word prefetch can
+            // otherwise slip into every gap between the renderer's 128-bit
+            // cache fills and cumulatively make the producer miss a line.
+            // Demand FDC reads retain the arbiter's normal p2/p4 fairness.
+            if(fdc_pf_have_stream && !p4_req && !fdc_media_req && vblank &&
+               !p2_req &&
+               !fdc_pf_discard && fdc_pf_count < 7'd64) begin
+                p4_req<=1;
+                p4_addr<=fdc_pf_next_addr;
+                fdc_p4_prefetch<=1;
+                fdc_pf_next_addr<=fdc_pf_next_addr+1'b1;
+            end
+
+            case({fdc_pf_push,fdc_pf_pop})
+                2'b10: fdc_pf_count<=fdc_pf_count+1'b1;
+                2'b01: fdc_pf_count<=fdc_pf_count-1'b1;
+                default: ;
+            endcase
+
             if(fdc_read_busy && !fdc_media_req)
                 fdc_read_busy<=0;
         end

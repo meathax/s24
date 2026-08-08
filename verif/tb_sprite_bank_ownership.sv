@@ -74,6 +74,29 @@ module tb_sprite_bank_ownership;
         assert(!dut.bank_filling[1] && !dut.line_valid[1])
             else $fatal(1,"previous-frame fill was resurrected as valid");
 
+        // The cached-empty shortcut claims and completes in one clock. Its
+        // decision must not use fill_epoch, which still belongs to the prior
+        // claim until the nonblocking assignment at this edge retires.
+        @(negedge clk);
+        dut.state=dut.S_IDLE;
+        dut.render_next_target=9'd10;
+        dut.list_cache_valid=1;
+        dut.cache_refresh_pending=0;
+        dut.active_list_valid=1;
+        dut.line_boundary[10]=0;
+        dut.active_count=0;
+        dut.display_bank=0;
+        dut.line_valid='0;
+        dut.bank_filling='0;
+        dut.fill_epoch=~dut.frame_epoch;
+        #1;
+        assert(dut.fill_candidate_valid)
+            else $fatal(1,"no free bank for cached-empty epoch test");
+        @(posedge clk); #1;
+        assert(dut.state==dut.S_IDLE && dut.bank_filling=='0 &&
+               dut.line_valid[1])
+            else $fatal(1,"cached-empty current-frame line was dropped");
+
         // A normal same-frame completion still publishes its line.
         @(negedge clk);
         dut.state=dut.S_NEXT_SPRITE;

@@ -83,6 +83,7 @@ SUPPORTED_INPUT_PROFILES = frozenset((
 MRA_CONTROL_GENERIC = "generic"
 MRA_CONTROL_SSPIRITS = "sspirits"
 MRA_CONTROL_HOTROD = "hotrod"
+MRA_CONTROL_ROUGHRAC = "roughrac"
 MRA_CONTROL_GOLF = "golf"
 MRA_CONTROL_CRKDOWN = "crkdown"
 MRA_CONTROL_BNZABROS = "bnzabros"
@@ -135,18 +136,23 @@ MRA_CONTROL_PROFILES = {
          "Start", "Coin", "Service", "Test"),
         ("A", "B", "X", "Start", "Select", "R", "L"),
     ),
-    # Scramble Spirits has three buttons per player. The System 24 generic
-    # port maps MiSTer A/B/X to MAME Button 1/2/3 respectively.
+    # Scramble Spirits uses two gameplay buttons: Fire and Formation.
     MRA_CONTROL_SSPIRITS: MraControls(
         "8-way",
-        ("Fire", "Attack", "Air/Ground", "-", "-", "-",
+        ("Fire", "Formation", "-", "-", "-", "-",
          "Start", "Coin", "Service", "Test"),
-        ("A", "B", "X", "Start", "Select", "R", "L"),
+        ("A", "B", "Start", "Select", "R", "L"),
     ),
     MRA_CONTROL_HOTROD: MraControls(
         "Steering Wheel / Accelerator",
         ("-", "-", "-", "-", "-", "-", "Start", "Coin", "Service", "Test"),
         ("Start", "Select", "R", "L"),
+    ),
+    MRA_CONTROL_ROUGHRAC: MraControls(
+        "Steering Wheel",
+        ("Accelerate", "Brake", "Action", "-", "-", "-",
+         "Start", "Coin", "Service", "Test"),
+        ("A", "B", "X", "Start", "Select", "R", "L"),
     ),
     MRA_CONTROL_GOLF: MraControls(
         "Swing / Angle",
@@ -249,7 +255,9 @@ GAMES = (
     Game("roughrac", "Rough Racer (Japan, Floppy Based, FD1094 317-0058-06b)", 1990,
          BOOT_DISK, FLOPPY | FD1094 | UPD4701, 0x2D00, dsw="FF FD",
          floppy=p("ds3-5000-06b.img", "a7fb2149"),
-         key=p("317-0058-06b.key", "6a5bf536")),
+         key=p("317-0058-06b.key", "6a5bf536"),
+         mra_controls=MRA_CONTROL_ROUGHRAC,
+         profile_version=1, analogue_profile=1),
     # profile_version=1/video_profile=1: the only set the flicker-blend
     # heuristic (projector beam, stage intro card) is verified against --
     # see the field comment on Game.video_profile above.

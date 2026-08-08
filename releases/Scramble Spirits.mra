@@ -10,7 +10,7 @@
   <resolution>15kHz</resolution>
   <rotation>vertical (ccw)</rotation>
   <joystick>8-way</joystick>
-  <buttons default="A,B,X,Start,Select,R,L" names="Fire,Attack,Air/Ground,-,-,-,Start,Coin,Service,Test"/>
+  <buttons default="A,B,Start,Select,R,L" names="Fire,Formation,-,-,-,-,Start,Coin,Service,Test"/>
   <switches default="FF FD"/>
   <rom index="1" zip="sspirits.zip" md5="none">
     <interleave output="16">

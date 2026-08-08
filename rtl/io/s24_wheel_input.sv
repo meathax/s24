@@ -25,6 +25,9 @@ module s24_wheel_input (
     input  logic        reset,
     input  logic         tick,
     input  logic signed [7:0] stick_x,
+    input  logic [1:0]  analogue_profile,
+    input  logic        digital_left,
+    input  logic        digital_right,
     input  logic [8:0]  spinner_in,    // real hps_io spinner_N passthrough
     output logic [8:0]  spinner_out
 );
@@ -34,13 +37,25 @@ module s24_wheel_input (
     // linear curve's abrupt jump in steering rate. The unsigned magnitude
     // handles -128 correctly as 8'h80.
     localparam logic [7:0] DEADZONE = 8'd8;
+    // A digital direction has no analogue magnitude, so use half of the
+    // stick curve's full-scale rate. This is quick enough for sustained
+    // cornering while leaving one-frame D-pad taps useful for correction.
+    localparam logic signed [7:0] DIGITAL_STEP = 8'sd8;
 
     logic [7:0] stick_abs;
     logic [7:0] effective;
     logic [13:0] curve_square;
     logic [14:0] curve_scaled;
     logic [5:0] speed_mag;
+    logic [18:0] rough_product;
+    logic [10:0] rough_rate;
+    logic [11:0] rough_sum;
+    logic [7:0] rough_accum;
+    logic [2:0] rough_step;
     logic signed [7:0] stick_step;
+    logic signed [7:0] steering_step;
+    assign rough_product = curve_square * 6'd23;
+    assign rough_sum = {4'd0,rough_accum} + {1'b0,rough_rate};
     always_comb begin
         stick_abs = stick_x[7] ? (~stick_x + 8'd1) : stick_x;
         effective = (stick_abs > DEADZONE) ? stick_abs - DEADZONE : 8'd0;
@@ -49,20 +64,53 @@ module s24_wheel_input (
                        {13'd0,curve_square[13:12]} +
                        15'd1;
         if (effective == 8'd0) speed_mag = 6'd0;
-        else if (curve_scaled > 15'd16) speed_mag = 6'd16;
+        // Hot Rod's former 16-count ceiling is reduced by approximately
+        // ten percent. Integer wheel deltas make 14 counts the closest
+        // conservative value; the rest of its established curve is kept.
+        else if (curve_scaled > 15'd14) speed_mag = 6'd14;
         else speed_mag = curve_scaled[5:0];
+
+        // Rough Racer uses a five-count full-scale quadratic curve. Keep the
+        // rate in Q8 fixed point so small movements can remain below one
+        // count per frame instead of being rounded up and made twitchy.
+        if (effective >= 8'd119) rough_rate = 11'd1280;
+        else rough_rate = rough_product[18:8];
 
         stick_step = 8'sd0;
         if (speed_mag != 6'd0) begin
             if (stick_x[7]) stick_step = -$signed({2'b00,speed_mag});
             else            stick_step =  $signed({2'b00,speed_mag});
         end
+
+        // D-pad steering overrides the absolute stick while exactly one
+        // direction is held. Opposing digital directions cancel cleanly.
+        steering_step = stick_step;
+        if (digital_left != digital_right)
+            steering_step = digital_left ? -DIGITAL_STEP : DIGITAL_STEP;
+        else if (digital_left && digital_right)
+            steering_step = 8'sd0;
     end
 
     logic stick_toggle;
     always_ff @(posedge clk) begin
-        if (reset) stick_toggle <= 1'b0;
-        else if (tick && stick_step != 8'sd0) stick_toggle <= ~stick_toggle;
+        if (reset) begin
+            stick_toggle <= 1'b0;
+            rough_accum <= 8'd0;
+            rough_step <= 3'd0;
+        end else if (tick) begin
+            if (analogue_profile == ANALOGUE_ROUGHRAC &&
+                digital_left == digital_right) begin
+                rough_accum <= rough_sum[7:0];
+                if (rough_sum[10:8] != 3'd0) begin
+                    rough_step <= rough_sum[10:8];
+                    stick_toggle <= ~stick_toggle;
+                end
+            end else begin
+                rough_accum <= 8'd0;
+                if (steering_step != 8'sd0)
+                    stick_toggle <= ~stick_toggle;
+            end
+        end
     end
 
     // Edge-merge: remember each source's last-seen toggle bit and forward
@@ -83,7 +131,13 @@ module s24_wheel_input (
                 spinner_out<={~spinner_out[8],spinner_in[7:0]};
             end
             if (stick_toggle!=stick_toggle_d) begin
-                spinner_out<={~spinner_out[8],stick_step[7:0]};
+                spinner_out<={~spinner_out[8],
+                    analogue_profile == ANALOGUE_ROUGHRAC &&
+                    digital_left == digital_right
+                        ? (stick_x[7]
+                           ? -$signed({5'd0,rough_step})
+                           :  $signed({5'd0,rough_step}))
+                        : steering_step[7:0]};
             end
         end
     end

@@ -1619,7 +1619,12 @@ module s24_sprite (
                         if(active_list_valid && !line_boundary[render_next_target]) begin
                             if(active_count==0) begin
                                 bank_filling[fill_candidate]<=0;
-                                line_valid[fill_candidate]<=1;
+                                // Claim and completion happen in this same
+                                // clock, so fill_epoch still describes the
+                                // previous claim here. The S_IDLE boundary/
+                                // refresh branches above prove this cached
+                                // active list belongs to the current frame.
+                                line_valid[fill_candidate]<=!frame_boundary;
                                 state<=S_IDLE;
                             end else begin
                                 render_pos<=active_count-1'b1;

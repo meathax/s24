@@ -20,7 +20,9 @@ module emu (
     logic [127:0] status;
     assign aspect=status[2:1];
     wire [1:0] rotation=status[9:8];
-    wire [2:0] scaling=status[12:10];
+    // video_freak encodes plain HV-Integer as 4. The shortened OSD uses its
+    // third entry (2), so translate it while omitting the +/- variants.
+    wire [2:0] scaling=(status[12:10]==3'd2) ? 3'd4 : status[12:10];
     wire rotation_active=|rotation;
     wire rotate_ccw=(rotation==2'd1);
     wire [12:0] aspect_arx=aspect==0 ? (rotation_active ? 13'd3 : 13'd4) : {11'd0,aspect-1'b1};
@@ -35,7 +37,7 @@ module emu (
         "O[6],Pause,Off,On;",
         "O[7],Service Mode,Off,On;",
         "O[9:8],Rotation,Normal,Rotate 90 CCW,Rotate 90 CW;",
-        "O[12:10],Scaling,Normal,V-Integer,HV-Integer-,HV-Integer+,HV-Integer;",
+        "O[12:10],Scaling,Normal,V-Integer,HV-Integer;",
         "P1O[101],CRT Adjust,Off,On;",
         "H1P1O[100:96],CRT H-Size,0,+1,+2,...,+15,-16,...,-1;",
         "H1P1O[85:79],CRT H-Position,0,+1,+2,...,+48,-48,...,-1;",
@@ -172,15 +174,23 @@ module emu (
     end
     s24_wheel_input wheel0(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
         .stick_x(stick_l0[7:0]),
+        .analogue_profile(descriptor.analogue_profile),
+        .digital_left(joy0[1]),.digital_right(joy0[0]),
         .spinner_in(hps_spinner0),.spinner_out(spinner0));
     s24_wheel_input wheel1(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
         .stick_x(stick_l1[7:0]),
+        .analogue_profile(descriptor.analogue_profile),
+        .digital_left(joy1[1]),.digital_right(joy1[0]),
         .spinner_in(hps_spinner1),.spinner_out(spinner1));
     s24_wheel_input wheel2(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
         .stick_x(stick_l2[7:0]),
+        .analogue_profile(descriptor.analogue_profile),
+        .digital_left(joy2[1]),.digital_right(joy2[0]),
         .spinner_in(hps_spinner2),.spinner_out(spinner2));
     s24_wheel_input wheel3(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
         .stick_x(stick_l3[7:0]),
+        .analogue_profile(descriptor.analogue_profile),
+        .digital_left(joy3[1]),.digital_right(joy3[0]),
         .spinner_in(hps_spinner3),.spinner_out(spinner3));
 
     // Hot Rod controls: left-stick X is converted to relative steering above;

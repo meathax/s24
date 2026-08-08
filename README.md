@@ -4,6 +4,11 @@ An FPGA recreation of Sega System 24 targeting the MiSTer DE10-Nano with one
 128 MB SDRAM module. This core does not distribute commercial ROM, floppy, or
 FD1094 key data.
 
+The core includes the GPLv3 core-side implementation from
+[MiSTer CRT Adjust](https://github.com/rmonic79/MiSTer-CRT-Adjust), providing
+OSD-controlled horizontal size/position and vertical shift without modifying
+the vendored MiSTer framework.
+
 ## Hardware profile
 
 - Two 68000-compatible processors at 10 MHz; the second may be an FD1094.

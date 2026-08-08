@@ -90,6 +90,7 @@ module tb_sdram;
     integer timeout;
     logic [9:0] burst_col;
     logic [127:0] burst_expected;
+    logic saw_contended_p2;
     initial begin
         repeat(4) @(posedge clk);
         @(negedge clk); init=0;
@@ -112,6 +113,54 @@ module tb_sdram;
         if(!p2_ack || p2_dout!==burst_expected)
             $fatal(1,"p2 burst mismatch %h expected %h",p2_dout,burst_expected);
         while(p2_ack) begin @(posedge clk); #1; end
+
+        // The sprite RAM is local on the PCB but shares SDRAM with both CPUs
+        // here. A simultaneous CPU read must not get ahead of the scanline-
+        // deadline sprite burst.
+        @(negedge clk);
+        p0_addr=26'h0000030;
+        p2_addr=23'h000006;
+        p0_req=1;
+        p2_req=1;
+        @(negedge clk);
+        p0_req=0;
+        p2_req=0;
+        timeout=0;
+        saw_contended_p2=0;
+        while(!p0_ack && timeout<260) begin
+            @(posedge clk); #1; timeout++;
+            if(p2_ack) saw_contended_p2=1;
+            if(p0_ack && !saw_contended_p2)
+                $fatal(1,"CPU read was granted ahead of pending sprite burst");
+        end
+        if(!p0_ack || !saw_contended_p2)
+            $fatal(1,"contended sprite/CPU reads did not both complete");
+        while(p0_ack || p2_ack) begin @(posedge clk); #1; end
+
+        // A queued write is another artifact of the shared FPGA SDRAM path
+        // and likewise must not cross ahead of a sprite deadline.
+        saw_write=0;
+        @(negedge clk);
+        wr_addr=26'h0000042;
+        wr_din=16'h55aa;
+        wr_be=2'b01;
+        p2_addr=23'h000007;
+        wr_req=1;
+        p2_req=1;
+        @(negedge clk);
+        wr_req=0;
+        p2_req=0;
+        timeout=0;
+        saw_contended_p2=0;
+        while(!wr_ack && timeout<260) begin
+            @(posedge clk); #1; timeout++;
+            if(p2_ack) saw_contended_p2=1;
+            if(wr_ack && !saw_contended_p2)
+                $fatal(1,"write was granted ahead of pending sprite burst");
+        end
+        if(!wr_ack || !saw_contended_p2 || !saw_write)
+            $fatal(1,"contended sprite/write requests did not both complete");
+        while(wr_ack || p2_ack) begin @(posedge clk); #1; end
 
         saw_write=0;
         @(negedge clk); wr_addr=26'h0000042; wr_din=16'h55aa;

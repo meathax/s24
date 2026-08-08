@@ -14,6 +14,8 @@ New-Item -ItemType Directory -Force -Path $ModelDirectory | Out-Null
 $pkg = 'C:/msys64/ucrt64/bin/pkg-config.exe'
 $sdlCflags = (& $pkg --cflags sdl2) -replace '-Dmain=SDL_main', ''
 $sdlLibs = (& $pkg --libs sdl2) -replace '-lmingw32', '' -replace '-mwindows', '' -replace '-lSDL2main', ''
+$sdlCompileArgs = @($sdlCflags -split '\s+' | Where-Object { $_ })
+$sdlLinkArgs = @($sdlLibs -split '\s+' | Where-Object { $_ })
 function Get-Sha256Hex([string]$Path) {
     $algorithm = [Security.Cryptography.SHA256]::Create()
     $stream = [IO.File]::OpenRead($Path)
@@ -81,6 +83,16 @@ Copy-Item -LiteralPath (Join-Path $repoRoot 'verif\s24_visual_main.cpp') -Destin
 & verilator-safe status
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+# Verilator builds are required to remain visibly user-observable on this
+# machine, just like simulations.  Keep the small SDL guard window alive for
+# the complete compile and close it only after the safe wrapper returns.
+$guardExe = Join-Path $ModelDirectory 'sdl_verilator_guard.exe'
+& 'C:/msys64/ucrt64/bin/g++.exe' 'verif/sdl_verilator_guard.cpp' `
+    '-DSDL_MAIN_HANDLED' $sdlCompileArgs $sdlLinkArgs '-o' $guardExe
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$guard = Start-Process -FilePath $guardExe -PassThru
+Start-Sleep -Milliseconds 300
+
 $sourceRoot = Join-Path $ModelDirectory 'src'
 $sources = @($repoSources | ForEach-Object {
     $stagedSource = Join-Path $sourceRoot $_
@@ -99,7 +111,11 @@ $arguments = @(
     '--threads',"$ModelThreads",'--build-jobs','4','--verilate-jobs','1'
 ) + $sources
 
-& verilator-safe @arguments
-$buildExit = $LASTEXITCODE
+try {
+    & verilator-safe @arguments
+    $buildExit = $LASTEXITCODE
+} finally {
+    if ($guard -and -not $guard.HasExited) { Stop-Process -Id $guard.Id }
+}
 if ($buildExit -eq 0) { Set-Content -LiteralPath $signaturePath -Value $signature -NoNewline }
 exit $buildExit

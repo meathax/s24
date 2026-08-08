@@ -58,6 +58,10 @@ Sources are ordered by authority for this implementation.
    mixer and register map remain MAME-derived.
 9. Furrtek 315-5242 die-trace RTL and physical research:
    https://github.com/furrtek/SiliconRE/tree/master/Sega/315-5242
+   The verbatim M71064 simulation oracle is preserved under
+   `verif/upstream/siliconre_315_5242/` and exercised by
+   `tools/build_siliconre_3155242_test.ps1`; it is verification-only and is
+   not instantiated by the production core.
 10. System 24 board summary and photographs:
     https://www.system16.com/hardware.php?id=708
 11. Furrtek 315-5292 decap supplied for this project:

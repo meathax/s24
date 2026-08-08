@@ -121,15 +121,20 @@ def command(exe: pathlib.Path, game: gen_mra.Game, media: pathlib.Path,
     # previously had no way to drive joy0 at all (host_joy0..3 truncated to
     # an implicit 1-bit net -- see verif/tb_gground_boot.sv). Native-frame
     # numbers come straight from the profile that already documented them.
-    profile = gameplay_profile(game)
-    if profile.coin_frame:
-        result.append(f"+COIN_FRAME={profile.coin_frame}")
-    if profile.start_frame:
-        result.append(f"+START_FRAME={profile.start_frame}")
-    if profile.input_frames:
-        result.append(f"+INPUT_HOLD_FRAMES={profile.input_frames}")
-    if profile.pedal_value:
-        result.append(f"+PADDLE0={profile.pedal_value:x}")
+    # Deep gameplay schedules currently exist only for parents that have been
+    # calibrated against MAME.  Media/video/attract coverage must still be
+    # runnable for the remaining universal profiles instead of failing while
+    # constructing their command line.
+    profile = GAMEPLAY_PROFILES.get(game.parent or game.setname)
+    if profile is not None:
+        if profile.coin_frame:
+            result.append(f"+COIN_FRAME={profile.coin_frame}")
+        if profile.start_frame:
+            result.append(f"+START_FRAME={profile.start_frame}")
+        if profile.input_frames:
+            result.append(f"+INPUT_HOLD_FRAMES={profile.input_frames}")
+        if profile.pedal_value:
+            result.append(f"+PADDLE0={profile.pedal_value:x}")
     return result
 
 

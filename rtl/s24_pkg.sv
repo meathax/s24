@@ -81,6 +81,9 @@ package s24_pkg;
     localparam logic [7:0] INPUT_QROUKA  = 8'd3;
     localparam logic [7:0] INPUT_MAHJONG = 8'd4;
 
+    localparam logic [1:0] ANALOGUE_STANDARD = 2'd0;
+    localparam logic [1:0] ANALOGUE_ROUGHRAC = 2'd1;
+
     typedef enum logic [3:0] {
         MAGIC_NONE      = 4'd0,
         MAGIC_DCCLUB    = 4'd2,

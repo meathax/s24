@@ -137,6 +137,7 @@ module tb_gground_boot;
     logic p4_outstanding=0,fdc_media_read_serviced=0;
     logic fdc_track_active=0;
     logic [26:0] p4_byte_addr_latched=0;
+    logic [26:0] p4_addr_latched=0;
     logic [26:0] fdc_track_base_latched=0;
     logic [7:0] fdc_track_number_latched=0;
     logic fdc_track_side_latched=0;
@@ -316,33 +317,90 @@ module tb_gground_boot;
         if(p4_req && !p4_req_d) begin
             if(p4_outstanding)
                 $fatal(1,"%s overlapping p4 floppy requests",game_name);
-            if(!dut.fdc_media_req || dut.fdc_media_wr)
-                $fatal(1,"%s p4 read without active FDC media read",game_name);
-            if(fdc_media_read_serviced)
-                $fatal(1,"%s duplicate p4 read for one held FDC request addr=%h",
-                       game_name,dut.fdc_media_addr);
             p4_requests<=p4_requests+1;
             p4_outstanding<=1;
-            fdc_media_read_serviced<=1;
-            p4_byte_addr_latched<=dut.fdc_media_addr;
-            if(dut.fdc_media_addr !=
-                    dut.fdc.track_base+{11'd0,dut.fdc.position})
-                $fatal(1,"%s FDC media address mismatch base=%h position=%h addr=%h",
-                       game_name,dut.fdc.track_base,dut.fdc.position,
-                       dut.fdc_media_addr);
-            // A command can be force-interrupted and restarted. Only a
-            // position-zero request starts a candidate full-track transfer;
-            // bytes from separate commands must never be accumulated.
-            if(dut.fdc.position==0) begin
-                fdc_track_active<=1;
-                fdc_track_bytes<=0;
-                fdc_track_checksum<=32'h811c9dc5;
-                fdc_track_base_latched<=dut.fdc.track_base;
-                fdc_track_number_latched<=dut.fdc.physical_track;
-                fdc_track_side_latched<=fdc_side_shadow;
-            end else if(fdc_track_active) begin
+            p4_addr_latched<=p4_addr;
+            if(dut.fdc_p4_prefetch) begin
+                // Read-ahead is intentionally issued while the FDC is idle.
+                // It has no media request, byte lane or track-stream event.
+                if(!vblank)
+                    $fatal(1,"%s FDC prefetch launched during active display",
+                           game_name);
+                if(p2_req)
+                    $fatal(1,"%s FDC prefetch launched over pending sprite burst",
+                           game_name);
+            end else begin
+                if(!dut.fdc_media_req || dut.fdc_media_wr)
+                    $fatal(1,"%s p4 read without active FDC media read",game_name);
+                if(fdc_media_read_serviced)
+                    $fatal(1,"%s duplicate p4 read for one held FDC request addr=%h",
+                           game_name,dut.fdc_media_addr);
+                fdc_media_read_serviced<=1;
+                p4_byte_addr_latched<=dut.fdc_media_addr;
                 if(dut.fdc_media_addr !=
-                        fdc_track_base_latched+fdc_track_bytes)
+                        dut.fdc.track_base+{11'd0,dut.fdc.position})
+                    $fatal(1,"%s FDC media address mismatch base=%h position=%h addr=%h",
+                           game_name,dut.fdc.track_base,dut.fdc.position,
+                           dut.fdc_media_addr);
+                // A command can be force-interrupted and restarted. Only a
+                // position-zero request starts a candidate full-track transfer;
+                // bytes from separate commands must never be accumulated.
+                if(dut.fdc.position==0) begin
+                    fdc_track_active<=1;
+                    fdc_track_bytes<=0;
+                    fdc_track_checksum<=32'h811c9dc5;
+                    fdc_track_base_latched<=dut.fdc.track_base;
+                    fdc_track_number_latched<=dut.fdc.physical_track;
+                    fdc_track_side_latched<=fdc_side_shadow;
+                end else if(fdc_track_active) begin
+                    if(dut.fdc_media_addr !=
+                            fdc_track_base_latched+fdc_track_bytes)
+                        $fatal(1,"%s non-contiguous FDC transfer byte=%0d expected=%h got=%h",
+                               game_name,fdc_track_bytes,
+                               fdc_track_base_latched+fdc_track_bytes,
+                               dut.fdc_media_addr);
+                    if(dut.fdc.position != fdc_track_bytes[15:0])
+                        $fatal(1,"%s FDC position skipped/duplicated expected=%h got=%h",
+                               game_name,fdc_track_bytes[15:0],
+                               dut.fdc.position);
+                    if(dut.fdc.physical_track!=fdc_track_number_latched ||
+                            fdc_side_shadow!=fdc_track_side_latched)
+                        $fatal(1,"%s FDC track/side changed within transfer",
+                               game_name);
+                end
+            end
+        end
+        if(p4_outstanding && p4_req &&
+                p4_addr!=p4_addr_latched)
+            $fatal(1,"%s p4 address changed while outstanding: %h -> %h",
+                   game_name,p4_addr_latched,p4_addr);
+        if(p4_ack && p4_req) begin
+            if(!p4_outstanding)
+                $fatal(1,"%s p4 acknowledged without an outstanding read",
+                       game_name);
+            if(!dut.fdc_p4_prefetch) begin
+                if(dut.fdc_read_odd!=p4_byte_addr_latched[0])
+                    $fatal(1,"%s p4 byte lane changed while outstanding addr=%h",
+                           game_name,p4_byte_addr_latched);
+                fdc_delivered_byte=dut.fdc_read_odd ? p4_data[15:8] :
+                                                         p4_data[7:0];
+            end
+            p4_acks<=p4_acks+1;
+            p4_outstanding<=0;
+        end
+        if(dut.fdc_media_ack && dut.fdc_media_req && !dut.fdc_media_wr) begin
+            fdc_delivered_byte=dut.fdc_media_rdata_bus;
+            if(!p4_ack && dut.fdc_media_addr==p4_byte_addr_latched+27'd1 &&
+                fdc_delivered_byte != (dut.fdc_media_addr[0] ?
+                    p4_data[15:8] : p4_data[7:0]))
+                $fatal(1,"%s cached FDC byte mismatch addr=%h data=%h expected=%h",
+                    game_name,dut.fdc_media_addr,fdc_delivered_byte,
+                    dut.fdc_media_addr[0] ? p4_data[15:8] : p4_data[7:0]);
+            fdc_read_bytes<=fdc_read_bytes+1;
+            fdc_checksum<=checksum_byte(fdc_checksum,fdc_delivered_byte);
+            if(fdc_track_active) begin
+                if(dut.fdc_media_addr !=
+                    fdc_track_base_latched+fdc_track_bytes)
                     $fatal(1,"%s non-contiguous FDC transfer byte=%0d expected=%h got=%h",
                            game_name,fdc_track_bytes,
                            fdc_track_base_latched+fdc_track_bytes,
@@ -352,47 +410,29 @@ module tb_gground_boot;
                            game_name,fdc_track_bytes[15:0],
                            dut.fdc.position);
                 if(dut.fdc.physical_track!=fdc_track_number_latched ||
-                        fdc_side_shadow!=fdc_track_side_latched)
+                    fdc_side_shadow!=fdc_track_side_latched)
                     $fatal(1,"%s FDC track/side changed within transfer",
                            game_name);
-            end
-        end
-        if(p4_outstanding && p4_req &&
-                p4_addr!=word_address(SDR_FLOPPY_BASE+p4_byte_addr_latched))
-            $fatal(1,"%s p4 address changed while outstanding: %h -> %h",
-                   game_name,p4_byte_addr_latched,p4_addr);
-        if(p4_ack && p4_req) begin
-            if(!p4_outstanding)
-                $fatal(1,"%s p4 acknowledged without an outstanding read",
-                       game_name);
-            if(dut.fdc_read_odd!=p4_byte_addr_latched[0])
-                $fatal(1,"%s p4 byte lane changed while outstanding addr=%h",
-                       game_name,p4_byte_addr_latched);
-            fdc_delivered_byte=dut.fdc_read_odd ? p4_data[15:8] :
-                                                     p4_data[7:0];
-            p4_acks<=p4_acks+1;
-            fdc_read_bytes<=fdc_read_bytes+1;
-            fdc_checksum<=checksum_byte(fdc_checksum,fdc_delivered_byte);
-            if(fdc_track_active && fdc_track_bytes==track_bytes-1) begin
-                if(dut.fdc.span!=16'd1)
-                    $fatal(1,"%s FDC completed %0d bytes with span=%h",
+                if(fdc_track_bytes==track_bytes-1) begin
+                    if(dut.fdc.span!=16'd1)
+                        $fatal(1,"%s FDC completed %0d bytes with span=%h",
                            game_name,track_bytes,dut.fdc.span);
-                fdc_last_track_checksum<=checksum_byte(
-                    fdc_track_checksum,fdc_delivered_byte);
-                fdc_complete_tracks<=fdc_complete_tracks+1;
-                fdc_track_bytes<=0;
-                fdc_track_checksum<=32'h811c9dc5;
-                fdc_track_active<=0;
-                $display("%s FDC transfer=%0d bytes=%0d checksum=%08h side/track=%0d/%0d",
-                    game_name,fdc_complete_tracks+1,track_bytes,
-                    checksum_byte(fdc_track_checksum,fdc_delivered_byte),
-                    fdc_side_shadow,dut.fdc.physical_track);
-            end else if(fdc_track_active) begin
-                fdc_track_bytes<=fdc_track_bytes+1;
-                fdc_track_checksum<=checksum_byte(
-                    fdc_track_checksum,fdc_delivered_byte);
+                    fdc_last_track_checksum<=checksum_byte(
+                        fdc_track_checksum,fdc_delivered_byte);
+                    fdc_complete_tracks<=fdc_complete_tracks+1;
+                    fdc_track_bytes<=0;
+                    fdc_track_checksum<=32'h811c9dc5;
+                    fdc_track_active<=0;
+                    $display("%s FDC transfer=%0d bytes=%0d checksum=%08h side/track=%0d/%0d",
+                        game_name,fdc_complete_tracks+1,track_bytes,
+                        checksum_byte(fdc_track_checksum,fdc_delivered_byte),
+                        fdc_side_shadow,dut.fdc.physical_track);
+                end else begin
+                    fdc_track_bytes<=fdc_track_bytes+1;
+                    fdc_track_checksum<=checksum_byte(
+                        fdc_track_checksum,fdc_delivered_byte);
+                end
             end
-            p4_outstanding<=0;
         end
 
         if(!p0_req) p0_ack<=0;
