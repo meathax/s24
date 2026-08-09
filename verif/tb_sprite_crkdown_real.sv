@@ -110,7 +110,7 @@ module tb_sprite_crkdown_real;
     logic [7:0] line_valid_prev;
     integer errors,checked,addr,lane,b,px;
     logic word_valid;
-    logic [15:0] word_gen;
+    logic [7:0] word_gen;
     logic [13:0] word_low14;
     integer fails_by_x [0:495];
     integer fails_by_y [0:383];
@@ -136,22 +136,22 @@ module tb_sprite_crkdown_real;
                                 case(lane)
                                     0: begin
                                         word_valid=dut.gen_line_lane[0].line0_ram.mem[b*128+addr][25];
-                                        word_gen=dut.gen_line_lane[0].line0_ram.mem[b*128+addr][41:26];
+                                        word_gen=dut.gen_line_lane[0].line0_ram.mem[b*128+addr][33:26];
                                         word_low14=dut.gen_line_lane[0].line0_ram.mem[b*128+addr][13:0];
                                     end
                                     1: begin
                                         word_valid=dut.gen_line_lane[1].line0_ram.mem[b*128+addr][25];
-                                        word_gen=dut.gen_line_lane[1].line0_ram.mem[b*128+addr][41:26];
+                                        word_gen=dut.gen_line_lane[1].line0_ram.mem[b*128+addr][33:26];
                                         word_low14=dut.gen_line_lane[1].line0_ram.mem[b*128+addr][13:0];
                                     end
                                     2: begin
                                         word_valid=dut.gen_line_lane[2].line0_ram.mem[b*128+addr][25];
-                                        word_gen=dut.gen_line_lane[2].line0_ram.mem[b*128+addr][41:26];
+                                        word_gen=dut.gen_line_lane[2].line0_ram.mem[b*128+addr][33:26];
                                         word_low14=dut.gen_line_lane[2].line0_ram.mem[b*128+addr][13:0];
                                     end
                                     default: begin
                                         word_valid=dut.gen_line_lane[3].line0_ram.mem[b*128+addr][25];
-                                        word_gen=dut.gen_line_lane[3].line0_ram.mem[b*128+addr][41:26];
+                                        word_gen=dut.gen_line_lane[3].line0_ram.mem[b*128+addr][33:26];
                                         word_low14=dut.gen_line_lane[3].line0_ram.mem[b*128+addr][13:0];
                                     end
                                 endcase
@@ -214,7 +214,7 @@ module tb_sprite_crkdown_real;
 
         for(ln=0; ln<=383; ln=ln+1) begin
             line_boundary(ln[9:0]);
-            repeat(2500) @(posedge clk);
+            repeat(1968) @(posedge clk);
         end
         $fclose(dumpfile);
         $display("real-artwork probe: lines_checked=%0d checked=%0d errors=%0d",
@@ -224,8 +224,8 @@ module tb_sprite_crkdown_real;
         for(dy=0;dy<384;dy=dy+1)
             if(fails_by_y[dy]!=0) $display("fails_by_y[%0d]=%0d",dy,fails_by_y[dy]);
         if(errors!=0 || lines_checked!=(SPR_Y1-SPR_Y0+1))
-            $display("TB_RESULT=FAIL errors=%0d lines_checked=%0d expected_lines=%0d",
-                     errors,lines_checked,SPR_Y1-SPR_Y0+1);
+            $fatal(1,"TB_RESULT=FAIL errors=%0d lines_checked=%0d expected_lines=%0d",
+                   errors,lines_checked,SPR_Y1-SPR_Y0+1);
         else
             $display("TB_RESULT=PASS");
         $finish;

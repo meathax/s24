@@ -492,6 +492,7 @@ int main(int argc, char** argv) {
 
     bool running = true;
     bool save_pending = false;
+    bool quit_after_save = false;
     bool previous_vblank = top.host_vblank;
     uint16_t previous_x = top.host_x;
     uint16_t previous_y = top.host_y;
@@ -564,9 +565,15 @@ int main(int argc, char** argv) {
 #endif
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) running = false;
+            if (event.type == SDL_QUIT) {
+                save_pending = true;
+                quit_after_save = true;
+            }
             if (event.type == SDL_KEYDOWN && !event.key.repeat) {
-                if (event.key.keysym.sym == SDLK_ESCAPE) running = false;
+                if (event.key.keysym.sym == SDLK_ESCAPE) {
+                    save_pending = true;
+                    quit_after_save = true;
+                }
                 if (event.key.keysym.sym == SDLK_F5 ||
                     (event.key.keysym.sym == SDLK_s &&
                      (event.key.keysym.mod & KMOD_CTRL))) save_pending = true;
@@ -682,8 +689,10 @@ int main(int argc, char** argv) {
                             while (SDL_PollEvent(&wait_event)) {
                                 if (wait_event.type == SDL_QUIT ||
                                     (wait_event.type == SDL_KEYDOWN &&
-                                     wait_event.key.keysym.sym == SDLK_ESCAPE))
-                                    running = false;
+                                     wait_event.key.keysym.sym == SDLK_ESCAPE)) {
+                                    save_pending = true;
+                                    quit_after_save = true;
+                                }
                             }
                             if (fs::exists(lockstep_root / "STOP.txt"))
                                 running = false;
@@ -719,7 +728,7 @@ int main(int argc, char** argv) {
                 if (!saved)
                     std::fprintf(stderr, "Checkpoint failed: %s\n", save_path.c_str());
                 save_pending = false;
-                if (exit_after_save) running = false;
+                if (exit_after_save || quit_after_save) running = false;
             }
             if (context.gotFinish()) break;
         }

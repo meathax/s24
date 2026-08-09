@@ -1,0 +1,8 @@
+﻿{
+    "started":  "2026-08-09T17:50:04.8948158+10:00",
+    "finished":  "2026-08-09T17:50:06.9401529+10:00",
+    "exitCode":  3,
+    "executable":  "D:\\Q17\\quartus\\bin64\\quartus_sh.exe",
+    "workingDir":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24",
+    "logPath":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24\\.codex-mister-build\\Arcade-SegaSystem24\\20260809-175004-485-compile\\quartus.log"
+}

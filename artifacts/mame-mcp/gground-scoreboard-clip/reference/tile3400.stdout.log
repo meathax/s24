@@ -1,0 +1,12 @@
+S24MAME tile frame=3400 control=0000,0000,8000,0000,0000,0000,0000,0000
+S24MAME raw frame=3400 boot=0000 t200000=0900 t205000=0000 t20a000=0000
+S24MAME tile frame=3400 line0=0000:384
+S24MAME tile frame=3400 line1=0000:384
+S24MAME tile frame=3400 line2=0000:200,0008:64,0070:120
+S24MAME tile frame=3400 line3=0000:384
+S24MAME sprite frame=3400 normal=41 clips=1 skips=1
+S24MAME sprite frame=3400 zoom=3f3f:41
+S24MAME sprite frame=3400 max_active=2 source_width=32 clipped_width=32 y=216
+S24MAME sprite frame=3400 active_descriptors=2 unique_palettes=2 unique_data_bursts=4
+S24MAME sprite frame=3400 cache8_palette=2/2 cache16_data=4/4
+Average speed: 1268.65% (58 seconds)

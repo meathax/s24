@@ -1,0 +1,142 @@
+S24DUMP frame=1330
+S24RAW idx=0 4501 0000 0000 0000 017f 01f7 ffff ffff
+S24DUMP idx=0 CLIP rev=0 ytop=0 xleft=-8 ybot=383 xright=495
+S24RAW idx=1281 8700 ffff ffff ffff ffff ffff ffff ffff
+S24RAW idx=1792 0701 3f3f 0a56 080b 00e0 1068 ffff ffff
+S24DUMP idx=1792 SPR x=96 y=224 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=232 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1793 0702 3f3f 0a58 080b 00e8 1068 ffff ffff
+S24DUMP idx=1793 SPR x=96 y=232 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=240 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1794 0703 3f3f 0a5a 080b 00f0 1068 ffff ffff
+S24DUMP idx=1794 SPR x=96 y=240 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=248 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1795 0704 3f3f 0a5c 080b 00f8 1068 ffff ffff
+S24DUMP idx=1795 SPR x=96 y=248 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=256 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1796 0705 3f3f 0a5e 080b 0100 1068 ffff ffff
+S24DUMP idx=1796 SPR x=96 y=256 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=264 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1797 0706 3f3f 0a60 080b 0108 1068 ffff ffff
+S24DUMP idx=1797 SPR x=96 y=264 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=272 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1798 0707 3f3f 0a62 080b 0110 1068 ffff ffff
+S24DUMP idx=1798 SPR x=96 y=272 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=280 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1799 0708 3f3f 0a64 080b 0118 1068 ffff ffff
+S24DUMP idx=1799 SPR x=96 y=280 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=288 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1800 0709 3f3f 0a66 080b 0120 1068 ffff ffff
+S24DUMP idx=1800 SPR x=96 y=288 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=296 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1801 070a 3f3f 0a68 080b 0128 1068 ffff ffff
+S24DUMP idx=1801 SPR x=96 y=296 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=304 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1802 070b 3f3f 0a6a 080b 0130 1068 ffff ffff
+S24DUMP idx=1802 SPR x=96 y=304 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=312 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1803 070c 3f3f 0a6c 080b 0138 1068 ffff ffff
+S24DUMP idx=1803 SPR x=96 y=312 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=320 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1804 070d 3f3f 0a6e 080b 0140 1068 ffff ffff
+S24DUMP idx=1804 SPR x=96 y=320 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=328 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1805 070e 3f3f 0a70 080b 0148 1068 ffff ffff
+S24DUMP idx=1805 SPR x=96 y=328 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=336 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1806 070f 3f3f 0a72 080b 0150 1068 ffff ffff
+S24DUMP idx=1806 SPR x=96 y=336 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=344 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1807 0710 3f3f 0a74 080b 0158 1068 ffff ffff
+S24DUMP idx=1807 SPR x=96 y=344 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=352 x2=112 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1808 0711 3f3f 09f4 0804 0030 1084 ffff ffff
+S24DUMP idx=1808 SPR x=124 y=48 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=56 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1809 0712 3f3f 09fa 0804 0038 1084 ffff ffff
+S24DUMP idx=1809 SPR x=124 y=56 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=64 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1810 0713 3f3f 0a00 0804 0040 1084 ffff ffff
+S24DUMP idx=1810 SPR x=124 y=64 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=72 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1811 0714 3f3f 0a06 0804 0048 1084 ffff ffff
+S24DUMP idx=1811 SPR x=124 y=72 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=80 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1812 0715 3f3f 0a0c 0804 0050 1084 ffff ffff
+S24DUMP idx=1812 SPR x=124 y=80 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=88 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1813 0716 3f3f 0a12 0804 0058 1084 ffff ffff
+S24DUMP idx=1813 SPR x=124 y=88 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=96 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1814 0717 3f3f 0a18 0804 0060 1084 ffff ffff
+S24DUMP idx=1814 SPR x=124 y=96 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=104 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1815 0718 3f3f 0a1e 0804 0068 1084 ffff ffff
+S24DUMP idx=1815 SPR x=124 y=104 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=112 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1816 0719 3f3f 0a24 0804 0070 1084 ffff ffff
+S24DUMP idx=1816 SPR x=124 y=112 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=120 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1817 071a 3f3f 0a2a 0804 0078 1084 ffff ffff
+S24DUMP idx=1817 SPR x=124 y=120 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=128 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1818 071b 3f3f 0a30 0804 0080 1084 ffff ffff
+S24DUMP idx=1818 SPR x=124 y=128 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=136 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1819 071c 3f3f 0a36 0804 0088 1084 ffff ffff
+S24DUMP idx=1819 SPR x=124 y=136 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=144 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1820 071d 3f3f 0a3c 0804 0090 1084 ffff ffff
+S24DUMP idx=1820 SPR x=124 y=144 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=152 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1821 071e 3f3f 0a42 0804 0098 1084 ffff ffff
+S24DUMP idx=1821 SPR x=124 y=152 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=160 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1822 071f 3f3f 0a48 0804 00a0 1084 ffff ffff
+S24DUMP idx=1822 SPR x=124 y=160 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=168 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1823 0720 3f3f 0a4e 0804 00a8 1084 ffff ffff
+S24DUMP idx=1823 SPR x=124 y=168 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=176 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1824 0721 3f3f 0a54 0804 00b0 1084 ffff ffff
+S24DUMP idx=1824 SPR x=124 y=176 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=184 x2=140 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1825 0722 3f3f 09f2 0804 0030 1074 ffff ffff
+S24DUMP idx=1825 SPR x=108 y=48 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=56 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1826 0723 3f3f 09f8 0804 0038 1074 ffff ffff
+S24DUMP idx=1826 SPR x=108 y=56 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=64 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1827 0724 3f3f 09fe 0804 0040 1074 ffff ffff
+S24DUMP idx=1827 SPR x=108 y=64 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=72 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1828 0725 3f3f 0a04 0804 0048 1074 ffff ffff
+S24DUMP idx=1828 SPR x=108 y=72 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=80 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1829 0726 3f3f 0a0a 0804 0050 1074 ffff ffff
+S24DUMP idx=1829 SPR x=108 y=80 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=88 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1830 0727 3f3f 0a10 0804 0058 1074 ffff ffff
+S24DUMP idx=1830 SPR x=108 y=88 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=96 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1831 0728 3f3f 0a16 0804 0060 1074 ffff ffff
+S24DUMP idx=1831 SPR x=108 y=96 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=104 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1832 0729 3f3f 0a1c 0804 0068 1074 ffff ffff
+S24DUMP idx=1832 SPR x=108 y=104 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=112 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1833 072a 3f3f 0a22 0804 0070 1074 ffff ffff
+S24DUMP idx=1833 SPR x=108 y=112 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=120 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1834 072b 3f3f 0a28 0804 0078 1074 ffff ffff
+S24DUMP idx=1834 SPR x=108 y=120 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=128 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1835 072c 3f3f 0a2e 0804 0080 1074 ffff ffff
+S24DUMP idx=1835 SPR x=108 y=128 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=136 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1836 072d 3f3f 0a34 0804 0088 1074 ffff ffff
+S24DUMP idx=1836 SPR x=108 y=136 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=144 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1837 072e 3f3f 0a3a 0804 0090 1074 ffff ffff
+S24DUMP idx=1837 SPR x=108 y=144 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=152 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1838 072f 3f3f 0a40 0804 0098 1074 ffff ffff
+S24DUMP idx=1838 SPR x=108 y=152 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=160 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1839 0730 3f3f 0a46 0804 00a0 1074 ffff ffff
+S24DUMP idx=1839 SPR x=108 y=160 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=168 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1840 0731 3f3f 0a4c 0804 00a8 1074 ffff ffff
+S24DUMP idx=1840 SPR x=108 y=168 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=176 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1841 0732 3f3f 0a52 0804 00b0 1074 ffff ffff
+S24DUMP idx=1841 SPR x=108 y=176 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=184 x2=124 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1842 0733 3f3f 09f0 0804 0030 1064 ffff ffff
+S24DUMP idx=1842 SPR x=92 y=48 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=56 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1843 0734 3f3f 09f6 0804 0038 1064 ffff ffff
+S24DUMP idx=1843 SPR x=92 y=56 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=64 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1844 0735 3f3f 09fc 0804 0040 1064 ffff ffff
+S24DUMP idx=1844 SPR x=92 y=64 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=72 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1845 0736 3f3f 0a02 0804 0048 1064 ffff ffff
+S24DUMP idx=1845 SPR x=92 y=72 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=80 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1846 0737 3f3f 0a08 0804 0050 1064 ffff ffff
+S24DUMP idx=1846 SPR x=92 y=80 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=88 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1847 0738 3f3f 0a0e 0804 0058 1064 ffff ffff
+S24DUMP idx=1847 SPR x=92 y=88 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=96 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1848 0739 3f3f 0a14 0804 0060 1064 ffff ffff
+S24DUMP idx=1848 SPR x=92 y=96 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=104 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1849 073a 3f3f 0a1a 0804 0068 1064 ffff ffff
+S24DUMP idx=1849 SPR x=92 y=104 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=112 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1850 073b 3f3f 0a20 0804 0070 1064 ffff ffff
+S24DUMP idx=1850 SPR x=92 y=112 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=120 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1851 073c 3f3f 0a26 0804 0078 1064 ffff ffff
+S24DUMP idx=1851 SPR x=92 y=120 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=128 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1852 073d 3f3f 0a2c 0804 0080 1064 ffff ffff
+S24DUMP idx=1852 SPR x=92 y=128 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=136 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1853 073e 3f3f 0a32 0804 0088 1064 ffff ffff
+S24DUMP idx=1853 SPR x=92 y=136 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=144 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1854 073f 3f3f 0a38 0804 0090 1064 ffff ffff
+S24DUMP idx=1854 SPR x=92 y=144 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=152 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1855 0740 3f3f 0a3e 0804 0098 1064 ffff ffff
+S24DUMP idx=1855 SPR x=92 y=152 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=160 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1856 0741 3f3f 0a44 0804 00a0 1064 ffff ffff
+S24DUMP idx=1856 SPR x=92 y=160 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=168 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1857 0742 3f3f 0a4a 0804 00a8 1064 ffff ffff
+S24DUMP idx=1857 SPR x=92 y=168 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=176 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1858 0743 3f3f 0a50 0804 00b0 1064 ffff ffff
+S24DUMP idx=1858 SPR x=92 y=176 sx=2 sy=1 zx=64 zy=64 w=16 h=8 y2=184 x2=108 flip=00 clip[rev=0 ytop=0 xleft=-8 ybot=383 xright=495]
+S24RAW idx=1859 ffff ffff ffff ffff ffff ffff ffff ffff
+S24DUMP end reason=type3
+S24DUMP done
+Average speed: 1517.52% (22 seconds)

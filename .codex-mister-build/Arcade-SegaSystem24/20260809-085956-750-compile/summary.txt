@@ -1,0 +1,100 @@
+﻿PROJECT=Arcade-SegaSystem24
+REVISION=Arcade-SegaSystem24
+QPF=C:\Users\meath\OneDrive\Documents\Sega System 24\Arcade-SegaSystem24.qpf
+QSF=C:\Users\meath\OneDrive\Documents\Sega System 24\Arcade-SegaSystem24.qsf
+TOP_LEVEL=sys_top
+DEVICE=5CSEBA6U23I7
+OUTPUT_DIRECTORY=C:\Users\meath\OneDrive\Documents\Sega System 24\output_files
+GENERATE_RBF=True
+DEBUG_NOHDMI_ACTIVE=False
+QUARTUS_VERSION=Quartus Prime Shell
+Version 17.0.2 Build 602 07/19/2017 SJ Lite Edition
+Copyright (C) 2017  Intel Corporation. All rights reserved.
+LAST_STAGE=compile
+LAST_LOG=C:\Users\meath\OneDrive\Documents\Sega System 24\.codex-mister-build\Arcade-SegaSystem24\20260809-085956-750-compile\quartus.log
+=== C:\Users\meath\OneDrive\Documents\Sega System 24\output_files\Arcade-SegaSystem24.asm.rpt ===
+; Assembler Status      ; Successful - Sun Aug 09 09:12:28 2026 ;
+=== C:\Users\meath\OneDrive\Documents\Sega System 24\output_files\Arcade-SegaSystem24.fit.rpt ===
+; Fitter Status                   ; Successful - Sun Aug 09 09:12:06 2026       ;
+; Logic utilization (in ALMs)     ; 20,286 / 41,910 ( 48 % )                    ;
+; Total registers                 ; 24781                                       ;
+; Total block memory bits         ; 4,504,063 / 5,662,720 ( 80 % )              ;
+; Total RAM Blocks                ; 547 / 553 ( 99 % )                          ;
+; Total DSP Blocks                ; 37 / 112 ( 33 % )                           ;
+; Total PLLs                      ; 3 / 6 ( 50 % )                              ;
+; Logic utilization (ALMs needed / total ALMs on device)      ; 20,286 / 41,910       ; 48 %  ;
+; Total block memory bits                                     ; 4,504,063 / 5,662,720 ; 80 %  ;
+; Total DSP Blocks                                            ; 37 / 112              ; 33 %  ;
+; Logic utilization (ALMs needed / total ALMs on device)      ; 20286 / 41910 ( 48 % ) ; 0 / 41910 ( 0 % )              ;
+; Total block memory bits                                     ; 4504063                ; 0                              ;
+=== C:\Users\meath\OneDrive\Documents\Sega System 24\output_files\Arcade-SegaSystem24.fit.summary ===
+Fitter Status : Successful - Sun Aug 09 09:12:06 2026
+Logic utilization (in ALMs) : 20,286 / 41,910 ( 48 % )
+Total registers : 24781
+Total block memory bits : 4,504,063 / 5,662,720 ( 80 % )
+Total RAM Blocks : 547 / 553 ( 99 % )
+Total DSP Blocks : 37 / 112 ( 33 % )
+Total PLLs : 3 / 6 ( 50 % )
+=== C:\Users\meath\OneDrive\Documents\Sega System 24\output_files\Arcade-SegaSystem24.flow.rpt ===
+; Flow Status                     ; Successful - Sun Aug 09 09:12:28 2026       ;
+; Logic utilization (in ALMs)     ; 20,286 / 41,910 ( 48 % )                    ;
+; Total registers                 ; 24781                                       ;
+; Total block memory bits         ; 4,504,063 / 5,662,720 ( 80 % )              ;
+; Total DSP Blocks                ; 37 / 112 ( 33 % )                           ;
+; Total PLLs                      ; 3 / 6 ( 50 % )                              ;
+=== C:\Users\meath\OneDrive\Documents\Sega System 24\output_files\Arcade-SegaSystem24.map.rpt ===
+; Logic utilization (in ALMs)     ; N/A                                         ;
+; Total registers                 ; 24105                                       ;
+; Total block memory bits         ; 4,504,063                                   ;
+; Total DSP Blocks                ; 37                                          ;
+; Total PLLs                      ; 3                                           ;
+; Estimate of Logic utilization (ALMs needed) ; 20994                                                                          ;
+; Total block memory bits                     ; 4504063                                                                        ;
+; Total DSP Blocks                            ; 37                                                                             ;
+; Total PLLs                                  ; 5                                                                              ;
+; Total registers                              ; 24101 ;
+=== C:\Users\meath\OneDrive\Documents\Sega System 24\output_files\Arcade-SegaSystem24.map.summary ===
+Logic utilization (in ALMs) : N/A
+Total registers : 24105
+Total block memory bits : 4,504,063
+Total DSP Blocks : 37
+Total PLLs : 3
+=== C:\Users\meath\OneDrive\Documents\Sega System 24\output_files\Arcade-SegaSystem24.sta.rpt ===
+ 46. Unconstrained Paths Summary
+ 48. Unconstrained Input Ports
+ 49. Unconstrained Output Ports
+ 50. Unconstrained Input Ports
+ 51. Unconstrained Output Ports
+This panel reports FMAX for every clock in the design, regardless of the user-specified clock periods.  FMAX is only computed for paths where the source and destination registers or ports are driven by the same clock.  Paths of different clocks, including generated clocks, are ignored.  For paths between a clock and its inversion, FMAX is computed as if the rising and falling edges are scaled along with FMAX, such that the duty cycle (in terms of a percentage) is maintained. Altera recommends that you always use clock constraints and other slack reports for sign-off analysis.
+This panel reports FMAX for every clock in the design, regardless of the user-specified clock periods.  FMAX is only computed for paths where the source and destination registers or ports are driven by the same clock.  Paths of different clocks, including generated clocks, are ignored.  For paths between a clock and its inversion, FMAX is computed as if the rising and falling edges are scaled along with FMAX, such that the duty cycle (in terms of a percentage) is maintained. Altera recommends that you always use clock constraints and other slack reports for sign-off analysis.
+; Worst-case Slack                                                                   ; 0.103  ; 0.044 ; 3.964    ; 0.174   ; 0.398               ;
+; Unconstrained Paths Summary                    ;
+; Unconstrained Clocks            ; 0     ; 0    ;
+; Unconstrained Input Ports       ; 5     ; 5    ;
+; Unconstrained Input Port Paths  ; 14    ; 14   ;
+; Unconstrained Output Ports      ; 50    ; 50   ;
+; Unconstrained Output Port Paths ; 97    ; 97   ;
+; Unconstrained Input Ports                                                                           ;
+; Unconstrained Output Ports                                                                            ;
+; Unconstrained Input Ports                                                                           ;
+; Unconstrained Output Ports                                                                            ;
+Info (332146): Worst-case setup slack is 0.294
+Info (332146): Worst-case hold slack is 0.244
+Info (332146): Worst-case recovery slack is 3.964
+Info (332146): Worst-case removal slack is 0.581
+Info (332146): Worst-case minimum pulse width slack is 0.398
+Info (332146): Worst-case setup slack is 0.103
+Info (332146): Worst-case hold slack is 0.137
+Info (332146): Worst-case recovery slack is 4.109
+Info (332146): Worst-case removal slack is 0.501
+Info (332146): Worst-case minimum pulse width slack is 0.398
+Info (332146): Worst-case setup slack is 2.531
+Info (332146): Worst-case hold slack is 0.127
+Info (332146): Worst-case recovery slack is 5.069
+Info (332146): Worst-case removal slack is 0.255
+Info (332146): Worst-case minimum pulse width slack is 0.398
+Info (332146): Worst-case setup slack is 2.587
+Info (332146): Worst-case hold slack is 0.044
+Info (332146): Worst-case recovery slack is 5.348
+Info (332146): Worst-case removal slack is 0.174
+Info (332146): Worst-case minimum pulse width slack is 0.398

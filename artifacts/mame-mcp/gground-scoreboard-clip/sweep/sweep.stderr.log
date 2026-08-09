@@ -1,0 +1,2 @@
+Getting list of Win32_PNPEntity devices failed. Error: 0x80041003
+XInput device detection failed. XInput won't be used. Error: 0x80041003

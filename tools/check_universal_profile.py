@@ -14,14 +14,39 @@ import run_game_matrix
 
 
 REQUIRED_RTL = frozenset((
+    "Arcade-SegaSystem24.sv",
     "rtl/s24_core.sv",
     "rtl/s24_board_arbiter.sv",
     "rtl/io/s24_inputs.sv",
     "rtl/io/s24_analog.sv",
+    "rtl/io/s24_wheel_input.sv",
     "rtl/prot/s24_magic_latch.sv",
     "rtl/fdc/s24_fdc.sv",
+    "rtl/mem/s24_rom_loader.sv",
+    "rtl/mem/sdram.sv",
     "rtl/cpu/s24_fd1094.sv",
+    "rtl/crt_adjust.sv",
+    "rtl/video/s24_sprite.sv",
 ))
+
+# Hardware contracts behind the three visible fixes that exposed stale RBF
+# packaging.  These checks deliberately name behavior, not commit hashes, so
+# they survive rebases while preventing a future manifest/profile cleanup from
+# silently building an older implementation.
+REQUIRED_FIX_CONTRACTS = {
+    "rtl/video/s24_sprite.sv": (
+        "localparam int STACK_DEPTH = 4096;",  # SSpirits long sprite lists
+        "logic [LINE_BANKS-1:0] bank_filling;",  # no invisible fill/display race
+        "{1'b0,bank_line_y[reclaim_scan]}<next_display_line",  # scoreboard/banding
+    ),
+    "rtl/mem/sdram.sv": (
+        "if (p2_pend)                 read_grant = 3'd2;",  # Crack Down hand
+    ),
+    "Arcade-SegaSystem24.sv": (
+        '"P1,CRT Adjust;"',
+        ".status_menumask({13'd0,~descriptor.video_profile[0],~status[101],1'b0})",
+    ),
+}
 
 # Release-build settings. The fitter effort/router/physical-synthesis entries
 # were raised from the light-load development policy: at 86% ALM / 86% RAM the
@@ -68,8 +93,16 @@ def validate_mras(mra_dir: pathlib.Path) -> None:
 
     missing = sorted(expected.keys() - actual.keys())
     extra = sorted(actual.keys() - expected.keys())
-    if missing or extra:
-        raise ValueError(f"MRA set mismatch: missing={missing}, extra={extra}")
+    if missing:
+        raise ValueError(f"MRA set mismatch: missing={missing}")
+
+    # Locally retained clone MRAs may outnumber GAMES, whose entries describe
+    # the audited parent media inventory. They must still select the same
+    # universal RBF; their media payload is intentionally not guessed here.
+    for setname in extra:
+        path, root = actual[setname]
+        if required_text(root.find("rbf"), "rbf", path) != gen_mra.RBF:
+            raise ValueError(f"{path}: clone does not target {gen_mra.RBF}.rbf")
 
     for setname, game in expected.items():
         path, root = actual[setname]
@@ -118,6 +151,17 @@ def validate_single_build(repo: pathlib.Path) -> None:
     if missing_rtl:
         raise ValueError(f"files.qip omits universal RTL: {missing_rtl}")
 
+    for relative_path, required_fragments in REQUIRED_FIX_CONTRACTS.items():
+        source = (repo / relative_path).read_text(encoding="utf-8")
+        missing_fragments = [
+            fragment for fragment in required_fragments if fragment not in source
+        ]
+        if missing_fragments:
+            raise ValueError(
+                f"{relative_path}: missing universal fix contracts: "
+                f"{missing_fragments}"
+            )
+
     qsf_lines = {
         line.strip() for line in
         (repo / "Arcade-SegaSystem24.qsf").read_text(
@@ -127,6 +171,18 @@ def validate_single_build(repo: pathlib.Path) -> None:
     missing_settings = sorted(REQUIRED_QSF_SETTINGS - qsf_lines)
     if missing_settings:
         raise ValueError(f"QSF policy mismatch: {missing_settings}")
+    if "source files.qip" not in qsf_lines:
+        raise ValueError("QSF does not source the universal files.qip manifest")
+
+    duplicate_core_sources = sorted(
+        line for line in qsf_lines
+        if line.startswith("set_global_assignment -name SYSTEMVERILOG_FILE rtl/")
+    )
+    if duplicate_core_sources:
+        raise ValueError(
+            "QSF duplicates core RTL outside files.qip: "
+            f"{duplicate_core_sources}"
+        )
 
 
 def validate_gameplay_profiles() -> None:

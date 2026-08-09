@@ -1,15 +1,15 @@
 ﻿{
     "schemaVersion":  2,
-    "pid":  20888,
+    "pid":  24696,
     "stage":  "compile",
-    "started":  "2026-08-08T10:00:10.3987824+10:00",
-    "workerStarted":  "2026-08-08T10:00:10.3821500+10:00",
-    "projectRoot":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24",
-    "qpfPath":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24\\Arcade-SegaSystem24.qpf",
+    "started":  "2026-08-09T17:52:01.8808217+10:00",
+    "workerStarted":  "2026-08-09T17:52:01.8625831+10:00",
+    "projectRoot":  "S:\\",
+    "qpfPath":  "S:\\Arcade-SegaSystem24.qpf",
     "projectName":  "Arcade-SegaSystem24",
     "revision":  "Arcade-SegaSystem24",
-    "qsfPath":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24\\Arcade-SegaSystem24.qsf",
-    "outputDirectory":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24\\output_files",
+    "qsfPath":  "S:\\Arcade-SegaSystem24.qsf",
+    "outputDirectory":  "S:\\output_files",
     "topLevel":  "sys_top",
     "device":  "5CSEBA6U23I7",
     "quartusVersion":  "Quartus Prime Shell\r\nVersion 17.0.2 Build 602 07/19/2017 SJ Lite Edition\r\nCopyright (C) 2017  Intel Corporation. All rights reserved.",
@@ -21,8 +21,8 @@
                       "-c",
                       "Arcade-SegaSystem24"
                   ],
-    "runDirectory":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24\\.codex-mister-build\\Arcade-SegaSystem24\\20260808-100010-329-compile",
-    "logPath":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24\\.codex-mister-build\\Arcade-SegaSystem24\\20260808-100010-329-compile\\quartus.log",
-    "exitCodePath":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24\\.codex-mister-build\\Arcade-SegaSystem24\\20260808-100010-329-compile\\exitcode.txt",
-    "resultPath":  "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24\\.codex-mister-build\\Arcade-SegaSystem24\\20260808-100010-329-compile\\result.json"
+    "runDirectory":  "S:\\.codex-mister-build\\Arcade-SegaSystem24\\20260809-175201-817-compile",
+    "logPath":  "S:\\.codex-mister-build\\Arcade-SegaSystem24\\20260809-175201-817-compile\\quartus.log",
+    "exitCodePath":  "S:\\.codex-mister-build\\Arcade-SegaSystem24\\20260809-175201-817-compile\\exitcode.txt",
+    "resultPath":  "S:\\.codex-mister-build\\Arcade-SegaSystem24\\20260809-175201-817-compile\\result.json"
 }

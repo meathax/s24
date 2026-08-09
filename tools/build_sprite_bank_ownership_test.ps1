@@ -8,6 +8,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $fileSystem = New-Object -ComObject Scripting.FileSystemObject
 $shortRoot = $fileSystem.GetFolder($repoRoot).ShortPath
 Set-Location -LiteralPath $shortRoot
+$env:Path = 'C:\msys64\ucrt64\bin;C:\msys64\usr\bin;' + $env:Path
 
 & verilator-safe status
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

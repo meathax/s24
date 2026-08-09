@@ -793,8 +793,9 @@ module tb_gground_boot;
         .wr_be(wr_be),.wr_ack(wr_ack));
 
     // Simulation-only observability for long-list renderer audits. A miss
-    // means the prior scanline was still rendering when the next native line
-    // boundary arrived. These counters are outside synthesizable core RTL.
+    // means no completed bank for the requested line existed when the native
+    // raster advanced. Producer activity alone is not a miss while queued
+    // lookahead still covers the consumer. These counters are outside RTL.
     logic [13:0] sprite_max_stack_count=0;
     logic [10:0] sprite_max_active_count=0;
     logic [31:0] sprite_deadline_misses=0;
@@ -810,9 +811,36 @@ module tb_gground_boot;
                 sprite_max_stack_count<=dut.sprite.stack_count;
             if(dut.sprite.active_count>sprite_max_active_count)
                 sprite_max_active_count<=dut.sprite.active_count;
-            if(ce_pixel && dut.hcount==10'd655 && dut.vcount<10'd384 &&
-               dut.sprite.state!=0)
+            // vcount 382 advances into vertical blank and asks the renderer
+            // for its internal line 384. No visible sprite line consumes that
+            // result, so absence of a bank there is not a display deadline.
+            if(ce_pixel && dut.hcount==10'd655 &&
+               (dut.vcount==10'd423 || dut.vcount<10'd382) &&
+               !dut.sprite.next_display_ready) begin
                 sprite_deadline_misses<=sprite_deadline_misses+1'b1;
+`ifdef S24_VISUAL
+                if(sprite_deadline_misses<32)
+                    $display("sprite_deadline frame=%0d v=%0d state=%0d target=%0d next=%0d active=%0d render_pos=%0d stack=%0d valid=%b filling=%b bank_y=%0d/%0d/%0d/%0d/%0d/%0d/%0d/%0d display=%0d fill=%0d origin_x=%0d width=%0d right_x=%0d clip_x=%0d..%0d dest_x=%0d source_col=%0d/%0d mem=%b/%b data_cache=%b:%0h wanted=%0h",
+                        sprite_debug_frame,dut.vcount,dut.sprite.state,
+                        dut.sprite.target_y,dut.sprite.render_next_target,
+                        dut.sprite.active_count,dut.sprite.render_pos,
+                        dut.sprite.stack_count,dut.sprite.line_valid,
+                        dut.sprite.bank_filling,
+                        dut.sprite.bank_line_y[0],dut.sprite.bank_line_y[1],
+                        dut.sprite.bank_line_y[2],dut.sprite.bank_line_y[3],
+                        dut.sprite.bank_line_y[4],dut.sprite.bank_line_y[5],
+                        dut.sprite.bank_line_y[6],dut.sprite.bank_line_y[7],
+                        dut.sprite.display_bank,
+                        dut.sprite.fill_bank,dut.sprite.descriptor_origin_x,
+                        dut.sprite.descriptor_output_width,
+                        dut.sprite.descriptor_right_x,dut.sprite.clip_min_x,
+                        dut.sprite.clip_max_x,dut.sprite.dest_x,
+                        dut.sprite.source_column,dut.sprite.total_columns,
+                        dut.sprite.mem_req,dut.sprite.mem_ack,
+                        dut.sprite.data_cache_valid,dut.sprite.data_cache_tag,
+                        dut.sprite.wanted_tag);
+`endif
+            end
             if(ce_pixel && dut.hcount==10'd655 && dut.vcount==10'd383) begin
                 sprite_debug_frame<=sprite_debug_frame+1'b1;
 `ifdef S24_VISUAL

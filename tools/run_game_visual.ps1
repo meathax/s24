@@ -123,7 +123,16 @@ if ($AutoInputFrames) { $arguments += "+AUTO_INPUT_FRAMES=$AutoInputFrames" }
 if ($HostFrameOut) { $arguments += "+HOST_FRAME_OUT=$HostFrameOut" }
 if ($WavOut) { $arguments += "+WAV_OUT=$WavOut" }
 if ($NoAutoFinish) { $arguments += '+NO_AUTO_FINISH=1' }
-& verilator-sim-safe -- $exe @arguments
+$simLauncher = Get-Command verilator-sim-safe -ErrorAction SilentlyContinue
+if (!$simLauncher) {
+	$simLauncher = 'C:/Users/meath/bin/verilator-sim-safe.exe'
+}
+$ucrtBin = 'C:/msys64/ucrt64/bin'
+$msysBin = 'C:/msys64/usr/bin'
+if ((Test-Path -LiteralPath $ucrtBin) -and (Test-Path -LiteralPath $msysBin)) {
+	$env:PATH = "$ucrtBin;$msysBin;$env:PATH"
+}
+& $simLauncher -- $exe @arguments
 $runExit = $LASTEXITCODE
 if ($ResultFile) {
     "exit_code=$runExit finished=$(Get-Date -Format o)" |

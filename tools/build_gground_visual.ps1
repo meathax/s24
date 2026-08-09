@@ -8,6 +8,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $repoRoot
+$env:Path = 'C:\msys64\ucrt64\bin;C:\msys64\usr\bin;' + $env:Path
 $visualMain = (($ModelDirectory.TrimEnd('/','\')) + '/s24_visual_main.cpp') -replace '\\','/'
 New-Item -ItemType Directory -Force -Path $ModelDirectory | Out-Null
 
@@ -61,7 +62,7 @@ $signaturePath = Join-Path $ModelDirectory 'build.signature'
 $verilatorVersion = & verilator-safe --version
 $signatureParts = @(
     $verilatorVersion, $sdlCflags, $sdlLibs,
-    "tb_gground_boot|S24_VISUAL|no-timing|savable|packed-fx68k-structs|real-audio=$RealAudio|threads=$ModelThreads|OPT_FAST=O3|OPT_SLOW=O2|OPT_GLOBAL=O2|march=native|mtune=native|fomit-frame-pointer|ABI=0"
+    "tb_gground_boot|S24_VISUAL|timing|savable|packed-fx68k-structs|real-audio=$RealAudio|threads=$ModelThreads|OPT_FAST=O3|OPT_SLOW=O2|OPT_GLOBAL=O2|march=native|mtune=native|fomit-frame-pointer|ABI=0"
 ) + (@($repoSources + 'verif/s24_visual_main.cpp' | ForEach-Object {
     $file = Join-Path $repoRoot $_
     "$_|$(Get-Sha256Hex $file)"

@@ -23,6 +23,8 @@ known_imperfect = ["crkdown"]
 
 [commands]
 validate_rom_archives = "python tools/gen_mra.py --out-dir verif/modelsim_mra_baseline"
+validate_universal_profile = "python tools/check_universal_profile.py --mra-dir releases"
+validate_rbf_release = "python tools/check_rbf_release.py"
 validate_media_matrix = "python tools/run_game_matrix.py --exe verif/obj_gground/Vtb_gground_boot.exe --dry-run --target 0"
 prepare_media = "python tools/gen_sim_media.py --all"
 build_sim = "powershell -ExecutionPolicy Bypass -File tools/build_game_model.ps1"

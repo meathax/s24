@@ -552,7 +552,7 @@ module tb_sprite_crkdown_list(input logic clk);
                 phase<=P_LINE_WAIT;
             end
             P_LINE_WAIT: begin
-                if(phase_count==2499) begin
+                if(phase_count==1967) begin
                     if(line_index==383)
                         phase<=P_CHECK;
                     else begin
@@ -579,7 +579,7 @@ module tb_sprite_crkdown_list(input logic clk);
                 $display("crkdown sprite 1051: %0d/%0d expected lines rendered, %0d missing",
                          target_lines-missing_lines,target_lines,missing_lines);
                 if(missing_lines!=0)
-                    $display("TB_RESULT=FAIL missing=%0d",missing_lines);
+                    $fatal(1,"TB_RESULT=FAIL missing=%0d",missing_lines);
                 else
                     $display("TB_RESULT=PASS");
                 $finish;
