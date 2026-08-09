@@ -164,10 +164,17 @@ module s24_tile (
     // A line entry retains validity separately from its raw palette/pen value.
     // Pen zero is transparent to the normal priority pass, but MAME's opaque
     // backdrop pass still needs color zero from the selected tile's palette.
-    (* ramstyle = "M10K, no_rw_check" *) logic [13:0] line0 [0:1023];
-    (* ramstyle = "M10K, no_rw_check" *) logic [13:0] line1 [0:1023];
-    (* ramstyle = "M10K, no_rw_check" *) logic [13:0] line2 [0:1023];
-    (* ramstyle = "M10K, no_rw_check" *) logic [13:0] line3 [0:1023];
+    //
+    // Masked spans are deliberately skipped to meet the scanline deadline.
+    // Tag every written entry with the generation of the bank being filled so
+    // an untouched cell can never resurrect content from an older line. A
+    // ten-bit generation outlives a complete one-cell-per-fill bank scrub.
+    localparam integer LINE_GEN_WIDTH = 10;
+    localparam integer LINE_WIDTH = LINE_GEN_WIDTH + 14;
+    (* ramstyle = "M10K, no_rw_check" *) logic [LINE_WIDTH-1:0] line0 [0:1023];
+    (* ramstyle = "M10K, no_rw_check" *) logic [LINE_WIDTH-1:0] line1 [0:1023];
+    (* ramstyle = "M10K, no_rw_check" *) logic [LINE_WIDTH-1:0] line2 [0:1023];
+    (* ramstyle = "M10K, no_rw_check" *) logic [LINE_WIDTH-1:0] line3 [0:1023];
 
     // MAME's 315-5292 device clears both character and tile RAM at device
     // start. Give the local tile/control RAM and scanline stores deterministic
@@ -222,10 +229,10 @@ module s24_tile (
         end
         for (small_ram_init=0; small_ram_init<1024;
              small_ram_init=small_ram_init+1) begin
-            line0[small_ram_init] = 14'h0000;
-            line1[small_ram_init] = 14'h0000;
-            line2[small_ram_init] = 14'h0000;
-            line3[small_ram_init] = 14'h0000;
+            line0[small_ram_init] = '0;
+            line1[small_ram_init] = '0;
+            line2[small_ram_init] = '0;
+            line3[small_ram_init] = '0;
         end
     end
 
@@ -289,7 +296,18 @@ module s24_tile (
 
     logic display_bank, fill_bank;
     logic [9:0] line_read_addr;
-    logic [13:0] line0_q,line1_q,line2_q,line3_q;
+    logic [LINE_WIDTH-1:0] line0_q,line1_q,line2_q,line3_q;
+    logic [LINE_GEN_WIDTH-1:0] fill_generation;
+    logic [LINE_GEN_WIDTH-1:0] bank_generation [0:1];
+    logic [8:0] bank_line_y [0:1];
+    logic [8:0] bank_scrub [0:1];
+    logic [1:0] bank_complete;
+    logic [1:0] bank_epoch;
+    logic fill_epoch,frame_epoch;
+    logic line_sample_bank;
+    logic [8:0] expected_line_y;
+    logic sample_line_ready;
+    logic line0_fresh,line1_fresh,line2_fresh,line3_fresh;
     logic cache_valid;
     logic [11:0] cache_char;
     logic [2:0] cache_row;
@@ -300,9 +318,33 @@ module s24_tile (
     logic char_read_pending;
     logic [63:0] char_read_data;
 
-    assign line_read_addr = (hcount == 10'd655)
-                            ? {~display_bank,9'd0}
-                            : {display_bank,hcount[8:0]+1'd1};
+    assign line_sample_bank = (hcount == 10'd655)
+                              ? ~display_bank : display_bank;
+    assign line_read_addr = {line_sample_bank,
+                             (hcount == 10'd655)
+                             ? 9'd0 : hcount[8:0]+1'd1};
+    assign expected_line_y = (hcount == 10'd655)
+                             ? ((vcount >= 10'd423)
+                                ? 9'd0 : vcount[8:0]+1'd1)
+                             : vcount[8:0];
+    assign sample_line_ready = bank_complete[line_sample_bank]
+                               && bank_line_y[line_sample_bank]
+                                  == expected_line_y
+                               && bank_epoch[line_sample_bank] == frame_epoch
+                               && !(render_active
+                                    && fill_bank == line_sample_bank);
+    assign line0_fresh = sample_line_ready && line0_q[13]
+                         && line0_q[LINE_WIDTH-1 -: LINE_GEN_WIDTH]
+                            == bank_generation[line_sample_bank];
+    assign line1_fresh = sample_line_ready && line1_q[13]
+                         && line1_q[LINE_WIDTH-1 -: LINE_GEN_WIDTH]
+                            == bank_generation[line_sample_bank];
+    assign line2_fresh = sample_line_ready && line2_q[13]
+                         && line2_q[LINE_WIDTH-1 -: LINE_GEN_WIDTH]
+                            == bank_generation[line_sample_bank];
+    assign line3_fresh = sample_line_ready && line3_q[13]
+                         && line3_q[LINE_WIDTH-1 -: LINE_GEN_WIDTH]
+                            == bank_generation[line_sample_bank];
 
     logic [8:0] source_x, source_y;
     logic selected, disabled;
@@ -392,10 +434,9 @@ module s24_tile (
         wanted_pixel = {tile_word[14:7],wanted_pen};
         line_index = {fill_bank,lookup_x_q};
 
-        // The display port erases the old scanline as it reads it.  A whole
-        // transparent eight-pixel selection span therefore needs no writes
-        // on the renderer port.  Skipping it preserves one-write-per-port RAM
-        // inference while leaving enough clocks to prepare every scanline.
+        // A whole transparent eight-pixel selection span needs no writes.
+        // Generation matching rejects any older entry left in that span,
+        // preserving one-write-per-port RAM inference and the line budget.
         fast_skip = lookup_valid && (disabled || !selected)
                     && lookup_x_q[2:0] == 0
                     && lookup_x_q <= 9'd488;
@@ -495,10 +536,10 @@ module s24_tile (
     task automatic write_line_pixel(input logic [13:0] value);
         begin
             case (lookup_layer_q)
-                2'd0: line0[line_index] <= value;
-                2'd1: line1[line_index] <= value;
-                2'd2: line2[line_index] <= value;
-                default: line3[line_index] <= value;
+                2'd0: line0[line_index] <= {fill_generation,value};
+                2'd1: line1[line_index] <= {fill_generation,value};
+                2'd2: line2[line_index] <= {fill_generation,value};
+                default: line3[line_index] <= {fill_generation,value};
             endcase
         end
     endtask
@@ -508,7 +549,11 @@ module s24_tile (
             if (lookup_x_q == 9'd495) begin
                 render_x <= 0;
                 cache_valid <= 1'b0;
-                if (lookup_layer_q == 2'd3) render_active <= 1'b0;
+                if (lookup_layer_q == 2'd3) begin
+                    render_active <= 1'b0;
+                    bank_complete[fill_bank]
+                        <= fill_epoch == frame_epoch;
+                end
                 else render_layer <= lookup_layer_q + 1'd1;
             end else render_x <= lookup_x_q + 1'd1;
         end
@@ -519,7 +564,11 @@ module s24_tile (
             if (lookup_x_q >= 9'd488) begin
                 render_x <= 0;
                 cache_valid <= 1'b0;
-                if (lookup_layer_q == 2'd3) render_active <= 1'b0;
+                if (lookup_layer_q == 2'd3) begin
+                    render_active <= 1'b0;
+                    bank_complete[fill_bank]
+                        <= fill_epoch == frame_epoch;
+                end
                 else render_layer <= lookup_layer_q + 1'd1;
             end else render_x <= lookup_x_q + 9'd8;
             // Discard metadata already issued for the skipped span and
@@ -529,21 +578,14 @@ module s24_tile (
         end
     endtask
 
-    // Port A supplies the visible pixel and erases it after the registered
-    // value has been captured.  Port B below renders into the opposite bank.
-    // This follows the proven JTS16 object/scroll line-buffer discipline and
-    // avoids multi-address writes on either physical RAM port.
+    // Port A is display-read-only. Port B below renders or performs one
+    // bounded scrub write into a non-displayed bank. Avoiding destructive
+    // read/clear makes mixed-port read-during-write behavior irrelevant.
     always @(posedge clk) begin
         line0_q <= line0[line_read_addr];
         line1_q <= line1[line_read_addr];
         line2_q <= line2[line_read_addr];
         line3_q <= line3[line_read_addr];
-        if (ce_pixel) begin
-            line0[line_read_addr] <= 14'd0;
-            line1[line_read_addr] <= 14'd0;
-            line2[line_read_addr] <= 14'd0;
-            line3[line_read_addr] <= 14'd0;
-        end
     end
 
     always @(posedge clk) begin
@@ -575,6 +617,17 @@ module s24_tile (
         if (reset) begin
             display_bank <= 0;
             fill_bank <= 1;
+            fill_generation <= 0;
+            bank_generation[0] <= 0;
+            bank_generation[1] <= 0;
+            bank_line_y[0] <= 0;
+            bank_line_y[1] <= 0;
+            bank_scrub[0] <= 0;
+            bank_scrub[1] <= 0;
+            bank_complete <= 0;
+            bank_epoch <= 0;
+            fill_epoch <= 0;
+            frame_epoch <= 0;
             render_active <= 0;
             render_layer <= 0;
             render_x <= 0;
@@ -629,6 +682,7 @@ module s24_tile (
                     // its frame epoch. A layer whose bit changed on this and
                     // the preceding frame boundary is treated as blinking.
                     if (vcount == 10'd383) begin
+                        frame_epoch <= ~frame_epoch;
                         // frame_layer is a 32-bit integer loop variable; every
                         // index into a 4-entry array is sliced to [1:0]
                         // (bit-identical for the only values the loop bound
@@ -658,28 +712,83 @@ module s24_tile (
                         end
                     end
                     display_bank <= ~display_bank;
-                    {layer0_valid,layer0_cat,layer0_pixel} <= line0_q;
-                    {layer1_valid,layer1_cat,layer1_pixel} <= line1_q;
-                    {layer2_valid,layer2_cat,layer2_pixel} <= line2_q;
-                    {layer3_valid,layer3_cat,layer3_pixel} <= line3_q;
+                    if (line0_fresh)
+                        {layer0_valid,layer0_cat,layer0_pixel}
+                            <= line0_q[13:0];
+                    else begin
+                        layer0_valid <= 0; layer0_cat <= 0; layer0_pixel <= 0;
+                    end
+                    if (line1_fresh)
+                        {layer1_valid,layer1_cat,layer1_pixel}
+                            <= line1_q[13:0];
+                    else begin
+                        layer1_valid <= 0; layer1_cat <= 0; layer1_pixel <= 0;
+                    end
+                    if (line2_fresh)
+                        {layer2_valid,layer2_cat,layer2_pixel}
+                            <= line2_q[13:0];
+                    else begin
+                        layer2_valid <= 0; layer2_cat <= 0; layer2_pixel <= 0;
+                    end
+                    if (line3_fresh)
+                        {layer3_valid,layer3_cat,layer3_pixel}
+                            <= line3_q[13:0];
+                    else begin
+                        layer3_valid <= 0; layer3_cat <= 0; layer3_pixel <= 0;
+                    end
 
                     // At the line boundary vcount still names the old line.
                     // Render the line after the one about to be displayed.
-                    if (!render_active) begin
+                    if (!render_active
+                        && ((vcount >= 10'd422) || (vcount < 10'd382))) begin
                         fill_bank <= display_bank;
+                        fill_generation
+                            <= bank_generation[display_bank] + 1'd1;
+                        bank_generation[display_bank]
+                            <= bank_generation[display_bank] + 1'd1;
+                        bank_line_y[display_bank] <= next_render_y[8:0];
+                        bank_epoch[display_bank] <= frame_epoch;
+                        bank_complete[display_bank] <= 1'b0;
+                        fill_epoch <= frame_epoch;
+                        line0[{display_bank,bank_scrub[display_bank]}] <= '0;
+                        line1[{display_bank,bank_scrub[display_bank]}] <= '0;
+                        line2[{display_bank,bank_scrub[display_bank]}] <= '0;
+                        line3[{display_bank,bank_scrub[display_bank]}] <= '0;
+                        bank_scrub[display_bank]
+                            <= bank_scrub[display_bank] + 1'd1;
                         render_layer <= 0;
                         render_x <= 0;
                         render_y <= next_render_y[8:0];
-                        render_active <= (vcount >= 10'd422) || (vcount < 10'd382);
+                        render_active <= 1'b1;
                         lookup_valid <= 0;
                         line_stage_valid <= 0;
                         cache_valid <= 0;
                     end
                 end else if (hcount < 10'd495) begin
-                    {layer0_valid,layer0_cat,layer0_pixel} <= line0_q;
-                    {layer1_valid,layer1_cat,layer1_pixel} <= line1_q;
-                    {layer2_valid,layer2_cat,layer2_pixel} <= line2_q;
-                    {layer3_valid,layer3_cat,layer3_pixel} <= line3_q;
+                    if (line0_fresh)
+                        {layer0_valid,layer0_cat,layer0_pixel}
+                            <= line0_q[13:0];
+                    else begin
+                        layer0_valid <= 0; layer0_cat <= 0; layer0_pixel <= 0;
+                    end
+                    if (line1_fresh)
+                        {layer1_valid,layer1_cat,layer1_pixel}
+                            <= line1_q[13:0];
+                    else begin
+                        layer1_valid <= 0; layer1_cat <= 0; layer1_pixel <= 0;
+                    end
+                    if (line2_fresh)
+                        {layer2_valid,layer2_cat,layer2_pixel}
+                            <= line2_q[13:0];
+                    else begin
+                        layer2_valid <= 0; layer2_cat <= 0; layer2_pixel <= 0;
+                    end
+                    if (line3_fresh)
+                        {layer3_valid,layer3_cat,layer3_pixel}
+                            <= line3_q[13:0];
+                    else begin
+                        layer3_valid <= 0; layer3_cat <= 0; layer3_pixel <= 0;
+                    end
                 end else begin
                     layer0_pixel <= 0; layer1_pixel <= 0;
                     layer2_pixel <= 0; layer3_pixel <= 0;
@@ -725,4 +834,19 @@ module s24_tile (
             end
         end
     end
+
+    // synthesis translate_off
+    initial begin
+        if ((1 << LINE_GEN_WIDTH) <= 512)
+            $fatal(1,"tile generation tag can wrap before bank scrub");
+    end
+    always @(posedge clk) begin
+        if (!reset && render_active)
+            assert(fill_bank != display_bank)
+                else $fatal(1,"tile renderer owns displayed bank");
+        if (!reset && sample_line_ready)
+            assert(!(render_active && fill_bank == line_sample_bank))
+                else $fatal(1,"tile display accepted in-flight bank");
+    end
+    // synthesis translate_on
 endmodule

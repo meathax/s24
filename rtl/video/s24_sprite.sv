@@ -1994,7 +1994,20 @@ module s24_sprite (
                 end
                 S_DATA_WAIT: if(mem_ack) begin
                     mem_req<=0;data_cache<=mem_data;data_cache_tag<=wanted_tag;
-                    data_cache_valid<=1;state<=S_X_SOURCE;
+                    data_cache_valid<=1;
+                    // This request was issued only after S_X_SOURCE proved
+                    // x_sum nonzero and the source column in range.  Bypass
+                    // that identical decision on return, saving one clock per
+                    // tile burst while preserving the exact emit path.
+                    if(zoomx_step==9'h040 && zoomy_step==9'h040 &&
+                       source_column[1:0]==2'b00 &&
+                       source_column+11'd4<=total_columns) begin
+                        state<=S_X_EMIT4;
+                    end else begin
+                        emit_count<=x_sum[8:6];
+                        x_accum<=x_sum[5:0];
+                        state<=S_X_EMIT;
+                    end
                 end
                 S_X_EMIT: begin
                     // Once a 1:1 row is resident, emit consecutive pixels

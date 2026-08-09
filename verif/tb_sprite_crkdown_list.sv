@@ -19,7 +19,7 @@ module tb_sprite_crkdown_list(input logic clk);
     logic [9:0] hcount=0,vcount=0;
     logic [13:0] pixel0,pixel1,pixel2,pixel3;
     logic [10:0] rank0,rank1,rank2,rank3;
-    logic mem_req,mem_ack;
+    logic mem_req,mem_ack=0;
     logic [26:4] mem_addr;
     logic [127:0] mem_data;
     localparam logic [26:4] BASE=SDR_SPRITE_BASE[26:4];
@@ -34,8 +34,25 @@ module tb_sprite_crkdown_list(input logic clk);
     logic drawn_at [0:383];
     logic walked_at [0:383];
     logic filled_at [0:383];
+    logic missed_deadline_at [0:383];
 
-    assign mem_ack=mem_req;
+    // Model the complete external-SDRAM/CDC round trip instead of granting
+    // every burst combinationally.  The old zero-wait model proved list
+    // correctness but could never reproduce a line-buffer deadline miss that
+    // exists only on the FPGA memory path.  Override at runtime with
+    // +MEM_LATENCY=N; zero retains the original focused-test behaviour.
+    integer mem_latency=0;
+    integer mem_wait=0;
+    initial void'($value$plusargs("MEM_LATENCY=%d",mem_latency));
+    always_ff @(posedge clk) begin
+        mem_ack<=1'b0;
+        if(!mem_req) mem_wait<=0;
+        else if(mem_latency==0) mem_ack<=1'b1;
+        else if(mem_wait==mem_latency-1) begin
+            mem_ack<=1'b1;
+            mem_wait<=0;
+        end else mem_wait<=mem_wait+1;
+    end
 
     always_comb begin
         mem_data=128'd0;
@@ -482,8 +499,12 @@ module tb_sprite_crkdown_list(input logic clk);
                 filled_at[init_line]<=1'b0;
                 walked_at[init_line]<=1'b0;
                 drawn_at[init_line]<=1'b0;
+                missed_deadline_at[init_line]<=1'b0;
             end
         end else begin
+            if(ce_pixel && hcount==10'd655 && vcount<10'd383 &&
+               dut.next_display_line<10'd384 && !dut.next_display_ready)
+                missed_deadline_at[dut.next_display_line]<=1'b1;
             if(dut.target_y<9'd384) begin
                 filled_at[dut.target_y]<=1'b1;
                 if(dut.descriptor[79:64]==TARGET_W4 &&
@@ -574,6 +595,9 @@ module tb_sprite_crkdown_list(input logic clk);
                         missing_lines=missing_lines+1;
                         $display("MISSING line=%0d sprite 1051 not drawn (reached render walk=%0d)",
                                  ln,walked_at[ln]);
+                    end else if(missed_deadline_at[ln]) begin
+                        missing_lines=missing_lines+1;
+                        $display("LATE line=%0d completed after display deadline",ln);
                     end
                 end
                 $display("crkdown sprite 1051: %0d/%0d expected lines rendered, %0d missing",

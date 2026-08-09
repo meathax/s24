@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$ModelDirectory = 'C:/tmp/s24_obj_sprite_crkdown_list',
-    [string]$Checkpoint = 'C:/tmp/s24_obj_sprite_crkdown_list/crkdown-list.vltsv'
+    [string]$Checkpoint = 'C:/tmp/s24_obj_sprite_crkdown_list/crkdown-list.vltsv',
+    [int]$MemoryLatency = 0
 )
 
 $ErrorActionPreference = 'Stop'
@@ -11,6 +12,8 @@ $shortRoot = $fileSystem.GetFolder($repoRoot).ShortPath
 Set-Location -LiteralPath $shortRoot
 $verilatorSafe = 'C:/Users/meath/bin/verilator-safe.exe'
 $env:Path = 'C:\msys64\ucrt64\bin;C:\msys64\usr\bin;' + $env:Path
+$env:MSYSTEM = 'UCRT64'
+$env:CHERE_INVOKING = '1'
 
 & $verilatorSafe status
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -46,7 +49,7 @@ $guard = Start-Process -FilePath $guardExe -PassThru
 Start-Sleep -Milliseconds 300
 
 $arguments = @(
-    '--cc', '--exe', '--build', '--savable', '--assert',
+    '--cc', '--exe', '--savable', '--assert',
     '--top-module', 'tb_sprite_crkdown_list',
     '--Mdir', $ModelDirectory,
     '--Wno-fatal', '-O3',
@@ -60,11 +63,29 @@ $arguments = @(
 try {
     & $verilatorSafe @arguments
     $buildExit = $LASTEXITCODE
+    if ($buildExit -eq 0) {
+        $modelMsys = (& 'C:/msys64/usr/bin/cygpath.exe' -u $ModelDirectory).Trim()
+        $makeCommand = "export PATH=/usr/bin:/ucrt64/bin:/c/Windows/System32 TMP='$modelMsys' TEMP='$modelMsys'; make -C '$modelMsys' -f Vtb_sprite_crkdown_list.mk -j 4"
+        & 'C:/msys64/usr/bin/env.exe' MSYSTEM=UCRT64 CHERE_INVOKING=1 `
+            'C:/msys64/usr/bin/bash.exe' -lc $makeCommand
+        $buildExit = $LASTEXITCODE
+    }
 } finally {
     if ($guard -and -not $guard.HasExited) { Stop-Process -Id $guard.Id }
 }
 if ($buildExit -ne 0) { exit $buildExit }
 
+# Keep the generated regression self-contained.  `verilator-safe sim` may be
+# launched from a process that does not inherit the MSYS2 UCRT64 PATH; without
+# the runtime beside the executable Windows opens a modal SDL2.dll error and
+# the mandatory visible test never starts.
+$runtimeDlls = @('SDL2.dll', 'libgcc_s_seh-1.dll', 'libstdc++-6.dll',
+                 'libwinpthread-1.dll')
+foreach ($runtimeDll in $runtimeDlls) {
+    Copy-Item -LiteralPath (Join-Path 'C:/msys64/ucrt64/bin' $runtimeDll) `
+        -Destination (Join-Path $ModelDirectory $runtimeDll) -Force
+}
+
 & $verilatorSafe sim (Join-Path $ModelDirectory 'Vtb_sprite_crkdown_list.exe') `
-    "+SAVE=$Checkpoint"
+    "+SAVE=$Checkpoint" "+MEM_LATENCY=$MemoryLatency"
 exit $LASTEXITCODE

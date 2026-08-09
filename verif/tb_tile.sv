@@ -20,13 +20,7 @@ module tb_tile;
     logic [11:0] p0,p1,p2,p3;
     logic c0,c1,c2,c3;
     logic valid0,valid1,valid2,valid3;
-    logic mem_req;
-    logic [26:3] mem_addr;
-    // Both adjacent character rows contain words 0x1234,0x5678. MAME's
-    // STEP8(0,4) layout must render them left-to-right as pens 1..8.
-    logic [63:0] mem_data = 64'h56781234_56781234;
-    logic mem_ack = 0;
-    logic mem_pending = 0;
+    logic [3:0] layer_blink;
     integer render_clocks;
     logic [1:0] window_test_layer;
     logic window_test_mask,window_test_category;
@@ -40,19 +34,11 @@ module tb_tile;
         .clk(clk),.reset(reset),.ce_pixel(ce_pixel),.hcount(hcount),.vcount(vcount),
         .cpu_wr(cpu_wr),.cpu_addr(cpu_addr),.cpu_din(cpu_din),.cpu_be(cpu_be),
         .char_wr(char_wr),.char_addr(char_addr),.char_din(char_din),.char_be(char_be),
+        .blend_en(1'b0),.layer_blink(layer_blink),
         .cpu_dout(cpu_dout),.layer0_pixel(p0),.layer1_pixel(p1),
         .layer2_pixel(p2),.layer3_pixel(p3),.layer0_cat(c0),.layer1_cat(c1),
         .layer2_cat(c2),.layer3_cat(c3),.layer0_valid(valid0),.layer1_valid(valid1),
-        .layer2_valid(valid2),.layer3_valid(valid3),.mem_req(mem_req),.mem_addr(mem_addr),
-        .mem_data(mem_data),.mem_ack(mem_ack));
-
-    always_ff @(posedge clk) begin
-        mem_ack <= 0;
-        if (mem_pending) begin
-            mem_pending <= 0;
-            mem_ack <= 1;
-        end else if (mem_req) mem_pending <= 1;
-    end
+        .layer2_valid(valid2),.layer3_valid(valid3));
 
     task automatic write_tile(input logic [14:0] address, input logic [15:0] data);
         begin
@@ -284,8 +270,8 @@ module tb_tile;
             $fatal(1,"layer 0 mismatch pixel=%h category=%b valid=%b",p0,c0,valid0);
         if (p1 !== 0 || p2 !== 0 || p3 !== 0 || valid1 || valid2 || valid3)
             $fatal(1,"disabled layers were not transparent");
-        if (dut.line0[{dut.display_bank,9'd0}] !== 14'd0)
-            $fatal(1,"display port did not erase consumed line pixel");
+        if (dut.line0[{dut.display_bank,9'd0}][13:0] !== 14'h2001)
+            $fatal(1,"display read unexpectedly modified line pixel");
         $display("PASS tile pixel=%h category=%b clocks=%0d",p0,c0,render_clocks);
         $finish;
     end

@@ -102,7 +102,7 @@ $sources = @($repoSources | ForEach-Object {
     ($stagedSource -replace '\\','/')
 }) + $visualMain
 $arguments = @(
-    '--cc','--exe','--build','--savable','--no-timing',
+    '--cc','--exe','--build','--savable',
     '-DS24_VISUAL','--top-module','tb_gground_boot','--Mdir',$ModelDirectory,
     '-CFLAGS',"-march=native -mtune=native -fomit-frame-pointer -D_GLIBCXX_USE_CXX11_ABI=0 -DSDL_MAIN_HANDLED $sdlCflags",
     '-LDFLAGS',$sdlLibs,
