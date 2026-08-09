@@ -9,6 +9,21 @@ The core includes the GPLv3 core-side implementation from
 OSD-controlled horizontal size/position and vertical shift without modifying
 the vendored MiSTer framework.
 
+## MiSTer integration
+
+- MiSTer's gamma table is applied without retiming the native 24.39 kHz
+  medium-resolution raster.
+- The OSD provides aspect/integer scaling, framework CRT-strength effects,
+  rotation, controller-toggle pause, optional pause while the OSD is open,
+  service mode, and CRT Adjust geometry controls.
+- `CRT Flicker Blend` is shown only for the verified Bonanza Bros board
+  profile; other games retain their raw per-frame layer behavior.
+- Floppy-based MRAs use a 2 MiB per-set MiSTer NVRAM overlay. Emulated FDC
+  writes are coalesced for five seconds and then saved automatically, so the
+  original disk from the MRA remains the clean first-boot source.
+- Hot Rod and Rough Racer use separate steering curves and hysteretic centre
+  deadzones; physical spinner devices continue to bypass the stick curve.
+
 ## Hardware profile
 
 - Two 68000-compatible processors at 10 MHz; the second may be an FD1094.

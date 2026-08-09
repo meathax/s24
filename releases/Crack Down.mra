@@ -7,7 +7,7 @@
   <rbf>Arcade-SegaSystem24</rbf>
   <rotation>horizontal</rotation>
   <joystick>8-way</joystick>
-  <buttons default="A,B,Start,Select,R,L" names="Attack,Smart Bomb,-,-,-,-,Start,Coin,Service,Test"/>
+  <buttons default="A,B,Start,Select,R,L,Y" names="Attack,Smart Bomb,-,-,-,-,Start,Coin,Service,Test,Pause"/>
   <switches default="FF FF"/>
   <rom index="1" zip="crkdown.zip" md5="none" type="merged|nonmerged|split">
     <interleave output="16">
@@ -19,6 +19,7 @@
     <part name="ds3-5000-04c.img" crc="7d97ba5e"/>
     <part repeat="253952">00</part>
   </rom>
+  <nvram index="8" size="2097152"/>
   <rom index="4" zip="crkdown.zip" md5="none" type="merged|nonmerged|split">
     <part name="317-0058-04c.key" crc="16e978cc"/>
   </rom>

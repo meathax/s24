@@ -81,11 +81,17 @@ module s24_rom_loader (
                     if (ioctl_addr + 1 < 8) desc[ioctl_addr[2:0]+1'b1] <= ioctl_dout[15:8];
                     descriptor_seen <= 1'b1;
                     rom_loaded <= 1'b0;
-                end else if (ioctl_index >= 1 && ioctl_index <= 3) begin
+                end else if ((ioctl_index >= 1 && ioctl_index <= 3) ||
+                             ioctl_index == 8) begin
                     wr_req <= 1'b1;
                     busy <= 1'b1;
-                    wr_addr <= word_address(region_base(ioctl_index) + ioctl_addr);
-                    wr_data <= (ioctl_index == 3) ? ioctl_dout :
+                    // Index 8 is MiSTer's persistent overlay for the writable
+                    // floppy image.  A present .sav is downloaded after the
+                    // immutable index-3 disk and replaces it byte-for-byte.
+                    wr_addr <= word_address(
+                        (ioctl_index == 8 ? SDR_FLOPPY_BASE :
+                         region_base(ioctl_index)) + ioctl_addr);
+                    wr_data <= (ioctl_index == 3 || ioctl_index == 8) ? ioctl_dout :
                                {ioctl_dout[7:0],ioctl_dout[15:8]};
                     wr_be <= 2'b11;
                 end else if (ioctl_index == 4) begin

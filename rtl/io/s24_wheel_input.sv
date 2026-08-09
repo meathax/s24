@@ -1,3 +1,5 @@
+import s24_pkg::*;
+
 // Converts an absolute analog-stick X deflection into the same relative
 // toggle+magnitude "spinner" event format hps_io's spinner_N ports use
 // (s24_upd4701 already consumes that format for the real 315-5292-board
@@ -31,18 +33,24 @@ module s24_wheel_input (
     input  logic [8:0]  spinner_in,    // real hps_io spinner_N passthrough
     output logic [8:0]  spinner_out
 );
-    // Hot Rod and Rough Racer share this curve. Remove a small deadzone,
-    // square the remaining magnitude, then scale it with shifts. The +1
-    // floor keeps the first usable deflection responsive without the old
-    // linear curve's abrupt jump in steering rate. The unsigned magnitude
-    // handles -128 correctly as 8'h80.
-    localparam logic [7:0] DEADZONE = 8'd8;
+    // Real controllers rarely rest on exactly zero.  Use profile-specific
+    // hysteretic deadzones: a larger threshold starts motion, while the
+    // smaller release threshold prevents chatter once the wheel is moving.
+    // Rough Racer needs more centre stability than Hot Rod because its
+    // fractional fine-control accumulator preserves sub-count input.
+    localparam logic [7:0] HOTROD_ENTER = 8'd12;
+    localparam logic [7:0] HOTROD_EXIT  = 8'd8;
+    localparam logic [7:0] ROUGH_ENTER  = 8'd16;
+    localparam logic [7:0] ROUGH_EXIT   = 8'd10;
     // A digital direction has no analogue magnitude, so use half of the
     // stick curve's full-scale rate. This is quick enough for sustained
     // cornering while leaving one-frame D-pad taps useful for correction.
     localparam logic signed [7:0] DIGITAL_STEP = 8'sd8;
 
     logic [7:0] stick_abs;
+    logic [7:0] deadzone_enter,deadzone_exit;
+    logic stick_active;
+    logic motion_active;
     logic [7:0] effective;
     logic [13:0] curve_square;
     logic [14:0] curve_scaled;
@@ -58,7 +66,16 @@ module s24_wheel_input (
     assign rough_sum = {4'd0,rough_accum} + {1'b0,rough_rate};
     always_comb begin
         stick_abs = stick_x[7] ? (~stick_x + 8'd1) : stick_x;
-        effective = (stick_abs > DEADZONE) ? stick_abs - DEADZONE : 8'd0;
+        if(analogue_profile==ANALOGUE_ROUGHRAC) begin
+            deadzone_enter=ROUGH_ENTER;
+            deadzone_exit=ROUGH_EXIT;
+        end else begin
+            deadzone_enter=HOTROD_ENTER;
+            deadzone_exit=HOTROD_EXIT;
+        end
+        motion_active=stick_active || stick_abs>=deadzone_enter;
+        effective = motion_active && stick_abs>deadzone_exit
+                  ? stick_abs-deadzone_exit : 8'd0;
         curve_square = effective * effective;
         curve_scaled = {11'd0,curve_square[13:10]} +
                        {13'd0,curve_square[13:12]} +
@@ -73,7 +90,7 @@ module s24_wheel_input (
         // Rough Racer uses a five-count full-scale quadratic curve. Keep the
         // rate in Q8 fixed point so small movements can remain below one
         // count per frame instead of being rounded up and made twitchy.
-        if (effective >= 8'd119) rough_rate = 11'd1280;
+        if (stick_abs >= 8'd120) rough_rate = 11'd1280;
         else rough_rate = rough_product[18:8];
 
         stick_step = 8'sd0;
@@ -95,9 +112,15 @@ module s24_wheel_input (
     always_ff @(posedge clk) begin
         if (reset) begin
             stick_toggle <= 1'b0;
+            stick_active <= 1'b0;
             rough_accum <= 8'd0;
             rough_step <= 3'd0;
         end else if (tick) begin
+            if(stick_active) begin
+                if(stick_abs<=deadzone_exit) stick_active<=1'b0;
+            end else if(stick_abs>=deadzone_enter) begin
+                stick_active<=1'b1;
+            end
             if (analogue_profile == ANALOGUE_ROUGHRAC &&
                 digital_left == digital_right) begin
                 rough_accum <= rough_sum[7:0];

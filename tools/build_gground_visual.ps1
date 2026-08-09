@@ -58,7 +58,7 @@ if($RealAudio) { $repoSources += $jt51Sources }
 else { $repoSources += 'verif/jt51_boot_stub.sv' }
 $exe = Join-Path $ModelDirectory 'Vtb_gground_boot.exe'
 $signaturePath = Join-Path $ModelDirectory 'build.signature'
-$verilatorVersion = & 'C:/Users/meath/bin/verilator.exe' --version
+$verilatorVersion = & verilator-safe --version
 $signatureParts = @(
     $verilatorVersion, $sdlCflags, $sdlLibs,
     "tb_gground_boot|S24_VISUAL|no-timing|savable|packed-fx68k-structs|real-audio=$RealAudio|threads=$ModelThreads|OPT_FAST=O3|OPT_SLOW=O2|OPT_GLOBAL=O2|march=native|mtune=native|fomit-frame-pointer|ABI=0"

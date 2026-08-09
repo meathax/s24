@@ -13,9 +13,9 @@
 // (x=308) and its last row (y=174).  This bench reports, per scanline, every
 // descriptor the renderer actually accepts, so the drop is observable directly
 // instead of through the framebuffer.
-module tb_sprite_crkdown_list;
+module tb_sprite_crkdown_list(input logic clk);
     import s24_pkg::*;
-    logic clk=0,reset=1,ce_pixel=0;
+    logic reset=1,ce_pixel=0;
     logic [9:0] hcount=0,vcount=0;
     logic [13:0] pixel0,pixel1,pixel2,pixel3;
     logic [10:0] rank0,rank1,rank2,rank3;
@@ -35,7 +35,6 @@ module tb_sprite_crkdown_list;
     logic walked_at [0:383];
     logic filled_at [0:383];
 
-    always #5 clk=~clk;
     assign mem_ack=mem_req;
 
     always_comb begin
@@ -476,63 +475,115 @@ module tb_sprite_crkdown_list;
         .mem_data(mem_data),.mem_ack(mem_ack));
 
     // Snoop every descriptor the renderer accepts for the line it is filling.
-    always @(posedge clk) if(!reset) begin
-        if(dut.target_y<9'd384) begin
-            filled_at[dut.target_y]<=1'b1;
-            if(dut.descriptor[79:64]==TARGET_W4 && dut.descriptor[95:80]==TARGET_W5) begin
-                walked_at[dut.target_y]<=1'b1;
-                if(dut.state==dut.S_YMAP || dut.state==dut.S_YDIV)
-                    drawn_at[dut.target_y]<=1'b1;
+    integer init_line;
+    always @(posedge clk) begin
+        if(reset) begin
+            for(init_line=0;init_line<384;init_line=init_line+1) begin
+                filled_at[init_line]<=1'b0;
+                walked_at[init_line]<=1'b0;
+                drawn_at[init_line]<=1'b0;
+            end
+        end else begin
+            if(dut.target_y<9'd384) begin
+                filled_at[dut.target_y]<=1'b1;
+                if(dut.descriptor[79:64]==TARGET_W4 &&
+                   dut.descriptor[95:80]==TARGET_W5) begin
+                    walked_at[dut.target_y]<=1'b1;
+                    if(dut.state==dut.S_YMAP || dut.state==dut.S_YDIV)
+                        drawn_at[dut.target_y]<=1'b1;
+                end
             end
         end
     end
 
-    task automatic line_boundary(input [9:0] line);
-        begin
-            @(negedge clk);
-            vcount=line;hcount=10'd655;ce_pixel=0;
-            @(posedge clk);
-            @(negedge clk);
-            ce_pixel=1;
-            @(posedge clk);#1;ce_pixel=0;hcount=0;
-        end
-    endtask
-
+    typedef enum logic [3:0] {
+        P_RESET, P_PRIME_SETUP, P_PRIME_PULSE, P_PRIME_CLEAR,
+        P_LIST_WAIT, P_LINE_SETUP, P_LINE_PULSE, P_LINE_CLEAR,
+        P_LINE_WAIT, P_CHECK
+    } phase_t;
+    phase_t phase=P_RESET;
+    integer phase_count=0;
+    integer line_index=0;
     integer ln;
-    initial begin
-        repeat(3) @(posedge clk);
-        reset=0;
-        line_boundary(10'd383);
-        repeat(4000) @(posedge clk);
-        if(!dut.list_cache_valid)
-            $fatal(1,"list collection failed seen=%0d index=%0d state=%0d",
-                   dut.list_seen,dut.list_index,dut.state);
-        $display("crkdown list collected: stack_count=%0d list_seen=%0d",
-                 dut.stack_count,dut.list_seen);
-        // Drive one complete frame of raster boundaries so the producer fills
-        // every line 0..383 in its normal order, then judge by target_y.
-        for(ln=0; ln<=383; ln=ln+1) begin
-            line_boundary(ln[9:0]);
-            repeat(2500) @(posedge clk);
-        end
-        // Sprite 1051 covers destination rows 111..174 inclusive.
-        for(ln=111; ln<=174; ln=ln+1) begin
-            target_lines=target_lines+1;
-            if(!filled_at[ln]) begin
-                missing_lines=missing_lines+1;
-                $display("UNFILLED line=%0d never rendered by the producer",ln);
-            end else if(!drawn_at[ln]) begin
-                missing_lines=missing_lines+1;
-                $display("MISSING line=%0d sprite 1051 not drawn (reached render walk=%0d)",
-                         ln,walked_at[ln]);
+
+    // Clocked stimulus keeps the test savable under Verilator 5.050. The
+    // phase sequence is cycle-equivalent to the former event-control task.
+    always @(posedge clk) begin
+        case(phase)
+            P_RESET: begin
+                if(phase_count==2) begin
+                    reset<=1'b0;
+                    phase_count<=0;
+                    phase<=P_PRIME_SETUP;
+                end else phase_count<=phase_count+1;
             end
-        end
-        $display("crkdown sprite 1051: %0d/%0d expected lines rendered, %0d missing",
-                 target_lines-missing_lines,target_lines,missing_lines);
-        if(missing_lines!=0)
-            $display("TB_RESULT=FAIL missing=%0d",missing_lines);
-        else
-            $display("TB_RESULT=PASS");
-        $finish;
+            P_PRIME_SETUP: begin
+                vcount<=10'd383;hcount<=10'd655;ce_pixel<=1'b0;
+                phase<=P_PRIME_PULSE;
+            end
+            P_PRIME_PULSE: begin
+                ce_pixel<=1'b1;
+                phase<=P_PRIME_CLEAR;
+            end
+            P_PRIME_CLEAR: begin
+                ce_pixel<=1'b0;hcount<=10'd0;phase_count<=0;
+                phase<=P_LIST_WAIT;
+            end
+            P_LIST_WAIT: begin
+                if(phase_count==3999) begin
+                    if(!dut.list_cache_valid)
+                        $fatal(1,"list collection failed seen=%0d index=%0d state=%0d",
+                               dut.list_seen,dut.list_index,dut.state);
+                    $display("crkdown list collected: stack_count=%0d list_seen=%0d",
+                             dut.stack_count,dut.list_seen);
+                    line_index<=0;phase<=P_LINE_SETUP;
+                end else phase_count<=phase_count+1;
+            end
+            P_LINE_SETUP: begin
+                vcount<=line_index[9:0];hcount<=10'd655;ce_pixel<=1'b0;
+                phase<=P_LINE_PULSE;
+            end
+            P_LINE_PULSE: begin
+                ce_pixel<=1'b1;
+                phase<=P_LINE_CLEAR;
+            end
+            P_LINE_CLEAR: begin
+                ce_pixel<=1'b0;hcount<=10'd0;phase_count<=0;
+                phase<=P_LINE_WAIT;
+            end
+            P_LINE_WAIT: begin
+                if(phase_count==2499) begin
+                    if(line_index==383)
+                        phase<=P_CHECK;
+                    else begin
+                        line_index<=line_index+1;
+                        phase<=P_LINE_SETUP;
+                    end
+                end else phase_count<=phase_count+1;
+            end
+            default: begin
+                target_lines=0;
+                missing_lines=0;
+                // Sprite 1051 covers destination rows 111..174 inclusive.
+                for(ln=111; ln<=174; ln=ln+1) begin
+                    target_lines=target_lines+1;
+                    if(!filled_at[ln]) begin
+                        missing_lines=missing_lines+1;
+                        $display("UNFILLED line=%0d never rendered by the producer",ln);
+                    end else if(!drawn_at[ln]) begin
+                        missing_lines=missing_lines+1;
+                        $display("MISSING line=%0d sprite 1051 not drawn (reached render walk=%0d)",
+                                 ln,walked_at[ln]);
+                    end
+                end
+                $display("crkdown sprite 1051: %0d/%0d expected lines rendered, %0d missing",
+                         target_lines-missing_lines,target_lines,missing_lines);
+                if(missing_lines!=0)
+                    $display("TB_RESULT=FAIL missing=%0d",missing_lines);
+                else
+                    $display("TB_RESULT=PASS");
+                $finish;
+            end
+        endcase
     end
 endmodule

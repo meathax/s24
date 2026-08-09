@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+import s24_pkg::*;
 module tb_analog;
     logic clk=0,reset=1;
     always #5 clk=~clk;
@@ -59,10 +60,26 @@ module tb_analog;
         if(wheel_out[7:0]!==8'h08)
             $fatal(1,"digital right wheel delta mismatch: %02x",wheel_out[7:0]);
 
-        // Opposing directions cancel rather than forwarding the stick.
-        digital_left=1;stick_x=8'sd127;
+        // Hot Rod's entry deadzone rejects normal centre jitter. Crossing the
+        // threshold emits a fine one-count event; returning through the lower
+        // exit threshold stops without toggle chatter.
+        digital_right=0;stick_x=8'sd11;
         wheel_tick=1;tick;wheel_tick=0;tick;
         if(wheel_out[7:0]!==8'h08)
+            $fatal(1,"Hot Rod centre jitter escaped deadzone");
+        stick_x=8'sd12;
+        wheel_tick=1;tick;wheel_tick=0;tick;
+        if(wheel_out[7:0]!==8'd1)
+            $fatal(1,"Hot Rod deadzone entry mismatch: %02x",wheel_out[7:0]);
+        stick_x=8'sd8;
+        wheel_tick=1;tick;wheel_tick=0;tick;
+        if(wheel_out[7:0]!==8'd1)
+            $fatal(1,"Hot Rod deadzone exit chattered");
+
+        // Opposing directions cancel rather than forwarding the stick.
+        digital_left=1;digital_right=1;stick_x=8'sd127;
+        wheel_tick=1;tick;wheel_tick=0;tick;
+        if(wheel_out[7:0]!==8'h01)
             $fatal(1,"opposing digital directions did not cancel");
 
         // Hot Rod retains its quadratic curve with the requested lower

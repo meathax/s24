@@ -386,7 +386,12 @@ module s24_sprite (
     logic [1:0] line_b_category [0:3];
     localparam int LINE_BANKS = 8;
     localparam int LINE_BANK_BITS = 3;
-    localparam int LINE_GEN_WIDTH = 16;
+    // Each bank advances its own generation and scrubs one of its 128 packed
+    // X words on every fill. An 8-bit generation therefore cannot wrap until
+    // every word has been cleared twice. Keeping the tag at 8 bits also makes
+    // the complete line word 34 bits, fitting each 1024-deep RAM in four M10Ks
+    // instead of five without changing ports, latency, or address mapping.
+    localparam int LINE_GEN_WIDTH = 8;
     localparam int LINE_WIDTH = LINE_GEN_WIDTH + 1 + 11 + 14;
     logic [9:0] line_b_addr [0:3];
     logic [LINE_WIDTH-1:0] line_b_data [0:3];
@@ -1174,15 +1179,15 @@ module s24_sprite (
     // Port B performs the renderer write or the inactive-bank clear. Port A
     // always consumes/clears the currently displayed bank on a pixel edge.
     logic line_b_clear;
-    // Generation tags reject stale pixels only until bank_generation wraps
-    // (2^LINE_GEN_WIDTH fills of a bank, ~23 s at 48 fills/bank/frame). A
+    // Generation tags reject stale pixels only until bank_generation wraps.
+    // With the 8-bit tag that is 256 fills of the same bank. A
     // word never rewritten in that whole window then matches its old tag
     // again, and as the counter keeps advancing the match sweeps through the
     // stored history: the line buffers replay ~23-second-old sprite pixels in
     // every scene, animated purely by the free-running fill counters -- even
     // with the CPU paused. Scrubbing one rotating word of the fill bank per
     // fill bounds any word's unwritten lifetime to 128 fills (~3 frames),
-    // far inside the wrap horizon, so no stale tag can survive to a wrap.
+    // half the wrap horizon, so no stale tag can survive to a wrap.
     logic scrub_req;
     logic [9:0] scrub_addr;
     logic [6:0] bank_scrub [0:LINE_BANKS-1];

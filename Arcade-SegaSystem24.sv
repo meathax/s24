@@ -12,7 +12,13 @@ module emu (
     assign {DDRAM_CLK,DDRAM_BURSTCNT,DDRAM_ADDR,DDRAM_DIN,
             DDRAM_BE,DDRAM_RD,DDRAM_WE}='0;
     `endif
-    assign VGA_F1=0; assign VGA_SCALER=rotation_active; assign VGA_DISABLE=0;
+    assign VGA_F1=0;
+    // System 24 is a native 24.39 kHz medium-resolution source.  The legacy
+    // 15 kHz in-core line doubler would turn that into an unintended 48.8 kHz
+    // mode, so honour MiSTer's forced-scandoubler request by selecting the
+    // framework scaler while preserving the board's native raster here.
+    assign VGA_SCALER=rotation_active|forced_scandoubler;
+    assign VGA_DISABLE=0;
     assign HDMI_FREEZE=0; assign HDMI_BLACKOUT=0; assign HDMI_BOB_DEINT=0;
     assign AUDIO_S=1; assign AUDIO_MIX=0;
     assign LED_DISK=0; assign LED_POWER=0; assign BUTTONS=0;
@@ -35,9 +41,11 @@ module emu (
         "S24;;",
         "O[2:1],Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
         "O[6],Pause,Off,On;",
+        "O[16],Pause when OSD is open,Off,On;",
         "O[7],Service Mode,Off,On;",
         "O[9:8],Rotation,Normal,Rotate 90 CCW,Rotate 90 CW;",
         "O[12:10],Scaling,Normal,V-Integer,HV-Integer;",
+        "O[15:14],Scandoubler Fx,None,CRT 25%,CRT 50%,CRT 75%;",
         "P1O[101],CRT Adjust,Off,On;",
         "H1P1O[100:96],CRT H-Size,0,+1,+2,...,+15,-16,...,-1;",
         "H1P1O[85:79],CRT H-Position,0,+1,+2,...,+48,-48,...,-1;",
@@ -47,9 +55,9 @@ module emu (
         // a tilemap on and off every frame, which a CRT integrates but a
         // fixed-pixel display shows as a 28.75 Hz flicker. Off gives the raw
         // alternation the PCB emits.
-        "O[13],Flicker Blend,On,Off;",
+        "H2O[13],CRT Flicker Blend,On,Off;",
         "R[0],Reset;",
-        "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test;",
+        "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test,Pause;",
         "V,v",`BUILD_DATE
     };
 
@@ -81,17 +89,22 @@ module emu (
     logic [7:0] paddle0,paddle1,paddle2,paddle3;
     logic [15:0] stick_l0,stick_l1,stick_l2,stick_l3;
     logic forced_scandoubler;
+    wire [21:0] gamma_bus;
     logic ioctl_download,ioctl_upload,ioctl_wr,ioctl_rd,ioctl_wait;
+    logic loader_wait,persistence_wait;
     logic [15:0] ioctl_index;
     logic [26:0] ioctl_addr;
     logic [15:0] ioctl_dout,ioctl_din;
+    logic floppy_save_req;
     logic [15:0] sdram_sz;
     s24_pkg::board_desc_t descriptor;
     hps_io #(.CONF_STR(CONF_STR),.WIDE(1)) hps(
-        .clk_sys(clk_sys),.HPS_BUS(HPS_BUS),.EXT_BUS(),.gamma_bus(),
+        .clk_sys(clk_sys),.HPS_BUS(HPS_BUS),.EXT_BUS(),.gamma_bus(gamma_bus),
         .forced_scandoubler(forced_scandoubler),.buttons(buttons),.status(status),
         .video_rotated(video_rotated),.new_vmode(1'b0),
-        .status_menumask({14'd0,~status[101],1'b0}),.joystick_0(joy0),.joystick_1(joy1),
+        // H1 owns the CRT-adjust children; H2 owns the Bonanza-only blend.
+        .status_menumask({13'd0,~descriptor.video_profile[0],~status[101],1'b0}),
+        .joystick_0(joy0),.joystick_1(joy1),
         .joystick_2(joy2),.joystick_3(joy3),
         .joystick_4(),.joystick_5(),
         .joystick_l_analog_0(stick_l0),.joystick_l_analog_1(stick_l1),
@@ -123,12 +136,12 @@ module emu (
         .sd_rd(1'b0),.sd_wr(1'b0),.sd_ack(),
         .sd_buff_addr(),.sd_buff_dout(),.sd_buff_din('{16'd0}),.sd_buff_wr(),
         .ioctl_download(ioctl_download),.ioctl_upload(ioctl_upload),
-        .ioctl_upload_req(1'b0),.ioctl_upload_index(8'd0),
+        .ioctl_upload_req(floppy_save_req),.ioctl_upload_index(8'd8),
         .ioctl_wr(ioctl_wr),.ioctl_rd(ioctl_rd),.ioctl_index(ioctl_index),
         .ioctl_addr(ioctl_addr),.ioctl_dout(ioctl_dout),.ioctl_din(ioctl_din),
         .ioctl_wait(ioctl_wait),.ioctl_file_ext(),.RTC(),.TIMESTAMP(),
         .uart_mode(),.uart_speed(),.sdram_sz(sdram_sz));
-    assign ioctl_din=0;
+    assign ioctl_wait=loader_wait|persistence_wait;
 
     logic [7:0] dsw,coinage;
     s24_switches switches(
@@ -232,7 +245,7 @@ module emu (
         .clk(clk_sys),.reset(~pll_locked),.mem_ready(sdram_ready_s),
         .ioctl_download(ioctl_download),.ioctl_index(ioctl_index[7:0]),
         .ioctl_wr(ioctl_wr),.ioctl_addr(ioctl_addr),.ioctl_dout(ioctl_dout),
-        .ioctl_wait(ioctl_wait),.descriptor(descriptor),.rom_loaded(rom_loaded),
+        .ioctl_wait(loader_wait),.descriptor(descriptor),.rom_loaded(rom_loaded),
         .wr_req(lwr_req),.wr_addr(lwr_addr),.wr_data(lwr_data),.wr_be(lwr_be),.wr_ack(lwr_ack),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata));
 
@@ -251,6 +264,28 @@ module emu (
     end
     assign core_reset=core_reset_sync[1];
 
+    // OSD Pause remains a level option, while the controller Pause input is
+    // edge-toggled so a normal button tap pauses until the next tap.  Keep
+    // the latch outside s24_core: all emulated clocks and both audio channels
+    // then observe the same pause request.  Optional OSD auto-pause is useful
+    // for cabinet play without making opening the menu change the default.
+    logic controller_pause;
+    logic pause_button_d;
+    wire pause_button=joy0[14]|joy1[14]|joy2[14]|joy3[14];
+    wire persistence_upload=ioctl_upload && ioctl_index[7:0]==8'd8;
+    wire core_pause=status[6]|controller_pause|(status[16]&OSD_STATUS)|
+                    persistence_upload;
+    always_ff @(posedge clk_sys) begin
+        if(core_reset) begin
+            controller_pause<=1'b0;
+            pause_button_d<=1'b0;
+        end else begin
+            pause_button_d<=pause_button;
+            if(pause_button && !pause_button_d)
+                controller_pause<=~controller_pause;
+        end
+    end
+
     logic p0_req,p2_req,p3_req,p4_req;
     logic [26:1] p0_addr,p3_addr,p4_addr;
     logic [26:4] p2_addr;
@@ -266,8 +301,9 @@ module emu (
     // The generated Cyclone V PLL is 48.317307 MHz. Pass that value to the
     // fractional enables so the board's native 16 MHz PCD raster remains at
     // its exact 656x424 timing instead of inheriting a /3 frequency error.
+    logic floppy_written;
     s24_core #(.CLK_HZ(48_317_307)) core(
-        .clk(clk_sys),.reset(core_reset),.pause(status[6]),
+        .clk(clk_sys),.reset(core_reset),.pause(core_pause),
         .flicker_blend(~status[13]),.board(descriptor),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),
         .input_ports(input_ports),
@@ -278,7 +314,7 @@ module emu (
         .mahjong_line(mahjong_line),
         .ce_pixel(core_ce),.hblank(hblank),.vblank(vblank),
         .hsync(hsync),.vsync(vsync),.red(r),.green(g),.blue(b),
-        .audio_l(AUDIO_L),.audio_r(AUDIO_R),
+        .audio_l(AUDIO_L),.audio_r(AUDIO_R),.floppy_written(floppy_written),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),
         .p3_req(p3_req),.p3_addr(p3_addr),.p3_data(p3_data),.p3_ack(p3_ack),
@@ -379,17 +415,38 @@ module emu (
     wire video_hs=crt_on ? crt_hs : hsync;
     wire video_vs=crt_on ? crt_vs : vsync;
     wire video_de=crt_on ? (crt_de_osd & ~crt_vb) : native_de;
+
+    // MiSTer's gamma table is a colour transform, not a reason to retime the
+    // medium-resolution raster.  gamma_corr pipelines RGB and all four timing
+    // qualifiers together, retaining the native 656x424/57.524 Hz mode.
+    wire [7:0] gamma_r,gamma_g,gamma_b;
+    wire gamma_hs,gamma_vs,gamma_hblank,gamma_vblank;
+    gamma_corr gamma_i(
+        .clk_sys(gamma_bus[20]),.clk_vid(clk_sys),.ce_pix(video_ce),
+        .gamma_en(gamma_bus[19]),.gamma_wr(gamma_bus[18]),
+        .gamma_wr_addr(gamma_bus[17:8]),.gamma_value(gamma_bus[7:0]),
+        .HSync(video_hs),.VSync(video_vs),
+        // video_de includes the CRT-adjust OSD anchor policy. Carry that
+        // exact active window through the gamma pipeline as combined blank.
+        .HBlank(~video_de),.VBlank(1'b0),
+        .RGB_in({video_r,video_g,video_b}),
+        .HSync_out(gamma_hs),.VSync_out(gamma_vs),
+        .HBlank_out(gamma_hblank),.VBlank_out(gamma_vblank),
+        .RGB_out({gamma_r,gamma_g,gamma_b})
+    );
+    assign gamma_bus[21]=1'b1;
+    wire gamma_de=~(gamma_hblank|gamma_vblank);
     wire video_de_freak;
     video_freak video_freak_i (
         .CLK_VIDEO(clk_sys),
         .CE_PIXEL(video_ce),
-        .VGA_VS(video_vs),
+        .VGA_VS(gamma_vs),
         .HDMI_WIDTH(HDMI_WIDTH),
         .HDMI_HEIGHT(HDMI_HEIGHT),
         .VGA_DE(video_de_freak),
         .VIDEO_ARX(VIDEO_ARX),
         .VIDEO_ARY(VIDEO_ARY),
-        .VGA_DE_IN(video_de),
+        .VGA_DE_IN(gamma_de),
         .ARX(aspect_arx[11:0]),
         .ARY(aspect_ary[11:0]),
         .CROP_SIZE(12'd0),
@@ -402,8 +459,8 @@ module emu (
     screen_rotate video_rotate (
         .CLK_VIDEO(clk_sys),
         .CE_PIXEL(video_ce),
-        .VGA_R(video_r),.VGA_G(video_g),.VGA_B(video_b),
-        .VGA_HS(video_hs),.VGA_VS(video_vs),.VGA_DE(video_de),
+        .VGA_R(gamma_r),.VGA_G(gamma_g),.VGA_B(gamma_b),
+        .VGA_HS(gamma_hs),.VGA_VS(gamma_vs),.VGA_DE(gamma_de),
         .rotate_ccw(rotate_ccw),
         .no_rotate(~rotation_active),
         .flip(1'b0),
@@ -450,6 +507,90 @@ module emu (
     logic mp0_ack,mp2_ack,mp3_ack,mp4_ack;
     logic wr_rsp_unused_src,wr_rsp_unused_dst;
 
+    // The immutable MRA disk (index 3) is overlaid by MiSTer's index-8 NVRAM
+    // file at boot.  Any accepted FDC write marks that image dirty.  Coalesce
+    // writes for five seconds before requesting a host save so a format or
+    // directory update becomes one transfer rather than a save loop.
+    localparam logic [27:0] FLOPPY_SAVE_DELAY=28'd241_586_535;
+    logic floppy_dirty;
+    logic [27:0] floppy_save_timer;
+    always_ff @(posedge clk_sys) begin
+        if(!pll_locked) begin
+            floppy_dirty<=1'b0;
+            floppy_save_timer<='0;
+            floppy_save_req<=1'b0;
+        end else begin
+            if(floppy_written) begin
+                floppy_dirty<=1'b1;
+                floppy_save_timer<=FLOPPY_SAVE_DELAY;
+            end else if(floppy_save_timer!=0) begin
+                floppy_save_timer<=floppy_save_timer-1'b1;
+            end
+
+            if(floppy_dirty && floppy_save_timer==0)
+                floppy_save_req<=1'b1;
+
+            if(persistence_upload) begin
+                floppy_dirty<=1'b0;
+                floppy_save_req<=1'b0;
+            end
+        end
+    end
+
+    // hps_io presents the upload address before requesting each data word.
+    // Prefetch that word through CPU-A's SDRAM port and hold ioctl_wait until
+    // it is resident.  Pausing the core lets any already-issued CPU-A request
+    // retire before ownership changes; no in-flight response is discarded.
+    logic persistence_owns_p0,persistence_p0_req,persistence_p0_ack;
+    logic [26:1] persistence_p0_addr;
+    logic [15:0] persistence_p0_data;
+    logic [26:0] persistence_cached_addr;
+    logic persistence_data_valid;
+    wire cdc_p0_req=persistence_owns_p0 ? persistence_p0_req : p0_req;
+    wire [26:1] cdc_p0_addr=persistence_owns_p0 ? persistence_p0_addr : p0_addr;
+    logic cdc_p0_ack;
+    logic [15:0] cdc_p0_data;
+    assign p0_ack=!persistence_owns_p0 && cdc_p0_ack;
+    assign p0_data=cdc_p0_data;
+    assign persistence_p0_ack=persistence_owns_p0 && cdc_p0_ack;
+    assign persistence_wait=persistence_upload &&
+                            (!persistence_owns_p0 || !persistence_data_valid);
+    assign ioctl_din=persistence_upload ? persistence_p0_data : 16'd0;
+
+    always_ff @(posedge clk_sys) begin
+        if(!pll_locked || !persistence_upload) begin
+            persistence_owns_p0<=1'b0;
+            persistence_p0_req<=1'b0;
+            persistence_p0_addr<='0;
+            persistence_p0_data<='0;
+            persistence_cached_addr<='1;
+            persistence_data_valid<=1'b0;
+        end else begin
+            if(!persistence_owns_p0 && !p0_req)
+                persistence_owns_p0<=1'b1;
+
+            if(persistence_data_valid &&
+               persistence_cached_addr!=ioctl_addr)
+                persistence_data_valid<=1'b0;
+
+            if(persistence_owns_p0 && !persistence_p0_req &&
+               (!persistence_data_valid ||
+                persistence_cached_addr!=ioctl_addr)) begin
+                persistence_p0_req<=1'b1;
+                persistence_p0_addr<=s24_pkg::word_address(
+                    s24_pkg::SDR_FLOPPY_BASE+ioctl_addr);
+                persistence_cached_addr<=ioctl_addr;
+                persistence_data_valid<=1'b0;
+            end
+
+            if(persistence_p0_ack) begin
+                persistence_p0_req<=1'b0;
+                persistence_p0_data<=cdc_p0_data;
+                persistence_data_valid<=1'b1;
+            end
+        end
+    end
+
     // SYNC_STAGES(1) on every instance below: clk_sys and clk_ram are the same
     // PLL VCO divided by 26 and 13 -- an exact phase-locked 2:1 pair that
     // Arcade-SegaSystem24.sdc already keeps in one clock group -- so the second
@@ -471,8 +612,8 @@ module emu (
 
     s24_sdram_cdc #(.REQ_WIDTH(26),.RSP_WIDTH(16),.SYNC_STAGES(1)) cdc_p0(
         .reset(~pll_locked),
-        .src_clk(clk_sys),.src_req(p0_req),.src_payload(p0_addr),
-        .src_ack(p0_ack),.src_response(p0_data),
+        .src_clk(clk_sys),.src_req(cdc_p0_req),.src_payload(cdc_p0_addr),
+        .src_ack(cdc_p0_ack),.src_response(cdc_p0_data),
         .dst_clk(clk_ram),.dst_req(mp0_req),.dst_payload(mp0_addr),
         .dst_ack(mp0_ack),.dst_response(mp0_data));
     s24_sdram_cdc #(.REQ_WIDTH(23),.RSP_WIDTH(128),.SYNC_STAGES(1)) cdc_p2(
@@ -511,15 +652,15 @@ module emu (
     // older 15 kHz cores and re-timed this medium-resolution stream, producing
     // line repeats, frame tearing and vertical jumps on real hardware.
     assign CE_PIXEL=video_ce;
-    assign VGA_R=video_r;
-    assign VGA_G=video_g;
-    assign VGA_B=video_b;
-    assign VGA_HS=video_hs;
-    assign VGA_VS=video_vs;
-    assign VGA_DE=video_de;
-    // System 24 is already a 384-line medium-resolution source.  Do not
-    // discard/darken alternate native lines in the framework scanline stage.
-    assign VGA_SL=2'b00;
+    assign VGA_R=gamma_r;
+    assign VGA_G=gamma_g;
+    assign VGA_B=gamma_b;
+    assign VGA_HS=gamma_hs;
+    assign VGA_VS=gamma_vs;
+    assign VGA_DE=gamma_de;
+    // The framework applies these strengths after scaling; no native System
+    // 24 line is discarded or darkened inside the authentic 384-line raster.
+    assign VGA_SL=status[15:14];
 
     assign LED_USER=~rom_loaded|ioctl_download|wrong_sdram_size;
 endmodule

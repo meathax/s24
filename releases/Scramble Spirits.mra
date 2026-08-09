@@ -10,7 +10,7 @@
   <resolution>15kHz</resolution>
   <rotation>vertical (ccw)</rotation>
   <joystick>8-way</joystick>
-  <buttons default="A,B,Start,Select,R,L" names="Fire,Formation,-,-,-,-,Start,Coin,Service,Test"/>
+  <buttons default="A,B,Start,Select,R,L,Y" names="Fire,Formation,-,-,-,-,Start,Coin,Service,Test,Pause"/>
   <switches default="FF FD"/>
   <rom index="1" zip="sspirits.zip" md5="none">
     <interleave output="16">
@@ -22,6 +22,7 @@
     <part name="ds3-5000-02-.img" crc="179b98e9"/>
     <part repeat="253952">00</part>
   </rom>
+  <nvram index="8" size="2097152"/>
   <rom index="0">
     <part>0100002D00000000</part>
   </rom>

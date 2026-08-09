@@ -95,6 +95,15 @@ module tb_loader;
         assert(wr_data==16'hbc9a) else $fatal(1,"floppy endian %h",wr_data);
         finish_sdram_write();
 
+        // A persisted disk save overlays index 3 byte-for-byte at the same
+        // SDRAM base. It must retain the disk's byte-linear host ordering.
+        begin_write(8,6,16'h5aa5);
+        assert(wr_req && wr_addr==word_address(SDR_FLOPPY_BASE+6))
+            else $fatal(1,"persistent floppy request");
+        assert(wr_data==16'h5aa5 && wr_be==2'b11)
+            else $fatal(1,"persistent floppy endian %h",wr_data);
+        finish_sdram_write();
+
         // FD1094 keys are also byte arrays; the key RAM owns byte selection.
         begin_write(4,6,16'hf0de);
         assert(key_wr && key_word_addr==12'd3 && key_wdata==16'hf0de) else $fatal(1,"key path");
@@ -112,7 +121,7 @@ module tb_loader;
         ioctl_download=0;
         @(posedge clk);#1;
         assert(rom_loaded) else $fatal(1,"missing boot commit");
-        $display("PASS loader endian, raw media, key, 6 local profiles, boot commit");
+        $display("PASS loader endian, persistent media, key, 6 local profiles, boot commit");
         $finish;
     end
 endmodule

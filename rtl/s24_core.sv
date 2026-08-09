@@ -39,6 +39,9 @@ module s24_core #(
     output logic [7:0]  blue,
     output logic [15:0] audio_l,
     output logic [15:0] audio_r,
+    // One clk pulse after an emulated floppy byte has reached SDRAM.  The
+    // MiSTer wrapper uses this to debounce host-side persistent-media saves.
+    output logic        floppy_written,
     output logic        p0_req,
     output logic [26:1] p0_addr,
     input  logic [15:0] p0_data,
@@ -1061,9 +1064,14 @@ module s24_core #(
     // Complete a floppy write byte after SDRAM accepts it.
     always_ff @(posedge clk) begin
         fdc_write_ack <= 1'b0;
-        if (reset) fdc_write_ack <= 1'b0;
-        else if (fdc_media_req && fdc_media_wr && wr_ack)
+        floppy_written <= 1'b0;
+        if (reset) begin
+            fdc_write_ack <= 1'b0;
+            floppy_written <= 1'b0;
+        end else if (fdc_media_req && fdc_media_wr && wr_ack) begin
             fdc_write_ack <= 1'b1;
+            floppy_written <= 1'b1;
+        end
     end
 
     // DAC is port H. MAME configures the YM channel and unsigned R-2R DAC

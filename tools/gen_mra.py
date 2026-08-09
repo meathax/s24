@@ -85,6 +85,7 @@ MRA_CONTROL_SSPIRITS = "sspirits"
 MRA_CONTROL_HOTROD = "hotrod"
 MRA_CONTROL_ROUGHRAC = "roughrac"
 MRA_CONTROL_GOLF = "golf"
+MRA_CONTROL_GGROUND = "gground"
 MRA_CONTROL_CRKDOWN = "crkdown"
 MRA_CONTROL_BNZABROS = "bnzabros"
 
@@ -133,49 +134,55 @@ MRA_CONTROL_PROFILES = {
     MRA_CONTROL_GENERIC: MraControls(
         "8-way",
         ("Button 1", "Button 2", "Button 3", "-", "-", "-",
-         "Start", "Coin", "Service", "Test"),
-        ("A", "B", "X", "Start", "Select", "R", "L"),
+         "Start", "Coin", "Service", "Test", "Pause"),
+        ("A", "B", "X", "Start", "Select", "R", "L", "Y"),
     ),
     # Scramble Spirits uses two gameplay buttons: Fire and Formation.
     MRA_CONTROL_SSPIRITS: MraControls(
         "8-way",
         ("Fire", "Formation", "-", "-", "-", "-",
-         "Start", "Coin", "Service", "Test"),
-        ("A", "B", "Start", "Select", "R", "L"),
+         "Start", "Coin", "Service", "Test", "Pause"),
+        ("A", "B", "Start", "Select", "R", "L", "Y"),
     ),
     MRA_CONTROL_HOTROD: MraControls(
         "Steering Wheel / Accelerator",
-        ("-", "-", "-", "-", "-", "-", "Start", "Coin", "Service", "Test"),
-        ("Start", "Select", "R", "L"),
+        ("-", "-", "-", "-", "-", "-", "Start", "Coin", "Service", "Test", "Pause"),
+        ("Start", "Select", "R", "L", "Y"),
     ),
     MRA_CONTROL_ROUGHRAC: MraControls(
         "Steering Wheel",
         ("Accelerate", "Brake", "Action", "-", "-", "-",
-         "Start", "Coin", "Service", "Test"),
-        ("A", "B", "X", "Start", "Select", "R", "L"),
+         "Start", "Coin", "Service", "Test", "Pause"),
+        ("A", "B", "X", "Start", "Select", "R", "L", "Y"),
     ),
     MRA_CONTROL_GOLF: MraControls(
         "Swing / Angle",
         ("Club", "Stance", "Angle Left", "Angle Right",
          "-", "-",
-         "Start", "Coin", "Service", "Test"),
+         "Start", "Coin", "Service", "Test", "Pause"),
         ("A", "B", "X", "Y", "Start", "Select", "R", "L"),
+    ),
+    MRA_CONTROL_GGROUND: MraControls(
+        "8-way",
+        ("Attack", "Special", "-", "-", "-", "-",
+         "Start", "Coin", "Service", "Test", "Pause"),
+        ("A", "B", "Start", "Select", "R", "L", "Y"),
     ),
     # Crack Down: MAME's crkdown has only two per-player fire buttons
     # (Attack, Smart Bomb); the core's generic Button 3 input is unused.
     MRA_CONTROL_CRKDOWN: MraControls(
         "8-way",
         ("Attack", "Smart Bomb", "-", "-", "-", "-",
-         "Start", "Coin", "Service", "Test"),
-        ("A", "B", "Start", "Select", "R", "L"),
+         "Start", "Coin", "Service", "Test", "Pause"),
+        ("A", "B", "Start", "Select", "R", "L", "Y"),
     ),
     # Bonanza Bros: MAME's bnzabros has only Fire and Jump; Button 3 is
     # unused.
     MRA_CONTROL_BNZABROS: MraControls(
         "8-way",
         ("Fire", "Jump", "-", "-", "-", "-",
-         "Start", "Coin", "Service", "Test"),
-        ("A", "B", "Start", "Select", "R", "L"),
+         "Start", "Coin", "Service", "Test", "Pause"),
+        ("A", "B", "Start", "Select", "R", "L", "Y"),
     ),
 }
 
@@ -247,7 +254,8 @@ GAMES = (
          BOOT_DISK, FLOPPY | FD1094, 0x2D00, rotation="vertical (ccw)",
          floppy=p("ds3-5000-03d-rev-a.img", "5c5910f2"),
          key=p("317-0058-03d.key", "e1785bbd"),
-         dsw="FF FD", input_profile=INPUT_GGROUND),
+         dsw="FF FD", input_profile=INPUT_GGROUND,
+         mra_controls=MRA_CONTROL_GGROUND),
     Game("crkdown", "Crack Down (World, Floppy Based, FD1094 317-0058-04c)", 1989,
          BOOT_DISK, FLOPPY | FD1094, 0x2D00,
          floppy=p("ds3-5000-04c.img", "7d97ba5e"), key=p("317-0058-04c.key", "16e978cc"),
@@ -616,10 +624,10 @@ def emit_romboard_item(lines: list[str], item: Pair | SoloLane | FillPair) -> No
 def generate(game: Game, out_dir: pathlib.Path) -> pathlib.Path:
     zips = archive_names(game)
     controls = mra_controls_for(game)
-    if len(controls.names) != 10:
-        raise ValueError(f"{game.setname}: MiSTer control names require 10 slots")
-    if len(controls.defaults) != sum(name != "-" for name in controls.names):
-        raise ValueError(f"{game.setname}: compact control defaults do not match named inputs")
+    if len(controls.names) != 11:
+        raise ValueError(f"{game.setname}: MiSTer control names require 11 slots")
+    if len(controls.defaults) > sum(name != "-" for name in controls.names):
+        raise ValueError(f"{game.setname}: too many compact control defaults")
     button_names = ",".join(controls.names)
     button_defaults = ",".join(controls.defaults)
     lines = [
@@ -669,6 +677,9 @@ def generate(game: Game, out_dir: pathlib.Path) -> pathlib.Path:
             f'    <part name="{escape(game.floppy.name)}"{floppy_crc}/>',
             f'    <part repeat="{padding_bytes}">00</part>',
             "  </rom>",
+            # Writable floppy state is overlaid at boot and uploaded after
+            # the RTL's debounced FDC-write notification.
+            f'  <nvram index="8" size="{FLOPPY_BUFFER_BYTES}"/>',
         ))
     if game.key:
         lines.extend((

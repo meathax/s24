@@ -30,6 +30,14 @@ module tb_sprite_bank_ownership;
         reset=0;
         repeat(2) @(posedge clk);
 
+        // The per-bank scrub must cover every packed X word strictly before
+        // that bank's generation tag can wrap and make stale data look live.
+        assert((1 << $bits(dut.fill_generation)) >
+               (1 << $bits(dut.bank_scrub[0])))
+            else $fatal(1,"sprite generation tag does not outlive scrub");
+        assert($bits(dut.line0_display_q[0])==34)
+            else $fatal(1,"sprite line word no longer hits four-M10K packing");
+
         // The combinational selectors must skip both the raster bank and a
         // different bank currently owned by the producer.
         @(negedge clk);
