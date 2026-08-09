@@ -234,16 +234,17 @@ media dry run passes all 6 local contracts.
 The mixer sprite-rank selection is now a balanced comparator tree rather than
 a four-deep chain. Its focused regression passes tile blocking and fallback,
 shadow composition, backdrop ordering, normal reverse-list ordering, and the
-equal-rank lower-group tie rule. The last completed fit, before this comparator
-change, used 14,200 ALMs (34%), 1,582,668 RAM bits (28%), 221 RAM blocks (40%),
-28 DSPs (25%), and three PLLs. A new fit and timing inspection are required
-before replacing or distributing `s24.rbf`.
+equal-rank lower-group tie rule.
 
-The latest available `output_files/Arcade-SegaSystem24.sta.summary` is not
-timing-clean: slow-corner setup slack is `-10.034 ns` on the HDMI PLL clock
-and `-0.709 ns` on core PLL gen1; slow-corner core hold slack reaches
-`-0.510 ns`. These are the audit baselines for the eventual timing/resource
-optimization pass, not deployment evidence.
+The latest preserved full compile, dated 2026-08-09, completed with 20,098
+ALMs (48%), 4,379,132 block-memory bits (77%), 532 of 553 RAM blocks (96%), 37
+DSP blocks, and three PLLs. All reported setup, hold, recovery, removal, and
+minimum-pulse-width slacks were positive; the worst setup and hold results were
+0.157 ns and 0.050 ns. That compile predates the current tile line-ownership
+generation tags and sprite deadline shortcut, so it is a historical baseline,
+not build evidence for the current source. A fresh fit, report inspection, and
+functional regression are required before replacing or distributing
+`s24.rbf`.
 
 ## Live continuation checkpoint
 

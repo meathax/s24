@@ -387,6 +387,10 @@ module s24_core #(
     logic [7:0] fdc_dout,fdc_media_wdata,fdc_media_rdata;
     logic [7:0] fdc_media_rdata_bus;
     logic [26:0] fdc_media_addr;
+    logic [7:0] rom_bank;
+    logic fdc_read_busy;
+    logic fdc_cache_hit;
+    logic fdc_fifo_hit;
     s24_fdc fdc(
         .clk(clk),.reset(reset),.track_size({board.track_bytes_hi,board.track_bytes_lo}),
         .index_pulse(index_count!=0),.bus_rd(fdc_rd),.bus_wr(fdc_wr),.bus_addr(fdc_addr),
@@ -709,15 +713,12 @@ module s24_core #(
     typedef enum logic [3:0] {X_IDLE,X_WRITE,X_LOCAL,X_TILE,
                               X_PALETTE,X_YM,X_FDC,X_WAIT} xstate_t;
     xstate_t xs;
-    logic [7:0] rom_bank;
-    logic fdc_read_busy;
     // The MB89311 exposes a local data register. Keep the complete SDRAM
     // word returned for a floppy byte so the immediately following byte
     // read (the other lane) does not become a second media transaction.
     logic fdc_cache_valid;
     logic [26:0] fdc_cache_addr;
     logic [15:0] fdc_cache_data;
-    logic fdc_cache_hit;
     localparam integer FDC_PREFETCH_DEPTH = 64;
     logic [15:0] fdc_pf_data [0:FDC_PREFETCH_DEPTH-1];
     logic [26:0] fdc_pf_addr [0:FDC_PREFETCH_DEPTH-1];
@@ -725,7 +726,6 @@ module s24_core #(
     logic [6:0] fdc_pf_count;
     logic fdc_p4_prefetch,fdc_pf_have_stream,fdc_pf_discard;
     logic [26:0] fdc_pf_next_addr;
-    logic fdc_fifo_hit;
     logic fdc_pf_push,fdc_pf_pop;
 
     assign fdc_cache_hit = fdc_cache_valid &&

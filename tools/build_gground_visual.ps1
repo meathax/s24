@@ -106,7 +106,7 @@ $arguments = @(
     '-DS24_VISUAL','--top-module','tb_gground_boot','--Mdir',$ModelDirectory,
     '-CFLAGS',"-march=native -mtune=native -fomit-frame-pointer -D_GLIBCXX_USE_CXX11_ABI=0 -DSDL_MAIN_HANDLED $sdlCflags",
     '-LDFLAGS',$sdlLibs,
-    '-MAKEFLAGS','CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe PATH=/usr/bin:/ucrt64/bin:/c/Windows/System32 SHELL=C:/msys64/usr/bin/sh.exe OPT_FAST=-O3 OPT_SLOW=-O2 OPT_GLOBAL=-O2',
+    '-MAKEFLAGS','CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe OPT_FAST=-O3 OPT_SLOW=-O2 OPT_GLOBAL=-O2',
     '--Wno-fatal','--Wno-BLKANDNBLK','--Wno-MULTIDRIVEN',
     '--Wno-WIDTHEXPAND','--Wno-WIDTHTRUNC','--Wno-INITIALDLY',
     '--threads',"$ModelThreads",'--build-jobs','4','--verilate-jobs','1'

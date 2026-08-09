@@ -42,7 +42,8 @@ and goes with the same two-consecutive-toggle cadence the heuristic requires
 to engage). The descriptor's `video_profile` bit 0 (`board.video_profile[0]`
 / `blend_capable` in s24_core.sv) now gates the heuristic per board; only
 `bnzabros`' MRA sets it, so every other set -- including `crkdown` -- keeps
-the raw "disabled means blank" behavior regardless of the Flicker Blend menu
+the raw "disabled means blank" behavior regardless of the
+Projector Flicker Fix menu
 toggle, matching MAME and the measured PCB alternation described in
 s24_tile.sv.
 

@@ -1,6 +1,8 @@
 module emu (
     `include "sys/emu_ports.vh"
 );
+    logic forced_scandoubler;
+    wire video_rotated;
     // This core has no user-I/O protocol. Drive unused open-drain lines low
     // so the board pins have a deterministic output-enable and Quartus does
     // not leave permanently disabled USER_IO output drivers.
@@ -17,7 +19,6 @@ module emu (
     // 15 kHz in-core line doubler would turn that into an unintended 48.8 kHz
     // mode, so honour MiSTer's forced-scandoubler request by selecting the
     // framework scaler while preserving the board's native raster here.
-    assign VGA_SCALER=rotation_active|forced_scandoubler;
     assign VGA_DISABLE=0;
     assign HDMI_FREEZE=0; assign HDMI_BLACKOUT=0; assign HDMI_BOB_DEINT=0;
     assign AUDIO_S=1; assign AUDIO_MIX=0;
@@ -30,6 +31,7 @@ module emu (
     // third entry (2), so translate it while omitting the +/- variants.
     wire [2:0] scaling=(status[12:10]==3'd2) ? 3'd4 : status[12:10];
     wire rotation_active=|rotation;
+    assign VGA_SCALER=rotation_active|forced_scandoubler;
     wire rotate_ccw=(rotation==2'd1);
     wire [12:0] aspect_arx=aspect==0 ? (rotation_active ? 13'd3 : 13'd4) : {11'd0,aspect-1'b1};
     wire [12:0] aspect_ary=aspect==0 ? (rotation_active ? 13'd4 : 13'd3) : 13'd0;
@@ -46,17 +48,18 @@ module emu (
         "O[9:8],Rotation,Normal,Rotate 90 CCW,Rotate 90 CW;",
         "O[12:10],Scaling,Normal,V-Integer,HV-Integer;",
         "O[15:14],Scandoubler Fx,None,CRT 25%,CRT 50%,CRT 75%;",
+        // Listed On first so the default status value of 0 selects it: several
+        // titles (Bonanza Bros' stage intros) obtain translucency by toggling
+        // a tilemap on and off every frame, which a CRT integrates but a
+        // fixed-pixel display shows as a 28.75 Hz flicker. Off gives the raw
+        // alternation the PCB emits. H2 keeps this root option visible only
+        // for the verified Bonanza Bros board profile.
+        "H2O[13],Projector Flicker Fix,On,Off;",
         "P1,CRT Adjust;",
         "P1O[101],Enable,Off,On;",
         "H1P1O[100:96],CRT H-Size,0,+1,+2,...,+15,-16,...,-1;",
         "H1P1O[85:79],CRT H-Position,0,+1,+2,...,+48,-48,...,-1;",
         "H1P1O[78:74],CRT V-Shift,0,+1,+2,...,+15,-16,...,-1;",
-        // Listed On first so the default status value of 0 selects it: several
-        // titles (Bonanza Bros' stage intros) obtain translucency by toggling
-        // a tilemap on and off every frame, which a CRT integrates but a
-        // fixed-pixel display shows as a 28.75 Hz flicker. Off gives the raw
-        // alternation the PCB emits.
-        "H2O[13],CRT Flicker Blend,On,Off;",
         "R[0],Reset;",
         "J1,B1,B2,B3,B4,B5,B6,Start,Coin,Service,Test,Pause;",
         "V,v",`BUILD_DATE
@@ -89,7 +92,6 @@ module emu (
     logic [8:0] hps_spinner0,hps_spinner1,hps_spinner2,hps_spinner3;
     logic [7:0] paddle0,paddle1,paddle2,paddle3;
     logic [15:0] stick_l0,stick_l1,stick_l2,stick_l3;
-    logic forced_scandoubler;
     wire [21:0] gamma_bus;
     logic ioctl_download,ioctl_upload,ioctl_wr,ioctl_rd,ioctl_wait;
     logic loader_wait,persistence_wait;
@@ -103,7 +105,8 @@ module emu (
         .clk_sys(clk_sys),.HPS_BUS(HPS_BUS),.EXT_BUS(),.gamma_bus(gamma_bus),
         .forced_scandoubler(forced_scandoubler),.buttons(buttons),.status(status),
         .video_rotated(video_rotated),.new_vmode(1'b0),
-        // H1 owns the CRT-adjust children; H2 owns the Bonanza-only blend.
+        // H1 owns the CRT-adjust children; H2 owns the Bonanza-only projector
+        // flicker fix on the root menu.
         .status_menumask({13'd0,~descriptor.video_profile[0],~status[101],1'b0}),
         .joystick_0(joy0),.joystick_1(joy1),
         .joystick_2(joy2),.joystick_3(joy3),
@@ -455,7 +458,6 @@ module emu (
         .SCALE(scaling)
     );
 
-    wire video_rotated;
 `ifdef MISTER_FB
     screen_rotate video_rotate (
         .CLK_VIDEO(clk_sys),

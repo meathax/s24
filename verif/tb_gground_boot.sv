@@ -133,7 +133,7 @@ module tb_gground_boot;
     logic [31:0] fdc_checksum=32'h811c9dc5;
     logic [31:0] fdc_track_checksum=32'h811c9dc5;
     logic [31:0] fdc_last_track_checksum=0;
-    logic fdc_media_req_d=0,p4_req_d=0;
+    logic fdc_media_req_d=0,p2_req_d=0,p4_req_d=0;
     logic p4_outstanding=0,fdc_media_read_serviced=0;
     logic fdc_track_active=0;
     logic [26:0] p4_byte_addr_latched=0;
@@ -305,6 +305,7 @@ module tb_gground_boot;
                 (dut.fdc.bus_din[7:4]==4'h9 || dut.fdc.bus_din[7:4]==4'hb))
             fdc_side_shadow<=dut.fdc.bus_din[3];
         fdc_media_req_d<=dut.fdc_media_req;
+        p2_req_d<=p2_req;
         p4_req_d<=p4_req;
         if(!dut.fdc_media_req)
             fdc_media_read_serviced<=0;
@@ -326,7 +327,12 @@ module tb_gground_boot;
                 if(!vblank)
                     $fatal(1,"%s FDC prefetch launched during active display",
                            game_name);
-                if(p2_req)
+                // A sprite request may rise on the same edge as the prefetch;
+                // neither request was pending when the producers decided to
+                // launch, and the SDRAM arbiter gives that sprite priority.
+                // Reject only a prefetch launched over an already-pending
+                // sprite request.
+                if(p2_req_d)
                     $fatal(1,"%s FDC prefetch launched over pending sprite burst",
                            game_name);
             end else begin

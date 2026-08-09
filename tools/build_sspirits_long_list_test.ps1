@@ -25,7 +25,7 @@ $gp=Start-Process -FilePath $guard -PassThru;Start-Sleep -Milliseconds 300
 $args=@('--cc','--exe','--build','--savable','--assert','-O3','--top-module',
 	'tb_sspirits_long_list','--Mdir',$ModelDirectory,'--Wno-fatal','-CFLAGS',
 	"-O3 -march=native -D_GLIBCXX_USE_CXX11_ABI=0 -DSDL_MAIN_HANDLED $cf",'-LDFLAGS',$lf,
-	'-MAKEFLAGS','CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe PATH=/usr/bin:/ucrt64/bin:/c/Windows/System32 SHELL=C:/msys64/usr/bin/sh.exe',
+	'-MAKEFLAGS','CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe',
 	'--threads','1','--build-jobs','4','--verilate-jobs','1','rtl/s24_pkg.sv',
 	'rtl/video/s24_sprite.sv','verif/tb_sspirits_long_list.sv','verif/sspirits_long_list_main.cpp')
 $args=$args[0..($args.Count-5)]+$sources

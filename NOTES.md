@@ -27,10 +27,12 @@ budget). Both runs used visible SDL and wrote full-state checkpoints.
 
 Regression: the full Gain Ground visual hierarchy builds with `--savable`,
 assertions and one model thread. A cold run remained tile-assertion-clean
-through frame 240, then stopped at the unrelated existing assertion
-`FDC prefetch launched over pending sprite burst` in `tb_gground_boot.sv:330`.
-The attract scene therefore remains to be rechecked after that independent
-regression is resolved. No Quartus compilation or RBF was produced.
+through frame 240, then stopped at `FDC prefetch launched over pending sprite
+burst`. A source audit found that the bench sampled a sprite request that rose
+on the same edge as the prefetch and incorrectly treated it as pre-existing;
+the assertion now checks the prior-cycle request, matching the producer gate.
+The attract scene still requires a rerun. No new Quartus compilation or RBF
+was produced.
 
 ## Iteration 2 — Crack Down hand-edge deadline
 

@@ -16,7 +16,8 @@ the vendored MiSTer framework.
 - The OSD provides aspect/integer scaling, framework CRT-strength effects,
   rotation, controller-toggle pause, optional pause while the OSD is open,
   service mode, and CRT Adjust geometry controls.
-- `CRT Flicker Blend` is shown only for the verified Bonanza Bros board
+- `Projector Flicker Fix` is shown on the root menu only for the verified
+  Bonanza Bros board
   profile; other games retain their raw per-frame layer behavior.
 - Floppy-based MRAs use a 2 MiB per-set MiSTer NVRAM overlay. Emulated FDC
   writes are coalesced for five seconds and then saved automatically, so the

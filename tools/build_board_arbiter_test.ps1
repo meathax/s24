@@ -23,7 +23,7 @@ $arguments = @(
     '--Wno-fatal',
     '-CFLAGS', '-O3 -D_GLIBCXX_USE_CXX11_ABI=0',
     '-MAKEFLAGS',
-    'CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe PATH=/usr/bin:/ucrt64/bin:/c/Windows/System32 SHELL=C:/msys64/usr/bin/sh.exe',
+    'CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe',
     '--threads', '1', '--build-jobs', '4', '--verilate-jobs', '1'
 ) + $sources
 
