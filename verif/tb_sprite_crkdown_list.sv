@@ -504,7 +504,7 @@ module tb_sprite_crkdown_list(input logic clk);
         end else begin
             if(ce_pixel && hcount==10'd655 && vcount<10'd383 &&
                dut.next_display_line<10'd384 && !dut.next_display_ready)
-                missed_deadline_at[dut.next_display_line]<=1'b1;
+                missed_deadline_at[dut.next_display_line[8:0]]<=1'b1;
             if(dut.target_y<9'd384) begin
                 filled_at[dut.target_y]<=1'b1;
                 if(dut.descriptor[79:64]==TARGET_W4 &&

@@ -31,3 +31,26 @@ through frame 240, then stopped at the unrelated existing assertion
 `FDC prefetch launched over pending sprite burst` in `tb_gground_boot.sv:330`.
 The attract scene therefore remains to be rechecked after that independent
 regression is resolved. No Quartus compilation or RBF was produced.
+
+## Iteration 2 — Crack Down hand-edge deadline
+
+Scenario / first divergence: the hardware capture has a horizontal seam at
+the final row of the 64-pixel-wide finger-detail sprite (descriptor 1051,
+destination y=174). MAME and the former zero-wait Verilator test are clean.
+
+Root cause: the focused bench acknowledged sprite bursts combinationally,
+while MiSTer reaches sprite RAM through external SDRAM and a CDC handshake.
+With a modeled 13-clock round trip, the renderer completed six hand rows only
+after their display deadline. The return from every tile-data burst also spent
+one redundant clock re-entering `S_X_SOURCE`, even though the request could
+only have been launched after that state's bounds and X-step decisions passed.
+
+Change: `S_DATA_WAIT` now returns directly to the already-selected scalar or
+four-pixel emit path. Addressing, artwork, transparency, rank and write order
+are unchanged. The Crack Down list bench now accepts `+MEM_LATENCY=N` and
+checks readiness at raster consumption instead of merely eventual completion.
+
+Focused result: pre-fix latency 13 FAIL (58/64 rows, six late); post-fix
+latency 13 PASS (64/64, zero late). Latency 14 still fails, proving the test
+remains deadline-sensitive. Runs used visible SDL and savable checkpoints.
+No Quartus compilation or new RBF was produced for this iteration.
