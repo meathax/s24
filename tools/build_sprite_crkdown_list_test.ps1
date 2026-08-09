@@ -46,7 +46,7 @@ $guard = Start-Process -FilePath $guardExe -PassThru
 Start-Sleep -Milliseconds 300
 
 $arguments = @(
-    '--cc', '--exe', '--build', '--savable', '--no-timing', '--assert',
+    '--cc', '--exe', '--build', '--savable', '--assert',
     '--top-module', 'tb_sprite_crkdown_list',
     '--Mdir', $ModelDirectory,
     '--Wno-fatal', '-O3',

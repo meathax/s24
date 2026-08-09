@@ -218,14 +218,16 @@ not acceptance evidence. All new focused regressions use Verilator, and visible
 Verilator gameplay remains the parent completion gate.
 
 The MAME289 sprite audit found and repaired a pathological-list discrepancy.
-MAME retains and reverse-renders up to 8192 normal descriptors; RTL now keeps
-the newest/frontmost 1024 in its bounded ring instead of dropping later entries.
-The Verilator 5.050 overflow regression proves descriptor 1024 replaces zero,
-logical odd-head scan order `[1,2,0]`, and reverse render order `[0,2,1]`. The
-existing 1024-entry stress regression remains green at 1,354 clocks. The fix
-adds no RAM blocks or DSPs, approximately ten state bits and low-tens ALMs;
-expanding to literal MAME-sized storage would cost at least about 1.59 Mbit and
-is rejected. Known Scramble Spirits usage is 1002 normal descriptors.
+MAME retains and reverse-renders up to 8192 normal descriptors; RTL keeps the
+newest/frontmost 4096 in its bounded frame ring instead of dropping later
+entries, while retaining a separate 1024-entry active-line cache. The focused
+Scramble Spirits regression walks 3547 synthetic descriptors through the real
+collector/filter path and keeps the 48 active descriptors inside the line
+budget. The 3547 count originates in source comments; its raw game capture is
+not retained here, so it is an unverified test bound rather than hardware
+evidence. Expanding to literal MAME-sized storage remains rejected because of
+its on-chip RAM cost and because it would not prove 8192 enlarged sprites can
+render inside one scanline.
 
 The MAME289 special-tile-mode audit found and repaired one exact shared defect:
 mode 1 now negates the full ten-bit vertical-scroll word when choosing the

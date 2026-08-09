@@ -157,7 +157,8 @@ module tb_sprite_crkdown_real;
                                 endcase
                                 got_color = (word_valid && word_gen==dut.bank_generation[b])
                                             ? word_low14[7:0] : 8'd0;
-                                $fwrite(dumpfile,"%02h\n",got_color);
+                                if(dumpfile!=0)
+                                    $fwrite(dumpfile,"%02h\n",got_color);
                                 checked=checked+1;
                                 if(exp_transparent) begin
                                     // A transparent source pixel must NOT
@@ -198,9 +199,15 @@ module tb_sprite_crkdown_real;
     end
 
     integer dumpfile;
+    string dump_path;
     initial begin
         errors=0;checked=0;lines_checked=0;
-        dumpfile=$fopen("verif/modelsim_sprite/crkdown_1051_actual_color.hex","w");
+        dumpfile=0;
+        if($value$plusargs("DUMP=%s",dump_path)) begin
+            dumpfile=$fopen(dump_path,"w");
+            if(dumpfile==0)
+                $fatal(1,"unable to open optional actual-color dump %s",dump_path);
+        end
         for(dx=0;dx<496;dx=dx+1) fails_by_x[dx]=0;
         for(dy=0;dy<384;dy=dy+1) fails_by_y[dy]=0;
         repeat(3) @(posedge clk);
@@ -216,7 +223,7 @@ module tb_sprite_crkdown_real;
             line_boundary(ln[9:0]);
             repeat(1968) @(posedge clk);
         end
-        $fclose(dumpfile);
+        if(dumpfile!=0) $fclose(dumpfile);
         $display("real-artwork probe: lines_checked=%0d checked=%0d errors=%0d",
                  lines_checked,checked,errors);
         for(dx=0;dx<496;dx=dx+1)

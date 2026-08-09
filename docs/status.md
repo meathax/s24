@@ -63,8 +63,9 @@ exactly two emulated seconds, then returns to 10 MHz. This is confined to the
 Gain Ground input profile and targets the timer/bus-contention check that
 otherwise forces free play; every other set retains the normal CPU clock.
 
-The sprite collector retains up to 1024 normal entries and renders into one
-line period. Overflow now retains the newest/frontmost entries rather than the
+The sprite frame collector retains up to 4096 normal entries; its separate
+active-line cache retains 1024 and renders into one line period. Overflow now
+retains the newest/frontmost entries rather than the
 oldest entries. This covers substantially more entries than expected game lists,
 but a pathological list or extremely enlarged sprite can overrun a line and
 is not yet cycle-proven against hardware. Sprite-versus-tile arbitration still

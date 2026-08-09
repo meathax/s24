@@ -47,9 +47,12 @@ resolved beyond MAME without a board capture, trace, or further decap work.
 
 ## Deliberate FPGA bound
 
-MAME can retain 8192 normal descriptors. The line renderer retains the newest
-1024 normal entries in a ring, rather than the oldest 1024, so a corrupt or
-pathological oversized list preserves the frontmost visible ordering. Real
-game lists are expected to remain below this bound. Raising it without a fit
-and timing study would consume substantial on-chip RAM while still not prove
-that 8192 enlarged sprites can be rendered inside one scanline.
+MAME can retain 8192 normal descriptors. The frame cache retains the newest
+4096 normal entries in a ring, rather than the oldest entries, so a corrupt or
+pathological oversized list preserves the frontmost visible ordering. The
+separate active-line cache remains 1024 entries. Scramble Spirits is reported
+in source comments as reaching 3547 normal descriptors, but the raw capture
+that produced that count is not retained in this repository; treat the number
+as an unverified test bound, not original-hardware evidence. Raising the frame
+cache to 8192 would consume substantial on-chip RAM while still not prove that
+8192 enlarged sprites can be rendered inside one scanline.

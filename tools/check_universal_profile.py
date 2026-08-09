@@ -29,6 +29,15 @@ REQUIRED_RTL = frozenset((
     "rtl/video/s24_sprite.sv",
 ))
 
+CURATED_MRA_FILENAMES = {
+    "bnzabros": "Bonanza Bros.mra",
+    "crkdown": "Crack Down.mra",
+    "gground": "Gain Ground.mra",
+    "hotrod": "Hot Rod (World, 3 Players, Turbo).mra",
+    "roughrac": "Rough Racer.mra",
+    "sspirits": "Scramble Spirits.mra",
+}
+
 # Hardware contracts behind the three visible fixes that exposed stale RBF
 # packaging.  These checks deliberately name behavior, not commit hashes, so
 # they survive rebases while preventing a future manifest/profile cleanup from
@@ -38,6 +47,9 @@ REQUIRED_FIX_CONTRACTS = {
         "localparam int STACK_DEPTH = 4096;",  # SSpirits long sprite lists
         "logic [LINE_BANKS-1:0] bank_filling;",  # no invisible fill/display race
         "{1'b0,bank_line_y[reclaim_scan]}<next_display_line",  # scoreboard/banding
+        "if(active_list_valid && !line_boundary[render_next_target]) begin",  # Hot Rod list budget
+        "end else if(descriptor_zoomy_step==9'h040) begin",  # Hot Rod 1:1 row mapping
+        "state<=S_X_EMIT4;",  # four-pixel 1:1 throughput path
     ),
     "rtl/mem/sdram.sv": (
         "if (p2_pend)                 read_grant = 3'd2;",  # Crack Down hand
@@ -84,30 +96,44 @@ def required_text(
 def validate_mras(mra_dir: pathlib.Path) -> None:
     expected = {game.setname: game for game in gen_mra.GAMES}
     actual: dict[str, tuple[pathlib.Path, ET.Element]] = {}
-    for path in mra_dir.glob("*.mra"):
+    if set(CURATED_MRA_FILENAMES) != set(expected):
+        raise ValueError("curated MRA filename map does not match GAMES")
+    for expected_setname, filename in CURATED_MRA_FILENAMES.items():
+        path = mra_dir / filename
+        if not path.is_file():
+            raise ValueError(f"missing curated MRA {filename}")
         root = ET.parse(path).getroot()
         setname = required_text(root.find("setname"), "setname", path)
+        if setname != expected_setname:
+            raise ValueError(
+                f"{path}: setname {setname} != {expected_setname}"
+            )
         if setname in actual:
             raise ValueError(f"duplicate MRA setname {setname}")
         actual[setname] = (path, root)
 
     missing = sorted(expected.keys() - actual.keys())
-    extra = sorted(actual.keys() - expected.keys())
     if missing:
         raise ValueError(f"MRA set mismatch: missing={missing}")
 
-    # Locally retained clone MRAs may outnumber GAMES, whose entries describe
-    # the audited parent media inventory. They must still select the same
-    # universal RBF; their media payload is intentionally not guessed here.
-    for setname in extra:
-        path, root = actual[setname]
-        if required_text(root.find("rbf"), "rbf", path) != gen_mra.RBF:
-            raise ValueError(f"{path}: clone does not target {gen_mra.RBF}.rbf")
-
     for setname, game in expected.items():
         path, root = actual[setname]
+        if root.tag != "misterromdescription":
+            raise ValueError(f"{path}: invalid MRA root {root.tag}")
+        for field in ("homebrew", "bootleg"):
+            value = required_text(root.find(field), field, path)
+            if value not in {"no", "yes"}:
+                raise ValueError(f"{path}: {field} must be no or yes")
+        if required_text(root.find("resolution"), "resolution", path) != "15kHz":
+            raise ValueError(f"{path}: resolution must be 15kHz")
         if required_text(root.find("rbf"), "rbf", path) != gen_mra.RBF:
             raise ValueError(f"{path}: does not target {gen_mra.RBF}.rbf")
+        typed_roms = [node.attrib.get("index", "?") for node in root.findall("rom")
+                      if "type" in node.attrib]
+        if typed_roms:
+            raise ValueError(
+                f"{path}: deprecated ROM type placeholder on indexes {typed_roms}"
+            )
         descriptor_node = root.find("./rom[@index='0']/part")
         descriptor = bytes.fromhex(required_text(
             descriptor_node, "descriptor", path
@@ -226,7 +252,8 @@ def main() -> None:
     parser.add_argument("--repo", type=pathlib.Path,
                         default=pathlib.Path("."))
     parser.add_argument("--mra-dir", type=pathlib.Path,
-                        default=pathlib.Path("mra"))
+                        default=pathlib.Path("releases"),
+                        help="curated release MRA directory (default: releases)")
     parser.add_argument(
         "--mame-source", type=pathlib.Path,
         default=pathlib.Path("D:/Arcade/AI/mame289"),
