@@ -1138,14 +1138,13 @@ ARCHITECTURE rtl OF ascal IS
 		-- Just OR them all together
 		--v := (p.r OR p.g OR p.b);
 
-		-- Maximum
-		IF p.r > p.g THEN
+		-- Maximum. Compare the three channels in parallel so the adaptive
+		-- polyphase path does not traverse two serial compare/select levels.
+		IF p.r >= p.g AND p.r >= p.b THEN
 			v := p.r;
-		ELSE
+		ELSIF p.g >= p.b THEN
 			v := p.g;
-		END IF;
-
-		IF p.b > v THEN
+		ELSE
 			v := p.b;
 		END IF;
 

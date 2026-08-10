@@ -13,6 +13,9 @@ module tb_tile_ownership(
     integer state = 0;
     integer reset_clocks = 0;
     integer render_clocks = 0;
+    integer probe_clocks = 0;
+    logic probe_complete = 0;
+    logic unauthorized_write_seen = 0;
 
     s24_tile dut(
         .clk(clk),.reset(reset),.ce_pixel(ce_pixel),
@@ -31,32 +34,82 @@ module tb_tile_ownership(
     // No delayed/event-controlled stimulus is used here. The C++ harness
     // drives clk so this focused regression remains compatible with the
     // model save API and always leaves an automatic checkpoint.
+    always @(posedge clk) begin
+        if (reset)
+            unauthorized_write_seen <= 1'b0;
+        else if (dut.line_write_fire && (dut.disabled || !dut.selected))
+            unauthorized_write_seen <= 1'b1;
+    end
+
     always @(negedge clk) begin
         case (state)
             0: begin
                 reset_clocks = reset_clocks + 1;
                 if (reset_clocks == 4) begin
                     reset = 0;
-
-                    // Disable every physical tilemap. The renderer therefore
-                    // skips the complete line without overwriting any pixel.
-                    dut.control_regs[4] = 16'h8000;
-                    dut.control_regs[5] = 16'h8000;
-                    dut.control_regs[6] = 16'h8000;
-                    dut.control_regs[7] = 16'h8000;
+                    if (!probe_complete) begin
+                        // Render one real line with layer 0 selected at X=0
+                        // and masked out at X=8. The same character spans both
+                        // cells, so X=8 is a cache hit which must not write.
+                        dut.control_regs[4] = 16'h0000;
+                        dut.control_regs[5] = 16'h8000;
+                        dut.control_regs[6] = 16'h8000;
+                        dut.control_regs[7] = 16'h8000;
+                        dut.mask_ram_hi[4] = 8'h40;
+                        dut.mask_ram_lo[4] = 8'h00;
+                        hcount = 10'd655;
+                        vcount = 10'd423;
+                        ce_pixel = 1;
+                        probe_clocks = 0;
+                        state = 10;
+                    end else begin
+                        // Disable every physical tilemap. The renderer
+                        // therefore skips the complete line without
+                        // overwriting any pixel.
+                        dut.control_regs[4] = 16'h8000;
+                        dut.control_regs[5] = 16'h8000;
+                        dut.control_regs[6] = 16'h8000;
+                        dut.control_regs[7] = 16'h8000;
 
                     // Poison bank 0, layer 0, X=0 with a valid white glyph.
                     // This models an old scrolling scoreboard pixel that a
                     // masked heading span must never expose on a later fill.
-                    dut.line0[0] = '0;
-                    dut.line0[0][13:0] = 14'h2fff;
+                        dut.line0[0] = '0;
+                        dut.line0[0][13:0] = 14'h2fff;
 
                     // 423->0 displays bank 1 and claims bank 0 to render line
                     // 1, leaving the poisoned masked-out cell untouched.
-                    hcount = 10'd655;
-                    vcount = 10'd423;
-                    ce_pixel = 1;
-                    state = 1;
+                        hcount = 10'd655;
+                        vcount = 10'd423;
+                        ce_pixel = 1;
+                        render_clocks = 0;
+                        state = 1;
+                    end
+                end
+            end
+            10: begin
+                ce_pixel = 0;
+                hcount = 0;
+                state = 11;
+            end
+            11: begin
+                probe_clocks = probe_clocks + 1;
+                if (probe_clocks > 656*3) begin
+                    $display("FAIL tile write-guard probe deadline %0d",
+                             probe_clocks);
+                    test_failed = 1;
+                    $finish;
+                end else if (!dut.render_active && probe_clocks > 4) begin
+                    if (unauthorized_write_seen) begin
+                        $display("FAIL masked tile issued a cache-hit line-buffer write");
+                        test_failed = 1;
+                    end
+                    // Cold-reset the DUT before the original generation-tag
+                    // scenario so the two checks remain independent.
+                    reset = 1;
+                    reset_clocks = 0;
+                    probe_complete = 1;
+                    state = 0;
                 end
             end
             1: begin
@@ -125,7 +178,7 @@ module tb_tile_ownership(
                     test_failed = 1;
                 end
                 if (!test_failed)
-                    $display("PASS stale tile rejected and opaque heading retained clocks=%0d",
+                    $display("PASS masked cache-hit suppressed, stale tile rejected, and opaque heading retained clocks=%0d",
                              render_clocks);
                 $finish;
             end

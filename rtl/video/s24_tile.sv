@@ -576,6 +576,7 @@ module s24_tile (
     // edge that advances the renderer, rather than one clock later.
     assign line_write_fire = render_active && !char_read_pending
                              && lookup_valid
+                             && !disabled && selected
                              && cache_valid && cache_char == wanted_char
                              && cache_row == wanted_row;
     assign line_scrub_fire = ce_pixel && hcount == 10'd655
