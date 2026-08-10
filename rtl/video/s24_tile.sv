@@ -171,10 +171,17 @@ module s24_tile (
     // ten-bit generation outlives a complete one-cell-per-fill bank scrub.
     localparam integer LINE_GEN_WIDTH = 10;
     localparam integer LINE_WIDTH = LINE_GEN_WIDTH + 14;
-    (* ramstyle = "M10K, no_rw_check" *) logic [LINE_WIDTH-1:0] line0 [0:1023];
-    (* ramstyle = "M10K, no_rw_check" *) logic [LINE_WIDTH-1:0] line1 [0:1023];
-    (* ramstyle = "M10K, no_rw_check" *) logic [LINE_WIDTH-1:0] line2 [0:1023];
-    (* ramstyle = "M10K, no_rw_check" *) logic [LINE_WIDTH-1:0] line3 [0:1023];
+
+    // The Verilator/RTL test backdoor keeps the line stores visible to the
+    // focused ownership tests.  Quartus uses the packed true-dual-port
+    // ALTSYNCRAMs below, so this array is simulation-only and cannot consume
+    // FPGA resources.
+`ifndef SYNTHESIS
+    logic [LINE_WIDTH-1:0] line0 [0:1023];
+    logic [LINE_WIDTH-1:0] line1 [0:1023];
+    logic [LINE_WIDTH-1:0] line2 [0:1023];
+    logic [LINE_WIDTH-1:0] line3 [0:1023];
+`endif
 
     // MAME's 315-5292 device clears both character and tile RAM at device
     // start. Give the local tile/control RAM and scanline stores deterministic
@@ -226,13 +233,6 @@ module s24_tile (
              small_ram_init=small_ram_init+1) begin
             mask_ram_lo[small_ram_init] = 8'h00;
             mask_ram_hi[small_ram_init] = 8'h00;
-        end
-        for (small_ram_init=0; small_ram_init<1024;
-             small_ram_init=small_ram_init+1) begin
-            line0[small_ram_init] = '0;
-            line1[small_ram_init] = '0;
-            line2[small_ram_init] = '0;
-            line3[small_ram_init] = '0;
         end
     end
 
@@ -296,7 +296,10 @@ module s24_tile (
 
     logic display_bank, fill_bank;
     logic [9:0] line_read_addr;
-    logic [LINE_WIDTH-1:0] line0_q,line1_q,line2_q,line3_q;
+    logic [13:0] line0_q,line1_q,line2_q,line3_q;
+    logic [LINE_GEN_WIDTH-1:0] line0_gen_q,line1_gen_q;
+    logic [LINE_GEN_WIDTH-1:0] line2_gen_q,line3_gen_q;
+    logic [LINE_WIDTH-1:0] line_data_q [0:3];
     logic [LINE_GEN_WIDTH-1:0] fill_generation;
     logic [LINE_GEN_WIDTH-1:0] bank_generation [0:1];
     logic [8:0] bank_line_y [0:1];
@@ -334,17 +337,13 @@ module s24_tile (
                                && !(render_active
                                     && fill_bank == line_sample_bank);
     assign line0_fresh = sample_line_ready && line0_q[13]
-                         && line0_q[LINE_WIDTH-1 -: LINE_GEN_WIDTH]
-                            == bank_generation[line_sample_bank];
+                         && line0_gen_q == bank_generation[line_sample_bank];
     assign line1_fresh = sample_line_ready && line1_q[13]
-                         && line1_q[LINE_WIDTH-1 -: LINE_GEN_WIDTH]
-                            == bank_generation[line_sample_bank];
+                         && line1_gen_q == bank_generation[line_sample_bank];
     assign line2_fresh = sample_line_ready && line2_q[13]
-                         && line2_q[LINE_WIDTH-1 -: LINE_GEN_WIDTH]
-                            == bank_generation[line_sample_bank];
+                         && line2_gen_q == bank_generation[line_sample_bank];
     assign line3_fresh = sample_line_ready && line3_q[13]
-                         && line3_q[LINE_WIDTH-1 -: LINE_GEN_WIDTH]
-                            == bank_generation[line_sample_bank];
+                         && line3_gen_q == bank_generation[line_sample_bank];
 
     logic [8:0] source_x, source_y;
     logic selected, disabled;
@@ -533,17 +532,6 @@ module s24_tile (
                       : vcount + 10'd2;
     end
 
-    task automatic write_line_pixel(input logic [13:0] value);
-        begin
-            case (lookup_layer_q)
-                2'd0: line0[line_index] <= {fill_generation,value};
-                2'd1: line1[line_index] <= {fill_generation,value};
-                2'd2: line2[line_index] <= {fill_generation,value};
-                default: line3[line_index] <= {fill_generation,value};
-            endcase
-        end
-    endtask
-
     task automatic advance_renderer;
         begin
             if (lookup_x_q == 9'd495) begin
@@ -578,15 +566,110 @@ module s24_tile (
         end
     endtask
 
-    // Port A is display-read-only. Port B below renders or performs one
-    // bounded scrub write into a non-displayed bank. Avoiding destructive
-    // read/clear makes mixed-port read-during-write behavior irrelevant.
-    always @(posedge clk) begin
-        line0_q <= line0[line_read_addr];
-        line1_q <= line1[line_read_addr];
-        line2_q <= line2[line_read_addr];
-        line3_q <= line3[line_read_addr];
+    logic [13:0] line_write_value;
+    logic line_write_fire, line_scrub_fire;
+    logic [9:0] line_write_addr;
+
+    assign line_write_value = {1'b1,tile_word[15],wanted_pixel};
+    // The explicit RAM write enables mirror the sequential renderer branches
+    // below. Keeping the request combinational lets the RAM see it on the same
+    // edge that advances the renderer, rather than one clock later.
+    assign line_write_fire = render_active && !char_read_pending
+                             && lookup_valid
+                             && cache_valid && cache_char == wanted_char
+                             && cache_row == wanted_row;
+    assign line_scrub_fire = ce_pixel && hcount == 10'd655
+                             && !render_active
+                             && ((vcount >= 10'd422) || (vcount < 10'd382));
+    assign line_write_addr = line_scrub_fire
+                            ? {display_bank,bank_scrub[display_bank]}
+                            : line_index;
+
+    // Port A is display-read-only. Port B renders or performs one bounded
+    // scrub write into a non-displayed bank. Keep the 14-bit pixel payload and
+    // 10-bit generation tag in the same 24-bit RAM word so each layer has one
+    // explicit placed memory interface; the current fit uses three M10Ks per
+    // layer and preserves the existing read/write cadence.
+`ifdef SYNTHESIS
+    genvar line_bank;
+    generate
+        for (line_bank=0; line_bank<4; line_bank=line_bank+1) begin : g_line_ram
+            localparam logic [1:0] LINE_INDEX = line_bank[1:0];
+            altsyncram line_ram (
+                .clock0(clk), .address_a(line_read_addr), .data_a(24'h000000),
+                .wren_a(1'b0), .q_a(line_data_q[line_bank]),
+                .clock1(clk), .address_b(line_write_addr),
+                .data_b(line_scrub_fire ? 24'h000000
+                                        : {fill_generation,line_write_value}),
+                .wren_b(line_scrub_fire ||
+                        (line_write_fire && lookup_layer_q == LINE_INDEX)),
+                .q_b(), .aclr0(1'b0), .aclr1(1'b0),
+                .addressstall_a(1'b0), .addressstall_b(1'b0),
+                .byteena_a(1'b1), .byteena_b(1'b1),
+                .clocken0(1'b1), .clocken1(1'b1), .clocken2(1'b1),
+                .clocken3(1'b1), .eccstatus(), .rden_a(1'b1),
+                .rden_b(1'b0)
+            );
+            defparam
+                line_ram.operation_mode = "BIDIR_DUAL_PORT",
+                line_ram.width_a = LINE_WIDTH,
+                line_ram.width_b = LINE_WIDTH,
+                line_ram.widthad_a = 10,
+                line_ram.widthad_b = 10,
+                line_ram.numwords_a = 1024,
+                line_ram.numwords_b = 1024,
+                line_ram.ram_block_type = "M10K",
+                line_ram.intended_device_family = "Cyclone V",
+                line_ram.lpm_type = "altsyncram",
+                line_ram.outdata_reg_a = "UNREGISTERED",
+                line_ram.read_during_write_mode_mixed_ports = "OLD_DATA",
+                line_ram.width_byteena_a = 1,
+                line_ram.width_byteena_b = 1,
+                line_ram.power_up_uninitialized = "FALSE";
+        end
+    endgenerate
+`else
+    integer line_init;
+    initial begin
+        for (line_init=0; line_init<1024; line_init=line_init+1) begin
+            line0[line_init] = '0;
+            line1[line_init] = '0;
+            line2[line_init] = '0;
+            line3[line_init] = '0;
+        end
     end
+
+    // Match the packed ALTSYNCRAM's registered read and old-data
+    // read-during-write behavior for simulation and focused regressions.
+    always @(posedge clk) begin
+        line_data_q[0] <= line0[line_read_addr];
+        line_data_q[1] <= line1[line_read_addr];
+        line_data_q[2] <= line2[line_read_addr];
+        line_data_q[3] <= line3[line_read_addr];
+        if (line_scrub_fire) begin
+            line0[line_write_addr] <= '0;
+            line1[line_write_addr] <= '0;
+            line2[line_write_addr] <= '0;
+            line3[line_write_addr] <= '0;
+        end else if (line_write_fire) begin
+            case (lookup_layer_q)
+                2'd0: line0[line_write_addr] <= {fill_generation,line_write_value};
+                2'd1: line1[line_write_addr] <= {fill_generation,line_write_value};
+                2'd2: line2[line_write_addr] <= {fill_generation,line_write_value};
+                default: line3[line_write_addr] <= {fill_generation,line_write_value};
+            endcase
+        end
+    end
+`endif
+
+    assign line0_q = line_data_q[0][13:0];
+    assign line1_q = line_data_q[1][13:0];
+    assign line2_q = line_data_q[2][13:0];
+    assign line3_q = line_data_q[3][13:0];
+    assign line0_gen_q = line_data_q[0][LINE_WIDTH-1 -: LINE_GEN_WIDTH];
+    assign line1_gen_q = line_data_q[1][LINE_WIDTH-1 -: LINE_GEN_WIDTH];
+    assign line2_gen_q = line_data_q[2][LINE_WIDTH-1 -: LINE_GEN_WIDTH];
+    assign line3_gen_q = line_data_q[3][LINE_WIDTH-1 -: LINE_GEN_WIDTH];
 
     always @(posedge clk) begin
         if (pipeline_advance) begin
@@ -750,10 +833,6 @@ module s24_tile (
                         bank_epoch[display_bank] <= frame_epoch;
                         bank_complete[display_bank] <= 1'b0;
                         fill_epoch <= frame_epoch;
-                        line0[{display_bank,bank_scrub[display_bank]}] <= '0;
-                        line1[{display_bank,bank_scrub[display_bank]}] <= '0;
-                        line2[{display_bank,bank_scrub[display_bank]}] <= '0;
-                        line3[{display_bank,bank_scrub[display_bank]}] <= '0;
                         bank_scrub[display_bank]
                             <= bank_scrub[display_bank] + 1'd1;
                         render_layer <= 0;
@@ -823,7 +902,6 @@ module s24_tile (
                 end else if (lookup_valid && cache_valid
                              && cache_char == wanted_char
                              && cache_row == wanted_row) begin
-                    write_line_pixel({1'b1,tile_word[15],wanted_pixel});
                     advance_renderer();
                 end else if (lookup_valid) begin
                     request_char <= wanted_char;

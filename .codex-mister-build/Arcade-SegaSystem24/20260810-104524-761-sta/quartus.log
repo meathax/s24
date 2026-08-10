@@ -1,0 +1,892 @@
+﻿=== Codex MiSTer Quartus worker started 2026-08-10T10:45:25.6405222+10:00 ===
+Working directory: Q:\
+Executable: D:\Q17\quartus\bin64\quartus_sta.exe
+Arguments: Arcade-SegaSystem24 -c Arcade-SegaSystem24
+
+Info: *******************************************************************
+Info: Running Quartus Prime TimeQuest Timing Analyzer
+    Info: Version 17.0.2 Build 602 07/19/2017 SJ Lite Edition
+    Info: Copyright (C) 2017  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel MegaCore Function License Agreement, or other 
+    Info: applicable license agreement, including, without limitation, 
+    Info: that your use is for the sole purpose of programming logic 
+    Info: devices manufactured by Intel and sold by Intel or its 
+    Info: authorized distributors.  Please refer to the applicable 
+    Info: agreement for further details.
+    Info: Processing started: Mon Aug 10 10:45:25 2026
+Info: Command: quartus_sta Arcade-SegaSystem24 -c Arcade-SegaSystem24
+Info: qsta_default_script.tcl version: #1
+Info (20032): Parallel compilation is enabled and will use up to 8 processors
+Info (21077): Low junction temperature is -40 degrees C
+Info (21077): High junction temperature is 100 degrees C
+Info (332164): Evaluating HDL-embedded SDC commands
+    Info (332165): Entity altera_std_synchronizer
+        Info (332166): set_false_path -to [get_keepers {*altera_std_synchronizer:*|din_s1}]
+Info (332104): Reading SDC File: '/sys/sys_top.sdc'
+Info (332110): Deriving PLL clocks
+    Info (332110): create_generated_clock -source {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin} -divide_by 512 -multiply_by 4279 -duty_cycle 50.00 -name {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]} {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]}
+    Info (332110): create_generated_clock -source {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]} -divide_by 17 -duty_cycle 50.00 -name {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk} {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk}
+    Info (332110): create_generated_clock -source {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin} -divide_by 8 -multiply_by 201 -duty_cycle 50.00 -name {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]} {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]}
+    Info (332110): create_generated_clock -source {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]} -divide_by 13 -duty_cycle 50.00 -name {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk} {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk}
+    Info (332110): create_generated_clock -source {emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]} -divide_by 26 -duty_cycle 50.00 -name {emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk} {emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk}
+    Info (332110): create_generated_clock -source {emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]} -divide_by 13 -phase 180.00 -duty_cycle 50.00 -name {emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk} {emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk}
+Info (332151): Clock uncertainty is not calculated until you update the timing netlist.
+Info (332104): Reading SDC File: '/Arcade-SegaSystem24.sdc'
+Info (332151): Clock uncertainty is not calculated until you update the timing netlist.
+Info (332097): The following timing edges are non-unate.  TimeQuest will assume pos-unate behavior for these edges in the clock network.
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~MEMORYREGOUT
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_762
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_827
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_920
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_7
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_6
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_5
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_4
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_3
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_2
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_1
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_0
+Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in TimeQuest to see clock uncertainties.
+Info: Found TIMEQUEST_REPORT_SCRIPT_INCLUDE_DEFAULT_ANALYSIS = ON
+Info: Analyzing Slow 1100mV 100C Model
+Info (332146): Worst-case setup slack is 0.616
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.700               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.759               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     1.671               0.000 SDRAM_CLK 
+    Info (332119):     4.005               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     8.374               0.000 FPGA_CLK1_50 
+    Info (332119):    11.006               0.000 FPGA_CLK2_50 
+    Info (332119):    15.309               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+Critical Warning (332148): Timing requirements not met
+    Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the TimeQuest Timing Analyzer.
+Info (332146): Worst-case hold slack is -0.330
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):    -0.330              -1.066 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.250               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.272               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.281               0.000 FPGA_CLK1_50 
+    Info (332119):     0.364               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     0.418               0.000 FPGA_CLK2_50 
+    Info (332119):     1.986               0.000 SDRAM_CLK 
+Info (332146): Worst-case recovery slack is 4.631
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     8.367               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):    13.484               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):    15.891               0.000 FPGA_CLK1_50 
+Info (332146): Worst-case removal slack is 0.599
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.599               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     1.021               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     1.171               0.000 FPGA_CLK1_50 
+Info (332146): Worst-case minimum pulse width slack is 0.398
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.398               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 
+    Info (332119):     1.196               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 
+    Info (332119):     3.584               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     4.192               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     4.972               0.000 emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     8.912               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     9.201               0.000 FPGA_CLK2_50 
+    Info (332119):     9.207               0.000 FPGA_CLK1_50 
+    Info (332119):     9.730               0.000 FPGA_CLK3_50 
+    Info (332119):    18.895               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+Info (332114): Report Metastability: Found 384 synchronizer chains.
+    Info (332114): Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+    Info (332114): Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+
+    Info (332114): Number of Synchronizer Chains Found: 384
+    Info (332114): Shortest Synchronizer Chain: 2 Registers
+    Info (332114): Fraction of Chains for which MTBFs Could Not be Calculated: 0.987
+    Info (332114): Worst Case Available Settling Time: 3.588 ns
+    Info (332114): Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
+    Info (332114):   - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 8.0
+    Info (332114): Typical MTBF values are calculated based on the nominal silicon characteristics, at nominal operating conditions.
+    Info (332114):   - Under typical conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 17.8
+Info: Analyzing Slow 1100mV -40C Model
+Info (334003): Started post-fitting delay annotation
+Info (334004): Delay annotation completed successfully
+Info (332097): The following timing edges are non-unate.  TimeQuest will assume pos-unate behavior for these edges in the clock network.
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~MEMORYREGOUT
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_762
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_827
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_920
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_7
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_6
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_5
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_4
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_3
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_2
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_1
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_0
+Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in TimeQuest to see clock uncertainties.
+Info (332146): Worst-case setup slack is 0.299
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.422               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.853               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     1.735               0.000 SDRAM_CLK 
+    Info (332119):     4.317               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     7.934               0.000 FPGA_CLK1_50 
+    Info (332119):    11.491               0.000 FPGA_CLK2_50 
+    Info (332119):    14.692               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+Critical Warning (332148): Timing requirements not met
+    Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the TimeQuest Timing Analyzer.
+Info (332146): Worst-case hold slack is -0.250
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):    -0.250              -0.478 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.237               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.259               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.268               0.000 FPGA_CLK1_50 
+    Info (332119):     0.315               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     0.437               0.000 FPGA_CLK2_50 
+    Info (332119):     2.148               0.000 SDRAM_CLK 
+Info (332146): Worst-case recovery slack is 4.728
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     8.418               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):    13.680               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):    16.100               0.000 FPGA_CLK1_50 
+Info (332146): Worst-case removal slack is 0.509
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.509               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.941               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     1.092               0.000 FPGA_CLK1_50 
+Info (332146): Worst-case minimum pulse width slack is 0.398
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.398               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 
+    Info (332119):     1.196               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 
+    Info (332119):     3.569               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     4.183               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     4.922               0.000 emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     8.881               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     9.312               0.000 FPGA_CLK1_50 
+    Info (332119):     9.314               0.000 FPGA_CLK2_50 
+    Info (332119):     9.754               0.000 FPGA_CLK3_50 
+    Info (332119):    18.876               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+Info (332114): Report Metastability: Found 384 synchronizer chains.
+    Info (332114): Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+    Info (332114): Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+
+    Info (332114): Number of Synchronizer Chains Found: 384
+    Info (332114): Shortest Synchronizer Chain: 2 Registers
+    Info (332114): Fraction of Chains for which MTBFs Could Not be Calculated: 0.987
+    Info (332114): Worst Case Available Settling Time: 3.814 ns
+    Info (332114): Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
+    Info (332114):   - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 1.7
+    Info (332114): Typical MTBF values are calculated based on the nominal silicon characteristics, at nominal operating conditions.
+    Info (332114):   - Under typical conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 17.8
+Info: Analyzing Fast 1100mV 100C Model
+Info (334003): Started post-fitting delay annotation
+Info (334004): Delay annotation completed successfully
+Info (332097): The following timing edges are non-unate.  TimeQuest will assume pos-unate behavior for these edges in the clock network.
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~MEMORYREGOUT
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_762
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_827
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_920
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_7
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_6
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_5
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_4
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_3
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_2
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_1
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_0
+Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in TimeQuest to see clock uncertainties.
+Info (332146): Worst-case setup slack is 2.539
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     2.539               0.000 SDRAM_CLK 
+    Info (332119):     4.497               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     6.411               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     7.836               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):    13.875               0.000 FPGA_CLK1_50 
+    Info (332119):    14.339               0.000 FPGA_CLK2_50 
+    Info (332119):    27.917               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+Critical Warning (332148): Timing requirements not met
+    Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the TimeQuest Timing Analyzer.
+Info (332146): Worst-case hold slack is -0.162
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):    -0.162              -0.759 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.100               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.140               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.149               0.000 FPGA_CLK1_50 
+    Info (332119):     0.178               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     0.179               0.000 FPGA_CLK2_50 
+    Info (332119):     3.166               0.000 SDRAM_CLK 
+Info (332146): Worst-case recovery slack is 5.542
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     9.175               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):    16.420               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):    17.747               0.000 FPGA_CLK1_50 
+Info (332146): Worst-case removal slack is 0.278
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.278               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.494               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     0.563               0.000 FPGA_CLK1_50 
+Info (332146): Worst-case minimum pulse width slack is 0.398
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.398               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 
+    Info (332119):     1.196               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 
+    Info (332119):     3.891               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     4.681               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     5.083               0.000 emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     9.137               0.000 FPGA_CLK2_50 
+    Info (332119):     9.140               0.000 FPGA_CLK1_50 
+    Info (332119):     9.224               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     9.347               0.000 FPGA_CLK3_50 
+    Info (332119):    19.218               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+Info (332114): Report Metastability: Found 384 synchronizer chains.
+    Info (332114): Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+    Info (332114): Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+
+    Info (332114): Number of Synchronizer Chains Found: 384
+    Info (332114): Shortest Synchronizer Chain: 2 Registers
+    Info (332114): Fraction of Chains for which MTBFs Could Not be Calculated: 0.987
+    Info (332114): Worst Case Available Settling Time: 4.849 ns
+    Info (332114): Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
+    Info (332114):   - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 8.0
+    Info (332114): Typical MTBF values are calculated based on the nominal silicon characteristics, at nominal operating conditions.
+    Info (332114):   - Under typical conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 17.8
+Info: Analyzing Fast 1100mV -40C Model
+Info (332097): The following timing edges are non-unate.  TimeQuest will assume pos-unate behavior for these edges in the clock network.
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~MEMORYREGOUT
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_762
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_827
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_920
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_7
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_6
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_5
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_4
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_3
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_2
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_1
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_0
+Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in TimeQuest to see clock uncertainties.
+Info (332146): Worst-case setup slack is 2.595
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     2.595               0.000 SDRAM_CLK 
+    Info (332119):     4.909               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     7.004               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     8.181               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):    14.632               0.000 FPGA_CLK1_50 
+    Info (332119):    15.432               0.000 FPGA_CLK2_50 
+    Info (332119):    29.419               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+Critical Warning (332148): Timing requirements not met
+    Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the TimeQuest Timing Analyzer.
+Info (332146): Worst-case hold slack is -0.172
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):    -0.172              -0.788 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.053               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.121               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.133               0.000 FPGA_CLK1_50 
+    Info (332119):     0.152               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     0.156               0.000 FPGA_CLK2_50 
+    Info (332119):     3.215               0.000 SDRAM_CLK 
+Info (332146): Worst-case recovery slack is 5.718
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     9.297               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):    17.056               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):    18.096               0.000 FPGA_CLK1_50 
+Info (332146): Worst-case removal slack is 0.193
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.193               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     0.421               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     0.482               0.000 FPGA_CLK1_50 
+Info (332146): Worst-case minimum pulse width slack is 0.398
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.398               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 
+    Info (332119):     1.196               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0] 
+    Info (332119):     3.896               0.000 sysmem|fpga_interfaces|clocks_resets|h2f_user0_clk 
+    Info (332119):     4.683               0.000 emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     5.069               0.000 emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     9.077               0.000 FPGA_CLK2_50 
+    Info (332119):     9.078               0.000 FPGA_CLK1_50 
+    Info (332119):     9.233               0.000 emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk 
+    Info (332119):     9.274               0.000 FPGA_CLK3_50 
+    Info (332119):    19.223               0.000 pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk 
+Info (332114): Report Metastability: Found 384 synchronizer chains.
+    Info (332114): Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+    Info (332114): Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+
+    Info (332114): Number of Synchronizer Chains Found: 384
+    Info (332114): Shortest Synchronizer Chain: 2 Registers
+    Info (332114): Fraction of Chains for which MTBFs Could Not be Calculated: 0.987
+    Info (332114): Worst Case Available Settling Time: 5.167 ns
+    Info (332114): Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
+    Info (332114):   - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 1.7
+    Info (332114): Typical MTBF values are calculated based on the nominal silicon characteristics, at nominal operating conditions.
+    Info (332114):   - Under typical conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 17.8
+Info (332102): Design is not fully constrained for setup requirements
+Info (332102): Design is not fully constrained for hold requirements
+Info: Quartus Prime TimeQuest Timing Analyzer was successful. 0 errors, 4 warnings
+    Info: Peak virtual memory: 7065 megabytes
+    Info: Processing ended: Mon Aug 10 10:45:56 2026
+    Info: Elapsed time: 00:00:31
+    Info: Total CPU time (on all processors): 00:01:27
+
+=== Worker finished 2026-08-10T10:45:57.0650702+10:00; exit code 0 ===
