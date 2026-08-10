@@ -443,12 +443,17 @@ module s24_core #(
         .layer2_valid(tv2),.layer3_valid(tv3));
     logic [13:0] sp0,sp1,sp2,sp3,mixed,mixed_alt;
     logic [10:0] sr0,sr1,sr2,sr3;
+	logic sprite_cache_invalidate;
+	assign sprite_cache_invalidate=cpu_wr_pending && wr_ack &&
+		cpu_phys[26:18]==SDR_SPRITE_BASE[26:18];
     s24_sprite sprite(
         .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
         .pixel0(sp0),.pixel1(sp1),.pixel2(sp2),.pixel3(sp3),
         .rank0(sr0),.rank1(sr1),.rank2(sr2),.rank3(sr3),
         .mem_req(p2_req),.mem_addr(p2_addr),
-        .mem_data(p2_data),.mem_ack(p2_ack));
+        .mem_data(p2_data),.mem_ack(p2_ack),
+		.cache_invalidate(sprite_cache_invalidate),
+		.cache_invalidate_tag(cpu_phys[17:4]));
 
     logic mixer_wr;
     logic [15:0] mixer_dout;

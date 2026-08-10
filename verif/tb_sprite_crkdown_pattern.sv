@@ -95,7 +95,8 @@ module tb_sprite_crkdown_pattern;
         .pixel0(pixel0),.pixel1(pixel1),.pixel2(pixel2),.pixel3(pixel3),
         .rank0(rank0),.rank1(rank1),.rank2(rank2),.rank3(rank3),
         .mem_req(mem_req),.mem_addr(mem_addr),
-        .mem_data(mem_data),.mem_ack(mem_ack));
+        .mem_data(mem_data),.mem_ack(mem_ack),
+        .cache_invalidate(1'b0),.cache_invalidate_tag(14'd0));
 
     localparam int SPR_X0=245, SPR_X1=308, SPR_Y0=111, SPR_Y1=174;
     localparam logic [16:0] TILE_BASE = 17'h10000; // d2=0x1000 -> d2[12:0]<<4

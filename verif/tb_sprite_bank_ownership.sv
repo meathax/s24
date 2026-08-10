@@ -23,7 +23,8 @@ module tb_sprite_bank_ownership;
         .pixel0(pixel0),.pixel1(pixel1),.pixel2(pixel2),.pixel3(pixel3),
         .rank0(rank0),.rank1(rank1),.rank2(rank2),.rank3(rank3),
         .mem_req(mem_req),.mem_addr(mem_addr),
-        .mem_data(128'd0),.mem_ack(1'b0));
+        .mem_data(128'd0),.mem_ack(1'b0),
+        .cache_invalidate(1'b0),.cache_invalidate_tag(14'd0));
 
     initial begin
         repeat(4) @(posedge clk);

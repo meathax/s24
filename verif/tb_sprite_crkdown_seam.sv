@@ -64,7 +64,8 @@ module tb_sprite_crkdown_seam;
         .pixel0(pixel0),.pixel1(pixel1),.pixel2(pixel2),.pixel3(pixel3),
         .rank0(rank0),.rank1(rank1),.rank2(rank2),.rank3(rank3),
         .mem_req(mem_req),.mem_addr(mem_addr),
-        .mem_data(mem_data),.mem_ack(mem_ack));
+        .mem_data(mem_data),.mem_ack(mem_ack),
+        .cache_invalidate(1'b0),.cache_invalidate_tag(14'd0));
 
     // Sprite bounding box (inclusive), matching MAME's x-=8 origin adjust
     // and the descriptor's raw y/size fields.

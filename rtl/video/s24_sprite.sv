@@ -73,6 +73,58 @@ module s24_sprite_line_ram #(
 `endif
 endmodule
 
+// The original sprite generator reads a dedicated one-cycle RAM.  System 24's
+// complete sprite RAM lives in SDRAM in this core, where a dependent linked-
+// list read costs many clocks.  Keep a small coherent working set on chip.
+// Port A is the renderer lookup; port B fills a complete aligned burst after
+// an SDRAM miss. Tags and validity live beside this RAM in s24_sprite so a CPU
+// write can invalidate one burst without clearing or rewriting the data RAM.
+module s24_sprite_burst_cache_ram (
+	input  logic         clk,
+	input  logic [7:0]   read_addr,
+	output logic [127:0] read_data,
+	input  logic [7:0]   write_addr,
+	input  logic [127:0] write_data,
+	input  logic         write_enable
+);
+`ifdef VERILATOR
+	logic [127:0] mem [0:255];
+	always_ff @(posedge clk) begin
+		read_data<=mem[read_addr];
+		if(write_enable) mem[write_addr]<=write_data;
+	end
+`else
+	logic [127:0] q_a;
+	altsyncram ram (
+		.clock0(clk),.address_a(read_addr),.data_a(128'd0),
+		.wren_a(1'b0),.q_a(q_a),
+		.clock1(clk),.address_b(write_addr),.data_b(write_data),
+		.wren_b(write_enable),.q_b(),
+		.aclr0(1'b0),.aclr1(1'b0),.addressstall_a(1'b0),
+		.addressstall_b(1'b0),.byteena_a(1'b1),.byteena_b(1'b1),
+		.clocken0(1'b1),.clocken1(1'b1),.clocken2(1'b1),
+		.clocken3(1'b1),.eccstatus(),.rden_a(1'b1),.rden_b(1'b0)
+	);
+	assign read_data=q_a;
+	defparam
+		ram.operation_mode="BIDIR_DUAL_PORT",
+		ram.width_a=128,
+		ram.width_b=128,
+		ram.widthad_a=8,
+		ram.widthad_b=8,
+		ram.numwords_a=256,
+		ram.numwords_b=256,
+		ram.ram_block_type="M10K",
+		ram.intended_device_family="Cyclone V",
+		ram.lpm_type="altsyncram",
+		ram.outdata_reg_a="UNREGISTERED",
+		ram.read_during_write_mode_mixed_ports="OLD_DATA",
+		ram.width_byteena_a=1,
+		ram.width_byteena_b=1,
+		ram.power_up_uninitialized="FALSE";
+`endif
+endmodule
+
 // A descriptor/clip pair is read as a packed pair while only one half is
 // written during list collection. Separate low/high arrays give Quartus one
 // clean write port per inferred RAM instead of a variable part-select write.
@@ -355,7 +407,11 @@ module s24_sprite (
     output logic         mem_req,
     output logic [26:4]  mem_addr,
     input  logic [127:0] mem_data,
-    input  logic         mem_ack
+    input  logic         mem_ack,
+    // Pulse when a CPU write to sprite RAM has completed. The tag is the
+    // aligned 128-bit offset within the 256 KiB sprite window.
+    input  logic         cache_invalidate,
+    input  logic [13:0]  cache_invalidate_tag
 );
     import s24_pkg::*;
 
@@ -368,6 +424,46 @@ module s24_sprite (
     localparam int ACTIVE_BITS = 10;
     localparam logic [STACK_BITS:0] STACK_COUNT_LIMIT = 13'd4096;
     localparam logic [STACK_BITS:0] STACK_LAST = 13'd4095;
+
+	localparam int BURST_CACHE_ENTRIES=256;
+	// Keep the asynchronous tag probe in fabric; only the wide data payload
+	// consumes the four spare M10Ks budgeted for this cache.
+	(* ramstyle="logic" *) logic [13:0] burst_cache_tag [0:BURST_CACHE_ENTRIES-1];
+	(* ramstyle="logic" *) logic burst_cache_valid [0:BURST_CACHE_ENTRIES-1];
+	logic [13:0] burst_request_tag,burst_lookup_tag;
+	logic [127:0] burst_cache_q,read_data;
+	logic burst_cache_hit,cache_ack_pending,read_ack;
+	logic burst_cache_fill;
+	integer burst_cache_init;
+
+	assign burst_cache_hit=burst_cache_valid[burst_request_tag[7:0]] &&
+		burst_cache_tag[burst_request_tag[7:0]]==burst_request_tag;
+	assign read_ack=mem_ack || cache_ack_pending;
+	assign read_data=cache_ack_pending ? burst_cache_q : mem_data;
+	assign burst_cache_fill=mem_req && mem_ack;
+
+	s24_sprite_burst_cache_ram burst_cache_ram (
+		.clk(clk),.read_addr(burst_request_tag[7:0]),
+		.read_data(burst_cache_q),.write_addr(burst_lookup_tag[7:0]),
+		.write_data(mem_data),.write_enable(burst_cache_fill));
+
+	// Valid/tag storage is deliberately separate from the M10K data array.
+	// Invalidation wins a same-burst fill, so a read racing a completed CPU
+	// store can never resurrect the older SDRAM contents.
+	always_ff @(posedge clk) begin
+		if(reset) begin
+			for(burst_cache_init=0;burst_cache_init<BURST_CACHE_ENTRIES;
+				burst_cache_init=burst_cache_init+1)
+				burst_cache_valid[burst_cache_init]<=1'b0;
+		end else begin
+			if(burst_cache_fill) begin
+				burst_cache_tag[burst_lookup_tag[7:0]]<=burst_lookup_tag;
+				burst_cache_valid[burst_lookup_tag[7:0]]<=1'b1;
+			end
+			if(cache_invalidate)
+				burst_cache_valid[cache_invalidate_tag[7:0]]<=1'b0;
+		end
+	end
 
     // {valid, reverse-list rank, 14-bit palette/shadow pixel}. Keeping one
     // candidate per priority group reproduces MAME's rule that a tile-blocked
@@ -839,9 +935,9 @@ module s24_sprite (
             active_cache_read_addr='0;
         active_render_descriptor=active_cache_q[208:81];
         active_render_clip=active_cache_q[80:0];
-        mem_w0=burst_word(mem_data,0);mem_w1=burst_word(mem_data,1);
-        mem_w2=burst_word(mem_data,2);mem_w3=burst_word(mem_data,3);
-        mem_w4=burst_word(mem_data,4);mem_w5=burst_word(mem_data,5);
+        mem_w0=burst_word(read_data,0);mem_w1=burst_word(read_data,1);
+        mem_w2=burst_word(read_data,2);mem_w3=burst_word(read_data,3);
+        mem_w4=burst_word(read_data,4);mem_w5=burst_word(read_data,5);
         list_zoomy_step=(mem_w1[7:0]==0)
                         ? 9'h040 : {1'b0,mem_w1[7:0]}+1'b1;
         list_height_sum=20'd32
@@ -881,6 +977,17 @@ module s24_sprite (
         wanted_word=word_calc[16:0];
         wanted_nibble={~within_x[1:0],2'b00};
         wanted_tag=wanted_word[16:3];
+		// Present the prospective request one clock before a cached burst is
+		// consumed. The M10K read therefore overlaps the existing REQ state;
+		// an SDRAM miss retains the old request timing.
+		burst_request_tag=burst_lookup_tag;
+		case(state)
+			S_LIST_REQ: burst_request_tag={1'b0,list_index};
+			S_YMAP: burst_request_tag=palette_base;
+			S_X_SOURCE,S_X_EMIT: burst_request_tag=wanted_tag;
+			S_X_EMIT4: burst_request_tag=wanted_tag;
+			default: ;
+		endcase
         wanted_data_word=burst_word(data_cache,wanted_word[2:0]);
         current_pen=wanted_data_word[wanted_nibble +: 4];
         mapped_color=palette_entry(palette_table,current_pen);
@@ -1327,11 +1434,11 @@ module s24_sprite (
     end endgenerate
 
     always_comb begin
-        descriptor_write_enable=state==S_LIST_WAIT && mem_ack &&
+        descriptor_write_enable=state==S_LIST_WAIT && read_ack &&
             mem_w0[15:14]==2'b00 && !(list_index==0 && mem_w0==0);
         descriptor_write_high=stack_write_slot[0];
         descriptor_write_addr=stack_write_slot[STACK_BITS-1:1];
-        descriptor_write_data=mem_data;
+        descriptor_write_data=read_data;
         clip_write_data={current_clip_valid,current_clip_flags,current_clip_top,
                          current_clip_left,current_clip_bottom,current_clip_right};
 
@@ -1391,6 +1498,7 @@ module s24_sprite (
             render_pos<=0;render_clip<=0;descriptor<=0;
             palette_table<=0;data_cache<=0;data_cache_tag<=0;
             data_cache_valid<=0;palette_cache_valid<=0;
+			burst_lookup_tag<=0;cache_ack_pending<=0;
             descriptor_origin_x<=0;descriptor_output_width<=0;
             mem_req<=0;mem_addr<=0;
             pixel0<=0;pixel1<=0;pixel2<=0;pixel3<=0;
@@ -1673,12 +1781,20 @@ module s24_sprite (
                         cache_refresh_pending<=0;
                         state<=S_IDLE;
                     end else begin
-                        mem_addr<=sprite_burst({1'b0,list_index,3'b0});mem_req<=1;
+						burst_lookup_tag<={1'b0,list_index};
+						if(burst_cache_hit) begin
+							cache_ack_pending<=1;
+						end else begin
+							cache_ack_pending<=0;
+							mem_addr<=sprite_burst({1'b0,list_index,3'b0});
+							mem_req<=1;
+						end
                         state<=S_LIST_WAIT;
                     end
                 end
-                S_LIST_WAIT: if(mem_ack) begin
-                    mem_req<=0;descriptor<=mem_data;list_seen<=list_seen+1'b1;
+                S_LIST_WAIT: if(read_ack) begin
+					mem_req<=0;cache_ack_pending<=0;
+					descriptor<=read_data;list_seen<=list_seen+1'b1;
                     if((list_index==0 && mem_w0==0) ||
                        mem_w0[15:14]==2'b11) begin
                         list_cache_valid<=1;
@@ -1959,7 +2075,14 @@ module s24_sprite (
                             dest_x<=$signed({d5[11],d5[11:0]})-13'sd8;
                             state<=S_X_SOURCE;
                         end else begin
-                            mem_addr<=sprite_burst({palette_base,3'b0});mem_req<=1;
+							burst_lookup_tag<=palette_base;
+							if(burst_cache_hit) begin
+								cache_ack_pending<=1;
+							end else begin
+								cache_ack_pending<=0;
+								mem_addr<=sprite_burst({palette_base,3'b0});
+								mem_req<=1;
+							end
                             state<=S_PALETTE_WAIT;
                         end
                     end else begin
@@ -1967,9 +2090,10 @@ module s24_sprite (
                         y_accum<=y_sum[5:0];source_row<=source_row+1'b1;
                     end
                 end
-                S_PALETTE_WAIT: if(mem_ack) begin
-                    mem_req<=0;palette_table<=mem_data;source_column<=0;
-                    palette_cache_data[palette_cache_index]<=mem_data;
+                S_PALETTE_WAIT: if(read_ack) begin
+					mem_req<=0;cache_ack_pending<=0;
+					palette_table<=read_data;source_column<=0;
+					palette_cache_data[palette_cache_index]<=read_data;
                     palette_cache_tags[palette_cache_index]<=palette_base;
                     palette_cache_valid[palette_cache_index]<=1;
                     x_accum<=6'h20;
@@ -1981,7 +2105,14 @@ module s24_sprite (
                     else if(x_sum[8:6]==0) begin
                         x_accum<=x_sum[5:0];source_column<=source_column+1'b1;
                     end else if(!data_cache_valid || data_cache_tag!=wanted_tag) begin
-                        mem_addr<=sprite_burst({wanted_tag,3'b000});mem_req<=1;
+						burst_lookup_tag<=wanted_tag;
+						if(burst_cache_hit) begin
+							cache_ack_pending<=1;
+						end else begin
+							cache_ack_pending<=0;
+							mem_addr<=sprite_burst({wanted_tag,3'b000});
+							mem_req<=1;
+						end
                         state<=S_DATA_WAIT;
                     end else if(zoomx_step==9'h040 && zoomy_step==9'h040 &&
                                 source_column[1:0]==2'b00 &&
@@ -1992,8 +2123,9 @@ module s24_sprite (
                         state<=S_X_EMIT;
                     end
                 end
-                S_DATA_WAIT: if(mem_ack) begin
-                    mem_req<=0;data_cache<=mem_data;data_cache_tag<=wanted_tag;
+                S_DATA_WAIT: if(read_ack) begin
+					mem_req<=0;cache_ack_pending<=0;
+					data_cache<=read_data;data_cache_tag<=wanted_tag;
                     data_cache_valid<=1;
                     // This request was issued only after S_X_SOURCE proved
                     // x_sum nonzero and the source column in range.  Bypass
@@ -2015,8 +2147,15 @@ module s24_sprite (
                     // destination pixel ahead in this state. A burst-boundary
                     // cache miss pauses without advancing and resumes safely.
                     if(!data_cache_valid || data_cache_tag!=wanted_tag) begin
-                        mem_addr<=sprite_burst({wanted_tag,3'b000});
-                        mem_req<=1;state<=S_DATA_WAIT;
+						burst_lookup_tag<=wanted_tag;
+						if(burst_cache_hit) begin
+							cache_ack_pending<=1;
+						end else begin
+							cache_ack_pending<=0;
+							mem_addr<=sprite_burst({wanted_tag,3'b000});
+							mem_req<=1;
+						end
+						state<=S_DATA_WAIT;
                     end else begin
                         dest_x<=dest_x+1'b1;
                         if(emit_count==1) begin
@@ -2038,8 +2177,15 @@ module s24_sprite (
                     // tile-row and flip mapping remain exact for larger
                     // sprites too.
                     if(!data_cache_valid || data_cache_tag!=lane_tag[0]) begin
-                        mem_addr<=sprite_burst({lane_tag[0],3'b000});
-                        mem_req<=1;state<=S_DATA_WAIT;
+						burst_lookup_tag<=lane_tag[0];
+						if(burst_cache_hit) begin
+							cache_ack_pending<=1;
+						end else begin
+							cache_ack_pending<=0;
+							mem_addr<=sprite_burst({lane_tag[0],3'b000});
+							mem_req<=1;
+						end
+						state<=S_DATA_WAIT;
                     end else begin
                         dest_x<=dest_x+13'sd4;
                         source_column<=source_column+11'd4;
@@ -2118,12 +2264,26 @@ module s24_sprite (
                     // the producer transaction instead of leaking ownership
                     // forever or publishing a partially rendered line.
                     mem_req<=0;
+					cache_ack_pending<=0;
                     bank_filling<='0;
                     line_valid[fill_bank]<=0;
                     active_list_valid<=0;
                     state<=S_IDLE;
                 end
             endcase
+
+			// The unified cache is write-snooped at burst granularity. Also
+			// discard the two smaller hot entries that bypass its tag lookup.
+			// This comes after the state updates so invalidation wins a same-
+			// clock cache return from the old contents.
+			if(cache_invalidate) begin
+				if(data_cache_valid && data_cache_tag==cache_invalidate_tag)
+					data_cache_valid<=0;
+				if(palette_cache_valid[cache_invalidate_tag[2:0]] &&
+				   palette_cache_tags[cache_invalidate_tag[2:0]]==
+					cache_invalidate_tag)
+					palette_cache_valid[cache_invalidate_tag[2:0]]<=0;
+			end
         end
     end
 

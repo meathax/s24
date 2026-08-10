@@ -468,7 +468,8 @@ module tb_sprite_crkdown_seam_full;
         .pixel0(pixel0),.pixel1(pixel1),.pixel2(pixel2),.pixel3(pixel3),
         .rank0(rank0),.rank1(rank1),.rank2(rank2),.rank3(rank3),
         .mem_req(mem_req),.mem_addr(mem_addr),
-        .mem_data(mem_data),.mem_ack(mem_ack));
+        .mem_data(mem_data),.mem_ack(mem_ack),
+        .cache_invalidate(1'b0),.cache_invalidate_tag(14'd0));
 
     // Sprite 1051's own bounding box (inclusive). Nothing later in the list
     // overlaps this X range, so with reverse-list render order 1051 must own
