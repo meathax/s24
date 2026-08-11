@@ -6,7 +6,9 @@ import s24_pkg::*;
 // Media is generated locally by tools/gen_sim_media.py; runtime plusargs select
 // the board population and game-specific inputs without recompiling the model.
 `ifdef S24_VISUAL
-module tb_gground_boot(
+module tb_gground_boot #(
+    parameter bit A_OPCACHE_ENABLE = 1'b1
+)(
     input  logic        clk,
     input  logic        host_restore,
     input  logic [31:0] host_joy0,
@@ -49,7 +51,9 @@ module tb_gground_boot(
     output logic [31:0] host_mixed_pixels
 );
 `else
-module tb_gground_boot;
+module tb_gground_boot #(
+    parameter bit A_OPCACHE_ENABLE = 1'b1
+);
     // Keep the non-visual regression's Hot Rod pedal as an explicit byte.
     // Without this declaration the visual-only port name becomes an implicit
     // one-bit net and silently truncates the MAME default pedal value.
@@ -777,7 +781,7 @@ module tb_gground_boot;
         .ports(simulated_inputs));
 
     logic flicker_blend_opt = 1'b0;
-    s24_core dut(
+    s24_core #(.A_OPCACHE_ENABLE(A_OPCACHE_ENABLE)) dut(
         .clk(clk),.reset(reset),.pause(pause),
         .flicker_blend(flicker_blend_opt),.board(board),
         .key_wr(key_wr),.key_word_addr(key_word_addr),.key_wdata(key_wdata),

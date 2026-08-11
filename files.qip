@@ -26,6 +26,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/fx68k/uaddrPla.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/fx68k/fx68k.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/s24_fd1094_decrypt.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/s24_fd1094.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/s24_a_opcache.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/s24_b_opcache.sv
 set_global_assignment -name MISC_FILE rtl/cpu/fx68k/microrom.mif
 set_global_assignment -name MISC_FILE rtl/cpu/fx68k/nanorom.mif

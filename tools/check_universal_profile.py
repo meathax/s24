@@ -25,6 +25,8 @@ REQUIRED_RTL = frozenset((
     "rtl/mem/s24_rom_loader.sv",
     "rtl/mem/sdram.sv",
     "rtl/cpu/s24_fd1094.sv",
+    "rtl/cpu/s24_a_opcache.sv",
+    "rtl/cpu/s24_b_opcache.sv",
     "rtl/crt_adjust.sv",
     "rtl/video/s24_sprite.sv",
 ))

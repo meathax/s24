@@ -39,7 +39,7 @@ $repoSources = @(
     'rtl/video/s24_mixer.sv',
     'rtl/cpu/fx68k/fx68kAlu.sv','rtl/cpu/fx68k/uaddrPla.sv',
     'rtl/cpu/fx68k/fx68k.sv','rtl/cpu/s24_fd1094_decrypt.sv',
-    'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_b_opcache.sv','rtl/s24_core.sv',
+    'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_a_opcache.sv','rtl/cpu/s24_b_opcache.sv','rtl/s24_core.sv',
     'verif/tb_gground_boot.sv'
 )
 $jt51Sources = @(

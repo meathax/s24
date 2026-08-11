@@ -20,13 +20,14 @@ $sources = @(
     'rtl/video/s24_mixer.sv',
     'rtl/cpu/fx68k/fx68kAlu.sv','rtl/cpu/fx68k/uaddrPla.sv',
     'rtl/cpu/fx68k/fx68k.sv','rtl/cpu/s24_fd1094_decrypt.sv',
-    'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_b_opcache.sv','verif/jt51_boot_stub.sv','rtl/s24_core.sv',
+    'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_a_opcache.sv','rtl/cpu/s24_b_opcache.sv','verif/jt51_boot_stub.sv','rtl/s24_core.sv',
     'verif/tb_core_dual_bus.sv'
 )
 $arguments = @(
-    '--binary','--timing','--top-module','tb_core_dual_bus',
+    '--binary','--timing','-O3','--output-split','20000',
+    '--top-module','tb_core_dual_bus',
     '--Mdir',$ModelDirectory,'--Wno-fatal',
-    '-CFLAGS','-O3 -D_GLIBCXX_USE_CXX11_ABI=0',
+    '-CFLAGS','-O3 -march=native -D_GLIBCXX_USE_CXX11_ABI=0',
     '-MAKEFLAGS',
     'CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe',
     '--threads','1','--build-jobs','4','--verilate-jobs','1'

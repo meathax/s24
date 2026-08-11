@@ -63,6 +63,18 @@ exactly two emulated seconds, then returns to 10 MHz. This is confined to the
 Gain Ground input profile and targets the timer/bus-contention check that
 otherwise forces free play; every other set retains the normal CPU clock.
 
+Both CPU fetch paths now avoid artificial MiSTer SDRAM latency without changing
+the PCB's 10 MHz CPU cadence. CPU A has a snooped 4 KiB plaintext program cache;
+CPU B's FD1094-state-tagged cache is organized as 1,024 four-word lines (8 KiB),
+with independent word validity and physical Work-A/Work-B invalidation. In the
+fixed 500,000-clock Gain Ground boot benchmark, CPU-A boot-memory reads fall
+from 17,411 to 94 (99.46%) while the retired-instruction count, last PC/opcode,
+writes, and raster position remain identical. Scramble Spirits shows the same
+result (17,555 to 94 reads with identical architectural milestones). Focused
+cache tests cover data-read bypass, tags, all four line words, FD1094 state,
+the former 4 KiB conflict pair, and write snooping. A post-change Quartus map
+and hardware stall-counter capture remain required before release acceptance.
+
 The sprite frame collector retains up to 4096 normal entries; its separate
 active-line cache retains 1024 and renders into one line period. Overflow now
 retains the newest/frontmost entries rather than the
@@ -88,7 +100,8 @@ non-overlap, pause/resume regression for the 48 MHz clock-enable generator and
 expanded FD1094 state-command coverage. System 16-specific maps, raster,
 priority, sound, and cabinet logic were intentionally not imported.
 
-The nineteen focused regressions (`analog`, clock enables, CPU bus, `inputs`, `315-5296 I/O`,
+The twenty-one focused regressions (`analog`, clock enables, CPU bus, CPU-A/CPU-B opcode caches,
+`inputs`, `315-5296 I/O`,
 MRA switches, FDC, IRQ, loader, magic latch, mixer, palette, sprite, tile, video timing,
 FD1094, 128 MB SDRAM, SDRAM CDC, and YM write-boundary)
 pass. The

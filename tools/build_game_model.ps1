@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [string]$ModelDirectory = 'C:/tmp/s24_obj_gground'
+    [string]$ModelDirectory = 'C:/tmp/s24_obj_gground',
+    [switch]$DisableACache
 )
 
 $ErrorActionPreference = 'Stop'
@@ -43,7 +44,7 @@ $sources = @(
     'rtl/cpu/fx68k/uaddrPla.sv',
     'rtl/cpu/fx68k/fx68k.sv',
     'rtl/cpu/s24_fd1094_decrypt.sv',
-    'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_b_opcache.sv',
+    'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_a_opcache.sv','rtl/cpu/s24_b_opcache.sv',
     'verif/jt51_boot_stub.sv',
     'rtl/s24_core.sv',
     'verif/tb_gground_boot.sv'
@@ -52,12 +53,14 @@ $sources = @(
 $arguments = @(
     '--binary',
     '--timing',
+    '-O3',
+    '--output-split', '20000',
     '--top-module', 'tb_gground_boot',
     '--Mdir', $modelDirectory,
     # Keep assertions enabled, but use an optimized C++ model for the long
     # deterministic attract sweep. This does not change Verilator's safe
     # thread/job limits or the RTL being verified.
-    '-CFLAGS', '-O3 -D_GLIBCXX_USE_CXX11_ABI=0',
+    '-CFLAGS', '-O3 -march=native -D_GLIBCXX_USE_CXX11_ABI=0',
     '-MAKEFLAGS',
     'CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe',
     '--Wno-fatal',
@@ -71,7 +74,7 @@ $arguments = @(
     # Keep generation deterministic while diagnosing the Windows/MSYS
     # single-file write race; C++ compilation remains bounded at four jobs.
     '--verilate-jobs', '1'
-) + $sources
+) + $(if($DisableACache) { @('-GA_OPCACHE_ENABLE=0') } else { @() }) + $sources
 
 & verilator-safe @arguments
 $buildExitCode = $LASTEXITCODE

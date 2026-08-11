@@ -1,7 +1,8 @@
 import s24_pkg::*;
 
 module s24_core #(
-    parameter int unsigned CLK_HZ = 48_000_000
+    parameter int unsigned CLK_HZ = 48_000_000,
+    parameter bit A_OPCACHE_ENABLE = 1'b1
 ) (
     input  logic        clk,
     input  logic        reset,
@@ -205,6 +206,8 @@ module s24_core #(
     logic [7:0] fd_state;
     logic [7:0]  fd_state_used;
     logic        bc_hit_record;
+    logic        ac_window,ac_q_valid,ac_hit,ac_fill;
+    logic [15:0] ac_hit_data;
     logic        bc_window,bc_q_valid,bc_hit;
     logic [15:0] bc_hit_data;
     logic        bc_fill,bc_snoop;
@@ -240,6 +243,19 @@ module s24_core #(
         .fill_state(board.has_fd1094 ? fd_state_used : 8'd0),
         .fill_data(b_mem_din),
         .snoop(bc_snoop),.snoop_phys(cpu_phys));
+
+    // CPU-A has the same artificial SDRAM fetch latency as CPU-B, without
+    // the FD1094 state dimension. Cache repeated program reads while leaving
+    // all data reads on the authentic memory path. The reset vectors stay
+    // uncached so reset sequencing remains directly observable.
+    assign ac_window = a_mem_fc[1] && a_mem_addr<24'h100000 &&
+                       a_mem_addr[23:1]>23'd3;
+    s24_a_opcache acache(
+        .clk(clk),.reset(reset),
+        .address(a_mem_addr[23:1]),.fetch_window(ac_window),
+        .lookup_q_valid(ac_q_valid),.hit(ac_hit),.hit_data(ac_hit_data),
+        .fill(ac_fill),.fill_address(a_mem_addr[23:1]),
+        .fill_data(a_mem_din),.snoop(bc_snoop),.snoop_phys(cpu_phys));
 
     always_ff @(posedge clk) begin
         fd_irq_enter<=1'b0;
@@ -624,6 +640,7 @@ module s24_core #(
         fd_key_start<=1'b0;
         bc_hit_record<=1'b0;
         bc_fill<=1'b0;
+        ac_fill<=1'b0;
         if(reset) begin
             a_mrstate<=MR_IDLE;
             b_mrstate<=MR_IDLE;
