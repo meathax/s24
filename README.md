@@ -101,6 +101,7 @@ profile is tracked for source completeness only.
 | Sound generator | YM2151-compatible JT51, including timer interrupts |
 | Audio output | 8-bit mono R-2R DAC model and System 24 audio mixing |
 | Analog daughterboard | uPD4701 quadrature counters and MSM6253 ADC models where populated |
+| ROM-board EPLD | EPM5032 ROM banking with documented 2M/4M/8M jumper profiles, visible FRC counter, documented modulo modes, MODE-qualified `/INT3`, and MAME-compatible FRC event timing |
 | Storage hardware | System 24 floppy controller, floppy index timing, writable overlay, and ROM-board banking |
 | MiSTer memory | 128 MB SDRAM layout for boot ROM, ROM board, floppy media, CPU RAM, character RAM, and sprite RAM |
 
@@ -133,6 +134,7 @@ profile is tracked for source completeness only.
   schematic archive](https://techdocs.exodusemulator.com/Arcade/SegaSystem24/).
 - **System 16 contributors** — the [System 24 board summary and photographs](https://www.system16.com/hardware.php?id=708).
 - **Charles MacDonald** — preserved [315-5292 notes and measured raster information](https://w.atwiki.jp/arcadegames/pages/33.html).
+- **Charles MacDonald** — [System 24 ROM-board notes](https://w.atwiki.jp/arcadegames/pages/150.html), used for the documented EPM5032 register, counter, bank, and interrupt behavior.
 - **Claude Code (Anthropic)** — AI-assisted development under human direction,
   review, and verification.
 

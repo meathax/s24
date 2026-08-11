@@ -278,14 +278,10 @@ bool append_trace(std::ofstream& stream, uint64_t frame,
                   const Vtb_gground_boot& top) {
     const int device = trace_device(top.host_trace_addr);
     if (!device) return true;
-    // MAME's address-space taps do not expose accesses performed inside the
-    // System 24 RAM/FDC/video handlers consistently.  Emitting millions of
-    // one-sided RTL events makes the live comparator repeatedly parse a huge
-    // file without adding comparable evidence.  Keep the low-volume control
-    // devices that both producers observe; detailed bulk-device behavior is
-    // covered by focused RTL tests and is called out in the coverage ledger.
-    if (device == 1 || device == 12 || device == 20 || device == 21 ||
-        device == 23 || device == 25) return true;
+    // MAME's address-space taps do not expose high-volume shared-RAM reads
+    // consistently, but its CPU writes to the video handlers are observable
+    // and are the causal evidence needed for scoreboard mismatches.  Keep the
+    // explicitly classified traffic; callers can bound the capture window.
     const unsigned address = device == 1
         ? (top.host_trace_addr & 0xfbffffU) : top.host_trace_addr;
     const unsigned lanes = top.host_trace_be;
@@ -378,6 +374,14 @@ int main(int argc, char** argv) {
     const std::string lockstep_arg = plusarg_value(argc, argv, "+LOCKSTEP_DIR=");
     const fs::path lockstep_root = lockstep_arg;
     const bool lockstep = !lockstep_arg.empty();
+    const std::string trace_arg = plusarg_value(argc, argv, "+TRACE_FILE=");
+    const bool trace_only = !trace_arg.empty() && !lockstep;
+    const auto trace_frame_arg = [&](const char* name) -> uint64_t {
+        const std::string value = plusarg_value(argc, argv, name);
+        return value.empty() ? 0 : std::strtoull(value.c_str(), nullptr, 10);
+    };
+    const uint64_t trace_start_frame = trace_frame_arg("+TRACE_START_FRAME=");
+    const uint64_t trace_end_frame = trace_frame_arg("+TRACE_END_FRAME=");
     std::ofstream trace_stream;
     std::ofstream audio_event_stream;
     if (lockstep) {
@@ -400,6 +404,15 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "Cannot open RTL audio event trace\n");
             return 5;
         }
+    } else if (trace_only) {
+        trace_stream.open(trace_arg, std::ios::binary | std::ios::trunc);
+        if (!trace_stream) {
+            std::fprintf(stderr, "Cannot open RTL trace: %s\n", trace_arg.c_str());
+            return 5;
+        }
+        std::fprintf(stderr, "RTL trace window: frames %llu..%llu -> %s\n",
+            static_cast<unsigned long long>(trace_start_frame),
+            static_cast<unsigned long long>(trace_end_frame), trace_arg.c_str());
     }
     const std::string initial_title = "Sega System 24 - " +
         (game.empty() ? std::string("unknown") : game) + " (Verilator)";
@@ -608,9 +621,13 @@ int main(int argc, char** argv) {
                     wav.append(top.host_audio_l, top.host_audio_r);
                 }
             }
-            if (lockstep && top.clk && top.host_trace_valid &&
-                    !fs::exists(lockstep_root / "TRACE_STOP.txt") &&
-                    !append_trace(trace_stream, published_frames, top)) {
+            if ((lockstep || trace_only) && top.clk && top.host_trace_valid &&
+                    (!trace_only ||
+                     ((frames >= trace_start_frame) &&
+                      (!trace_end_frame || frames <= trace_end_frame))) &&
+                    (!lockstep || !fs::exists(lockstep_root / "TRACE_STOP.txt")) &&
+                    !append_trace(trace_stream,
+                                  lockstep ? published_frames : frames, top)) {
                 std::fprintf(stderr, "Cannot append RTL lockstep trace\n");
                 running = false;
             }

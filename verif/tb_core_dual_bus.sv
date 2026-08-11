@@ -27,7 +27,7 @@ module tb_core_dual_bus;
         .input_ports(64'hffff_ffff_ffff_ffff),
         .spinner0('0),.spinner1('0),.spinner2('0),.spinner3('0),
         .paddle0(8'h80),.paddle1(8'h80),.paddle2(8'h80),.paddle3(8'h80),
-        .mahjong_line(),.ce_pixel(),.hblank(),.vblank(),.hsync(),.vsync(),
+        .mahjong_line(),.ce_pixel(),.hblank(),.vblank(),.hsync(),.vsync(),.video_flip(),
         .red(),.green(),.blue(),.audio_l(),.audio_r(),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
         .p2_req(),.p2_addr(),.p2_data('0),.p2_ack(1'b0),

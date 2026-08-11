@@ -1,13 +1,14 @@
 `timescale 1ns/1ps
 
 module tb_io_5296;
-    logic clk=0,reset=1,rd=0,wr=0;
+    logic clk=0,reset=1,ce_16m=1,rd=0,wr=0;
     logic [5:0] addr=0;
     logic [7:0] din=0,dout;
     logic [63:0] port_in=64'h8877665544332211;
     logic [63:0] port_out,port_write_data;
     logic [7:0] port_dir,port_write;
     logic [2:0] cnt;
+    logic cnt2_clock,ckot_clock;
     logic [2:0] mahjong_line;
     always #5 clk=~clk;
     s24_io_5296 dut(.*);
@@ -62,6 +63,30 @@ module tb_io_5296;
         addr=11;#1;assert(dout==8'h41) else $fatal(1,"SEGA ID A");
         write_io(6'h0e,8'h05);
         assert(cnt==3'b101) else $fatal(1,"CNT outputs %b",cnt);
+
+        // CNT2 clock mode ignores data bit 2 and implements the documented
+        // CLK/4 divider. A square-wave output toggles every two source ticks.
+        write_io(6'h0e,8'h0c);
+        assert(cnt[2]==1'b0 && cnt2_clock==1'b0)
+            else $fatal(1,"CNT2 clock mode initial phase %b/%b",cnt[2],cnt2_clock);
+        repeat(1) @(posedge clk);#1;
+        assert(cnt2_clock==1'b0) else $fatal(1,"CNT2 clock toggled early");
+        repeat(1) @(posedge clk);#1;
+        assert(cnt2_clock==1'b1 && cnt[2]==1'b1)
+            else $fatal(1,"CNT2 CLK/4 first half-period %b/%b",cnt2_clock,cnt[2]);
+        repeat(2) @(posedge clk);#1;
+        assert(cnt2_clock==1'b0) else $fatal(1,"CNT2 CLK/4 period");
+
+        // CKOT has its independent upper divider field. Rewriting CNT resets
+        // both divider phases, so a CLK/8 output toggles after four ticks.
+        write_io(6'h0e,8'h4c);
+        repeat(3) @(posedge clk);#1;
+        assert(ckot_clock==1'b0) else $fatal(1,"CKOT toggled early");
+        repeat(1) @(posedge clk);#1;
+        assert(ckot_clock==1'b1) else $fatal(1,"CKOT CLK/8 first half-period");
+        write_io(6'h0e,8'h04);
+        assert(cnt[2]==1'b1 && cnt2_clock==1'b0 && ckot_clock==1'b0)
+            else $fatal(1,"CNT programmable mode restore %b/%b/%b",cnt[2],cnt2_clock,ckot_clock);
         $display("PASS 315-5296 ports, callbacks, direction, ID, and CNT latch");
         $finish;
     end

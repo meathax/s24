@@ -26,26 +26,15 @@ module s24_board_arbiter (
 );
     logic selected_q;
     logic round_robin_q;
+    board_transaction_t active_transaction_q;
 
     always_comb begin
         transaction = '0;
-        transaction.valid       = transaction_valid;
-        transaction.requester   = selected_q;
-        transaction.grant       = transaction_valid;
-        transaction.complete    = a_complete | b_complete;
-        transaction.phase       = a_complete | b_complete
-                                ? BUS_PHASE_COMPLETE
-                                : a_grant | b_grant
-                                ? BUS_PHASE_GRANTED
-                                : transaction_valid
-                                ? BUS_PHASE_WAIT : BUS_PHASE_CAPTURE;
-        transaction.wait_state  = transaction_valid && !completion;
-        if (transaction_valid || a_complete || b_complete) begin
-            if (selected_q) transaction = b_transaction;
-            else            transaction = a_transaction;
-        end
-        // The source transaction is immutable while active, but status fields
-        // belong to the arbiter and must remain observable at its boundary.
+        if (transaction_valid || a_complete || b_complete)
+            transaction = active_transaction_q;
+        // The source transaction is captured on grant and remains immutable
+        // through wait and completion. Status fields belong to the arbiter
+        // and must remain observable at its boundary.
         transaction.valid       = transaction_valid;
         transaction.requester   = selected_q;
         transaction.grant       = transaction_valid;
@@ -63,6 +52,7 @@ module s24_board_arbiter (
         if (reset) begin
             selected_q       <= 1'b0;
             round_robin_q    <= 1'b0;
+            active_transaction_q <= '0;
             transaction_valid <= 1'b0;
             a_grant          <= 1'b0;
             b_grant          <= 1'b0;
@@ -77,16 +67,23 @@ module s24_board_arbiter (
             if (!transaction_valid) begin
                 if (a_pending && b_pending) begin
                     selected_q <= round_robin_q;
-                    if (round_robin_q) b_grant <= 1'b1;
-                    else               a_grant <= 1'b1;
+                    if (round_robin_q) begin
+                        b_grant <= 1'b1;
+                        active_transaction_q <= b_transaction;
+                    end else begin
+                        a_grant <= 1'b1;
+                        active_transaction_q <= a_transaction;
+                    end
                     round_robin_q <= ~round_robin_q;
                     transaction_valid <= 1'b1;
                 end else if (a_pending) begin
                     selected_q <= 1'b0;
+                    active_transaction_q <= a_transaction;
                     a_grant <= 1'b1;
                     transaction_valid <= 1'b1;
                 end else if (b_pending) begin
                     selected_q <= 1'b1;
+                    active_transaction_q <= b_transaction;
                     b_grant <= 1'b1;
                     transaction_valid <= 1'b1;
                 end

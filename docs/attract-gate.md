@@ -24,12 +24,13 @@ grid samples was observed at:
 | `crkdown` | 961 | `0x008e94` |
 | `hotrod` | 1321 | `0x006a5e`–`0x006a7c` |
 | `gground` | 1261 | `0x0085b0`–`0x0085b2` |
-| `roughrac` | pending fresh probe | pending |
+| `roughrac` | 1141 | `0x00927e` |
 | `sspirits` | 1201 | `0x0086b4` |
 
 The 60-second MAME reference sweep produced an adaptive first-game-screen
-snapshot for the retained parent sets; Rough Racer was added afterward and
-still needs a fresh reference probe. These
+snapshot for the retained parent sets. Rough Racer was subsequently probed
+with the same no-input contract: its first qualifying screen was frame 1141,
+with the secondary CPU at `0x00927e`. These
 snapshots are retained under the ignored `verif/mame/matrix60adaptive` tree
 for later native-frame comparison.
 

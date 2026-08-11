@@ -311,7 +311,7 @@ module emu (
     logic [26:1] cwr_addr;
     logic [15:0] cwr_data;
     logic [1:0] cwr_be;
-    logic core_ce,hblank,vblank,hsync,vsync;
+    logic core_ce,hblank,vblank,hsync,vsync,video_flip;
     logic [7:0] r,g,b;
     // The generated Cyclone V PLL is 48.317307 MHz. Pass that value to the
     // fractional enables so the board's native 16 MHz PCD raster remains at
@@ -328,7 +328,8 @@ module emu (
         .paddle2(pedal_merged2),.paddle3(pedal_merged3),
         .mahjong_line(mahjong_line),
         .ce_pixel(core_ce),.hblank(hblank),.vblank(vblank),
-        .hsync(hsync),.vsync(vsync),.red(r),.green(g),.blue(b),
+        .hsync(hsync),.vsync(vsync),.video_flip(video_flip),
+        .red(r),.green(g),.blue(b),
         .audio_l(AUDIO_L),.audio_r(AUDIO_R),.floppy_written(floppy_written),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),
@@ -477,7 +478,11 @@ module emu (
         .VGA_HS(gamma_hs),.VGA_VS(gamma_vs),.VGA_DE(gamma_de),
         .rotate_ccw(rotate_ccw),
         .no_rotate(~rotation_active),
-        .flip(1'b0),
+        // Descriptor video_profile bit 1 is the board-profile screen-flip
+        // control.  All current System 24 sets leave it clear; keeping the
+        // path profile-driven makes the hardware orientation selectable
+        // without a set-name conditional or a change to the native raster.
+        .flip(descriptor.video_profile[1] | video_flip),
         .video_rotated(video_rotated),
         .FB_EN(FB_EN),.FB_FORMAT(FB_FORMAT),
         .FB_WIDTH(FB_WIDTH),.FB_HEIGHT(FB_HEIGHT),

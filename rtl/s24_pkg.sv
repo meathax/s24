@@ -84,6 +84,15 @@ package s24_pkg;
     localparam logic [1:0] ANALOGUE_STANDARD = 2'd0;
     localparam logic [1:0] ANALOGUE_ROUGHRAC = 2'd1;
 
+    // 837-7187 ROM-board jumper populations.  The names are the ROM device
+    // densities printed in the board notes, not byte capacities: 2M uses
+    // four pairs of 27C020 devices, 4M uses four pairs of 27C040 devices,
+    // and 8M uses two pairs of 27C080 devices.  The 4M profile preserves the
+    // legacy linear 4 MiB media layout.
+    localparam logic [1:0] ROMBOARD_PROFILE_4M = 2'd0;
+    localparam logic [1:0] ROMBOARD_PROFILE_2M = 2'd1;
+    localparam logic [1:0] ROMBOARD_PROFILE_8M = 2'd2;
+
     typedef enum logic [3:0] {
         MAGIC_NONE      = 4'd0,
         MAGIC_DCCLUB    = 4'd2,
@@ -94,6 +103,10 @@ package s24_pkg;
         MAGIC_BNZABROS  = 4'd7
     } magic_sel_t;
 
+    // The ROM-board /INT3 input is a level-1 source enabled by bit 0 of the
+    // per-CPU IRQ-enable registers. Keep it distinct from the periodic FRC
+    // event, which is the higher-level timer source at bit 5.
+    localparam int IRQ_INT3   = 0;
     localparam int IRQ_YM2151 = 1;
     localparam int IRQ_TIMER  = 2;
     localparam int IRQ_VBLANK = 3;
@@ -113,6 +126,24 @@ package s24_pkg;
 
     function automatic logic [26:1] word_address(input logic [26:0] byte_address);
         word_address = byte_address[26:1];
+    endfunction
+
+    // Convert the 256 KiB CPU-visible bank window into the byte offset in
+    // the downloaded ROM-board image.  The 2M jumper population uses BK2:BK1
+    // to select one of four ROM pairs and BK0 as the pair-local high address;
+    // BK3 is not connected to ROM selection.  4M and 8M populations both
+    // present a linear 4 MiB byte image in the loader, with all four bank
+    // bits contributing to the offset.  Reserved profiles intentionally use
+    // the conservative 4M mapping until a board netlist assigns them.
+    function automatic logic [21:0] romboard_offset(
+        input logic [1:0] profile,
+        input logic [3:0] bank,
+        input logic [17:0] window_address
+    );
+        if (profile == ROMBOARD_PROFILE_2M)
+            romboard_offset = {1'b0, bank[2:0], window_address};
+        else
+            romboard_offset = {bank, window_address};
     endfunction
 
 endpackage

@@ -80,7 +80,14 @@ so one `s24.rbf` can configure every present game without resynthesis.
 Shared CPU writes and device cycles cross the typed `board_transaction_t`
 boundary in `rtl/s24_board_arbiter.sv`. Independent memory reads continue
 through the SDRAM adapter, while the arbiter holds one granted transaction
-unchanged until completion/DTACK. The exact EPM5032 equations and unmeasured
+unchanged until completion/DTACK. The ROM-board EPM5032 behavioral block
+models the documented 625 kHz visible counter, modulo-256/modulo-103 modes,
+mode-write phase reset, and MODE-qualified `/INT3` level. The motherboard's
+MAME-compatible FRC event uses the separate `/1024` phase input; the
+ROM-board bank mapper consumes the descriptor's documented 2M/4M/8M jumper
+population, including the 2M BK3 alias, and preserves the legacy 4 MiB linear
+layout for 4M/8M media. The programmed fuse/JED equations, board-specific
+jumper netlist, and unmeasured
 electrical timing remain unknown and are tracked in `docs/online-evidence.json`.
 
 ## Cross-chip priority contract

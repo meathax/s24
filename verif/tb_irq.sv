@@ -4,7 +4,7 @@ module tb_irq;
     import s24_pkg::*;
     logic clk=0,reset=1,ce_8m=0,hsync_tick=0;
     logic [9:0] vcount=0;
-    logic ym_irq=0,frc_tick=0,frc_mode=0,frc_ack=0,rd_a=0,rd_b=0,wr=0;
+    logic ym_irq=0,int3_n=1,frc_tick=0,frc_mode=0,frc_ack=0,rd_a=0,rd_b=0,wr=0;
     logic [1:0] addr=0,be=2'b11;
     logic [15:0] din=0,dout;
     logic [2:0] ipl_a_n,ipl_b_n;
@@ -105,7 +105,23 @@ module tb_irq;
         if(ipl_a_n!=3'b111 || ipl_b_n!=3'b111)
             $fatal(1,"mode-0 FRC tick asserted an interrupt");
 
-        $display("PASS System 24 raster/timer/FRC IRQ phase and per-CPU ack");
+        // The ROM-board /INT3 pin is level-sensitive and selects interrupt
+        // level 1 through bit 0 of each CPU's enable register. Unlike the
+        // periodic FRC latch above, it clears only when the board releases
+        // /INT3 by leaving MODE=1.
+        write_irq(2,16'h0001);
+        write_irq(3,16'h0001);
+        int3_n=0; #1;
+        if(ipl_a_n!=~3'd1 || ipl_b_n!=~3'd1)
+            $fatal(1,"ROM-board /INT3 level-1 mismatch A=%b B=%b",ipl_a_n,ipl_b_n);
+        write_irq(3,16'h0000);
+        if(ipl_a_n!=~3'd1 || ipl_b_n==~3'd1)
+            $fatal(1,"ROM-board /INT3 per-CPU mask mismatch A=%b B=%b",ipl_a_n,ipl_b_n);
+        int3_n=1; #1;
+        if(ipl_a_n!=3'b111 || ipl_b_n!=3'b111)
+            $fatal(1,"ROM-board /INT3 release did not clear level interrupt");
+
+        $display("PASS System 24 raster/timer/FRC IRQ phase, per-CPU ack, and ROM-board /INT3 level");
         $finish;
     end
 endmodule

@@ -105,6 +105,18 @@ module tb_board_arbiter;
                 end
             end else if (cycle % 3 == 0) begin
                 completion = 1'b1;
+            end else begin
+                // A requester-side record is not trusted after grant.  The
+                // board boundary must continue presenting the captured bus
+                // cycle until completion even if the producer reuses its
+                // source record early.
+                if (transaction.requester == 1'b0) begin
+                    a_transaction.address = 24'h700000 + cycle[23:0];
+                    a_transaction.write_data = ~cycle[15:0];
+                end else begin
+                    b_transaction.address = 24'h710000 + cycle[23:0];
+                    b_transaction.write_data = cycle[15:0];
+                end
             end
         end
 

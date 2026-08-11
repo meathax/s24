@@ -10,9 +10,13 @@ module tb_jt51_tone;
     logic [7:0] din=0,dout;
     logic ct1,ct2,irq_n,sample;
     logic signed [15:0] left,right,xleft,xright;
+    logic signed [15:0] dac_left,dac_right;
     longint unsigned energy_l=0,energy_r=0;
+    longint unsigned dac_energy_l=0,dac_energy_r=0;
     integer sample_count=0;
     integer peak_l=0,peak_r=0;
+    integer dac_peak_l=0,dac_peak_r=0;
+    integer quantized_samples=0;
 
     always #5 clk=~clk;
     always_ff @(posedge clk) begin
@@ -26,6 +30,11 @@ module tb_jt51_tone;
         .ct1(ct1),.ct2(ct2),.irq_n(irq_n),.sample(sample),
         .left(left),.right(right),.xleft(xleft),.xright(xright));
 
+    s24_ym3012_sample_hold dac(
+        .clk(clk),.reset(rst),.sample(sample),
+        .linear_left(xleft),.linear_right(xright),
+        .audio_left(dac_left),.audio_right(dac_right));
+
     function automatic integer abs16(input logic signed [15:0] value);
         abs16 = value < 0 ? -$signed(value) : $signed(value);
     endfunction
@@ -34,8 +43,32 @@ module tb_jt51_tone;
         sample_count<=sample_count+1;
         energy_l<=energy_l+abs16(xleft);
         energy_r<=energy_r+abs16(xright);
+        dac_energy_l<=dac_energy_l+abs16(dac_left);
+        dac_energy_r<=dac_energy_r+abs16(dac_right);
         if(abs16(xleft)>peak_l) peak_l<=abs16(xleft);
         if(abs16(xright)>peak_r) peak_r<=abs16(xright);
+        if(abs16(dac_left)>dac_peak_l) dac_peak_l<=abs16(dac_left);
+        if(abs16(dac_right)>dac_peak_r) dac_peak_r<=abs16(dac_right);
+    end
+
+    // JT51 exposes both its full-resolution accumulator and the quantized
+    // mantissa/exponent output that the external YM3012 reconstructs.  Check
+    // the production digital boundary against that independent low-resolution
+    // reference at each settled sample, rather than only comparing aggregate
+    // tone energy.
+    always @(posedge sample) begin
+        if(!rst) begin
+            // JT51's sample marker rises after the clock edge that presents
+            // the new accumulator value.  The production sample/hold takes
+            // that marker on the following core clock, so check after that
+            // boundary rather than racing the nonblocking update.
+            @(posedge clk);
+            #1;
+            if(dac_left !== left || dac_right !== right)
+                $fatal(1,"YM3012 reconstruction mismatch sample=%0d dac=%0d/%0d jt51=%0d/%0d x=%0d/%0d",
+                       quantized_samples,dac_left,dac_right,left,right,xleft,xright);
+            quantized_samples = quantized_samples + 1;
+        end
     end
 
     task automatic bus_write(input logic address_phase,
@@ -93,11 +126,16 @@ module tb_jt51_tone;
 
         if(sample_count<1000)
             $fatal(1,"too few JT51 samples: %0d",sample_count);
-        if(energy_l==0 || energy_r==0 || peak_l<8 || peak_r<8)
-            $fatal(1,"silent JT51 tone samples=%0d energy=%0d/%0d peak=%0d/%0d",
-                   sample_count,energy_l,energy_r,peak_l,peak_r);
-        $display("PASS real JT51 tone samples=%0d energy=%0d/%0d peak=%0d/%0d",
-                 sample_count,energy_l,energy_r,peak_l,peak_r);
+        if(quantized_samples<1000)
+            $fatal(1,"too few settled YM3012 samples: %0d",quantized_samples);
+        if(energy_l==0 || energy_r==0 || peak_l<8 || peak_r<8 ||
+           dac_energy_l==0 || dac_energy_r==0 || dac_peak_l<8 || dac_peak_r<8)
+            $fatal(1,"silent JT51/YM3012 tone samples=%0d exact=%0d/%0d peak=%0d/%0d dac=%0d/%0d peak=%0d/%0d",
+                   sample_count,energy_l,energy_r,peak_l,peak_r,
+                   dac_energy_l,dac_energy_r,dac_peak_l,dac_peak_r);
+        $display("PASS real JT51/YM3012 tone samples=%0d exact=%0d/%0d peak=%0d/%0d dac=%0d/%0d peak=%0d/%0d",
+                 sample_count,energy_l,energy_r,peak_l,peak_r,
+                 dac_energy_l,dac_energy_r,dac_peak_l,dac_peak_r);
         $finish;
     end
 endmodule

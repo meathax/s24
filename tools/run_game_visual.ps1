@@ -5,6 +5,9 @@ param(
     [string]$Restore = '',
     [string]$Save = '',
     [string]$LockstepDirectory = '',
+    [string]$TraceFile = '',
+    [UInt64]$TraceStartFrame = 0,
+    [UInt64]$TraceEndFrame = 0,
     [ValidateRange(0,8)][int]$Target = 8,
     [string]$FrameOut = '',
     [string]$WavOut = '',
@@ -68,6 +71,9 @@ if ($Detached) {
     if ($LockstepDirectory) {
         $childArguments += ' -LockstepDirectory "' + $LockstepDirectory + '"'
     }
+    if ($TraceFile) { $childArguments += ' -TraceFile "' + $TraceFile + '"' }
+    if ($TraceStartFrame) { $childArguments += ' -TraceStartFrame ' + $TraceStartFrame }
+    if ($TraceEndFrame) { $childArguments += ' -TraceEndFrame ' + $TraceEndFrame }
     $childArguments += ' -Target ' + $Target
     if ($FrameOut) { $childArguments += ' -FrameOut "' + $FrameOut + '"' }
     if ($AutoCoinFrame) { $childArguments += ' -AutoCoinFrame ' + $AutoCoinFrame }
@@ -110,6 +116,9 @@ $arguments = @(& python @profileCommand)
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if ($Restore) { $arguments += "+RESTORE=$Restore" }
 if ($Save) { $arguments += "+SAVE=$Save" }
+if ($TraceFile) { $arguments += "+TRACE_FILE=$TraceFile" }
+if ($TraceStartFrame) { $arguments += "+TRACE_START_FRAME=$TraceStartFrame" }
+if ($TraceEndFrame) { $arguments += "+TRACE_END_FRAME=$TraceEndFrame" }
 if ($AutoCoinFrame) { $arguments += "+AUTO_COIN_FRAME=$AutoCoinFrame" }
 if ($AutoStartFrame) { $arguments += "+AUTO_START_FRAME=$AutoStartFrame" }
 if ($AutoActionFrame) { $arguments += "+AUTO_ACTION_FRAME=$AutoActionFrame" }

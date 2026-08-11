@@ -22,6 +22,7 @@ MAME_ATTRACT_B_PC_MIN = {
     "gground": 0x0085B0,
     "crkdown": 0x008E94,
     "bnzabros": 0x0081CA,
+    "roughrac": 0x00927E,
 }
 
 

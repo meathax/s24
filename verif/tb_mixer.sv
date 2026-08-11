@@ -10,7 +10,7 @@ module tb_mixer;
     logic v0=0,v1=0,v2=0,v3=0;
     logic [13:0] sp0=0,sp1=0,sp2=0,sp3=0,mixed,mixed_alt;
     logic [10:0] sr0=0,sr1=0,sr2=0,sr3=0;
-    logic blank;
+    logic blank,screen_flip;
     always #5 clk=~clk;
 
     s24_mixer dut(
@@ -23,7 +23,7 @@ module tb_mixer;
         .sprite0_rank(sr0),.sprite1_rank(sr1),.sprite2_rank(sr2),.sprite3_rank(sr3),
         .tile_blink(4'b0000),
         .mixed_pixel(mixed),.mixed_pixel_alt(mixed_alt),
-        .display_blank(blank));
+        .display_blank(blank),.screen_flip(screen_flip));
 
     task automatic write_reg(input [3:0] a,input [15:0] d);
         begin cpu_addr=a;cpu_din=d;cpu_wr=1;@(posedge clk);#1;cpu_wr=0;end
@@ -73,6 +73,17 @@ module tb_mixer;
         // Once group 0 also clears the tile, its larger list rank wins.
         write_reg(11,16'h0004);#1;
         assert(mixed==14'h1010) else $fatal(1,"front sprite ordering %h",mixed);
+
+        // Mixer register 13 bit 0 blanks the native pixel path; bit 1 is the
+        // separate board screen-flip control.  Verify the two controls do not
+        // alias each other.
+        write_reg(13,16'h0002);#1;
+        assert(screen_flip) else $fatal(1,"screen flip register");
+        assert(!blank) else $fatal(1,"screen flip changed blanking");
+        write_reg(13,16'h0001);#1;
+        assert(!screen_flip) else $fatal(1,"blank register changed screen flip");
+        assert(blank) else $fatal(1,"display blank register");
+        write_reg(13,16'h0000);#1;
 
         // Equal reverse-list ranks preserve the original sequential/MAME
         // group order, including across the two branches of the rank tree.

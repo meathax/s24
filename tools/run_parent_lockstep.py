@@ -12,6 +12,7 @@ import pathlib
 import subprocess
 import sys
 import time
+import wave
 import xml.etree.ElementTree as ET
 
 import gen_mra
@@ -44,6 +45,28 @@ def sha256(path: pathlib.Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest().lower()
+
+
+def wav_receipt(path: pathlib.Path) -> dict[str, object]:
+    """Return auditable metadata for a native PCM capture, without decoding it."""
+    if not path.is_file():
+        return {"status": "missing", "path": str(path)}
+    receipt: dict[str, object] = {
+        "status": "present", "path": str(path),
+        "size": path.stat().st_size, "sha256": sha256(path),
+    }
+    try:
+        with wave.open(str(path), "rb") as stream:
+            receipt.update({
+                "channels": stream.getnchannels(),
+                "sample_width": stream.getsampwidth(),
+                "sample_rate": stream.getframerate(),
+                "frames": stream.getnframes(),
+                "compression": stream.getcomptype(),
+            })
+    except (wave.Error, OSError) as error:
+        receipt.update({"status": "invalid", "error": str(error)})
+    return receipt
 
 
 def mame_dip_defaults(game: str, executable: pathlib.Path) -> dict[str, int]:
@@ -294,7 +317,10 @@ def main() -> int:
         target=8, max_clocks=9_000_000_000_000_000_000,
         progress_clocks=100_000_000,
     )
+    rtl_audio_path = session / "rtl_audio.wav"
+    mame_audio_path = session / "mame_audio.wav"
     rtl_command.extend((f"+LOCKSTEP_DIR={session}",
+                        f"+WAV_OUT={rtl_audio_path}",
                         f"+SAVE={REPO / (args.game + '.vltsv')}"))
     # Own the safe wrapper directly.  An intermediate PowerShell process can
     # be terminated on timeout while leaving its queued safe-launch child
@@ -311,6 +337,8 @@ def main() -> int:
         "-nvram_directory", str(session / "nvram"),
         "-state_directory", str(session / "state"),
         "-snapshot_directory", str(session / "snap"),
+        "-samplerate", "48000",
+        "-wavwrite", str(mame_audio_path),
         "-autoboot_script", str(REPO / "verif/mame/live_lockstep_producer.lua"),
     ], cwd=args.mame_exe.parent, env=env, stdout=mame_out, stderr=mame_err)
     manifest = {
@@ -345,6 +373,21 @@ def main() -> int:
         mame_code = stop_process(mame)
         for stream in (coordinator_log, rtl_out, rtl_err, mame_out, mame_err):
             stream.close()
+
+    audio_receipt = {
+        "schema": "s24-lockstep-audio-v1",
+        "sample_contract": {
+            "sample_rate": 48000,
+            "channels": 2,
+            "format": "signed 16-bit little-endian PCM",
+            "rtl": "48.317307 MHz host mix resampled by WavWriter",
+            "mame": "MAME sound mixer wavwrite at -samplerate 48000",
+        },
+        "rtl": wav_receipt(rtl_audio_path),
+        "mame": wav_receipt(mame_audio_path),
+        "comparison": "capture-only; sample alignment and analogue response remain separate gates",
+    }
+    write_json(session / "audio_receipt.json", audio_receipt)
 
     metrics_path = session / "metrics.jsonl"
     records = [json.loads(line) for line in
@@ -382,8 +425,12 @@ def main() -> int:
         "bulk_device_bus": {"rtl": "focused_tests_only", "mame": "missing_evidence",
                             "devices": ["shared_ram", "palette", "tile", "character", "sprite", "fdc"],
                             "reason": "MAME address-space taps do not expose handler-internal accesses consistently; one-sided RTL traffic is not treated as differential proof"},
-        "audio": {"rtl": "unavailable", "mame": "unavailable",
-                  "reason": "native audio producer not yet implemented"},
+        "audio": {
+            "rtl": audio_receipt["rtl"].get("status", "unknown"),
+            "mame": audio_receipt["mame"].get("status", "unknown"),
+            "receipt": str((session / "audio_receipt.json").resolve()),
+            "comparison": "capture-only; no equivalence verdict",
+        },
     }
     write_json(session / "coverage_ledger.json", coverage)
     if protocol_completion:

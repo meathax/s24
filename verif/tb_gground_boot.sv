@@ -914,7 +914,7 @@ module tb_gground_boot #(
         .paddle3(board.hotrod_io ? 8'h01 : 8'h00),
         .mahjong_line(mahjong_line),
         .ce_pixel(ce_pixel),.hblank(hblank),.vblank(vblank),
-        .hsync(hsync),.vsync(vsync),.red(red),.green(green),.blue(blue),
+        .hsync(hsync),.vsync(vsync),.video_flip(),.red(red),.green(green),.blue(blue),
         .audio_l(audio_l),.audio_r(audio_r),
         .p0_req(p0_req),.p0_addr(p0_addr),.p0_data(p0_data),.p0_ack(p0_ack),
         .p2_req(p2_req),.p2_addr(p2_addr),.p2_data(p2_data),.p2_ack(p2_ack),

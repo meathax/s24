@@ -4,6 +4,7 @@
 // intentionally small so it can be run later without rebuilding the core.
 module tb_video_timing;
     logic clk=0,reset=1,ce_pixel=1;
+    logic sync_mode=0;
     logic [9:0] hcount,vcount;
     logic hblank,vblank,hsync,vsync,hsync_tick;
     integer pixels=0;
@@ -14,7 +15,8 @@ module tb_video_timing;
     always #5 clk=~clk;
 
     s24_video_timing dut(
-        .clk(clk),.reset(reset),.ce_pixel(ce_pixel),.hcount(hcount),.vcount(vcount),
+        .clk(clk),.reset(reset),.ce_pixel(ce_pixel),.sync_mode(sync_mode),
+        .hcount(hcount),.vcount(vcount),
         .hblank(hblank),.vblank(vblank),.hsync(hsync),.vsync(vsync),
         .hsync_tick(hsync_tick));
 

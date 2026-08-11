@@ -431,20 +431,33 @@ module s24_sprite (
 	(* ramstyle="logic" *) logic [13:0] burst_cache_tag [0:BURST_CACHE_ENTRIES-1];
 	(* ramstyle="logic" *) logic burst_cache_valid [0:BURST_CACHE_ENTRIES-1];
 	logic [13:0] burst_request_tag,burst_lookup_tag;
+	logic [7:0] burst_request_index,burst_lookup_index;
 	logic [127:0] burst_cache_q,read_data;
 	logic burst_cache_hit,cache_ack_pending,read_ack;
 	logic burst_cache_fill;
 	integer burst_cache_init;
+	function automatic logic [7:0] burst_cache_index(input logic [13:0] tag);
+		begin
+			burst_cache_index=tag[7:0]^{2'b00,tag[13:8]};
+		end
+	endfunction
 
-	assign burst_cache_hit=burst_cache_valid[burst_request_tag[7:0]] &&
-		burst_cache_tag[burst_request_tag[7:0]]==burst_request_tag;
+	// Sprite tiles are commonly allocated 0x100 bursts apart. Indexing only
+	// with the low byte aliases those adjacent banks onto one cache entry and
+	// can turn a heavily reused gameplay row into all misses. Fold the upper
+	// tag bits into the existing eight-bit index; this preserves capacity and
+	// M10K usage while retaining the complete tag for exact hit validation.
+	assign burst_request_index=burst_cache_index(burst_request_tag);
+	assign burst_lookup_index=burst_cache_index(burst_lookup_tag);
+	assign burst_cache_hit=burst_cache_valid[burst_request_index] &&
+		burst_cache_tag[burst_request_index]==burst_request_tag;
 	assign read_ack=mem_ack || cache_ack_pending;
 	assign read_data=cache_ack_pending ? burst_cache_q : mem_data;
 	assign burst_cache_fill=mem_req && mem_ack;
 
 	s24_sprite_burst_cache_ram burst_cache_ram (
-		.clk(clk),.read_addr(burst_request_tag[7:0]),
-		.read_data(burst_cache_q),.write_addr(burst_lookup_tag[7:0]),
+		.clk(clk),.read_addr(burst_request_index),
+		.read_data(burst_cache_q),.write_addr(burst_lookup_index),
 		.write_data(mem_data),.write_enable(burst_cache_fill));
 
 	// Valid/tag storage is deliberately separate from the M10K data array.
@@ -457,11 +470,11 @@ module s24_sprite (
 				burst_cache_valid[burst_cache_init]<=1'b0;
 		end else begin
 			if(burst_cache_fill) begin
-				burst_cache_tag[burst_lookup_tag[7:0]]<=burst_lookup_tag;
-				burst_cache_valid[burst_lookup_tag[7:0]]<=1'b1;
+				burst_cache_tag[burst_lookup_index]<=burst_lookup_tag;
+				burst_cache_valid[burst_lookup_index]<=1'b1;
 			end
 			if(cache_invalidate)
-				burst_cache_valid[cache_invalidate_tag[7:0]]<=1'b0;
+				burst_cache_valid[burst_cache_index(cache_invalidate_tag)]<=1'b0;
 		end
 	end
 
@@ -658,6 +671,11 @@ module s24_sprite (
     logic signed [12:0] dest_y,dest_x;
     logic flipx,flipy;
     logic [7:0] size_x_tiles,size_y_tiles;
+    // Sprite dimensions are powers of two. Keep the encoded width exponent
+    // and the vertical reverse mask beside the dimensions so the address
+    // path does not rebuild a subtractor from the live render state.
+    logic [2:0] size_x_shift;
+    logic [7:0] size_y_mask;
     logic [16:0] wanted_word;
     logic [3:0] wanted_nibble;
     logic [3:0] current_pen;
@@ -679,6 +697,7 @@ module s24_sprite (
     logic [7:0] tile_x,tile_y;
     logic [2:0] within_x,within_y;
     logic [17:0] word_calc;
+    logic [13:0] tile_row_offset;
     logic [13:0] tile_ordinal;
     logic [13:0] wanted_tag;
     logic [15:0] wanted_data_word;
@@ -960,7 +979,9 @@ module s24_sprite (
         tile_x=source_column[10:3];
         within_x=source_column[2:0];
         if(flipy) begin
-            tile_y=size_y_tiles-1'b1-tile_y;
+            // For a power-of-two height, N-1-y is exactly y xor (N-1).
+            // size_y_mask is registered when the descriptor is accepted.
+            tile_y=tile_y^size_y_mask;
             within_y=3'd7-within_y;
         end
         if(flipx) begin
@@ -968,10 +989,21 @@ module s24_sprite (
             within_x=3'd7-within_x;
         end
         // MAME masks every sprite-data word address to the 0x20000-word RAM.
-        // Widen before multiplication. An 8-bit multiply would truncate
-        // ordinals for sprites wider/taller than 32 tiles before MAME's final
-        // 0x1ffff-word RAM address mask is applied.
-        tile_ordinal=({6'd0,tile_y}*{6'd0,size_x_tiles})+{6'd0,tile_x};
+        // The descriptor width is always a power of two, so select the exact
+        // shift wiring instead of inferring a general 14x14 multiplier. The
+        // result remains 14 bits, which is sufficient for 128*128 tiles.
+        tile_row_offset=14'd0;
+        case(size_x_shift)
+            3'd0: tile_row_offset={6'd0,tile_y};
+            3'd1: tile_row_offset={5'd0,tile_y,1'b0};
+            3'd2: tile_row_offset={4'd0,tile_y,2'b0};
+            3'd3: tile_row_offset={3'd0,tile_y,3'b0};
+            3'd4: tile_row_offset={2'd0,tile_y,4'b0};
+            3'd5: tile_row_offset={1'b0,tile_y,5'b0};
+            3'd6: tile_row_offset={tile_y,6'b0};
+            default: tile_row_offset={tile_y[6:0],7'b0};
+        endcase
+        tile_ordinal=tile_row_offset+{6'd0,tile_x};
         word_calc={1'b0,tile_base} + {tile_ordinal,4'b0}
                   + {14'd0,within_y,1'b0} + {17'd0,within_x[2]};
         wanted_word=word_calc[16:0];
@@ -1518,7 +1550,7 @@ module s24_sprite (
             scan_quad_pending_clip[1]<=0;
             scan_quad_pending_clip[2]<=0;
             dest_y<=0;dest_x<=0;flipx<=0;flipy<=0;size_x_tiles<=1;
-            size_y_tiles<=1;
+            size_y_tiles<=1;size_x_shift<=0;size_y_mask<=0;
         end else begin
             // Toggle the frame epoch at the last visible-line boundary even
             // if the renderer is still busy there. Defer list-cache refresh
@@ -1953,6 +1985,8 @@ module s24_sprite (
                     flipy<=render_w4[15];
                     size_x_tiles<=8'd1<<render_w5[14:12];
                     size_y_tiles<=8'd1<<render_w4[14:12];
+                    size_x_shift<=render_w5[14:12];
+                    size_y_mask<=(8'd1<<render_w4[14:12])-8'd1;
                     if(!render_w0[13]) begin
                         zoomx_step<=(render_w1[7:0]==0)?9'h040:
                                    {1'b0,render_w1[7:0]}+1'b1;
@@ -2214,6 +2248,8 @@ module s24_sprite (
                         flipy<=render_w4[15];
                         size_x_tiles<=8'd1<<render_w5[14:12];
                         size_y_tiles<=8'd1<<render_w4[14:12];
+                        size_x_shift<=render_w5[14:12];
+                        size_y_mask<=(8'd1<<render_w4[14:12])-8'd1;
                         if(!render_w0[13]) begin
                             zoomx_step<=(render_w1[7:0]==0)?9'h040:
                                        {1'b0,render_w1[7:0]}+1'b1;

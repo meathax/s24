@@ -31,6 +31,7 @@ module tb_flicker_blend;
     logic hblank, vblank, hsync, vsync, hsync_tick;
     s24_video_timing timing(
         .clk(clk),.reset(reset),.ce_pixel(ce_pixel),
+        .sync_mode(1'b0),
         .hcount(hcount),.vcount(vcount),
         .hblank(hblank),.vblank(vblank),.hsync(hsync),.vsync(vsync),
         .hsync_tick(hsync_tick));

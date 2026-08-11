@@ -13,7 +13,7 @@ Coin 1/Start 1 input reaches unmistakable live gameplay on both sides.
 | 3 | `bnzabros` | frame 781, CPU-B `0081ca`–`0100c4` | 4 MiB zero tail, 20-frame FDC index cadence, generic input and magic-latch contracts aligned | **complete:** attract is pixel-exact; visible Verilator frame 1800 proves live gameplay closely matched to MAME |
 | 4 | `hotrod` | frame 1321, CPU-B `006a5e`–`006a7c` | media, 2f00 FDC, analog daughterboard and `FF FF` aligned | **complete:** attract is pixel-exact; visible Verilator frame 2400 proves live racing closely matched to MAME |
 | 5 | `sspirits` | frame 1201, CPU-B `0086b4` | corrected `FF FD`; raw native rotation boundary defined | pending; historical run used wrong DIP |
-| 6 | `roughrac` | pending fresh MAME probe | newly promoted local archive; FD1094, uPD4701, `FF FD` profile | pending target-7 and visual proof |
+| 6 | `roughrac` | frame 1141, CPU-B `00927e` | newly promoted local archive; FD1094, uPD4701, `FF FD` profile | pending target-7 and visual proof |
 
 The finite visual workflow is `tools/run_parent_lockstep.py`. It records the
 pinned behavioral-file hashes and checkout HEAD, isolated CFG/NVRAM/state,

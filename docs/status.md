@@ -14,15 +14,27 @@ verification matrix. See `docs/game-coverage.md` for the exact scope.
 | MiSTer shell / 128 MB SDRAM | Integrated; full-core memory-port simulation passes; 16-bit MRA switch payloads preserve both DIP bytes; hardware synthesis pending |
 | Dual 68000 buses | Integrated with fx68k and shared arbitration; synthetic reset-vector/instruction trace passes; Gain Ground full-track and CNT1/CPU-B execution gates pass; MAME release timing and sustained post-release video remain |
 | FD1094 data transform | MAME-derived decrypt path and mask ROM are integrated; CPU reset/IRQ state handling, instruction-address tracking, and prefetch-safe execution-qualified CMPI/RTE transitions are source-integrated; broader protected-set comparison pending |
-| 315-5292 tiles | Four-layer double-buffer renderer; MAME address mirrors, 128 KB character store, measured sync windows, special-pair priority routing, and palette-aware pen-zero backdrop are source-integrated |
+| 315-5292 tiles | Four-layer double-buffer renderer; MAME address mirrors, 128 KB character store, measured sync windows, documented invalid 512-scanline synchronization mode, special-pair priority routing, palette-aware pen-zero backdrop, and descriptor-driven framebuffer flip path are source-integrated |
 | 315-5293/5295 sprites | MAME-audited linked list, inclusive/reverse-Y clipping, flips, widened large-sprite addressing, zoom, all-pen indirect colors, shadow pen, newest-entry overflow retention, and one candidate per priority group are source-integrated |
 | 315-5294 mixer / palette | Register priorities, opaque tile backdrop, shadow composition, cross-group sprite fallback, and exact 315-5242 shadow/highlight rounding are source-integrated |
-| YM2151 / DAC | JT51 and unsigned R-2R DAC paths integrated with MAME's equal 0.50/0.50 routing and saturating mixing; audio comparison pending |
-| 315-5296 I/O | Digital ports and counters integrated; generic, Hot Rod, and golf maps follow MAME; CNT1 pulses CPU B reset when releasing HALT |
-| 834-6510 analog board | uPD4701 and MSM6253 models pass deterministic regression with descriptor-gated `0xC00000` mirrors; hardware control testing pending |
+| YM2151 / YM3012 / DAC | Real JT51 digital tone regression passes through an explicit YM3012-compatible 10-bit mantissa/3-bit exponent reconstruction and sample/hold boundary, with stereo energy and the 48 kHz native PCM capture path integrated; MAME sample alignment and YM3012/cabinet analogue filter/amplifier response remain pending |
+| 315-5296 I/O | Digital ports, CNT2/CKOT divider modes, and counters integrated; generic, Hot Rod, and golf maps follow MAME; CNT1 pulses CPU B reset when releasing HALT |
+| 834-6510 analog board | uPD4701 read-latch and MSM6253 models pass deterministic regression with descriptor-gated `0xC00000` mirrors; hardware control testing pending |
 | IRQ/timer controller | HSync/8 MHz timer modes, per-CPU masks, and MAME raster levels implemented; sprite/VBlank assertions use the registered 423->0 and 383->384 boundaries |
 | Floppy controller | Flat-image transfers, MAME track geometry, deterministic FBNeo-compatible 2 MiB zero padding, low-byte write qualification, no-media open bus, 20-frame index cadence, and full `B00000-B7FFFF` mirroring implemented; focused command/media sequencing regression passes |
+| ROM-board EPM5032/FRC | Documented 625 kHz visible counter, modulo-256/modulo-103 modes, mode-write phase reset, MODE-qualified level-1 `/INT3` IRQ, and 2M/4M/8M jumper bank mapping integrated and unit-tested; the motherboard's MAME-compatible `/1024` FRC event is separate; programmed fuse/JED equations and board-specific jumper netlist remain unavailable |
 | ROM sets / MRAs | All 6 supported local ZIPs CRC-validated against MAME 0.288; one MRA per set targets `s24.rbf` |
+
+The implementation audit for the previously queued hardware work is:
+
+| Queued task | RTL completion | Evidence boundary still open |
+| --- | --- | --- |
+| 315-5295 arbitration | Captured `board_transaction_t` cycles, deterministic round-robin grants, immutable wait-state holding, and completion routing are implemented and regression-tested | PCB pin-level arbitration and cycle ordering |
+| 315-5292 side/video controls | Side-register latches, measured raster/synchronization mode, and the mixer-to-framebuffer flip path are implemented | Custom-ASIC side-trigger equations and PCB propagation timing |
+| 315-5296 I/O | Digital ports, callbacks, divider modes, counters, and source-backed unmapped/default values are implemented | Electrical open-bus and pin timing |
+| MB89311/FDD | Raw-image command/status/data contract, writable transfers, DRQ sequencing, index status, and full-track regression are implemented | Flux-level rotation, MFM gaps, CRC generation/checking, and physical DRQ timing |
+| EPM5032/FRC | Documented counter, mode, interrupt-level, and 2M/4M/8M bank-profile behavior is implemented | Programmed fuse/JED equations and board-specific jumper netlist |
+| YM3012/audio | 10-bit mantissa/3-bit exponent reconstruction and sample/hold boundary are implemented in the production path | Board-specific TL084/filter response, cabinet amplifier response, and PCB audio timing |
 
 The source-level bus audit has also corrected 68000 low-byte alignment for the
 315-5296 and the shared ROM-bank/FRC/magic registers at `BC/CC0001-7`. These
@@ -222,11 +234,15 @@ That negative observation is retained as an unresolved MAME-probe boundary;
 it is not being used to relax the RTL FDC gate or to claim equivalence.
 A 30-second pinned MAME probe also confirmed the next queued feature-family
 set, `sspirits`, at frame 1201 with `grid_nonblack=2914` and secondary CPU PC
-`0x0086b4`; this remains a reference baseline until its Verilator gate runs.
+`0x0086b4`. Its strict target-7 RTL replay reached the safe 300-second runner
+limit without a result or target failure; this is a throughput limitation, not
+a pass or an equivalence verdict. The optimized headless model passes bounded
+1e6- and 1e7-clock milestones, but the full target-7 barrier remains pending.
 A 30-second MAME sweep measured `hotrod` crossing the grid gate at frame 1321
 with `grid_nonblack=2854` and CPU-B in the `0x006a5e`–`0x006a7c` attract loop.
-The newly promoted Rough Racer parent has no recorded MAME attract probe yet;
-its target-7 reference baseline is the next required evidence item.
+The newly promoted Rough Racer parent now has a fresh pinned MAME attract
+probe: first qualifying screen at frame 1141, secondary CPU `0x00927e`.
+Its target-7 RTL gate remains pending; no acceptance result is claimed.
 
 ## Universal profile integration
 
@@ -299,13 +315,14 @@ not claimed.
 
 Shared writes and device cycles now cross the typed
 `board_transaction_t` interface in `rtl/s24_board_arbiter.sv`. The dedicated
-arbiter applies deterministic round-robin tie breaking, holds the granted
-address/data/lane/function-code transaction unchanged through wait states, and
-reports completion to the original 68000 front-end. Independent memory reads
-still use the existing SDRAM adapter paths. The new regression
-`verif/tb_board_arbiter.sv` passes one million deterministic cycles, and the
-full-core dual-bus regression passes parallel reads, shared serialization, byte
-lanes, FD1094 sequencing, and A-bus contention.
+arbiter applies deterministic round-robin tie breaking, captures the granted
+address/data/lane/function-code transaction into an active register, holds it
+unchanged through wait states, and reports completion to the original 68000
+front-end. Independent memory reads still use the existing SDRAM adapter
+paths. The regression `verif/tb_board_arbiter.sv` passes one million
+deterministic cycles while deliberately mutating requester-side source records
+after grant, and the full-core dual-bus regression passes parallel reads, shared
+serialization, byte lanes, FD1094 sequencing, and A-bus contention.
 
 The eight-byte descriptor remains backward-compatible. Legacy bytes 5–7 decode
 as default profiles; version-one descriptors can name motherboard/RAM revision,
@@ -315,18 +332,35 @@ MRA/profile validators and is never selected by a set-name conditional.
 
 The core now exports a board-domain `audio_event_t` stream for JT51 register
 writes, YM IRQ edges, serial/sample-boundary events, and port-H R-2R changes.
-The visual RTL producer writes `rtl_audio_events.jsonl`, while the MAME Lua
-producer writes comparable YM register-write events. This improves evidence
-and event-level diagnosis; it does not yet prove YM3012 analogue or cabinet
-amplifier accuracy.
+The visual RTL producer writes `rtl_audio_events.jsonl` and a 48 kHz stereo
+PCM/WAV capture, while the MAME Lua producer writes comparable YM
+register-write events and the lockstep runner records a MAME WAV receipt.
+The production path now reconstructs the YM3012-compatible 10-bit
+mantissa/3-bit exponent digital word and holds it at the JT51 sample boundary
+before PCM mixing. These artifacts and the focused tone regression still do
+not prove MAME sample alignment, the analogue filter/amplifier response, or
+PCB-level audio timing.
 
-The FRC mode write now resets both the visible divider and IRQ prescaler phase,
-and FDC `side` state is again explicit and observable for the existing track
+The ROM-board EPM5032 behavioral block now owns the documented 625 kHz visible
+counter, MODE-qualified `/INT3` level, and modulo-256/modulo-103 wrapping;
+mode-write phase reset is covered by `tb_romboard_epld`. The active-low `/INT3`
+level is now connected to the per-CPU IRQ controller as the documented level-1
+source enabled by bit 0 of the A00005/A00007 masks; the periodic motherboard
+FRC event remains a separate `/1024` phase input and higher-level source.
+Its banked ROM path now consumes the descriptor's documented 2M/4M/8M jumper
+population, including the 2M BK3 alias; `tb_romboard_mapper` covers the full
+window boundaries.
+The exact programmed fuse/JED equations and board-specific jumper netlist
+remain unknown. FDC `side` state is explicit and observable for the existing track
 transfer contract. The current FDC remains a logical flat-image model, not a
 physical MB89311 rotational/CRC/DRQ model. The current tile implementation is
-MAME-derived for normal and documented special window/scroll modes; the
-315-5292 side-trigger equations and hardware screen-flip behavior remain
-unknown and are not being post-frame approximated.
+MAME-derived for normal and documented special window/scroll modes. The
+315-5292 synchronization-mode register now drives the documented invalid
+512-scanline diagnostic raster, with a focused regression for its late blanking
+and vertical-sync overlap. Mixer register 13 bit 1 now drives the real
+descriptor/core framebuffer flip path, matching the bit identified by the
+pinned MAME source; the original ASIC's XHOUT/XVOUT timing and flip propagation
+remain unmeasured on a PCB.
 
 The latest fit artifact is `output_files/Arcade-SegaSystem24.fit.summary`:
 18,744/41,910 ALMs, 4,105,455/5,662,720 block-memory bits, and 498/553 RAM

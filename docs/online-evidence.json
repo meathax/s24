@@ -31,6 +31,17 @@
       "notes": "Confirms the four-layer RAM tile architecture, STEP8 character layout, sprite traversal model, and mixer contract."
     },
     {
+      "id": "atwiki-3155292-timing",
+      "url": "https://w.atwiki.jp/arcadegames/pages/33.html",
+      "accessed": "2026-08-11",
+      "provenance": "Public System 24 hardware research page; secondary source",
+      "sha256": null,
+      "device_or_area": ["315-5292 raster", "synchronization mode"],
+      "confidence": "medium",
+      "evidence_type": "secondary-hardware-research",
+      "notes": "Documents the 656x424 raster, measured sync windows, and the invalid 512-scanline synchronization mode. The mode-1 blanking boundary is implemented as an observed diagnostic behavior; PCB timing capture is still absent."
+    },
+    {
       "id": "mame-3155296-0288",
       "url": "https://github.com/mamedev/mame/blob/affe701f9210d003d2cc5eff311f94053afa679b/src/mame/sega/315_5296.cpp",
       "accessed": "2026-08-03",
@@ -39,7 +50,7 @@
       "device_or_area": ["315-5296", "CNT", "I/O", "YM reset", "DAC port"],
       "confidence": "high",
       "evidence_type": "emulator-source",
-      "notes": "Source-backed register and cabinet behavior; the internal divider and electrical open-bus behavior remain incomplete."
+      "notes": "Source-backed register and cabinet behavior; CNT2/CKOT divider modes are implemented in RTL, while electrical open-bus behavior and PCB pin timing remain unproven."
     },
     {
       "id": "mame-fd1094-0288",
@@ -60,7 +71,40 @@
       "device_or_area": ["motherboard connectivity", "FDD board", "834-6510 analogue I/O"],
       "confidence": "medium-high",
       "evidence_type": "schematic-index",
-      "notes": "The archive states that the ROM board is not included; ROM-board equations therefore remain profile/documentation driven."
+      "notes": "The archive states that the ROM board is not included. The behavioral ROM-board timing/register contract is therefore sourced from the separate public ROM-board notes; exact programmed equations remain unavailable."
+    },
+    {
+      "id": "exodus-system24-schematic-pdf",
+      "url": "https://drive.google.com/file/d/14Va0ebYeVZ8LZHzS-Be_mBhA7hQ1CYXH/view?usp=drive_open",
+      "accessed": "2026-08-12",
+      "provenance": "Public System 24 schematic PDF linked by the Exodus technical-document archive",
+      "sha256": null,
+      "device_or_area": ["315-5292", "315-5295", "XHOUT", "XVOUT", "YM3012", "main-board connectivity"],
+      "confidence": "medium-high",
+      "evidence_type": "schematic-pdf",
+      "notes": "The scanned 16-page schematic confirms the 315-5292/315-5295 XHOUT/XVOUT inter-chip timing boundary and, on page 15, the populated YM2151/YM3012/TL084 analogue chain and cabinet audio path. It does not expose the custom-ASIC internal compare equations, component transfer response, or PCB waveforms."
+    },
+    {
+      "id": "ym3012-datasheet-bitsavers",
+      "url": "https://bitsavers.org/components/yamaha/YM3012_199204.pdf",
+      "accessed": "2026-08-12",
+      "provenance": "Yamaha YM3012 primary datasheet scan",
+      "sha256": null,
+      "device_or_area": ["YM3012", "10-bit mantissa", "3-bit exponent", "sample/hold", "analogue output stage"],
+      "confidence": "high",
+      "evidence_type": "component-datasheet",
+      "notes": "Supports the digital mantissa/exponent reconstruction and sample/hold boundary. The external op-amp/filter and cabinet amplifier response remain board-specific and are not represented as a guessed FPGA filter."
+    },
+    {
+      "id": "atwiki-system24-romboard-epld",
+      "url": "https://w.atwiki.jp/arcadegames/pages/150.html",
+      "accessed": "2026-08-12",
+      "provenance": "Public System 24 ROM-board hardware research page; secondary source",
+      "sha256": null,
+      "device_or_area": ["837-7187 ROM board", "EPM5032", "ROM bank", "FRC counter", "ROM-board interrupt"],
+      "confidence": "medium",
+      "evidence_type": "secondary-hardware-research",
+      "notes": "Documents the EPM5032 register map, bank and mode controls, no-wait-state ROM access, the 10 MHz/16 625 kHz visible counter clock, MODE-qualified INT3# level, modulo-256 and modulo-103 modes, and the 10 MHz/1024 auxiliary input used in the modulo-103 logic. The programmed fuse/JED equations and board-specific jumper netlist remain unavailable."
     },
     {
       "id": "system16-system24",
@@ -142,12 +186,12 @@
     }
   },
   "unknowns": [
-    "Complete 315-5295 electrical arbitration and cycle ordering",
-    "315-5292 special-mode line-scroll and screen-flip equations",
-    "315-5296 internal CNT/CKOT divider and open-bus electrical behavior",
-    "MB89311 rotational, index, CRC, gap, and DRQ timing on physical media",
-    "EPM5032 ROM-board fuse equations",
-    "YM3012 analogue reconstruction and cabinet amplifier response",
+    "315-5295 PCB pin-level arbitration and cycle ordering beyond the captured RTL transaction contract",
+    "315-5292 side-trigger equations and PCB-level screen-flip timing/propagation beyond the implemented MAME/measurement contract",
+    "315-5296 open-bus electrical behavior and PCB pin timing beyond the implemented digital map",
+    "MB89311 rotational, index, CRC, gap, and DRQ timing on physical media beyond the implemented raw-image command contract",
+    "EPM5032 programmed fuse/JED equations and board-specific jumper netlist beyond the implemented documented profile behavior",
+    "YM3012 analogue reconstruction and cabinet amplifier response beyond the implemented digital mantissa/exponent/sample-hold boundary",
     "Direct PCB timing captures for any claim beyond MAME-conformant behavior"
   ]
 }

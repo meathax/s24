@@ -6,10 +6,11 @@ module tb_analog;
 
     logic [8:0] sx=0,sy=0;
     logic [1:0] uaddr=0;
+    logic uread=0;
     logic [7:0] udout;
     s24_upd4701 upd(
         .clk(clk),.reset(reset),.spinner_x(sx),.spinner_y(sy),
-        .addr(uaddr),.dout(udout));
+        .addr(uaddr),.read(uread),.dout(udout));
 
     logic select=0,shift=0;
     logic [7:0] din=0;
@@ -40,11 +41,18 @@ module tb_analog;
 
         // MiSTer spinner event: +5, then -2. Counter wraps at 12 bits.
         sx={1'b1,8'h05};tick;
+        uread=1;tick;uread=0;#1;
         if(udout!==8'h05)$fatal(1,"uPD4701 +delta mismatch: %02x",udout);
         sx={1'b0,8'hfe};tick;
-        if(udout!==8'h03)$fatal(1,"uPD4701 -delta mismatch: %02x",udout);
+        // Motion after the low-byte read must not change the high byte from
+        // that same µPD4701A snapshot.
         uaddr=1;#1;
-        if(udout!==8'h00)$fatal(1,"uPD4701 high nibble mismatch: %02x",udout);
+        if(udout!==8'h00)$fatal(1,"uPD4701 latched high nibble mismatch: %02x",udout);
+        uaddr=0;uread=1;tick;uread=0;#1;
+        if(udout!==8'h03)$fatal(1,"uPD4701 -delta mismatch: %02x",udout);
+        sx={1'b1,8'h04};tick;
+        uaddr=1;#1;
+        if(udout!==8'h00)$fatal(1,"uPD4701 high byte moved with no read latch: %02x",udout);
 
         // Native MiSTer spinner events pass through unchanged, independently
         // of the synthetic left-stick source.

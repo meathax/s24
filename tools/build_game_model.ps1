@@ -37,7 +37,9 @@ $sources = @(
     'rtl/io/s24_io_5296.sv',
     'rtl/io/s24_inputs.sv',
     'rtl/io/s24_analog.sv',
+    'rtl/audio/s24_ym3012.sv',
     'rtl/prot/s24_magic_latch.sv',
+    'rtl/prot/s24_romboard_epld.sv',
     'rtl/fdc/s24_fdc.sv',
     'rtl/s24_irq.sv',
     'rtl/video/s24_video_timing.sv',
@@ -70,7 +72,7 @@ $arguments = @(
     # thread/job limits or the RTL being verified.
     '-CFLAGS', '-O3 -march=native -D_GLIBCXX_USE_CXX11_ABI=0',
     '-MAKEFLAGS',
-    'CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe',
+    'CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe OPT_FAST=-O3',
     '--Wno-fatal',
     '--Wno-BLKANDNBLK',
     '--Wno-MULTIDRIVEN',

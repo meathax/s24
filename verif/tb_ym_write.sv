@@ -86,6 +86,7 @@ module tb_ym_write;
     logic [23:0] bus_addr_drive;
     logic [7:0] bus_data_drive;
     logic [1:0] bus_be_drive;
+    logic [8:0] spinner0_drive = '0;
 
     always #5 clk = ~clk;
 
@@ -93,10 +94,10 @@ module tb_ym_write;
         .clk(clk), .reset(reset), .pause(1'b0), .flicker_blend(1'b0),.board(board),
         .key_wr(1'b0), .key_word_addr('0), .key_wdata('0),
         .input_ports(64'hffff_ffff_ffff_ffff),
-        .spinner0('0), .spinner1('0), .spinner2('0), .spinner3('0),
+        .spinner0(spinner0_drive), .spinner1('0), .spinner2('0), .spinner3('0),
         .paddle0(8'h80), .paddle1(8'h80), .paddle2(8'h80), .paddle3(8'h80),
         .ce_pixel(ce_pixel), .hblank(hblank), .vblank(vblank),
-        .hsync(hsync), .vsync(vsync), .red(red), .green(green), .blue(blue),
+        .hsync(hsync), .vsync(vsync), .video_flip(), .red(red), .green(green), .blue(blue),
         .audio_l(audio_l), .audio_r(audio_r),
         .p0_req(p0_req), .p0_addr(p0_addr), .p0_data(16'h4e71), .p0_ack(p0_ack),
         .p2_req(p2_req), .p2_addr(p2_addr), .p2_data('0), .p2_ack(p2_ack),
@@ -195,11 +196,17 @@ module tb_ym_write;
         // exception and explicitly returns ffff.
         board.has_upd4701 = 1'b1;
         board.has_adc = 1'b1;
+        // The uPD4701A count is latched by the accepted C00000 read. Motion
+        // is presented through the same toggle/delta input used by the
+        // visual harness, then the core path must return the latched low byte.
+        spinner0_drive = {1'b1,8'h05};
+        @(posedge clk);#1;
+        spinner0_drive = '0;
         cpu_local_read(24'h800010,2'b11,16'h0053); // I/O ID 'S'
         cpu_local_read(24'h800020,2'b11,16'h00ff); // unused 315-5296 reg
         cpu_local_read(24'h800010,2'b10,16'h0000); // unmapped upper lane
         cpu_local_read(24'h800100,2'b11,16'h0000); // YM status from stub
-        cpu_local_read(24'hc00000,2'b11,16'h0000); // uPD4701 X low
+        cpu_local_read(24'hc00000,2'b11,16'h0005); // uPD4701 latched X low
         cpu_local_read(24'hc00010,2'b11,16'h0000); // MSM6253 D7 low
         cpu_local_read(24'h800040,2'b11,16'hffff); // explicit IOD stub
 

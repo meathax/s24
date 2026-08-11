@@ -7,6 +7,9 @@ local frame = 0
 local coin_frame = tonumber(os.getenv("S24_COIN_FRAME") or "0") or 0
 local start_frame = tonumber(os.getenv("S24_START_FRAME") or "0") or 0
 local action_frame = tonumber(os.getenv("S24_ACTION_FRAME") or "0") or 0
+local pedal_frame = tonumber(os.getenv("S24_PEDAL_FRAME") or "0") or 0
+local pedal_end_frame = tonumber(os.getenv("S24_PEDAL_END_FRAME") or "0") or 0
+local pedal_value = tonumber(os.getenv("S24_PEDAL_VALUE") or "255") or 255
 local input_frames = tonumber(os.getenv("S24_INPUT_FRAMES") or "4") or 4
 
 local function find_fields(wanted)
@@ -34,6 +37,17 @@ local start_field = start_frame > 0 and find_field({
 local action_field = action_frame > 0 and find_field({
     ["button 1"] = true, ["p1 button 1"] = true,
     ["p1 button1"] = true, ["p1 fire 1"] = true}) or nil
+local pedal_field = nil
+if pedal_frame > 0 then
+    for tag, port in pairs(machine.ioport.ports) do
+        for name, field in pairs(port.fields) do
+            local lower = string.lower(name)
+            if not pedal_field and (string.lower(tag) == ":pedal1" or
+                lower == "p1 pedal" or lower == "pedal 1" or
+                lower == "pedal1") then pedal_field = field end
+        end
+    end
+end
 if coin_frame > 0 and #coin_fields == 0 then error("Coin 1 input field not found") end
 if start_frame > 0 and not start_field then
     error("Player 1 Start input field not found")
@@ -41,6 +55,7 @@ end
 if action_frame > 0 and not action_field then
     error("Player 1 Button 1 input field not found")
 end
+if pedal_frame > 0 and not pedal_field then error("P1 Pedal input field not found") end
 
 local function tile_word(offset)
     return space:read_u16(0x200000 + 2 * offset)
@@ -59,6 +74,11 @@ emu.register_frame_done(function()
     if action_field then
         action_field:set_value(frame >= action_frame and
                                frame < action_frame + input_frames and 1 or 0)
+    end
+    if pedal_field then
+        local active = frame >= pedal_frame and
+            (pedal_end_frame == 0 or frame < pedal_end_frame)
+        pedal_field:set_value(active and pedal_value or 1)
     end
     if frame ~= target then return end
 

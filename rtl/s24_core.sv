@@ -35,6 +35,7 @@ module s24_core #(
     output logic        vblank,
     output logic        hsync,
     output logic        vsync,
+    output logic        video_flip,
     output logic [7:0]  red,
     output logic [7:0]  green,
     output logic [7:0]  blue,
@@ -79,6 +80,7 @@ module s24_core #(
     assign line_wrap = ce16 && (hcount == 10'd655);
     s24_video_timing timing(
         .clk(clk),.reset(reset),.ce_pixel(ce16),.hcount(hcount),.vcount(vcount),
+        .sync_mode(tile_syncmode[0]),
         .hblank(hblank),.vblank(vblank),.hsync(hsync),.vsync(vsync),
         .hsync_tick(hsync_tick));
 
@@ -275,13 +277,14 @@ module s24_core #(
     logic [63:0] io_port_out;
     logic [63:0] io_port_write_data;
     logic [7:0] io_dir,io_port_write;
+    logic io_cnt2_clock,io_ckot_clock;
     s24_io_5296 io(
-        .clk(clk),.reset(reset),.rd(io_rd),.wr(io_wr),
+        .clk(clk),.reset(reset),.ce_16m(ce16),.rd(io_rd),.wr(io_wr),
         .addr({1'b0,bus_addr[5:1]}),
         .din(bus_dout[7:0]),.dout(io_dout),.port_in(input_ports),
         .port_out(io_port_out),.port_dir(io_dir),
         .port_write(io_port_write),.port_write_data(io_port_write_data),
-        .cnt(io_cnt));
+        .cnt(io_cnt),.cnt2_clock(io_cnt2_clock),.ckot_clock(io_ckot_clock));
     s24_mahjong_mux mahjong_mux(
         .clk(clk),.reset(reset),
         .enable(board.input_profile==INPUT_MAHJONG),
@@ -297,6 +300,8 @@ module s24_core #(
     // dead-wired by omission. Golf cabinets use the first counter when the
     // descriptor says the analog angle control is fitted.
     logic [7:0] upd0_dout,upd1_dout,adc0_dout,adc1_dout;
+    logic upd0_read,upd1_read;
+    logic upd_read_pending,upd_read_select;
     logic adc0_select,adc1_select,adc0_shift,adc1_shift;
     logic [7:0] pedal0,pedal1,pedal2,pedal3;
     assign pedal0=(paddle0==0)?8'h01:paddle0;
@@ -305,10 +310,10 @@ module s24_core #(
     assign pedal3=(paddle3==0)?8'h01:paddle3;
     s24_upd4701 upd0(
         .clk(clk),.reset(reset),.spinner_x(spinner0),.spinner_y(spinner1),
-        .addr(bus_addr[2:1]),.dout(upd0_dout));
+        .addr(bus_addr[2:1]),.read(upd0_read),.dout(upd0_dout));
     s24_upd4701 upd1(
         .clk(clk),.reset(reset),.spinner_x(spinner2),.spinner_y(spinner3),
-        .addr(bus_addr[2:1]),.dout(upd1_dout));
+        .addr(bus_addr[2:1]),.read(upd1_read),.dout(upd1_dout));
     s24_msm6253 adc0(
         .clk(clk),.reset(reset),.select(adc0_select),.shift(adc0_shift),
         .din(bus_dout[7:0]),.an0(pedal0),.an1(pedal1),
@@ -322,7 +327,12 @@ module s24_core #(
     logic [7:0] ym_data_q;
     logic [7:0] ym_dout;
     logic ym_irq_n,ym_half,ym_sample,ym_irq_q;
+    // JT51's xleft/xright outputs are its exact internal linear accumulator.
+    // The external YM3012 quantizes the 10-bit mantissa/3-bit exponent word,
+    // so route that diagnostic through the explicit digital DAC model before
+    // mixing it with the port-H R-2R channel.
     logic signed [15:0] ym_l,ym_r;
+    logic signed [15:0] ym_exact_l,ym_exact_r;
     always_ff @(posedge clk) if (reset) ym_half<=0; else if (ce4) ym_half<=~ym_half;
     jt51 ym(
         // CNT2 drives the YM2151 active-low /IC reset pin. System 24 boot
@@ -331,17 +341,22 @@ module s24_core #(
         .rst(reset | ~io_cnt[2]),.clk(clk),.cen(ce4),.cen_p1(ce4 & ym_half),
         .cs_n(~ym_wr),.wr_n(~ym_wr),.a0(ym_addr_q),.din(ym_data_q),
         .dout(ym_dout),.ct1(),.ct2(),.irq_n(ym_irq_n),.sample(ym_sample),
-        .left(),.right(),.xleft(ym_l),.xright(ym_r));
+        .left(),.right(),.xleft(ym_exact_l),.xright(ym_exact_r));
+    s24_ym3012_sample_hold ym3012(
+        .clk(clk),.reset(reset),.sample(ym_sample),
+        .linear_left(ym_exact_l),.linear_right(ym_exact_r),
+        .audio_left(ym_l),.audio_right(ym_r));
 
     logic irq_rd_a,irq_rd_b,irq_wr;
     logic irq_read_pending;
     logic [15:0] irq_dout;
     logic frc_tick;
+    logic frc_int3_n;
     logic frc_mode;
     logic frc_mode_write,frc_ack_write;
     s24_irq irq(
         .clk(clk),.reset(reset),.ce_8m(ce8),.hsync_tick(line_wrap),.vcount(vcount),
-        .ym_irq(~ym_irq_n),.frc_tick(frc_tick),.frc_mode(frc_mode),
+        .ym_irq(~ym_irq_n),.int3_n(frc_int3_n),.frc_tick(frc_tick),.frc_mode(frc_mode),
         .frc_ack(frc_ack_write),.rd_a(irq_rd_a),.rd_b(irq_rd_b),
         .wr(irq_wr),.addr(bus_addr[2:1]),.din(bus_dout),.be(bus_be),
         .dout(irq_dout),.ipl_a_n(a_ipl_n),.ipl_b_n(b_ipl_n));
@@ -352,41 +367,15 @@ module s24_core #(
         .clk(clk),.reset(reset),.wr(magic_wr),.din(bus_dout[7:0]),
         .selector(magic_sel_t'(board.magic_table)),.dout(magic_dout));
 
-    logic [10:0] frc_div;
-    logic [10:0] frc_irq_div;
     logic [7:0] frc_count;
-    always_ff @(posedge clk) begin
-        if (reset) begin
-            frc_div<=0; frc_irq_div<=0; frc_count<=0; frc_mode<=0;
-            frc_tick<=0;
-        end
-        else begin
-            frc_tick <= 1'b0;
-            if (phi1) begin
-                if (frc_irq_div == 1535) begin
-                    frc_irq_div <= 0;
-                    frc_tick <= 1'b1;
-                end else frc_irq_div <= frc_irq_div + 1'd1;
-                if ((!frc_mode && frc_div==23) || (frc_mode && frc_div==1535)) begin
-                    frc_div<=0;
-                    if (frc_mode) begin
-                        frc_count <= (frc_count==8'h66)?8'd0:frc_count+8'd1;
-                    end else frc_count <= frc_count + 8'd1;
-                end else frc_div<=frc_div+1'd1;
-            end
-            if (frc_mode_write) begin
-                // MAME restarts the free-running counter's mode-dependent
-                // cadence on a mode write.  Reset both the visible count
-                // divider and the independent IRQ prescaler so a mode switch
-                // cannot inherit a fractional phase from the old mode.
-                frc_mode<=bus_dout[0];
-                frc_div<=0;
-                frc_irq_div<=0;
-                frc_count<=0;
-                frc_tick<=0;
-            end
-        end
-    end
+    logic frc_mode_data;
+    // The EPM5032 owns the visible ROM-board counter and its two documented
+    // clock-divider outputs. The CPU register handshake is captured below,
+    // while this component models the board's 625 kHz/9 kHz timing.
+    s24_romboard_epld romboard_epld(
+        .clk(clk),.reset(reset),.phi1(phi1),
+        .mode_write(frc_mode_write),.mode_data(frc_mode_data),
+        .mode(frc_mode),.count(frc_count),.int3_n(frc_int3_n),.irq_tick(frc_tick));
 
     logic [4:0] index_count;
     always_ff @(posedge clk) begin
@@ -403,7 +392,10 @@ module s24_core #(
     logic [7:0] fdc_dout,fdc_media_wdata,fdc_media_rdata;
     logic [7:0] fdc_media_rdata_bus;
     logic [26:0] fdc_media_addr;
-    logic [7:0] rom_bank;
+    // The EPM5032 exposes only BK3..BK0 at CC/BC0001.  Keep the latch at the
+    // physical four-bit width so writes to the unused upper byte bits cannot
+    // become an FPGA-only readback feature or affect later ROM addressing.
+    logic [3:0] rom_bank;
     logic fdc_read_busy;
     logic fdc_cache_hit;
     logic fdc_fifo_hit;
@@ -474,6 +466,7 @@ module s24_core #(
     logic mixer_wr;
     logic [15:0] mixer_dout;
     logic display_blank;
+    logic screen_flip;
     s24_mixer mixer(
         .clk(clk),.reset(reset),.cpu_wr(mixer_wr),.cpu_addr(bus_addr[4:1]),
         .cpu_din(bus_dout),.cpu_be(bus_be),.cpu_dout(mixer_dout),
@@ -484,7 +477,11 @@ module s24_core #(
         .sprite0_rank(sr0),.sprite1_rank(sr1),.sprite2_rank(sr2),.sprite3_rank(sr3),
         .tile_blink(tile_blink),
         .mixed_pixel(mixed),.mixed_pixel_alt(mixed_alt),
-        .display_blank(display_blank));
+        .display_blank(display_blank),.screen_flip(screen_flip));
+    // Hold the board-visible flip state at the core boundary.  The register
+    // file is synchronous, so this changes only after a completed mixer write
+    // and remains a normal dynamic video control for the framebuffer path.
+    assign video_flip = screen_flip;
 
     // Keep the byte lanes separate so Quartus can infer byte-enabled true
     // dual-port M10Ks: port A supplies the pixel stream while port B serves
@@ -611,7 +608,12 @@ module s24_core #(
         else if (is_sprite_window(a)) is_writable=1;
         else is_writable=0;
     endfunction
-    function automatic [26:0] physical(input logic cpu,input logic [23:0] a,input logic [3:0] bank);
+    function automatic [26:0] physical(
+        input logic cpu,
+        input logic [23:0] a,
+        input logic [3:0] bank,
+        input logic [1:0] romboard_profile
+    );
         if (a >= 24'hf80000)
             physical=SDR_WORKA_BASE+{9'd0,a[17:0]};
         else if (a >= 24'hf00000)
@@ -624,7 +626,8 @@ module s24_core #(
         // throughout the mirrored 512 KB CPU window (Model 1/2 populate more).
         else if (a[23:21]==3'b001 && a[19]) physical=SDR_CHAR_BASE+{10'd0,a[16:0]};
         else if (is_sprite_window(a)) physical=SDR_SPRITE_BASE+{9'd0,a[17:0]};
-        else physical=SDR_ROMBOARD_BASE+{5'd0,bank,a[17:0]};
+        else physical=SDR_ROMBOARD_BASE+
+                      {5'd0,romboard_offset(romboard_profile,bank,a[17:0])};
     endfunction
 
     // Each physical CPU bus has its own read path into SDRAM. Keep a request
@@ -654,14 +657,31 @@ module s24_core #(
         end else begin
             case(a_mrstate)
                 MR_IDLE: if(a_mem_req) begin
-                    p0_addr<=word_address(physical(1'b0,a_mem_addr,rom_bank[3:0]));
-                    p0_req<=1'b1;
-                    a_mrstate<=MR_SDRAM;
+                    if(A_OPCACHE_ENABLE) a_mrstate<=MR_LOOKUP;
+                    else begin
+                        p0_addr<=word_address(physical(1'b0,a_mem_addr,rom_bank,
+                                                        board.romboard_profile));
+                        p0_req<=1'b1;
+                        a_mrstate<=MR_SDRAM;
+                    end
+                end
+                MR_LOOKUP: begin
+                    if(ac_hit) begin
+                        a_mem_din<=ac_hit_data;
+                        a_mem_ack<=1'b1;
+                        a_mrstate<=MR_DROP;
+                    end else begin
+                        p0_addr<=word_address(physical(1'b0,a_mem_addr,rom_bank,
+                                                        board.romboard_profile));
+                        p0_req<=1'b1;
+                        a_mrstate<=MR_SDRAM;
+                    end
                 end
                 MR_SDRAM: if(p0_ack) begin
                     p0_req<=1'b0;
                     a_mem_din<=p0_data;
                     a_mem_ack<=1'b1;
+                    ac_fill<=A_OPCACHE_ENABLE && ac_window;
                     a_mrstate<=MR_DROP;
                 end
                 MR_DROP: if(!a_mem_req) a_mrstate<=MR_IDLE;
@@ -687,7 +707,8 @@ module s24_core #(
                         bc_hit_record<=board.has_fd1094;
                         b_mrstate<=MR_DROP;
                     end else begin
-                        p3_addr<=word_address(physical(1'b1,b_mem_addr,rom_bank[3:0]));
+                        p3_addr<=word_address(physical(1'b1,b_mem_addr,rom_bank,
+                                                        board.romboard_profile));
                         p3_req<=1'b1;
                         // Same predicate the MR_SDRAM arm below uses to raise
                         // fd_start, evaluated on the identical registered
@@ -735,6 +756,18 @@ module s24_core #(
     typedef enum logic [3:0] {X_IDLE,X_WRITE,X_LOCAL,X_TILE,
                               X_PALETTE,X_YM,X_FDC,X_WAIT} xstate_t;
     xstate_t xs;
+    // MAME's read_xy handler pulses CS low before selecting axis/byte and
+    // reading the uPD4701A. Keep that edge tied to the accepted bus request;
+    // X_LOCAL returns the now-latched payload on the following clock.
+    always_comb begin
+        upd0_read=1'b0;
+        upd1_read=1'b0;
+        if (xs==X_IDLE && bus_req && bus_rnw && !bus_addr[4] &&
+            board.has_upd4701) begin
+            if (bus_addr[3] && board.hotrod_io) upd1_read=1'b1;
+            else if (!bus_addr[3]) upd0_read=1'b1;
+        end
+    end
     // The MB89311 exposes a local data register. Keep the complete SDRAM
     // word returned for a floppy byte so the immediately following byte
     // read (the other lane) does not become a second media transaction.
@@ -749,15 +782,26 @@ module s24_core #(
     logic fdc_p4_prefetch,fdc_pf_have_stream,fdc_pf_discard;
     logic [26:0] fdc_pf_next_addr;
     logic fdc_pf_push,fdc_pf_pop;
+    // The game can modify the floppy image through the shared CPU SDRAM
+    // window as well as through the FDC's byte-write request.  Any such
+    // write must invalidate read-ahead before a following FDC byte read can
+    // observe the old word.
+    logic fdc_floppy_write;
+    assign fdc_floppy_write = wr_req &&
+                               (wr_addr >= word_address(SDR_FLOPPY_BASE)) &&
+                               (wr_addr < word_address(SDR_FDKEY_BASE));
 
-    assign fdc_cache_hit = fdc_cache_valid &&
+    assign fdc_cache_hit = fdc_cache_valid && !fdc_floppy_write &&
                            (fdc_cache_addr ==
                             word_address(SDR_FLOPPY_BASE+fdc_media_addr));
     assign fdc_fifo_hit = (fdc_pf_count != 0) &&
+                          !fdc_floppy_write &&
+                          !fdc_pf_discard &&
                           (fdc_pf_addr[fdc_pf_rd] ==
                            word_address(SDR_FLOPPY_BASE+fdc_media_addr));
     assign fdc_pf_push = p4_ack && p4_req && fdc_p4_prefetch &&
-                         !fdc_pf_discard;
+                         !fdc_pf_discard &&
+                         !fdc_floppy_write;
     assign fdc_pf_pop = fdc_media_req && !fdc_media_wr &&
                         !fdc_read_busy && !fdc_cache_hit && fdc_fifo_hit;
     assign fdc_media_rdata_bus = fdc_cache_hit ?
@@ -797,7 +841,7 @@ module s24_core #(
         else begin
             // A media write invalidates all read-ahead state.  Do not cancel
             // an already accepted p4 cycle; discard its result on completion.
-            if(fdc_media_req && fdc_media_wr) begin
+            if(fdc_floppy_write) begin
                 fdc_cache_valid<=0;
                 fdc_pf_count<=0;
                 fdc_pf_rd<=0;
@@ -846,7 +890,9 @@ module s24_core #(
                 p4_req<=0;
                 fdc_p4_prefetch<=0;
                 if(fdc_p4_prefetch) begin
-                    if(fdc_pf_discard) begin
+                    // A write may arrive on the same edge as a speculative
+                    // read response. Never enqueue that pre-write word.
+                    if(fdc_pf_discard || fdc_floppy_write) begin
                         fdc_pf_count<=0;
                         fdc_pf_rd<=0;
                         fdc_pf_wr<=0;
@@ -860,13 +906,20 @@ module s24_core #(
                     end
                 end
                 else begin
-                    fdc_read_ack<=1;
-                    fdc_media_rdata<=fdc_read_odd?p4_data[15:8]:p4_data[7:0];
-                    fdc_cache_valid<=1;
-                    fdc_cache_addr<=p4_addr;
-                    fdc_cache_data<=p4_data;
-                    fdc_pf_have_stream<=1;
-                    fdc_pf_next_addr<=p4_addr+1'b1;
+                    if(fdc_pf_discard || fdc_floppy_write) begin
+                        fdc_read_ack<=0;
+                        fdc_cache_valid<=0;
+                        fdc_pf_have_stream<=0;
+                        fdc_pf_discard<=0;
+                    end else begin
+                        fdc_read_ack<=1;
+                        fdc_media_rdata<=fdc_read_odd?p4_data[15:8]:p4_data[7:0];
+                        fdc_cache_valid<=1;
+                        fdc_cache_addr<=p4_addr;
+                        fdc_cache_data<=p4_data;
+                        fdc_pf_have_stream<=1;
+                        fdc_pf_next_addr<=p4_addr+1'b1;
+                    end
                 end
             end
 
@@ -887,11 +940,17 @@ module s24_core #(
                 fdc_pf_next_addr<=fdc_pf_next_addr+1'b1;
             end
 
-            case({fdc_pf_push,fdc_pf_pop})
-                2'b10: fdc_pf_count<=fdc_pf_count+1'b1;
-                2'b01: fdc_pf_count<=fdc_pf_count-1'b1;
-                default: ;
-            endcase
+            if(fdc_floppy_write) begin
+                // The write flush above must win over a same-edge prefetch
+                // response; otherwise the stale word reappears in the FIFO.
+                fdc_pf_count<=0;
+            end else begin
+                case({fdc_pf_push,fdc_pf_pop})
+                    2'b10: fdc_pf_count<=fdc_pf_count+1'b1;
+                    2'b01: fdc_pf_count<=fdc_pf_count-1'b1;
+                    default: ;
+                endcase
+            end
 
             if(fdc_read_busy && !fdc_media_req)
                 fdc_read_busy<=0;
@@ -921,11 +980,12 @@ module s24_core #(
         frc_mode_write<=0;frc_ack_write<=0;bc_snoop<=0;
         if(reset) begin
             xs<=X_IDLE;bus_din<=16'h0000;
-            cpu_wr_pending<=0;cpu_phys<=0;rom_bank<=0;
+            cpu_wr_pending<=0;cpu_phys<=0;rom_bank<=0;frc_mode_data<=0;
             fdc_addr<=0;
             tile_absel<=0;tile_xhout<=0;tile_xvout<=0;tile_syncmode<=0;
             ym_write_pending<=0;ym_addr_q<=0;ym_data_q<=0;
             irq_read_pending<=0;
+            upd_read_pending<=0;upd_read_select<=0;
         end else begin
             if (ym_wr)
                 ym_write_pending <= 1'b0;
@@ -939,7 +999,8 @@ module s24_core #(
                 if(bus_cpu && bus_addr[23:20]==4'ha && a_mem_req) begin
                     // Hold X_IDLE and leave the shared request pending.
                 end else if(is_memory(bus_cpu,bus_addr)) begin
-                    cpu_phys<=physical(bus_cpu,bus_addr,rom_bank[3:0]);
+                    cpu_phys<=physical(bus_cpu,bus_addr,rom_bank,
+                                       board.romboard_profile);
                     if(!bus_rnw && is_writable(bus_cpu,bus_addr)) begin
                         cpu_wr_pending<=1;xs<=X_WRITE;
                         // Invalidate any opcode-cache line this store may
@@ -1000,6 +1061,8 @@ module s24_core #(
                             board.has_upd4701 &&
                             (board.hotrod_io || !bus_addr[3])) begin
                     bus_din<={8'h00,bus_addr[3]?upd1_dout:upd0_dout};
+                    upd_read_pending<=upd0_read || upd1_read;
+                    upd_read_select<=upd1_read;
                     xs<=X_LOCAL;
                 end else if(bus_addr[23:19]==5'b11000 && bus_addr[4] &&
                             board.has_adc) begin
@@ -1035,13 +1098,16 @@ module s24_core #(
                             // The BC/CC0001 bank latch is populated only on
                             // ROM-board configurations. Floppy-only boards
                             // leave this byte open, matching rombd_common_map.
-                            bus_din<=board.has_romboard?{8'h00,rom_bank}:16'h0000;
+                            bus_din<=board.has_romboard?{12'h000,rom_bank}:16'h0000;
                             if(!bus_rnw && bus_be[0] && board.has_romboard)
-                                rom_bank<=bus_dout[7:0];
+                                rom_bank<=bus_dout[3:0];
                         end
                         2'd1: begin
                             bus_din<={15'd0,frc_mode};
-                            if(!bus_rnw && bus_be[0])frc_mode_write<=1;
+                            if(!bus_rnw && bus_be[0]) begin
+                                frc_mode_data<=bus_dout[0];
+                                frc_mode_write<=1;
+                            end
                         end
                         2'd2: begin
                             bus_din<={8'h00,frc_count};
@@ -1062,6 +1128,10 @@ module s24_core #(
                 // after the request phase, so a line-boundary update cannot
                 // return the stale value captured at X_IDLE.
                 if(irq_read_pending) bus_din<=irq_dout;
+                if(upd_read_pending) begin
+                    bus_din<={8'h00,upd_read_select?upd1_dout:upd0_dout};
+                    upd_read_pending<=1'b0;
+                end
                 bus_ack<=1;xs<=X_WAIT;
             end
             X_TILE: begin bus_din<=tile_dout;bus_ack<=1;xs<=X_WAIT;end

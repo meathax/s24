@@ -78,7 +78,7 @@ module tb_core_smoke;
         .spinner0('0), .spinner1('0), .spinner2('0), .spinner3('0),
         .paddle0(8'h80), .paddle1(8'h80), .paddle2(8'h80), .paddle3(8'h80),
         .ce_pixel(ce_pixel), .hblank(hblank), .vblank(vblank),
-        .hsync(hsync), .vsync(vsync), .red(red), .green(green), .blue(blue),
+        .hsync(hsync), .vsync(vsync), .video_flip(), .red(red), .green(green), .blue(blue),
         .audio_l(audio_l), .audio_r(audio_r),
         .p0_req(p0_req), .p0_addr(p0_addr), .p0_data(p0_data), .p0_ack(p0_ack),
         .p2_req(p2_req), .p2_addr(p2_addr), .p2_data(p2_data), .p2_ack(p2_ack),

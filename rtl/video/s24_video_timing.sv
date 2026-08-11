@@ -2,6 +2,11 @@ module s24_video_timing (
     input  logic       clk,
     input  logic       reset,
     input  logic       ce_pixel,
+    // 315-5292 synchronization-mode bit 0 selects the documented invalid
+    // 512-scanline mode.  System 24 uses zero; keeping the mode here still
+    // matters for software/ASIC probing because the chip changes its frame
+    // terminal count and exposes the known bad blanking phase.
+    input  logic       sync_mode,
     output logic [9:0] hcount,
     output logic [9:0] vcount,
     output logic       hblank,
@@ -12,7 +17,12 @@ module s24_video_timing (
 );
     always_comb begin
         hblank = hcount >= 10'd496;
-        vblank = vcount >= 10'd384;
+        // The documented mode-1 failure leaves the normal sync window at
+        // 395..398 but does not blank until after it, so the display is
+        // enabled during vertical sync.  The remainder of the 512-line
+        // frame is blank.  This is intentionally the observed invalid mode,
+        // not a new usable monitor format.
+        vblank = sync_mode ? (vcount >= 10'd400) : (vcount >= 10'd384);
         // Measured 315-5292 raster, rotated so the active display begins at
         // count zero: 496 active, 43 right border, 48 sync, 69 left border;
         // 384 active, 11 bottom border, 4 sync, 25 top border.
@@ -31,7 +41,9 @@ module s24_video_timing (
                 if (hcount == 10'd655) begin
                     hcount <= 0;
                     hsync_tick <= 1'b1;
-                    vcount <= (vcount == 10'd423) ? 10'd0 : vcount + 10'd1;
+                    vcount <= sync_mode
+                              ? ((vcount == 10'd511) ? 10'd0 : vcount + 10'd1)
+                              : ((vcount == 10'd423) ? 10'd0 : vcount + 10'd1);
                 end else hcount <= hcount + 10'd1;
             end
         end

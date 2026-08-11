@@ -8,6 +8,7 @@ module s24_irq (
     input  logic        hsync_tick,
     input  logic [9:0]  vcount,
     input  logic        ym_irq,
+    input  logic        int3_n,
     input  logic        frc_tick,
     input  logic        frc_mode,
     input  logic        frc_ack,
@@ -45,6 +46,7 @@ module s24_irq (
         else if (p[3]) encoded_ipl = 3'd4;
         else if (p[2]) encoded_ipl = 3'd3;
         else if (p[1]) encoded_ipl = 3'd2;
+        else if (p[0]) encoded_ipl = 3'd1;
         else           encoded_ipl = 3'd0;
     endfunction
 
@@ -55,6 +57,8 @@ module s24_irq (
     always_comb begin
         pending_a = 6'b0;
         pending_b = 6'b0;
+        pending_a[IRQ_INT3]   = !int3_n;
+        pending_b[IRQ_INT3]   = !int3_n;
         pending_a[IRQ_YM2151] = ym_irq;
         pending_b[IRQ_YM2151] = ym_irq;
         pending_a[IRQ_TIMER]  = timer_a;

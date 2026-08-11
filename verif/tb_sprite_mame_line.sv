@@ -22,7 +22,9 @@ module tb_sprite_mame_line(input logic clk,output logic test_failed);
 	integer raster_frames=2,completed_frames=0,first_frame_misses=-1;
 	integer mem_latency=13,mem_wait=0,mem_requests=0,data_requests=0;
 	integer cache_entries=0,cache_hits=0,cache_misses=0;
+	integer cache_hash=0;
 	integer cache_index,request_cache_index;
+	string sprite_hex_path;
 	logic [13:0] request_cache_tag;
 	logic mem_pending=0;
 	logic [13:0] probe_cache_tag [0:1023];
@@ -35,10 +37,25 @@ module tb_sprite_mame_line(input logic clk,output logic test_failed);
 	logic cache_invalidate=0,snoop_check_pending=0,snoop_pass=0;
 	logic [13:0] cache_invalidate_tag=0;
 	integer snoop_pick,snoop_i;
+	function automatic [7:0] rtl_cache_index(input logic [13:0] tag);
+		begin
+			rtl_cache_index=tag[7:0]^{2'b00,tag[13:8]};
+		end
+	endfunction
 
 	initial begin
+		// Every pair below collided in the former low-byte-only cache. Keep the
+		// address-folding contract explicit so a later simplification cannot
+		// silently restore the continuous gameplay miss band.
+		for(i=0;i<256;i=i+1)
+			assert(rtl_cache_index(i[13:0])!=
+			       rtl_cache_index(i[13:0]+14'h0100))
+				else $fatal(1,"sprite cache alias contract index=%0d",i);
+		if(!$value$plusargs("SPRITE_HEX=%s",sprite_hex_path))
+			sprite_hex_path=".build/mame-sspirits-sprite1200.hex";
 		if(!$value$plusargs("MEM_LATENCY=%d",mem_latency)) mem_latency=13;
 		if(!$value$plusargs("CACHE_ENTRIES=%d",cache_entries)) cache_entries=0;
+		if(!$value$plusargs("CACHE_HASH=%d",cache_hash)) cache_hash=0;
 		if(!$value$plusargs("RASTER_FRAMES=%d",raster_frames)) raster_frames=2;
 		if(raster_frames<1) $fatal(1,"RASTER_FRAMES must be positive");
 		if(cache_entries!=0 && cache_entries!=64 &&
@@ -49,7 +66,7 @@ module tb_sprite_mame_line(input logic clk,output logic test_failed);
 			probe_cache_tag[i]=0;
 			probe_cache_valid[i]=0;
 		end
-		$readmemh(".build/mame-sspirits-sprite1200.hex",sprite_ram);
+		$readmemh(sprite_hex_path,sprite_ram);
 	end
 
 	function automatic [127:0] sprite_burst(input logic [26:4] address);
@@ -65,6 +82,8 @@ module tb_sprite_mame_line(input logic clk,output logic test_failed);
 	always_comb begin
 		mem_data=sprite_burst(mem_addr);
 		cache_index=(mem_addr-BASE)&1023;
+		if(cache_hash!=0)
+			cache_index=cache_index^((mem_addr-BASE)>>8);
 		probe_cache_hit=cache_entries!=0 &&
 			probe_cache_valid[cache_index&(cache_entries-1)] &&
 			probe_cache_tag[cache_index&(cache_entries-1)]==(mem_addr-BASE);
@@ -128,10 +147,10 @@ module tb_sprite_mame_line(input logic clk,output logic test_failed);
 		edge_monitor<=0;
 		cache_invalidate<=0;
 		if(snoop_check_pending) begin
-			if(dut.burst_cache_valid[cache_invalidate_tag[7:0]]) begin
+			if(dut.burst_cache_valid[rtl_cache_index(cache_invalidate_tag)]) begin
 				test_failed<=1;
 				$display("FAIL sprite burst cache snoop did not invalidate index %0d",
-					cache_invalidate_tag[7:0]);
+					rtl_cache_index(cache_invalidate_tag));
 			end else snoop_pass<=1;
 			snoop_check_pending<=0;
 		end

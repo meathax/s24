@@ -37,7 +37,11 @@ module s24_mixer (
     input  logic [3:0]  tile_blink,
     output logic [13:0] mixed_pixel,
     output logic [13:0] mixed_pixel_alt,
-    output logic        display_blank
+    output logic        display_blank,
+    // MAME identifies mixer register 13 bit 1 (mask 0x2) as the System 24
+    // screen-flip control.  The FPGA framebuffer path consumes this board
+    // signal after the native mixer, while bit 0 continues to blank pixels.
+    output logic        screen_flip
 );
     import s24_pkg::*;
     logic [15:0] regs [0:15];
@@ -45,6 +49,7 @@ module s24_mixer (
 
     assign cpu_dout = regs[cpu_addr];
     assign display_blank = regs[13][0];
+    assign screen_flip = regs[13][1];
 
     // One evaluation of the 315-5294 priority chain. The tile validity inputs
     // are arguments so the same logic can be re-evaluated with a blinking

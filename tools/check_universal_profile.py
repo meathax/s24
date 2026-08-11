@@ -19,8 +19,10 @@ REQUIRED_RTL = frozenset((
     "rtl/s24_board_arbiter.sv",
     "rtl/io/s24_inputs.sv",
     "rtl/io/s24_analog.sv",
+    "rtl/audio/s24_ym3012.sv",
     "rtl/io/s24_wheel_input.sv",
     "rtl/prot/s24_magic_latch.sv",
+    "rtl/prot/s24_romboard_epld.sv",
     "rtl/fdc/s24_fdc.sv",
     "rtl/mem/s24_rom_loader.sv",
     "rtl/mem/sdram.sv",
@@ -59,6 +61,7 @@ REQUIRED_FIX_CONTRACTS = {
     "Arcade-SegaSystem24.sv": (
         '"P1,CRT Adjust;"',
         ".status_menumask({13'd0,~descriptor.video_profile[0],~status[101],~wheel_controls})",
+        ".flip(descriptor.video_profile[1] | video_flip)",
     ),
 }
 
