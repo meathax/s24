@@ -113,6 +113,9 @@ module tb_sprite_crkdown_real;
     logic word_valid;
     logic [7:0] word_gen;
     logic [13:0] word_low14;
+    logic [33:0] category_word [0:3];
+    logic [33:0] selected_word;
+    logic any_category_valid;
     integer fails_by_x [0:495];
     integer fails_by_y [0:383];
     integer lines_checked;
@@ -136,26 +139,38 @@ module tb_sprite_crkdown_real;
                                 exp_transparent=(exp_color==0);
                                 case(lane)
                                     0: begin
-                                        word_valid=dut.gen_line_lane[0].line0_ram.mem[b*128+addr][25];
-                                        word_gen=dut.gen_line_lane[0].line0_ram.mem[b*128+addr][33:26];
-                                        word_low14=dut.gen_line_lane[0].line0_ram.mem[b*128+addr][13:0];
+                                        category_word[0]=dut.gen_line_lane[0].line0_ram.mem[b*128+addr];
+                                        category_word[1]=dut.gen_line_lane[0].line1_ram.mem[b*128+addr];
+                                        category_word[2]=dut.gen_line_lane[0].line2_ram.mem[b*128+addr];
+                                        category_word[3]=dut.gen_line_lane[0].line3_ram.mem[b*128+addr];
                                     end
                                     1: begin
-                                        word_valid=dut.gen_line_lane[1].line0_ram.mem[b*128+addr][25];
-                                        word_gen=dut.gen_line_lane[1].line0_ram.mem[b*128+addr][33:26];
-                                        word_low14=dut.gen_line_lane[1].line0_ram.mem[b*128+addr][13:0];
+                                        category_word[0]=dut.gen_line_lane[1].line0_ram.mem[b*128+addr];
+                                        category_word[1]=dut.gen_line_lane[1].line1_ram.mem[b*128+addr];
+                                        category_word[2]=dut.gen_line_lane[1].line2_ram.mem[b*128+addr];
+                                        category_word[3]=dut.gen_line_lane[1].line3_ram.mem[b*128+addr];
                                     end
                                     2: begin
-                                        word_valid=dut.gen_line_lane[2].line0_ram.mem[b*128+addr][25];
-                                        word_gen=dut.gen_line_lane[2].line0_ram.mem[b*128+addr][33:26];
-                                        word_low14=dut.gen_line_lane[2].line0_ram.mem[b*128+addr][13:0];
+                                        category_word[0]=dut.gen_line_lane[2].line0_ram.mem[b*128+addr];
+                                        category_word[1]=dut.gen_line_lane[2].line1_ram.mem[b*128+addr];
+                                        category_word[2]=dut.gen_line_lane[2].line2_ram.mem[b*128+addr];
+                                        category_word[3]=dut.gen_line_lane[2].line3_ram.mem[b*128+addr];
                                     end
                                     default: begin
-                                        word_valid=dut.gen_line_lane[3].line0_ram.mem[b*128+addr][25];
-                                        word_gen=dut.gen_line_lane[3].line0_ram.mem[b*128+addr][33:26];
-                                        word_low14=dut.gen_line_lane[3].line0_ram.mem[b*128+addr][13:0];
+                                        category_word[0]=dut.gen_line_lane[3].line0_ram.mem[b*128+addr];
+                                        category_word[1]=dut.gen_line_lane[3].line1_ram.mem[b*128+addr];
+                                        category_word[2]=dut.gen_line_lane[3].line2_ram.mem[b*128+addr];
+                                        category_word[3]=dut.gen_line_lane[3].line3_ram.mem[b*128+addr];
                                     end
                                 endcase
+                                selected_word=category_word[exp_color[7:6]];
+                                word_valid=selected_word[25];
+                                word_gen=selected_word[33:26];
+                                word_low14=selected_word[13:0];
+                                any_category_valid=1'b0;
+                                for(integer cat=0;cat<4;cat=cat+1)
+                                    any_category_valid |= category_word[cat][25] &&
+                                        category_word[cat][33:26]==dut.bank_generation[b];
                                 got_color = (word_valid && word_gen==dut.bank_generation[b])
                                             ? word_low14[7:0] : 8'd0;
                                 if(dumpfile!=0)
@@ -164,7 +179,7 @@ module tb_sprite_crkdown_real;
                                 if(exp_transparent) begin
                                     // A transparent source pixel must NOT
                                     // claim the word this generation.
-                                    if(word_valid && word_gen==dut.bank_generation[b]) begin
+                                    if(any_category_valid) begin
                                         errors=errors+1;
                                         fails_by_x[px]=fails_by_x[px]+1;
                                         fails_by_y[dut.bank_line_y[b]]=fails_by_y[dut.bank_line_y[b]]+1;

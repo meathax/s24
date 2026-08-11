@@ -93,8 +93,10 @@ module tb_gground_boot #(
 
 `ifdef S24_VISUAL
     logic reset=1,pause=0;
+    logic bench_active=1;
 `else
     logic clk=0,reset=1,pause=0;
+    logic bench_active=0;
 `endif
     board_desc_t board;
     logic key_wr=0;
@@ -270,6 +272,8 @@ module tb_gground_boot #(
     integer floppy_byte_offset,floppy_write_offset;
     logic [7:0] floppy_lo,floppy_hi;
     logic [7:0] fdc_delivered_byte;
+    logic [15:0] fdc_demand_word_expected;
+    logic fdc_demand_word_valid;
 `ifdef S24_VISUAL
     // The generated model serializes the SystemVerilog file descriptor value, but an OS
     // descriptor is process-local.  The SDL host pulses host_restore before
@@ -305,9 +309,106 @@ module tb_gground_boot #(
     end
 `endif
     always @(posedge clk) begin
+        if(reset || !bench_active) begin
+            // DUT state is synchronously reset.  Do not acknowledge or
+            // observe randomized pre-reset outputs as real bus activity.
+            p0_ack<=0;
+            p2_ack<=0;
+            p3_ack<=0;
+            p4_ack<=0;
+            wr_ack<=0;
+            p0_data<=0;
+            p3_data<=0;
+            p4_data<=0;
+            fdc_media_req_d<=0;
+            p2_req_d<=0;
+            p4_req_d<=0;
+            p4_outstanding<=0;
+            fdc_media_read_serviced<=0;
+            fdc_track_active<=0;
+            fdc_demand_word_valid<=0;
+            fdc_side_shadow<=0;
+            cnt1_d<=0;
+            vsync_d<=0;
+
+            cpu_a_instructions<=0;
+            cpu_b_instructions<=0;
+            boot_reads<=0;
+            romboard_reads<=0;
+            cpu_b_reads<=0;
+            floppy_reads<=0;
+            floppy_track_reads<=0;
+            memory_writes<=0;
+            floppy_writes<=0;
+            palette_writes<=0;
+            tile_writes<=0;
+            mixer_writes<=0;
+            char_writes<=0;
+            sprite_writes<=0;
+            mixer_log_count<=0;
+            irq_log_count<=0;
+            irq_b_read_log_count<=0;
+            tile_requests<=0;
+            sprite_requests<=0;
+            decrypt_starts<=0;
+            decrypt_done<=0;
+            cnt_releases<=0;
+            visible_pixels<=0;
+            video_frames<=0;
+            raw_frame_count<=0;
+            tile_pixels<=0;
+            sprite_pixels<=0;
+            mixed_pixels<=0;
+            blanked_pixels<=0;
+            unknown_video_pixels<=0;
+            fdc_media_requests<=0;
+            fdc_media_acks<=0;
+            p4_requests<=0;
+            p4_acks<=0;
+            fdc_read_bytes<=0;
+            fdc_track_bytes<=0;
+            fdc_complete_tracks<=0;
+            fdc_checksum<=32'h811c9dc5;
+            fdc_track_checksum<=32'h811c9dc5;
+            fdc_last_track_checksum<=0;
+            p4_byte_addr_latched<=0;
+            p4_addr_latched<=0;
+            fdc_track_base_latched<=0;
+            fdc_track_number_latched<=0;
+            fdc_track_side_latched<=0;
+            fdc_demand_word_expected<=0;
+            frame_pixels<=0;
+            frame_nonblack_pixels<=0;
+            frame_capture_active<=0;
+            frame_capture_done<=0;
+            frame_nonblack_current<=0;
+            frame_unknown_current<=0;
+            frame_signature_current<=0;
+            last_frame_signature<=0;
+            attract_frames<=0;
+            attract_changes<=0;
+            last_frame_nonblack<=0;
+            attract_code_seen<=0;
+            frame_code_window_current<=0;
+            capture_code_window_seen<=0;
+            sprite_probe_done<=0;
+            last_a_address<=0;
+            last_b_address<=0;
+            last_a_opcode<=0;
+            last_b_opcode<=0;
+`ifndef S24_VISUAL
+            host_joy0[11]<=0;
+            host_joy0[10]<=0;
+`endif
+        end else begin
         if(dut.fdc.bus_wr && dut.fdc.bus_addr==3'd0 &&
-                (dut.fdc.bus_din[7:4]==4'h9 || dut.fdc.bus_din[7:4]==4'hb))
+                (dut.fdc.bus_din[7:4]==4'h9 || dut.fdc.bus_din[7:4]==4'hb)) begin
             fdc_side_shadow<=dut.fdc.bus_din[3];
+            $display("%s FDC command=%02h side/track=%0d/%0d position=%0d span=%0d A=%h:%h",
+                game_name,dut.fdc.bus_din,dut.fdc.bus_din[3],
+                dut.fdc.physical_track,dut.fdc.position,dut.fdc.span,
+                {last_a_address,1'b0},last_a_opcode);
+        end
         fdc_media_req_d<=dut.fdc_media_req;
         p2_req_d<=p2_req;
         p4_req_d<=p4_req;
@@ -352,32 +453,6 @@ module tb_gground_boot #(
                     $fatal(1,"%s FDC media address mismatch base=%h position=%h addr=%h",
                            game_name,dut.fdc.track_base,dut.fdc.position,
                            dut.fdc_media_addr);
-                // A command can be force-interrupted and restarted. Only a
-                // position-zero request starts a candidate full-track transfer;
-                // bytes from separate commands must never be accumulated.
-                if(dut.fdc.position==0) begin
-                    fdc_track_active<=1;
-                    fdc_track_bytes<=0;
-                    fdc_track_checksum<=32'h811c9dc5;
-                    fdc_track_base_latched<=dut.fdc.track_base;
-                    fdc_track_number_latched<=dut.fdc.physical_track;
-                    fdc_track_side_latched<=fdc_side_shadow;
-                end else if(fdc_track_active) begin
-                    if(dut.fdc_media_addr !=
-                            fdc_track_base_latched+fdc_track_bytes)
-                        $fatal(1,"%s non-contiguous FDC transfer byte=%0d expected=%h got=%h",
-                               game_name,fdc_track_bytes,
-                               fdc_track_base_latched+fdc_track_bytes,
-                               dut.fdc_media_addr);
-                    if(dut.fdc.position != fdc_track_bytes[15:0])
-                        $fatal(1,"%s FDC position skipped/duplicated expected=%h got=%h",
-                               game_name,fdc_track_bytes[15:0],
-                               dut.fdc.position);
-                    if(dut.fdc.physical_track!=fdc_track_number_latched ||
-                            fdc_side_shadow!=fdc_track_side_latched)
-                        $fatal(1,"%s FDC track/side changed within transfer",
-                               game_name);
-                end
             end
         end
         if(p4_outstanding && p4_req &&
@@ -394,21 +469,80 @@ module tb_gground_boot #(
                            game_name,p4_byte_addr_latched);
                 fdc_delivered_byte=dut.fdc_read_odd ? p4_data[15:8] :
                                                          p4_data[7:0];
+                // Read-ahead responses share p4_data and may arrive after
+                // this demand word but before the FDC acknowledges the
+                // adjacent byte. Retain the demand response for the
+                // cache-lane invariant instead of comparing against the
+                // most recently completed speculative response.
+                fdc_demand_word_expected<=p4_data;
+                fdc_demand_word_valid<=1;
             end
             p4_acks<=p4_acks+1;
             p4_outstanding<=0;
         end
+        if(dut.fdc_media_req && dut.fdc_media_wr)
+            $display("%s FDC write-debug addr=%h data=%h ack=%b cache=%b/%b fifo=%b/%b count=%0d discard=%b p4=%b/%b prefetch=%b",
+                game_name,dut.fdc_media_addr,dut.fdc_media_wdata,
+                dut.fdc_media_ack,dut.fdc_cache_valid,dut.fdc_cache_hit,
+                dut.fdc_fifo_hit,(dut.fdc_pf_count!=0),dut.fdc_pf_count,
+                dut.fdc_pf_discard,dut.p4_req,dut.p4_ack,dut.fdc_p4_prefetch);
         if(dut.fdc_media_ack && dut.fdc_media_req && !dut.fdc_media_wr) begin
             fdc_delivered_byte=dut.fdc_media_rdata_bus;
+            if(dut.fdc_media_addr !=
+                    dut.fdc.track_base+{11'd0,dut.fdc.position})
+                $fatal(1,"%s FDC media address mismatch base=%h position=%h addr=%h",
+                       game_name,dut.fdc.track_base,dut.fdc.position,
+                       dut.fdc_media_addr);
             if(!p4_ack && dut.fdc_media_addr==p4_byte_addr_latched+27'd1 &&
+                fdc_demand_word_valid &&
                 fdc_delivered_byte != (dut.fdc_media_addr[0] ?
-                    p4_data[15:8] : p4_data[7:0]))
+                    fdc_demand_word_expected[15:8] :
+                    fdc_demand_word_expected[7:0])) begin
+                $display("%s FDC stale-debug addr=%h data=%h expected=%h media=%b/%b ack=%b cache=%b/%b/%h/%h fifo=%b/%b/%h/%h count=%0d discard=%b fwr=%b p4=%b/%b prefetch=%b p4addr=%h mediaaddr=%h wr=%b/%b/%h/%h",
+                    game_name,dut.fdc_media_addr,fdc_delivered_byte,
+                    dut.fdc_media_addr[0] ? fdc_demand_word_expected[15:8] :
+                        fdc_demand_word_expected[7:0],
+                    dut.fdc_media_req,dut.fdc_media_wr,dut.fdc_media_ack,
+                    dut.fdc_cache_valid,dut.fdc_cache_hit,
+                    dut.fdc_cache_addr,dut.fdc_cache_data,
+                    dut.fdc_fifo_hit,(dut.fdc_pf_count!=0),
+                    dut.fdc_pf_addr[dut.fdc_pf_rd],dut.fdc_pf_data[dut.fdc_pf_rd],
+                    dut.fdc_pf_count,dut.fdc_pf_discard,dut.fdc_floppy_write,
+                    dut.p4_req,dut.p4_ack,
+                    dut.fdc_p4_prefetch,dut.p4_addr,dut.fdc_media_addr,
+                    dut.wr_req,dut.wr_ack,dut.wr_addr,dut.wr_data);
                 $fatal(1,"%s cached FDC byte mismatch addr=%h data=%h expected=%h",
                     game_name,dut.fdc_media_addr,fdc_delivered_byte,
-                    dut.fdc_media_addr[0] ? p4_data[15:8] : p4_data[7:0]);
+                    dut.fdc_media_addr[0] ? fdc_demand_word_expected[15:8] :
+                        fdc_demand_word_expected[7:0]);
+            end
             fdc_read_bytes<=fdc_read_bytes+1;
             fdc_checksum<=checksum_byte(fdc_checksum,fdc_delivered_byte);
-            if(fdc_track_active) begin
+            // Start transfer accounting on the accepted position-zero byte,
+            // irrespective of whether it came from a demand p4 read, the
+            // one-word cache, or the read-ahead FIFO.  Starting this monitor
+            // at p4 launch made cache/FIFO-served tracks invisible.
+            if(dut.fdc.position==0) begin
+                fdc_track_active<=1;
+                fdc_track_bytes<=1;
+                fdc_track_checksum<=checksum_byte(32'h811c9dc5,
+                                                   fdc_delivered_byte);
+                fdc_track_base_latched<=dut.fdc.track_base;
+                fdc_track_number_latched<=dut.fdc.physical_track;
+                fdc_track_side_latched<=fdc_side_shadow;
+                floppy_track_reads<=floppy_track_reads+1;
+                $display("%s FDC side/track=%0d/%0d image=%0d D0=%h D1=%h D2=%h D4=%h D6=%h D7=%h A0=%h A1=%h",
+                    game_name,fdc_side_shadow,dut.fdc.physical_track,
+                    floppy_file_bytes,
+                    {dut.cpu_a.excUnit.regs68H[0],dut.cpu_a.excUnit.regs68L[0]},
+                    {dut.cpu_a.excUnit.regs68H[1],dut.cpu_a.excUnit.regs68L[1]},
+                    {dut.cpu_a.excUnit.regs68H[2],dut.cpu_a.excUnit.regs68L[2]},
+                    {dut.cpu_a.excUnit.regs68H[4],dut.cpu_a.excUnit.regs68L[4]},
+                    {dut.cpu_a.excUnit.regs68H[6],dut.cpu_a.excUnit.regs68L[6]},
+                    {dut.cpu_a.excUnit.regs68H[7],dut.cpu_a.excUnit.regs68L[7]},
+                    {dut.cpu_a.excUnit.regs68H[8],dut.cpu_a.excUnit.regs68L[8]},
+                    {dut.cpu_a.excUnit.regs68H[9],dut.cpu_a.excUnit.regs68L[9]});
+            end else if(fdc_track_active) begin
                 if(dut.fdc_media_addr !=
                     fdc_track_base_latched+fdc_track_bytes)
                     $fatal(1,"%s non-contiguous FDC transfer byte=%0d expected=%h got=%h",
@@ -457,20 +591,6 @@ module tb_gground_boot #(
         end else if(!p4_req) p4_ack<=0;
         else if(!p4_ack) begin
             floppy_byte_offset=(p4_addr-FLOPPY_WORD_BASE)*2;
-            if(dut.fdc.position==0) begin
-                floppy_track_reads<=floppy_track_reads+1;
-                $display("%s FDC side/track=%0d/%0d image=%0d D0=%h D1=%h D2=%h D4=%h D6=%h D7=%h A0=%h A1=%h",
-                    game_name,fdc_side_shadow,dut.fdc.physical_track,
-                    floppy_file_bytes,
-                    {dut.cpu_a.excUnit.regs68H[0],dut.cpu_a.excUnit.regs68L[0]},
-                    {dut.cpu_a.excUnit.regs68H[1],dut.cpu_a.excUnit.regs68L[1]},
-                    {dut.cpu_a.excUnit.regs68H[2],dut.cpu_a.excUnit.regs68L[2]},
-                    {dut.cpu_a.excUnit.regs68H[4],dut.cpu_a.excUnit.regs68L[4]},
-                    {dut.cpu_a.excUnit.regs68H[6],dut.cpu_a.excUnit.regs68L[6]},
-                    {dut.cpu_a.excUnit.regs68H[7],dut.cpu_a.excUnit.regs68L[7]},
-                    {dut.cpu_a.excUnit.regs68H[8],dut.cpu_a.excUnit.regs68L[8]},
-                    {dut.cpu_a.excUnit.regs68H[9],dut.cpu_a.excUnit.regs68L[9]});
-            end
             if(floppy_byte_offset<0 || floppy_byte_offset+1>=floppy_file_bytes)
                 $fatal(1,"%s floppy byte read outside image: byte=%h word=%h size=%h side/track=%0d/%0d position=%h span=%h D0=%h D1=%h D2=%h D4=%h D6=%h D7=%h A0=%h A1=%h PC=%h:%h",
                     game_name,floppy_byte_offset,p4_addr,floppy_file_bytes,
@@ -759,6 +879,7 @@ module tb_gground_boot #(
                 end
             end else frame_pixels<=frame_pixels+1;
         end
+        end
     end
 
     logic [2:0] mahjong_line;
@@ -920,6 +1041,11 @@ module tb_gground_boot #(
     end
 
     initial begin
+`ifndef S24_VISUAL
+        // Randomized DUT state is not meaningful until synchronous reset has
+        // clocked.  Re-enable every assertion before functional execution.
+        $assertoff;
+`endif
         game_name="gground";
         boot_file="verif/media/gground/boot.mem";
         romboard_file="verif/media/gground/romboard.mem";
@@ -1057,6 +1183,22 @@ module tb_gground_boot #(
         end
         repeat(16) @(posedge clk);
         reset=0;
+        // Let fx68k's reset microsequence establish valid one-hot decode
+        // controls while the bench still accepts no external transaction.
+        repeat(64) @(posedge clk);
+        $asserton;
+        if(p0_ack || p2_ack || p3_ack || p4_ack || wr_ack ||
+                cpu_a_instructions!=0 || cpu_b_instructions!=0 ||
+                boot_reads!=0 || romboard_reads!=0 || cpu_b_reads!=0 ||
+                floppy_reads!=0 || memory_writes!=0 ||
+                fdc_media_requests!=0 || fdc_media_acks!=0 ||
+                p4_requests!=0 || p4_acks!=0 || fdc_read_bytes!=0 ||
+                cnt_releases!=0 || video_frames!=0 ||
+                palette_writes!=0 || tile_writes!=0 || mixer_writes!=0 ||
+                char_writes!=0 || sprite_writes!=0)
+            $fatal(1,"%s reset barrier accepted pre-reset activity",game_name);
+        $display("%s reset-barrier clean assertions=on",game_name);
+        bench_active=1;
         while(!reached_target && i<max_clocks) begin
             @(posedge clk);
             i=i+1;

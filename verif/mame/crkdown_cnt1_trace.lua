@@ -1,47 +1,32 @@
 -- MAME 0.288 reference trace for Crack Down's CPU-B release sequence.
 local machine = manager.machine
 local taps = {}
+-- Tap handles must remain reachable for the entire run.  Without a global
+-- root Lua can collect them before Crack Down releases CPU-B (~14 seconds).
+_G.crkdown_cnt1_taps = taps
 
 local function install(tag)
     local device = machine.devices[tag]
     local space = device.spaces["program"]
+    -- 315-5296 occupies 800000-80003f mirrored by 1ffe00.  Watch the
+    -- complete mirrored aperture so Crack Down's release write is visible.
     taps[#taps + 1] = space:install_write_tap(
-        0x800000, 0x80003f, "crkdown_cnt1_" .. tag,
+        0x800000, 0x9fffff, "crkdown_cnt1_" .. tag,
         function(address, data, mask)
-            print(string.format(
-                "S24MAME crkdown-io-write cpu=%s time=%.9f pc=%06x addr=%06x data=%04x mask=%04x",
-                tag, machine.time:as_double(), device.state["CURPC"].value,
-                address, data, mask))
+            if (address & 0xe001c0) == 0x800000 then
+                print(string.format(
+                    "S24MAME crkdown-io-write cpu=%s time=%.9f pc=%06x addr=%06x canonical=%02x data=%04x mask=%04x",
+                    tag, machine.time:as_double(), device.state["CURPC"].value,
+                    address, address & 0x3f, data, mask))
+            end
         end)
+    -- Command/register writes are sparse and expose the exact floppy-command
+    -- sequence without the enormous polling-read stream.
     taps[#taps + 1] = space:install_write_tap(
-        0xb00000, 0xb0000f, "crkdown_fdc_" .. tag,
+        0xb00000, 0xb0000f, "crkdown_fdc_write_" .. tag,
         function(address, data, mask)
             print(string.format(
                 "S24MAME crkdown-fdc-write cpu=%s time=%.9f pc=%06x addr=%06x data=%04x mask=%04x",
-                tag, machine.time:as_double(), device.state["CURPC"].value,
-                address, data, mask))
-        end)
-    taps[#taps + 1] = space:install_read_tap(
-        0xb00000, 0xb0000f, "crkdown_fdc_read_" .. tag,
-        function(address, data, mask)
-            print(string.format(
-                "S24MAME crkdown-fdc-read cpu=%s time=%.9f pc=%06x addr=%06x data=%04x mask=%04x",
-                tag, machine.time:as_double(), device.state["CURPC"].value,
-                address, data, mask))
-        end)
-    taps[#taps + 1] = space:install_write_tap(
-        0xa00000, 0xbfffff, "crkdown_high_write_" .. tag,
-        function(address, data, mask)
-            print(string.format(
-                "S24MAME crkdown-high-write cpu=%s time=%.9f pc=%06x addr=%06x data=%04x mask=%04x",
-                tag, machine.time:as_double(), device.state["CURPC"].value,
-                address, data, mask))
-        end)
-    taps[#taps + 1] = space:install_read_tap(
-        0xa00000, 0xbfffff, "crkdown_high_read_" .. tag,
-        function(address, data, mask)
-            print(string.format(
-                "S24MAME crkdown-high-read cpu=%s time=%.9f pc=%06x addr=%06x data=%04x mask=%04x",
                 tag, machine.time:as_double(), device.state["CURPC"].value,
                 address, data, mask))
         end)

@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$ModelDirectory = 'C:/tmp/s24_obj_gground',
-    [switch]$DisableACache
+    [switch]$DisableACache,
+    [switch]$NoInstall
 )
 
 $ErrorActionPreference = 'Stop'
@@ -18,6 +19,10 @@ Set-Location -LiteralPath $shortRoot
 # controlled compatibility check after the testbench type change. A caller can
 # select a second local scratch directory when an existing generated source is
 # held open by another process; no object directory is deleted or cleaned.
+New-Item -ItemType Directory -Force -Path $ModelDirectory | Out-Null
+$mainCpp = Join-Path $ModelDirectory 'gground_boot_main.cpp'
+Copy-Item -LiteralPath 'verif/gground_boot_main.cpp' -Destination $mainCpp -Force
+$mainCppArg = $mainCpp.Replace('\','/')
 
 & verilator-safe status
 if ($LASTEXITCODE -ne 0) {
@@ -51,8 +56,11 @@ $sources = @(
 )
 
 $arguments = @(
-    '--binary',
+    '--cc',
+    '--exe',
+    '--build',
     '--timing',
+    '--assert',
     '-O3',
     '--output-split', '20000',
     '--top-module', 'tb_gground_boot',
@@ -73,7 +81,8 @@ $arguments = @(
     '--build-jobs', '4',
     # Keep generation deterministic while diagnosing the Windows/MSYS
     # single-file write race; C++ compilation remains bounded at four jobs.
-    '--verilate-jobs', '1'
+    '--verilate-jobs', '1',
+    $mainCppArg
 ) + $(if($DisableACache) { @('-GA_OPCACHE_ENABLE=0') } else { @() }) + $sources
 
 & verilator-safe @arguments
@@ -84,5 +93,9 @@ if ($buildExitCode -ne 0) {
 
 $builtExecutable = Join-Path $modelDirectory 'Vtb_gground_boot.exe'
 $repositoryExecutable = Join-Path $repoRoot 'verif\obj_gground\Vtb_gground_boot.exe'
-Copy-Item -LiteralPath $builtExecutable -Destination $repositoryExecutable -Force
-Write-Output "Updated $repositoryExecutable"
+if($NoInstall) {
+    Write-Output "Built $builtExecutable (repository executable unchanged)"
+} else {
+    Copy-Item -LiteralPath $builtExecutable -Destination $repositoryExecutable -Force
+    Write-Output "Updated $repositoryExecutable"
+}

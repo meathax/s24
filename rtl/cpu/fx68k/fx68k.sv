@@ -2146,6 +2146,20 @@ module sequencer( input s_clks Clks, input enT3,
 	assign inGrp0Exc = rExcRst | rExcBusErr | rExcAdrErr;
 	
 	always_ff @( posedge Clks.clk) begin
+		if( Clks.pwrUp) begin
+			rExcRst <= 1'b0;
+			rExcBusErr <= 1'b0;
+			rExcAdrErr <= 1'b0;
+			rSpurious <= 1'b0;
+			rAutovec <= 1'b0;
+			rTrace <= 1'b0;
+			rInterrupt <= 1'b0;
+			rIllegal <= 1'b0;
+			rLineA <= 1'b0;
+			rLineF <= 1'b0;
+			rPriv <= 1'b0;
+		end
+		else begin
 		if( grp0LatchEn & enT3) begin
 			rExcRst <= excRst;
 			rExcBusErr <= BerrA;
@@ -2165,6 +2179,7 @@ module sequencer( input s_clks Clks, input enT3,
 			rLineA <= isLineA;
 			rLineF <= isLineF;
 			rPriv <= isPriv & !psw[ SF];
+		end
 		end
 	end
 
