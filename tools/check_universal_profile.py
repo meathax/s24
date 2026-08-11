@@ -58,7 +58,7 @@ REQUIRED_FIX_CONTRACTS = {
     ),
     "Arcade-SegaSystem24.sv": (
         '"P1,CRT Adjust;"',
-        ".status_menumask({13'd0,~descriptor.video_profile[0],~status[101],1'b0})",
+        ".status_menumask({13'd0,~descriptor.video_profile[0],~status[101],~wheel_controls})",
     ),
 }
 

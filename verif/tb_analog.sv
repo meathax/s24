@@ -21,9 +21,12 @@ module tb_analog;
     logic signed [7:0] stick_x=0;
     logic digital_left=0,digital_right=0;
     logic [1:0] analogue_profile=ANALOGUE_STANDARD;
+    logic stick_enable=1;
+    logic [3:0] stick_sensitivity=4'd1;
     logic [8:0] wheel_spinner=0,wheel_out;
     s24_wheel_input wheel(
-        .clk(clk),.reset(reset),.tick(wheel_tick),.stick_x(stick_x),
+        .clk(clk),.reset(reset),.tick(wheel_tick),.stick_enable(stick_enable),
+        .stick_x(stick_x),.stick_sensitivity(stick_sensitivity),
         .analogue_profile(analogue_profile),
         .digital_left(digital_left),.digital_right(digital_right),
         .spinner_in(wheel_spinner),.spinner_out(wheel_out));
@@ -42,6 +45,15 @@ module tb_analog;
         if(udout!==8'h03)$fatal(1,"uPD4701 -delta mismatch: %02x",udout);
         uaddr=1;#1;
         if(udout!==8'h00)$fatal(1,"uPD4701 high nibble mismatch: %02x",udout);
+
+        // Native MiSTer spinner events pass through unchanged, independently
+        // of the synthetic left-stick source.
+        wheel_spinner={1'b1,8'd6};tick;
+        if(wheel_out[7:0]!==8'd6)
+            $fatal(1,"native spinner positive delta mismatch: %02x",wheel_out[7:0]);
+        wheel_spinner={1'b0,8'hfd};tick;
+        if(wheel_out[7:0]!==8'hfd)
+            $fatal(1,"native spinner negative delta mismatch: %02x",wheel_out[7:0]);
 
         // Select ADC channel 2 (0xa5), then verify MSB-first D7 shifting.
         din=8'h02;select=1;tick;select=0;#1;
@@ -89,12 +101,37 @@ module tb_analog;
         if(wheel_out[7:0]!==8'd14)
             $fatal(1,"Hot Rod full-scale delta mismatch: %02x",wheel_out[7:0]);
 
+        // The OSD sensitivity level scales only synthetic stick motion. Level
+        // 2 doubles the established level-1 full-scale event.
+        stick_sensitivity=4'd2;
+        wheel_tick=1;tick;wheel_tick=0;tick;
+        if(wheel_out[7:0]!==8'd28)
+            $fatal(1,"Hot Rod sensitivity level 2 mismatch: %02x",wheel_out[7:0]);
+        stick_sensitivity=4'd8;
+        wheel_tick=1;tick;wheel_tick=0;tick;
+        if(wheel_out[7:0]!==8'd112)
+            $fatal(1,"Hot Rod sensitivity level 8 mismatch: %02x",wheel_out[7:0]);
+
         // Rough Racer keeps its fractional quadratic fine control but now
         // reaches five counts per frame at full travel.
         analogue_profile=ANALOGUE_ROUGHRAC;
+        stick_sensitivity=4'd1;
         wheel_tick=1;tick;wheel_tick=0;tick;
         if(wheel_out[7:0]!==8'd5)
             $fatal(1,"Rough Racer full-scale delta mismatch: %02x",wheel_out[7:0]);
+        stick_sensitivity=4'd3;
+        wheel_tick=1;tick;wheel_tick=0;tick;
+        if(wheel_out[7:0]!==8'd15)
+            $fatal(1,"Rough Racer sensitivity level 3 mismatch: %02x",wheel_out[7:0]);
+        stick_sensitivity=4'd8;
+        wheel_tick=1;tick;wheel_tick=0;tick;
+        if(wheel_out[7:0]!==8'd40)
+            $fatal(1,"Rough Racer sensitivity level 8 mismatch: %02x",wheel_out[7:0]);
+
+        // Disabling the synthetic source must not block a native spinner.
+        stick_enable=0;stick_sensitivity=4'd8;wheel_spinner={1'b1,8'd2};tick;
+        if(wheel_out[7:0]!==8'd2)
+            $fatal(1,"native spinner was blocked with stick source disabled");
 
         $display("PASS System 24 analog devices and D-pad wheel steering");
         $finish;

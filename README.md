@@ -29,6 +29,7 @@ implementation is still being validated against original hardware; see
 | Scaling | Normal, vertical integer, horizontal-and-vertical integer |
 | Scandoubler Fx | None, CRT 25%, CRT 50%, CRT 75% |
 | Projector Flicker Fix | Bonanza Bros-only option that blends the verified projector translucency effect |
+| Steering Sensitivity | Hot Rod and Rough Racer left-stick steering level 1–8 |
 | CRT Adjust | Enable, horizontal size, horizontal position, and vertical shift |
 | Reset | Reset the emulated board |
 

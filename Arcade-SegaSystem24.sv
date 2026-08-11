@@ -48,6 +48,7 @@ module emu (
         "O[9:8],Rotation,Normal,Rotate 90 CCW,Rotate 90 CW;",
         "O[12:10],Scaling,Normal,V-Integer,HV-Integer;",
         "O[15:14],Scandoubler Fx,None,CRT 25%,CRT 50%,CRT 75%;",
+        "H0O[19:17],Steering Sensitivity,1,2,3,4,5,6,7,8;",
         // Listed On first so the default status value of 0 selects it: several
         // titles (Bonanza Bros' stage intros) obtain translucency by toggling
         // a tilemap on and off every frame, which a CRT integrates but a
@@ -101,13 +102,19 @@ module emu (
     logic floppy_save_req;
     logic [15:0] sdram_sz;
     s24_pkg::board_desc_t descriptor;
+    // status[19:17] is a shared 1..8 multiplier for synthetic left-stick
+    // steering. Native spinner deltas and digital steering are unaffected.
+    // Only Hot Rod and Rough Racer expose this setting.
+    wire wheel_controls = descriptor.hotrod_io ||
+                          descriptor.analogue_profile==s24_pkg::ANALOGUE_ROUGHRAC;
+    wire [3:0] stick_sensitivity = {1'b0,status[19:17]} + 4'd1;
     hps_io #(.CONF_STR(CONF_STR),.WIDE(1)) hps(
         .clk_sys(clk_sys),.HPS_BUS(HPS_BUS),.EXT_BUS(),.gamma_bus(gamma_bus),
         .forced_scandoubler(forced_scandoubler),.buttons(buttons),.status(status),
         .video_rotated(video_rotated),.new_vmode(1'b0),
         // H1 owns the CRT-adjust children; H2 owns the Bonanza-only projector
         // flicker fix on the root menu.
-        .status_menumask({13'd0,~descriptor.video_profile[0],~status[101],1'b0}),
+        .status_menumask({13'd0,~descriptor.video_profile[0],~status[101],~wheel_controls}),
         .joystick_0(joy0),.joystick_1(joy1),
         .joystick_2(joy2),.joystick_3(joy3),
         .joystick_4(),.joystick_5(),
@@ -191,21 +198,25 @@ module emu (
     end
     s24_wheel_input wheel0(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
         .stick_x(stick_l0[7:0]),
+        .stick_enable(wheel_controls),.stick_sensitivity(stick_sensitivity),
         .analogue_profile(descriptor.analogue_profile),
         .digital_left(joy0[1]),.digital_right(joy0[0]),
         .spinner_in(hps_spinner0),.spinner_out(spinner0));
     s24_wheel_input wheel1(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
         .stick_x(stick_l1[7:0]),
+        .stick_enable(wheel_controls),.stick_sensitivity(stick_sensitivity),
         .analogue_profile(descriptor.analogue_profile),
         .digital_left(joy1[1]),.digital_right(joy1[0]),
         .spinner_in(hps_spinner1),.spinner_out(spinner1));
     s24_wheel_input wheel2(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
         .stick_x(stick_l2[7:0]),
+        .stick_enable(wheel_controls),.stick_sensitivity(stick_sensitivity),
         .analogue_profile(descriptor.analogue_profile),
         .digital_left(joy2[1]),.digital_right(joy2[0]),
         .spinner_in(hps_spinner2),.spinner_out(spinner2));
     s24_wheel_input wheel3(.clk(clk_sys),.reset(~pll_locked),.tick(wheel_tick),
         .stick_x(stick_l3[7:0]),
+        .stick_enable(wheel_controls),.stick_sensitivity(stick_sensitivity),
         .analogue_profile(descriptor.analogue_profile),
         .digital_left(joy3[1]),.digital_right(joy3[0]),
         .spinner_in(hps_spinner3),.spinner_out(spinner3));

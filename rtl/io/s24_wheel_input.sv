@@ -13,9 +13,10 @@ import s24_pkg::*;
 // current stick deflection and, outside a deadzone, emits a signed delta.
 // Stick position controls spinner speed through a quadratic response curve:
 // small deflections stay at one or two counts per frame for fine control,
-// while the rate rises progressively toward a sixteen-count cap at full
-// deflection. Holding the stick turns continuously; centering it stops
-// without returning the wheel counter to any absolute position.
+// while the rate rises progressively toward the profile's base cap at full
+// deflection. The user-selectable sensitivity scales this synthetic delta;
+// holding the stick turns continuously and centering it stops without
+// returning the wheel counter to any absolute position.
 //
 // merge_in/merge_out let a real MiSTer spinner peripheral (hps_io's
 // literal spinner_N ports) keep working side by side with this
@@ -26,7 +27,9 @@ module s24_wheel_input (
     input  logic        clk,
     input  logic        reset,
     input  logic         tick,
+    input  logic         stick_enable,
     input  logic signed [7:0] stick_x,
+    input  logic [3:0]  stick_sensitivity,
     input  logic [1:0]  analogue_profile,
     input  logic        digital_left,
     input  logic        digital_right,
@@ -54,16 +57,26 @@ module s24_wheel_input (
     logic [7:0] effective;
     logic [13:0] curve_square;
     logic [14:0] curve_scaled;
-    logic [5:0] speed_mag;
+    logic [5:0] speed_base;
+    logic [7:0] speed_mag;
+    logic [8:0] speed_scaled;
+    logic [3:0] sensitivity;
     logic [18:0] rough_product;
     logic [10:0] rough_rate;
-    logic [11:0] rough_sum;
+    logic [14:0] rough_rate_scaled;
+    logic [14:0] rough_sum;
     logic [7:0] rough_accum;
-    logic [2:0] rough_step;
+    logic [6:0] rough_step;
     logic signed [7:0] stick_step;
     logic signed [7:0] steering_step;
     assign rough_product = curve_square * 6'd23;
-    assign rough_sum = {4'd0,rough_accum} + {1'b0,rough_rate};
+    assign sensitivity = (stick_sensitivity == 4'd0) ? 4'd1 : stick_sensitivity;
+    // Extend both operands before multiplying. This keeps the full product
+    // width explicit in Quartus/SystemVerilog instead of relying on context
+    // sizing for the 8x and 14-count cases.
+    assign speed_scaled = {3'd0,speed_base} * {5'd0,sensitivity};
+    assign rough_rate_scaled = {4'd0,rough_rate} * {11'd0,sensitivity};
+    assign rough_sum = {7'd0,rough_accum} + rough_rate_scaled;
     always_comb begin
         stick_abs = stick_x[7] ? (~stick_x + 8'd1) : stick_x;
         if(analogue_profile==ANALOGUE_ROUGHRAC) begin
@@ -80,23 +93,25 @@ module s24_wheel_input (
         curve_scaled = {11'd0,curve_square[13:10]} +
                        {13'd0,curve_square[13:12]} +
                        15'd1;
-        if (effective == 8'd0) speed_mag = 6'd0;
-        // Hot Rod's former 16-count ceiling is reduced by approximately
-        // ten percent. Integer wheel deltas make 14 counts the closest
-        // conservative value; the rest of its established curve is kept.
-        else if (curve_scaled > 15'd14) speed_mag = 6'd14;
-        else speed_mag = curve_scaled[5:0];
+        if (effective == 8'd0) speed_base = 6'd0;
+        // Hot Rod's established base curve has a conservative 14-count cap.
+        // Sensitivity is applied after this base curve so level 1 preserves
+        // the existing behaviour and higher levels are easy to reason about.
+        else if (curve_scaled > 15'd14) speed_base = 6'd14;
+        else speed_base = curve_scaled[5:0];
+        speed_mag = (speed_scaled > 9'd127) ? 8'd127 : speed_scaled[7:0];
 
-        // Rough Racer uses a five-count full-scale quadratic curve. Keep the
-        // rate in Q8 fixed point so small movements can remain below one
-        // count per frame instead of being rounded up and made twitchy.
+        // Rough Racer uses a five-count full-scale quadratic base curve. Keep
+        // the rate in Q8 fixed point so small movements can remain below one
+        // count per frame instead of being rounded up and made twitchy. The
+        // sensitivity multiplier is applied to the Q8 rate above.
         if (stick_abs >= 8'd120) rough_rate = 11'd1280;
         else rough_rate = rough_product[18:8];
 
         stick_step = 8'sd0;
-        if (speed_mag != 6'd0) begin
-            if (stick_x[7]) stick_step = -$signed({2'b00,speed_mag});
-            else            stick_step =  $signed({2'b00,speed_mag});
+        if (speed_mag != 8'd0) begin
+            if (stick_x[7]) stick_step = -$signed({1'b0,speed_mag[6:0]});
+            else            stick_step =  $signed({1'b0,speed_mag[6:0]});
         end
 
         // D-pad steering overrides the absolute stick while exactly one
@@ -114,23 +129,23 @@ module s24_wheel_input (
             stick_toggle <= 1'b0;
             stick_active <= 1'b0;
             rough_accum <= 8'd0;
-            rough_step <= 3'd0;
+            rough_step <= 7'd0;
         end else if (tick) begin
             if(stick_active) begin
                 if(stick_abs<=deadzone_exit) stick_active<=1'b0;
             end else if(stick_abs>=deadzone_enter) begin
                 stick_active<=1'b1;
             end
-            if (analogue_profile == ANALOGUE_ROUGHRAC &&
+            if (stick_enable && analogue_profile == ANALOGUE_ROUGHRAC &&
                 digital_left == digital_right) begin
                 rough_accum <= rough_sum[7:0];
-                if (rough_sum[10:8] != 3'd0) begin
-                    rough_step <= rough_sum[10:8];
+                if (rough_sum[14:8] != 7'd0) begin
+                    rough_step <= rough_sum[14:8];
                     stick_toggle <= ~stick_toggle;
                 end
             end else begin
                 rough_accum <= 8'd0;
-                if (steering_step != 8'sd0)
+                if (stick_enable && steering_step != 8'sd0)
                     stick_toggle <= ~stick_toggle;
             end
         end
@@ -155,11 +170,11 @@ module s24_wheel_input (
             end
             if (stick_toggle!=stick_toggle_d) begin
                 spinner_out<={~spinner_out[8],
-                    analogue_profile == ANALOGUE_ROUGHRAC &&
+                    stick_enable && analogue_profile == ANALOGUE_ROUGHRAC &&
                     digital_left == digital_right
                         ? (stick_x[7]
-                           ? -$signed({5'd0,rough_step})
-                           :  $signed({5'd0,rough_step}))
+                           ? -$signed({1'b0,rough_step})
+                           :  $signed({1'b0,rough_step}))
                         : steering_step[7:0]};
             end
         end
