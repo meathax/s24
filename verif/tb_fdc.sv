@@ -79,10 +79,30 @@ module tb_fdc;
         if(value&8'h02) $fatal(1,"status read did not clear IRQ");
 
         // Read track 2 side 1: 4*(2*2+1) = byte address 20.
-        write_reg(0,8'h98);
+        bus_addr=0;bus_din=8'h98;bus_wr=1;
+        @(posedge clk);#1;
+        if(!media_req || media_wr || media_addr!=20)
+            $fatal(1,"read command did not immediately prefetch first byte");
+        if(dut.drq)
+            $fatal(1,"read command advertised DRQ before prefetched byte was valid");
+        bus_addr=0;#1;
+        if((bus_dout&8'h03)!=8'h01)
+            $fatal(1,"read prefetch status expected busy/no-DRQ got %02h",bus_dout);
+        idle_cycle();
+        wait(dut.drq);bus_addr=0;#1;
+        if((bus_dout&8'h03)!=8'h03)
+            $fatal(1,"read valid status expected busy/DRQ got %02h",bus_dout);
         read_reg(4,value);
         if((value&8'h01)==0) $fatal(1,"read command did not raise DRQ");
-        for(i=0;i<4;i++) begin
+        bus_addr=3;bus_rd=1;#1;value=bus_dout;
+        @(posedge clk);#1;
+        if(value!=media[20]) $fatal(1,"read byte 0 got %02h expected %02h",value,media[20]);
+        bus_addr=0;#1;
+        if((bus_dout&8'h03)!=8'h01)
+            $fatal(1,"read next-prefetch status expected busy/no-DRQ got %02h",bus_dout);
+        while(media_req) begin @(posedge clk);#1;end
+        idle_cycle();
+        for(i=1;i<4;i++) begin
             read_reg(3,value);
             if(value!=media[20+i]) $fatal(1,"read byte %0d got %02h expected %02h",i,value,media[20+i]);
         end
@@ -90,6 +110,16 @@ module tb_fdc;
         read_reg(4,value);
         if((value&8'h03)!=8'h02) $fatal(1,"read completion status %02h",value);
         read_reg(0,value);
+        if((value&8'h03)!=8'h00)
+            $fatal(1,"read completed status expected idle/no-DRQ got %02h",value);
+
+        // Reading without a valid prefetched byte must neither consume nor
+        // advance the completed track pipeline.
+        i=dut.position;
+        read_reg(3,value);
+        if(dut.position!=i || dut.span!=0 || dut.drq)
+            $fatal(1,"invalid read advanced pipeline pos=%0d span=%0d drq=%0b",
+                   dut.position,dut.span,dut.drq);
 
         // Write track 2 side 0: base byte address 16.
         requests=0;
@@ -112,6 +142,8 @@ module tb_fdc;
         if(dut.position!=1 || dut.span!=3 || requests!=1)
             $fatal(1,"stretched ack consumed multiple bytes pos=%0d span=%0d req=%0d",
                    dut.position,dut.span,requests);
+        while(media_req) begin @(posedge clk);#1;end
+        idle_cycle();
 
         write_reg(0,8'hd0);
         read_reg(4,value);

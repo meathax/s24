@@ -5,6 +5,8 @@
 module s24_cpu_bus (
     input  logic        clk,
     input  logic        reset,
+    input  logic        cpu_phi1,
+    input  logic        a_halted_n,
 
     input  logic        a_as_n,
     input  logic        a_rw_n,
@@ -50,6 +52,8 @@ module s24_cpu_bus (
 );
     logic a_seen, b_seen, a_pending, b_pending;
     logic a_mem_pending, b_mem_pending;
+    logic b_cross_delay;
+    logic [2:0] b_cross_clocks;
     logic a_ack, b_ack, active;
     logic a_grant, b_grant, a_complete, b_complete;
     board_transaction_t a_transaction, b_transaction, arb_transaction;
@@ -126,6 +130,7 @@ module s24_cpu_bus (
         if (reset) begin
             a_seen <= 0; b_seen <= 0; a_pending <= 0; b_pending <= 0;
             a_mem_pending <= 0; b_mem_pending <= 0;
+            b_cross_delay <= 0; b_cross_clocks <= 0;
             a_ack <= 0; b_ack <= 0;
             a_din <= 16'hffff; b_din <= 16'hffff;
             a_rnw_p <= 0; b_rnw_p <= 0; a_be_p <= 0; b_be_p <= 0;
@@ -145,6 +150,16 @@ module s24_cpu_bus (
             else if (b_ack && b_uds_n && b_lds_n) begin
                 b_seen <= 0;
                 b_ack <= 0;
+            end
+
+            if (b_cross_delay && cpu_phi1) begin
+                if (b_cross_clocks == 3'd1) begin
+                    b_cross_delay <= 1'b0;
+                    b_cross_clocks <= 0;
+                    b_ack <= 1'b1;
+                end else begin
+                    b_cross_clocks <= b_cross_clocks - 1'b1;
+                end
             end
 
             // fx68k asserts AS before the data strobes settle.  Capture only
@@ -183,7 +198,15 @@ module s24_cpu_bus (
             if (a_grant) a_pending <= 1'b0;
             if (b_grant) b_pending <= 1'b0;
             if (a_complete) begin a_din <= bus_din; a_ack <= 1'b1; end
-            if (b_complete) begin b_din <= bus_din; b_ack <= 1'b1; end
+            if (b_complete) begin
+                b_din <= bus_din;
+                if (b_addr_p[23:20] == 4'ha && a_halted_n) begin
+                    b_cross_delay <= 1'b1;
+                    b_cross_clocks <= 3'd4;
+                end else begin
+                    b_ack <= 1'b1;
+                end
+            end
 
             if (a_mem_pending && a_mem_ack) begin
                 a_mem_pending <= 1'b0;

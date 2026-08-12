@@ -7,6 +7,7 @@ The machine record is `PROVENANCE.json`.
 | ID | Name | URL/local path | Revision/hash | Licence | Role |
 |---|---|---|---|---|---|
 | D001 | IKAOPM | https://github.com/ika-musume/IKAOPM | `08a5b40ed14418319287df450f7d4a523ddeed5e` | BSD-2-Clause | Production YM2151 RTL |
+| E001 | Sega System 24 schematics | https://techdocs.exodusemulator.com/Arcade/SegaSystem24/index.html | PDF SHA-256 `EB92DAC481046B819884485F7308C1A92BF1D2508CDEBA7563D4DD6C7561A40B` | Original Sega service drawing; reference only | 837-6571 main board, 837-6443 FDD board and 834-6510 Hot Rod I/O connectivity and component values |
 
 ## Hardware compatibility matrix
 

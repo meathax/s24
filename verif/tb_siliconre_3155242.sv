@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
 
 // SiliconRE-derived contract test for the 315-5242/M71064 output stage.
-// This checks the silicon-traced RGB latch, blanking gate and grayscale path.
-// The external resistor-DAC shade voltage is intentionally not inferred here;
-// the production 8-bit table remains covered by tb_palette.sv.
+// This checks the silicon-traced RGB latch, blanking gate, grayscale path and
+// each component's independent shade-output enable. The external resistor-DAC
+// voltage for driven nonzero components remains covered by tb_palette.sv.
 module tb_siliconre_3155242;
     logic clk = 1'b0;
     logic nblank = 1'b1;
@@ -72,12 +72,32 @@ module tb_siliconre_3155242;
                                r,g,b,rout,gout,bout);
                 end
 
+        // Each shade pin is enabled only by its own nonzero component. Prove
+        // zero stays high-Z independently while nonzero peers are driven, for
+        // both the low/shadow and high/highlight shade polarities.
+        ngrey=1'b1; nblank=1'b1; nshade=1'b0;
+        for (int polarity=0; polarity<2; polarity++) begin
+            hi_lo=polarity[0];
+            r=5'd0; g=5'd7; b=5'd0;
+            @(posedge clk); #1;
+            if (rout_sh !== 1'bz || gout_sh !== ~polarity[0] || bout_sh !== 1'bz)
+                $fatal(1, "315-5242 per-channel shade enable mismatch polarity=%0d pins=%b/%b/%b",
+                       polarity,rout_sh,gout_sh,bout_sh);
+
+            r=5'd11; g=5'd0; b=5'd19;
+            @(posedge clk); #1;
+            if (rout_sh !== ~polarity[0] || gout_sh !== 1'bz ||
+                bout_sh !== ~polarity[0])
+                $fatal(1, "315-5242 per-channel shade enable mismatch polarity=%0d pins=%b/%b/%b",
+                       polarity,rout_sh,gout_sh,bout_sh);
+        end
+
         // Blanking remains dominant over grayscale and shade controls.
         nblank=1'b0; nshade=1'b0; hi_lo=1'b1;
         r=5'h1f; g=5'h1f; b=5'h1f;
         sample_expected(5'h00,5'h00,5'h00);
 
-        $display("PASS SiliconRE 315-5242 RGB latch, blanking and grayscale contract");
+        $display("PASS SiliconRE 315-5242 RGB latch, blanking, grayscale and per-channel shade-enable contract");
         $finish;
     end
 endmodule

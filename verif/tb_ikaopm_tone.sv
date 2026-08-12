@@ -5,9 +5,11 @@ module tb_ikaopm_tone;
     logic write_valid=0,write_a0=0,write_accepted;
     logic [7:0] write_data=0,status;
     logic irq_n;
+    logic sample_strobe_l,sample_strobe_r;
     logic signed [15:0] audio_l,audio_r;
     integer div=0,samples=0,accepts=0;
     longint unsigned energy_l=0,energy_r=0;
+    integer clocks=0,last_l=-1,last_r=-1,l_interval=0,r_interval=0;
 
     function automatic integer abs16(input logic signed [15:0] value);
         abs16 = value < 0 ? -$signed(value) : $signed(value);
@@ -15,22 +17,29 @@ module tb_ikaopm_tone;
 
     always #10 clk=~clk;
     always_ff @(posedge clk) begin
+        clocks<=clocks+1;
         ce_4m <= 1'b0;
         if(div==11) begin div<=0; ce_4m<=1'b1; end
         else div<=div+1;
         if(write_accepted) accepts<=accepts+1;
-        if(!reset && chip_reset_n && dut.sample_l) begin
+        if(!reset && chip_reset_n && sample_strobe_l) begin
+            if(last_l>=0) l_interval<=clocks-last_l;
+            last_l<=clocks;
             samples<=samples+1;
             energy_l<=energy_l+abs16(audio_l);
         end
-        if(!reset && chip_reset_n && dut.sample_r)
+        if(!reset && chip_reset_n && sample_strobe_r) begin
+            if(last_r>=0) r_interval<=clocks-last_r;
+            last_r<=clocks;
             energy_r<=energy_r+abs16(audio_r);
+        end
     end
 
     s24_opm dut(
         .clk(clk),.reset(reset),.ce_4m(ce_4m),.chip_reset_n(chip_reset_n),
         .write_valid(write_valid),.write_a0(write_a0),.write_data(write_data),
         .write_accepted(write_accepted),.status(status),.irq_n(irq_n),
+        .sample_strobe_l(sample_strobe_l),.sample_strobe_r(sample_strobe_r),
         .audio_l(audio_l),.audio_r(audio_r));
 
     task automatic bus_write(input logic a0,input logic [7:0] data);
@@ -68,6 +77,9 @@ module tb_ikaopm_tone;
 
         if(accepts!=34) $fatal(1,"expected 34 accepted bus phases, got %0d",accepts);
         if(samples<100) $fatal(1,"too few IKAOPM samples: %0d",samples);
+        if(l_interval!=768 || r_interval!=768)
+            $fatal(1,"IKAOPM cadence L=%0d R=%0d expected=768 clocks",
+                   l_interval,r_interval);
         if(energy_l==0 || energy_r==0)
             $fatal(1,"silent IKAOPM tone samples=%0d energy=%0d/%0d addr=%02h data=%02h rl=%b kon=%b konreg=%02h mrst=%b ika=%0d/%0d",
                    samples,energy_l,energy_r,dut.opm.REG.hireg_addr,

@@ -87,6 +87,7 @@ module s24_core #(
     // ------------------------------- CPUs ---------------------------------
     logic a_rw_n,a_as_n,a_lds_n,a_uds_n,b_rw_n,b_as_n,b_lds_n,b_uds_n;
     logic a_dtack_n,b_dtack_n;
+    logic a_halted_n;
     logic [2:0] a_fc,b_fc,a_ipl_n,b_ipl_n;
     logic [15:0] a_din,a_dout,b_din,b_dout;
     logic [23:1] a_word_addr,b_word_addr;
@@ -163,7 +164,7 @@ module s24_core #(
         .clk(clk),.HALTn(1'b1),.extReset(reset),.pwrUp(reset),
         .enPhi1(phi1),.enPhi2(phi2),.eRWn(a_rw_n),.ASn(a_as_n),
         .LDSn(a_lds_n),.UDSn(a_uds_n),.E(),.VMAn(),
-        .FC0(a_fc[0]),.FC1(a_fc[1]),.FC2(a_fc[2]),.BGn(),.oRESETn(),.oHALTEDn(),
+        .FC0(a_fc[0]),.FC1(a_fc[1]),.FC2(a_fc[2]),.BGn(),.oRESETn(),.oHALTEDn(a_halted_n),
         .DTACKn(a_dtack_n),.VPAn(a_vpa_n),.BERRn(1'b1),.BRn(1'b1),.BGACKn(1'b1),
         .IPL0n(a_ipl_n[0]),.IPL1n(a_ipl_n[1]),.IPL2n(a_ipl_n[2]),
         .iEdb(a_din),.oEdb(a_dout),.eab(a_word_addr),
@@ -190,7 +191,7 @@ module s24_core #(
     logic [23:0] a_mem_addr,b_mem_addr;
     logic [15:0] a_mem_din,b_mem_din;
     s24_cpu_bus cpu_bus(
-        .clk(clk),.reset(reset),
+        .clk(clk),.reset(reset),.cpu_phi1(phi1),.a_halted_n(a_halted_n),
         .a_as_n(a_as_n),.a_rw_n(a_rw_n),.a_uds_n(a_uds_n),.a_lds_n(a_lds_n),
         .a_fc(a_fc),.a_addr(a_word_addr),.a_dout(a_dout),.a_din(a_din),.a_dtack_n(a_dtack_n),
         .b_as_n(b_as_n),.b_rw_n(b_rw_n),.b_uds_n(b_uds_n),.b_lds_n(b_lds_n),
@@ -328,6 +329,7 @@ module s24_core #(
     logic [7:0] ym_dout;
     logic ym_irq_n,ym_irq_q;
     logic signed [15:0] ym_l,ym_r;
+    logic ym_sample_l,ym_sample_r;
     s24_opm ym(
         .clk(clk),.reset(reset),.ce_4m(ce4),
         // CNT2 is wired to the physical YM2151 active-low /IC pin. System 24
@@ -335,7 +337,9 @@ module s24_core #(
         .chip_reset_n(io_cnt[2] & ~reset),
         .write_valid(ym_write_pending),.write_a0(ym_addr_q),
         .write_data(ym_data_q),.write_accepted(ym_write_accepted),
-        .status(ym_dout),.irq_n(ym_irq_n),.audio_l(ym_l),.audio_r(ym_r));
+        .status(ym_dout),.irq_n(ym_irq_n),
+        .sample_strobe_l(ym_sample_l),.sample_strobe_r(ym_sample_r),
+        .audio_l(ym_l),.audio_r(ym_r));
 
     logic irq_rd_a,irq_rd_b,irq_wr;
     logic irq_read_pending;
@@ -1168,7 +1172,16 @@ module s24_core #(
             else                        mix_sat = sum[15:0];
         end
     endfunction
-    assign audio_l=pause?16'sd0:mix_sat(ym_l,dac_sample);
-    assign audio_r=pause?16'sd0:mix_sat(ym_r,dac_sample);
+    logic signed [15:0] mixed_l,mixed_r,filtered_l,filtered_r;
+    assign mixed_l=mix_sat(ym_l,dac_sample);
+    assign mixed_r=mix_sat(ym_r,dac_sample);
+    s24_audio_lpf audio_filter_l(
+        .clk(clk),.reset(reset),.sample_strobe(ym_sample_l),
+        .sample_in(mixed_l),.sample_out(filtered_l));
+    s24_audio_lpf audio_filter_r(
+        .clk(clk),.reset(reset),.sample_strobe(ym_sample_r),
+        .sample_in(mixed_r),.sample_out(filtered_r));
+    assign audio_l=pause?16'sd0:filtered_l;
+    assign audio_r=pause?16'sd0:filtered_r;
 
 endmodule

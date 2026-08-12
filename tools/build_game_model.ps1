@@ -37,7 +37,7 @@ $sources = @(
     'rtl/io/s24_io_5296.sv',
     'rtl/io/s24_inputs.sv',
     'rtl/io/s24_analog.sv',
-    'rtl/audio/s24_opm.sv','rtl/audio/ikaopm/IKAOPM.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v',
+    'rtl/audio/s24_opm.sv','rtl/audio/s24_audio_lpf.sv','rtl/audio/ikaopm/IKAOPM.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v',
     'rtl/prot/s24_magic_latch.sv',
     'rtl/prot/s24_romboard_epld.sv',
     'rtl/fdc/s24_fdc.sv',

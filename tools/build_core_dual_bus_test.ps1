@@ -14,7 +14,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $sources = @(
     'rtl/s24_pkg.sv','rtl/s24_clock_enables.sv','rtl/s24_board_arbiter.sv',
     'rtl/s24_cpu_bus.sv','rtl/io/s24_io_5296.sv','rtl/io/s24_inputs.sv',
-    'rtl/io/s24_analog.sv','rtl/audio/s24_opm.sv','rtl/audio/ikaopm/IKAOPM.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v','rtl/prot/s24_magic_latch.sv','rtl/prot/s24_romboard_epld.sv','rtl/fdc/s24_fdc.sv',
+    'rtl/io/s24_analog.sv','rtl/audio/s24_opm.sv','rtl/audio/s24_audio_lpf.sv','rtl/audio/ikaopm/IKAOPM.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v','rtl/prot/s24_magic_latch.sv','rtl/prot/s24_romboard_epld.sv','rtl/fdc/s24_fdc.sv',
     'rtl/s24_irq.sv','rtl/video/s24_video_timing.sv','rtl/video/s24_palette.sv',
     'rtl/video/s24_tile.sv','rtl/video/s24_sprite.sv',
     'rtl/video/s24_mixer.sv',

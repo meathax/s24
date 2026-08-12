@@ -34,8 +34,14 @@ module tb_palette;
             // C++ converts the complete floating-point expression to int,
             // so highlight is floor(255 - 0.6*(255-base)) ==
             // floor((510 + 3*base)/5), not 255-floor(0.6*(255-base)).
-            result = highlight ? ((510 + 3 * base) / 5)
-                               : ((3 * base) / 5);
+            // SiliconRE M71064 die-traced enables leave an individually zero
+            // component undriven in either shade polarity. Keep MAME's table
+            // as the reference for every nonzero component only.
+            if (base == 0)
+                result = 0;
+            else
+                result = highlight ? ((510 + 3 * base) / 5)
+                                   : ((3 * base) / 5);
             mame_component = result[7:0];
         end
     endfunction
@@ -79,7 +85,7 @@ module tb_palette;
         assert(red==8'd106) else $fatal(1,"highlight rounding %0d",red);
         palette_word=16'hffff;#1;
         assert({red,green,blue}==24'hffffff) else $fatal(1,"white highlight");
-        $display("PASS exhaustive 315-5242 expansion and shadow/highlight rounding");
+        $display("PASS 315-5242 zero-component hardware gate and nonzero MAME-derived shade table");
         $finish;
     end
 endmodule

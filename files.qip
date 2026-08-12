@@ -8,6 +8,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/io/s24_io_5296.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/io/s24_inputs.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/io/s24_analog.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/audio/s24_opm.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/audio/s24_audio_lpf.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/io/s24_switches.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/io/s24_wheel_input.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/prot/s24_magic_latch.sv

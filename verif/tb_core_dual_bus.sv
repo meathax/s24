@@ -18,6 +18,8 @@ module tb_core_dual_bus;
     logic [2:0] a_fc=3'b001,b_fc=3'b001;
     logic [23:1] a_addr='0,b_addr='0;
     logic [15:0] a_dout=0,b_dout=0;
+    logic a_halted_n=1;
+    integer i;
 
     always #5 clk=~clk;
 
@@ -85,6 +87,7 @@ module tb_core_dual_bus;
         force dut.b_uds_n=b_uds_n; force dut.b_lds_n=b_lds_n;
         force dut.b_fc=b_fc; force dut.b_word_addr=b_addr;
         force dut.b_dout=b_dout;
+        force dut.a_halted_n=a_halted_n;
 
         repeat(4) @(posedge clk);reset=0;repeat(2) @(posedge clk);
 
@@ -104,6 +107,33 @@ module tb_core_dual_bus;
         if(dut.a_din!=16'haaaa || dut.b_din!=16'hbbbb)
             $fatal(1,"parallel read payload mismatch A=%h B=%h",dut.a_din,dut.b_din);
         idle_cpu_cycles();
+
+        // CPU-B crossings onto CPU-A's A00000-Afffff bus take four extra
+        // 68000 clocks while CPU A runs, but no extra clocks while it is in
+        // STOP. The delay is armed once at the shared completion boundary.
+        @(negedge clk);
+        a_halted_n=1;
+        b_addr=24'ha00000>>1;b_as_n=0;b_uds_n=0;b_lds_n=0;
+        wait(dut.cpu_bus.b_cross_delay);#1;
+        i=dut.phi1 ? 1 : 0;
+        while(dut.b_dtack_n) begin
+            @(posedge clk);#1;
+            if(dut.phi1) i=i+1;
+        end
+        if(i!=4) $fatal(1,"running CPU-A crossing delay clocks=%0d expected=4",i);
+        repeat(2) begin
+            @(posedge clk);#1;
+            if(dut.b_dtack_n) $fatal(1,"crossing delay re-armed within one transaction");
+        end
+        idle_cpu_cycles();
+
+        @(negedge clk);
+        a_halted_n=0;
+        b_addr=24'ha00000>>1;b_as_n=0;b_uds_n=0;b_lds_n=0;
+        wait(dut.cpu_bus.b_complete);@(posedge clk);#1;
+        if(dut.b_dtack_n) $fatal(1,"CPU-A STOP crossing received added delay");
+        idle_cpu_cycles();
+        a_halted_n=1;
 
         // MAME common_map() exposes Work-A at 080000-0fffff to both CPUs.
         // Exercise the CPU-B write through the complete core write channel,

@@ -26,6 +26,9 @@ A scenario passes only when:
 | ID | Subsystem | Failure protected against | Command/task | Status |
 |---|---|---|---|---|
 | R001 | reset/clock |  |  | NOT CONFIGURED |
+| R002 | FDC | Read-track DRQ before data is available, invalid-read advance and stretched-ack reuse | `tools/build_fdc_test.ps1` | PASS 2026-08-12 |
+| R003 | Dual CPU bus | Missing four-cycle CPU-B wait on CPU-A-owned A00000 space and incorrect STOP bypass | `tools/build_core_dual_bus_test.ps1` | PASS 2026-08-12 |
+| R004 | Audio | Wrong IKA sample cadence or unbounded/non-held schematic RC state | `tools/build_ikaopm_tone_test.ps1`; `tools/build_audio_lpf_test.ps1` | PASS 2026-08-12 |
 
 ## Reset and initialization matrix
 

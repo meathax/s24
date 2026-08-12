@@ -1,4 +1,5 @@
-// 315-5242 palette conversion used by MAME's segas24_state::paletteram_w.
+// 315-5242 palette: nonzero shade levels retain the MAME-derived table;
+// the zero-component gate follows SiliconRE M71064 die-traced evidence.
 module s24_palette (
     input  logic [15:0] palette_word,
     input  logic        shadow_bank,
@@ -15,7 +16,7 @@ module s24_palette (
         input logic        highlight
     );
         case (component)
-            5'd0: shade_value = highlight ? 8'd102 : 8'd0;
+            5'd0: shade_value = 8'd0;
             5'd1: shade_value = highlight ? 8'd106 : 8'd4;
             5'd2: shade_value = highlight ? 8'd111 : 8'd9;
             5'd3: shade_value = highlight ? 8'd116 : 8'd14;

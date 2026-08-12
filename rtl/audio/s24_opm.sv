@@ -10,6 +10,8 @@ module s24_opm (
     output logic               write_accepted,
     output logic [7:0]         status,
     output logic               irq_n,
+    output logic               sample_strobe_l,
+    output logic               sample_strobe_r,
     output logic signed [15:0] audio_l,
     output logic signed [15:0] audio_r
 );
@@ -20,6 +22,9 @@ module s24_opm (
     logic [1:0] write_phi_wait;
     logic sample_l, sample_r;
     logic signed [15:0] ika_l, ika_r;
+
+    assign sample_strobe_l = sample_l;
+    assign sample_strobe_r = sample_r;
 
     // FULLY_SYNCHRONOUS adds a two-stage input synchronizer. Four stable host
     // clocks provide an explicit capture window before the board bus retires

@@ -15,7 +15,7 @@ New-Item -ItemType Directory -Force -Path $ModelDirectory | Out-Null
 $sources = @(
     'rtl/s24_pkg.sv','rtl/s24_clock_enables.sv','rtl/s24_board_arbiter.sv',
     'rtl/s24_cpu_bus.sv','rtl/io/s24_io_5296.sv','rtl/io/s24_inputs.sv',
-    'rtl/io/s24_analog.sv','rtl/audio/s24_opm.sv',
+    'rtl/io/s24_analog.sv','rtl/audio/s24_opm.sv','rtl/audio/s24_audio_lpf.sv',
     'rtl/audio/ikaopm/IKAOPM.v',
     'rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v',
     'rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v',
