@@ -1,0 +1,2208 @@
+{
+  "build_files": [
+    ".build/codex_tb_tile_opt/Vtb_tile.mk",
+    ".build/codex_tb_tile_opt/Vtb_tile_classes.mk",
+    ".build/models/sprite_mame_line_current/Vtb_sprite_mame_line.mk",
+    ".build/models/sprite_mame_line_current/Vtb_sprite_mame_line_classes.mk",
+    ".build/models/sspirits_audit_current/Vtb_gground_boot.mk",
+    ".build/models/sspirits_audit_current/Vtb_gground_boot_classes.mk",
+    ".build/obj_sprite_gen8/Vtb_sprite.mk",
+    ".build/obj_sprite_gen8/Vtb_sprite_classes.mk",
+    ".build/obj_tb_sprite_overflow/Vtb_sprite_overflow.mk",
+    ".build/obj_tb_sprite_overflow/Vtb_sprite_overflow_classes.mk",
+    ".build/s24_obj_gground_visual/Vtb_gground_boot.mk",
+    ".build/s24_obj_gground_visual/Vtb_gground_boot_classes.mk",
+    ".build/s24_obj_sprite_focus2/Vtb_sprite.mk",
+    ".build/s24_obj_sprite_focus2/Vtb_sprite_classes.mk",
+    ".codex-mister-build/analog_obj_codex/Vtb_analog.mk",
+    ".codex-mister-build/analog_obj_codex/Vtb_analog_classes.mk",
+    ".tmp_verilator/coredual_guard/Vtb_core_dual_bus.mk",
+    ".tmp_verilator/coredual_guard/Vtb_core_dual_bus_classes.mk",
+    ".tmp_verilator/s24_jt51_tone_20260802/Vtb_jt51_tone.mk",
+    ".tmp_verilator/s24_jt51_tone_20260802/Vtb_jt51_tone_classes.mk",
+    ".tmp_verilator/s24_obj_tb_sprite_ramfix/Vtb_sprite.mk",
+    ".tmp_verilator/s24_obj_tb_sprite_ramfix/Vtb_sprite_classes.mk",
+    ".tmp_verilator/sspirits_long_list/Vtb_sspirits_long_list.mk",
+    ".tmp_verilator/sspirits_long_list/Vtb_sspirits_long_list_classes.mk",
+    ".tmp_verilator/tb_video_rows_a/Vtb_video_timing.mk",
+    ".tmp_verilator/tb_video_rows_a/Vtb_video_timing_classes.mk",
+    "artifacts/verilator/builds/io_5296/Vtb_io_5296.mk",
+    "artifacts/verilator/builds/io_5296/Vtb_io_5296_classes.mk",
+    "artifacts/verilator/crkdown_hand/headless_model/Vtb_sprite_crkdown_list.mk",
+    "artifacts/verilator/crkdown_hand/headless_model/Vtb_sprite_crkdown_list_classes.mk",
+    "artifacts/verilator/crkdown_hand/model/Vtb_sprite_crkdown_list.mk",
+    "artifacts/verilator/crkdown_hand/model/Vtb_sprite_crkdown_list_classes.mk",
+    "artifacts/verilator/s24_obj_analog_sensitivity/Vtb_analog.mk",
+    "artifacts/verilator/s24_obj_analog_sensitivity/Vtb_analog_classes.mk",
+    "artifacts/verilator/video_timing_sync_20260811/Vtb_video_timing_sync.mk",
+    "artifacts/verilator/video_timing_sync_20260811/Vtb_video_timing_sync_classes.mk",
+    "clean.bat"
+  ],
+  "created_utc": "2026-08-11T23:58:10Z",
+  "hdl": {
+    "files": [
+      ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+      ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68kAlu.sv",
+      ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/uaddrPla.sv",
+      ".build/models/sspirits_audit_current/src/rtl/cpu/s24_b_opcache.sv",
+      ".build/models/sspirits_audit_current/src/rtl/cpu/s24_fd1094.sv",
+      ".build/models/sspirits_audit_current/src/rtl/cpu/s24_fd1094_decrypt.sv",
+      ".build/models/sspirits_audit_current/src/rtl/fdc/s24_fdc.sv",
+      ".build/models/sspirits_audit_current/src/rtl/io/s24_analog.sv",
+      ".build/models/sspirits_audit_current/src/rtl/io/s24_inputs.sv",
+      ".build/models/sspirits_audit_current/src/rtl/io/s24_io_5296.sv",
+      ".build/models/sspirits_audit_current/src/rtl/prot/s24_magic_latch.sv",
+      ".build/models/sspirits_audit_current/src/rtl/s24_board_arbiter.sv",
+      ".build/models/sspirits_audit_current/src/rtl/s24_clock_enables.sv",
+      ".build/models/sspirits_audit_current/src/rtl/s24_core.sv",
+      ".build/models/sspirits_audit_current/src/rtl/s24_cpu_bus.sv",
+      ".build/models/sspirits_audit_current/src/rtl/s24_irq.sv",
+      ".build/models/sspirits_audit_current/src/rtl/s24_pkg.sv",
+      ".build/models/sspirits_audit_current/src/rtl/video/s24_mixer.sv",
+      ".build/models/sspirits_audit_current/src/rtl/video/s24_palette.sv",
+      ".build/models/sspirits_audit_current/src/rtl/video/s24_sprite.sv",
+      ".build/models/sspirits_audit_current/src/rtl/video/s24_tile.sv",
+      ".build/models/sspirits_audit_current/src/rtl/video/s24_video_timing.sv",
+      ".build/models/sspirits_audit_current/src/verif/jt51_boot_stub.sv",
+      ".build/models/sspirits_audit_current/src/verif/tb_gground_boot.sv",
+      ".build/tb_sprite_mame_line_audit.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/Arcade-SegaSystem24.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68kAlu.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/uaddrPla.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/s24_b_opcache.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/s24_fd1094.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/s24_fd1094_decrypt.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/crt_adjust.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/fdc/s24_fdc.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_analog.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_inputs.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_io_5296.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_switches.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/mem/s24_rom_loader.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/mem/s24_sdram_cdc.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/mem/sdram.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/prot/s24_magic_latch.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_board_arbiter.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_clock_enables.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_core.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_cpu_bus.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_irq.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_pkg.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_mixer.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_palette.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_sprite.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_tile.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_video_timing.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/alsa.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/audio_out.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/ddr_svc.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/f2sdram_safe_terminator.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/gamma_corr.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/hps_io.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/hq2x.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/ltc2308.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/math.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/mcp23009.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/mt32pi.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/sd_card.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/shadowmask.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/sysmem.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/vga_out.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_cleaner.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_freak.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_freezer.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_mixer.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/yc_out.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/jt51_boot_stub.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_analog.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_board_arbiter.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_char_video_ram.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_clock_enables.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_core_dual_bus.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_core_smoke.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_cpu_bus.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_dcclub_boot.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_fd1094.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_fd1094_upstream_compare.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_fdc.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_flicker_blend.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_gground_boot.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_inputs.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_io_5296.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_irq.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_jt51_channel.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_jt51_timers.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_jt51_tone.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_loader.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_magic_latch.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_mixer.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_palette.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sdram.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sdram_cdc.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_list.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_pattern.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_real.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_seam.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_seam_full.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_ghost.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_mame_line.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_overflow.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_switches.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_tile.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_video_timing.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_ym_write.sv",
+      ".codex-mister-build/analog_obj_codex/s24_analog.sv",
+      ".codex-mister-build/analog_obj_codex/s24_pkg.sv",
+      ".codex-mister-build/analog_obj_codex/s24_wheel_input.sv",
+      ".codex-mister-build/analog_obj_codex/tb_analog.sv",
+      ".tmp_verilator/sprite_audit/s24_pkg.sv",
+      ".tmp_verilator/sprite_audit/s24_sprite.sv",
+      ".tmp_verilator/sprite_audit/tb_sprite.sv",
+      "Arcade-SegaSystem24.sv",
+      "artifacts/verilator/crkdown_hand/headless_model/s24_pkg.sv",
+      "artifacts/verilator/crkdown_hand/headless_model/s24_sprite.sv",
+      "artifacts/verilator/crkdown_hand/headless_model/tb_sprite_crkdown_list.sv",
+      "artifacts/verilator/crkdown_hand/model/s24_pkg.sv",
+      "artifacts/verilator/crkdown_hand/model/s24_sprite.sv",
+      "artifacts/verilator/crkdown_hand/model/tb_sprite_crkdown_list.sv",
+      "artifacts/verilator/s24_obj_analog_sensitivity/s24_analog.sv",
+      "artifacts/verilator/s24_obj_analog_sensitivity/s24_pkg.sv",
+      "artifacts/verilator/s24_obj_analog_sensitivity/s24_wheel_input.sv",
+      "artifacts/verilator/s24_obj_analog_sensitivity/tb_analog.sv",
+      "artifacts/verilator/sprite_bank_ownership/s24_pkg.sv",
+      "artifacts/verilator/sprite_bank_ownership/s24_sprite.sv",
+      "artifacts/verilator/sprite_bank_ownership/tb_sprite_bank_ownership.sv",
+      "rtl/audio/s24_ym3012.sv",
+      "rtl/cpu/fx68k/fx68k.sv",
+      "rtl/cpu/fx68k/fx68kAlu.sv",
+      "rtl/cpu/fx68k/uaddrPla.sv",
+      "rtl/cpu/s24_a_opcache.sv",
+      "rtl/cpu/s24_b_opcache.sv",
+      "rtl/cpu/s24_fd1094.sv",
+      "rtl/cpu/s24_fd1094_decrypt.sv",
+      "rtl/crt_adjust.sv",
+      "rtl/fdc/s24_fdc.sv",
+      "rtl/io/s24_analog.sv",
+      "rtl/io/s24_inputs.sv",
+      "rtl/io/s24_io_5296.sv",
+      "rtl/io/s24_switches.sv",
+      "rtl/io/s24_wheel_input.sv",
+      "rtl/mem/s24_rom_loader.sv",
+      "rtl/mem/s24_sdram_cdc.sv",
+      "rtl/mem/sdram.sv",
+      "rtl/prot/s24_magic_latch.sv",
+      "rtl/prot/s24_romboard_epld.sv",
+      "rtl/s24_board_arbiter.sv",
+      "rtl/s24_clock_enables.sv",
+      "rtl/s24_core.sv",
+      "rtl/s24_cpu_bus.sv",
+      "rtl/s24_irq.sv",
+      "rtl/s24_pkg.sv",
+      "rtl/video/s24_mixer.sv",
+      "rtl/video/s24_palette.sv",
+      "rtl/video/s24_sprite.sv",
+      "rtl/video/s24_tile.sv",
+      "rtl/video/s24_video_timing.sv",
+      "sys/alsa.sv",
+      "sys/audio_out.sv",
+      "sys/ddr_svc.sv",
+      "sys/f2sdram_safe_terminator.sv",
+      "sys/gamma_corr.sv",
+      "sys/hps_io.sv",
+      "sys/hq2x.sv",
+      "sys/ltc2308.sv",
+      "sys/math.sv",
+      "sys/mcp23009.sv",
+      "sys/mt32pi.sv",
+      "sys/sd_card.sv",
+      "sys/shadowmask.sv",
+      "sys/sysmem.sv",
+      "sys/vga_out.sv",
+      "sys/video_cleaner.sv",
+      "sys/video_freak.sv",
+      "sys/video_freezer.sv",
+      "sys/video_mixer.sv",
+      "sys/yc_out.sv",
+      "verif/jt51_boot_stub.sv",
+      "verif/tb_a_opcache.sv",
+      "verif/tb_analog.sv",
+      "verif/tb_b_opcache.sv",
+      "verif/tb_board_arbiter.sv",
+      "verif/tb_char_video_ram.sv",
+      "verif/tb_clock_enables.sv",
+      "verif/tb_core_dual_bus.sv",
+      "verif/tb_core_smoke.sv",
+      "verif/tb_cpu_bus.sv",
+      "verif/tb_dcclub_boot.sv",
+      "verif/tb_fd1094.sv",
+      "verif/tb_fd1094_cache_race.sv",
+      "verif/tb_fd1094_upstream_compare.sv",
+      "verif/tb_fdc.sv",
+      "verif/tb_flicker_blend.sv",
+      "verif/tb_gground_boot.sv",
+      "verif/tb_inputs.sv",
+      "verif/tb_io_5296.sv",
+      "verif/tb_irq.sv",
+      "verif/tb_jt51_channel.sv",
+      "verif/tb_jt51_timers.sv",
+      "verif/tb_jt51_tone.sv",
+      "verif/tb_loader.sv",
+      "verif/tb_magic_latch.sv",
+      "verif/tb_mixer.sv",
+      "verif/tb_palette.sv",
+      "verif/tb_romboard_epld.sv",
+      "verif/tb_romboard_mapper.sv",
+      "verif/tb_sdram.sv",
+      "verif/tb_sdram_cdc.sv",
+      "verif/tb_siliconre_3155242.sv",
+      "verif/tb_sprite.sv",
+      "verif/tb_sprite_bank_ownership.sv",
+      "verif/tb_sprite_crkdown_list.sv",
+      "verif/tb_sprite_crkdown_pattern.sv",
+      "verif/tb_sprite_crkdown_real.sv",
+      "verif/tb_sprite_crkdown_seam.sv",
+      "verif/tb_sprite_crkdown_seam_full.sv",
+      "verif/tb_sprite_ghost.sv",
+      "verif/tb_sprite_mame_line.sv",
+      "verif/tb_sprite_overflow.sv",
+      "verif/tb_sspirits_long_list.sv",
+      "verif/tb_switches.sv",
+      "verif/tb_tile.sv",
+      "verif/tb_tile_ownership.sv",
+      "verif/tb_video_timing.sv",
+      "verif/tb_video_timing_sync.sv",
+      "verif/tb_ym3012.sv",
+      "verif/tb_ym_write.sv",
+      ".claude/worktrees/agent-aa01b012bc64cf823/build_id.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_acc.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_csr_ch.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_csr_op.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_eg.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_exp2lin.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_exprom.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_kon.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_lfo.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_lin2exp.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_mmr.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_mod.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_noise.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_noise_lfsr.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_op.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_pg.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_phinc_rom.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_phrom.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_pm.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_reg.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_reg_ch.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_sh.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_timers.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/pll/pll.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/pll/synthesis/pll.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/rtl/pll/synthesis/submodules/pll_pll_inst.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/arcade_video.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/i2c.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/i2s.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/iir_filter.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/osd.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_audio/pll_audio_0002.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_audio.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_cfg/altera_pll_reconfig_core.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_cfg/altera_pll_reconfig_top.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_cfg/pll_cfg.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_cfg/pll_cfg_hdmi.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_hdmi/pll_hdmi_0002.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_hdmi.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/scandoubler.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/scanlines.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/sigma_delta_dac.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/spdif.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/sys_top.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/upstream/jtcores_s16/jts16_fd1094.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/upstream/jtcores_s16/jts16_fd1094_ctrl.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/upstream/jtcores_s16/jts16_fd1094_dec.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/verif/upstream/jtcores_s18/jts18_colmix.v",
+      "build_id.v",
+      "rtl/audio/jt51/jt51.v",
+      "rtl/audio/jt51/jt51_acc.v",
+      "rtl/audio/jt51/jt51_csr_ch.v",
+      "rtl/audio/jt51/jt51_csr_op.v",
+      "rtl/audio/jt51/jt51_eg.v",
+      "rtl/audio/jt51/jt51_exp2lin.v",
+      "rtl/audio/jt51/jt51_exprom.v",
+      "rtl/audio/jt51/jt51_kon.v",
+      "rtl/audio/jt51/jt51_lfo.v",
+      "rtl/audio/jt51/jt51_lin2exp.v",
+      "rtl/audio/jt51/jt51_mmr.v",
+      "rtl/audio/jt51/jt51_mod.v",
+      "rtl/audio/jt51/jt51_noise.v",
+      "rtl/audio/jt51/jt51_noise_lfsr.v",
+      "rtl/audio/jt51/jt51_op.v",
+      "rtl/audio/jt51/jt51_pg.v",
+      "rtl/audio/jt51/jt51_phinc_rom.v",
+      "rtl/audio/jt51/jt51_phrom.v",
+      "rtl/audio/jt51/jt51_pm.v",
+      "rtl/audio/jt51/jt51_reg.v",
+      "rtl/audio/jt51/jt51_reg_ch.v",
+      "rtl/audio/jt51/jt51_sh.v",
+      "rtl/audio/jt51/jt51_timers.v",
+      "rtl/pll/pll.v",
+      "rtl/pll/synthesis/pll.v",
+      "rtl/pll/synthesis/submodules/pll_pll_inst.v",
+      "sys/arcade_video.v",
+      "sys/i2c.v",
+      "sys/i2s.v",
+      "sys/iir_filter.v",
+      "sys/osd.v",
+      "sys/pll_audio/pll_audio_0002.v",
+      "sys/pll_audio.v",
+      "sys/pll_cfg/altera_pll_reconfig_core.v",
+      "sys/pll_cfg/altera_pll_reconfig_top.v",
+      "sys/pll_cfg/pll_cfg.v",
+      "sys/pll_cfg/pll_cfg_hdmi.v",
+      "sys/pll_hdmi/pll_hdmi_0002.v",
+      "sys/pll_hdmi.v",
+      "sys/scandoubler.v",
+      "sys/scanlines.v",
+      "sys/sigma_delta_dac.v",
+      "sys/spdif.v",
+      "sys/sys_top.v",
+      "verif/upstream/jtcores_s16/jts16_fd1094.v",
+      "verif/upstream/jtcores_s16/jts16_fd1094_ctrl.v",
+      "verif/upstream/jtcores_s16/jts16_fd1094_dec.v",
+      "verif/upstream/jtcores_s18/jts18_colmix.v",
+      "verif/upstream/siliconre_315_5242/M71064.v",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/ascal.vhd",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/pll_hdmi_adj.vhd",
+      "sys/ascal.vhd",
+      "sys/pll_hdmi_adj.vhd"
+    ],
+    "modules": [
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "fx68k"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "nDecoder3"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "irdDecode"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "excUnit"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "dataIo"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "uaddrDecode"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "onehotEncoder4"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "pren"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "sequencer"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "busArbiter"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "busControl"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "uRom"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "nanoRom"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "microToNanoAddr"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
+        "module": "fx68kTop"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "fx68kAlu"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluCorf"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluShifter"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluGetOp"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "rowDecoder"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "ccrTable"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/uaddrPla.sv",
+        "module": "pla_lined"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/s24_b_opcache.sv",
+        "module": "s24_b_opcache"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/s24_fd1094.sv",
+        "module": "s24_fd1094_key_ram"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/s24_fd1094.sv",
+        "module": "s24_fd1094"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/cpu/s24_fd1094_decrypt.sv",
+        "module": "s24_fd1094_decrypt"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/fdc/s24_fdc.sv",
+        "module": "s24_fdc"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/io/s24_analog.sv",
+        "module": "s24_upd4701"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/io/s24_analog.sv",
+        "module": "s24_msm6253"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/io/s24_inputs.sv",
+        "module": "s24_inputs"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/io/s24_io_5296.sv",
+        "module": "s24_io_5296"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/io/s24_io_5296.sv",
+        "module": "s24_mahjong_mux"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/prot/s24_magic_latch.sv",
+        "module": "s24_magic_latch"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/s24_board_arbiter.sv",
+        "module": "s24_board_arbiter"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/s24_clock_enables.sv",
+        "module": "s24_clock_enables"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/s24_core.sv",
+        "module": "s24_core"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/s24_cpu_bus.sv",
+        "module": "s24_cpu_bus"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/s24_irq.sv",
+        "module": "s24_irq"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_mixer.sv",
+        "module": "s24_mixer"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_palette.sv",
+        "module": "s24_palette"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_tile.sv",
+        "module": "s24_char_video_ram"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_tile.sv",
+        "module": "s24_tile"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/rtl/video/s24_video_timing.sv",
+        "module": "s24_video_timing"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/verif/jt51_boot_stub.sv",
+        "module": "jt51"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/verif/tb_gground_boot.sv",
+        "module": "tb_gground_boot"
+      },
+      {
+        "file": ".build/models/sspirits_audit_current/src/verif/tb_gground_boot.sv",
+        "module": "tb_gground_boot"
+      },
+      {
+        "file": ".build/tb_sprite_mame_line_audit.sv",
+        "module": "tb_sprite_mame_line"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/Arcade-SegaSystem24.sv",
+        "module": "emu"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "fx68k"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "nDecoder3"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "irdDecode"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "excUnit"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "dataIo"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "uaddrDecode"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "onehotEncoder4"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "pren"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "sequencer"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "busArbiter"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "busControl"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "uRom"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "nanoRom"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "microToNanoAddr"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68k.sv",
+        "module": "fx68kTop"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "fx68kAlu"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluCorf"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluShifter"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluGetOp"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "rowDecoder"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "ccrTable"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/fx68k/uaddrPla.sv",
+        "module": "pla_lined"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/s24_b_opcache.sv",
+        "module": "s24_b_opcache"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/s24_fd1094.sv",
+        "module": "s24_fd1094_key_ram"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/s24_fd1094.sv",
+        "module": "s24_fd1094"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/cpu/s24_fd1094_decrypt.sv",
+        "module": "s24_fd1094_decrypt"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/crt_adjust.sv",
+        "module": "crt_adjust"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/fdc/s24_fdc.sv",
+        "module": "s24_fdc"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_analog.sv",
+        "module": "s24_upd4701"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_analog.sv",
+        "module": "s24_msm6253"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_inputs.sv",
+        "module": "s24_inputs"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_io_5296.sv",
+        "module": "s24_io_5296"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_io_5296.sv",
+        "module": "s24_mahjong_mux"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/io/s24_switches.sv",
+        "module": "s24_switches"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/mem/s24_rom_loader.sv",
+        "module": "s24_rom_loader"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/mem/s24_sdram_cdc.sv",
+        "module": "s24_sdram_cdc"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/mem/sdram.sv",
+        "module": "sdram"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/prot/s24_magic_latch.sv",
+        "module": "s24_magic_latch"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_board_arbiter.sv",
+        "module": "s24_board_arbiter"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_clock_enables.sv",
+        "module": "s24_clock_enables"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_core.sv",
+        "module": "s24_core"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_cpu_bus.sv",
+        "module": "s24_cpu_bus"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/s24_irq.sv",
+        "module": "s24_irq"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_mixer.sv",
+        "module": "s24_mixer"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_palette.sv",
+        "module": "s24_palette"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_tile.sv",
+        "module": "s24_char_video_ram"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_tile.sv",
+        "module": "s24_tile"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/video/s24_video_timing.sv",
+        "module": "s24_video_timing"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/alsa.sv",
+        "module": "alsa"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/audio_out.sv",
+        "module": "audio_out"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/audio_out.sv",
+        "module": "aud_mix_top"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/ddr_svc.sv",
+        "module": "ddr_svc"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/f2sdram_safe_terminator.sv",
+        "module": "f2sdram_safe_terminator"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/gamma_corr.sv",
+        "module": "gamma_corr"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/gamma_corr.sv",
+        "module": "gamma_fast"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hps_io.sv",
+        "module": "hps_io"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hps_io.sv",
+        "module": "ps2_device"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hps_io.sv",
+        "module": "video_calc"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hps_io.sv",
+        "module": "confstr_rom"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hq2x.sv",
+        "module": "Hq2x"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hq2x.sv",
+        "module": "hq2x_in"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hq2x.sv",
+        "module": "hq2x_buf"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hq2x.sv",
+        "module": "DiffCheck"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/hq2x.sv",
+        "module": "Blend"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/ltc2308.sv",
+        "module": "ltc2308"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/ltc2308.sv",
+        "module": "ltc2308_tape"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/math.sv",
+        "module": "sys_udiv"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/math.sv",
+        "module": "sys_umul"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/math.sv",
+        "module": "sys_umuldiv"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/mcp23009.sv",
+        "module": "mcp23009"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/mt32pi.sv",
+        "module": "mt32pi"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/sd_card.sv",
+        "module": "sd_card"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/shadowmask.sv",
+        "module": "shadowmask"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/sysmem.sv",
+        "module": "sysmem_lite"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/sysmem.sv",
+        "module": "sysmem_HPS_fpga_interfaces"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/vga_out.sv",
+        "module": "vga_out"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_cleaner.sv",
+        "module": "video_cleaner"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_cleaner.sv",
+        "module": "s_fix"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_freak.sv",
+        "module": "video_freak"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_freak.sv",
+        "module": "video_scale_int"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_freezer.sv",
+        "module": "video_freezer"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_freezer.sv",
+        "module": "sync_lock"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/video_mixer.sv",
+        "module": "video_mixer"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/sys/yc_out.sv",
+        "module": "yc_out"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/jt51_boot_stub.sv",
+        "module": "jt51"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_analog.sv",
+        "module": "tb_analog"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_board_arbiter.sv",
+        "module": "tb_board_arbiter"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_char_video_ram.sv",
+        "module": "tb_char_video_ram"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_clock_enables.sv",
+        "module": "tb_clock_enables"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_core_dual_bus.sv",
+        "module": "tb_core_dual_bus"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_core_smoke.sv",
+        "module": "tb_core_smoke"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_cpu_bus.sv",
+        "module": "tb_cpu_bus"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_dcclub_boot.sv",
+        "module": "tb_dcclub_boot"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_fd1094.sv",
+        "module": "tb_fd1094"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_fd1094_upstream_compare.sv",
+        "module": "tb_fd1094_upstream_compare"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_fdc.sv",
+        "module": "tb_fdc"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_flicker_blend.sv",
+        "module": "tb_flicker_blend"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_gground_boot.sv",
+        "module": "tb_gground_boot"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_gground_boot.sv",
+        "module": "tb_gground_boot"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_inputs.sv",
+        "module": "tb_inputs"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_io_5296.sv",
+        "module": "tb_io_5296"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_irq.sv",
+        "module": "tb_irq"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_jt51_channel.sv",
+        "module": "tb_jt51_channel"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_jt51_timers.sv",
+        "module": "tb_jt51_timers"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_jt51_tone.sv",
+        "module": "tb_jt51_tone"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_loader.sv",
+        "module": "tb_loader"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_magic_latch.sv",
+        "module": "tb_magic_latch"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_mixer.sv",
+        "module": "tb_mixer"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_palette.sv",
+        "module": "tb_palette"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sdram.sv",
+        "module": "tb_sdram"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sdram_cdc.sv",
+        "module": "tb_sdram_cdc"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite.sv",
+        "module": "tb_sprite"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_list.sv",
+        "module": "tb_sprite_crkdown_list"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_pattern.sv",
+        "module": "tb_sprite_crkdown_pattern"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_real.sv",
+        "module": "tb_sprite_crkdown_real"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_seam.sv",
+        "module": "tb_sprite_crkdown_seam"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_crkdown_seam_full.sv",
+        "module": "tb_sprite_crkdown_seam_full"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_ghost.sv",
+        "module": "tb_sprite_ghost"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_mame_line.sv",
+        "module": "tb_sprite_mame_line"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_sprite_overflow.sv",
+        "module": "tb_sprite_overflow"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_switches.sv",
+        "module": "tb_switches"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_tile.sv",
+        "module": "tb_tile"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_video_timing.sv",
+        "module": "tb_video_timing"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_ym_write.sv",
+        "module": "jt51"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_ym_write.sv",
+        "module": "tb_ym_write"
+      },
+      {
+        "file": ".codex-mister-build/analog_obj_codex/s24_analog.sv",
+        "module": "s24_upd4701"
+      },
+      {
+        "file": ".codex-mister-build/analog_obj_codex/s24_analog.sv",
+        "module": "s24_msm6253"
+      },
+      {
+        "file": ".codex-mister-build/analog_obj_codex/s24_wheel_input.sv",
+        "module": "s24_wheel_input"
+      },
+      {
+        "file": ".codex-mister-build/analog_obj_codex/tb_analog.sv",
+        "module": "tb_analog"
+      },
+      {
+        "file": ".tmp_verilator/sprite_audit/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": ".tmp_verilator/sprite_audit/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": ".tmp_verilator/sprite_audit/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": ".tmp_verilator/sprite_audit/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": ".tmp_verilator/sprite_audit/tb_sprite.sv",
+        "module": "tb_sprite"
+      },
+      {
+        "file": "Arcade-SegaSystem24.sv",
+        "module": "emu"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/headless_model/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/headless_model/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/headless_model/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/headless_model/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/headless_model/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/headless_model/tb_sprite_crkdown_list.sv",
+        "module": "tb_sprite_crkdown_list"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/model/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/model/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/model/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/model/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "artifacts/verilator/crkdown_hand/model/tb_sprite_crkdown_list.sv",
+        "module": "tb_sprite_crkdown_list"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_analog_sensitivity/s24_analog.sv",
+        "module": "s24_upd4701"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_analog_sensitivity/s24_analog.sv",
+        "module": "s24_msm6253"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_analog_sensitivity/s24_wheel_input.sv",
+        "module": "s24_wheel_input"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_analog_sensitivity/tb_analog.sv",
+        "module": "tb_analog"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_ownership/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_ownership/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_ownership/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_ownership/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_ownership/tb_sprite_bank_ownership.sv",
+        "module": "tb_sprite_bank_ownership"
+      },
+      {
+        "file": "rtl/audio/s24_ym3012.sv",
+        "module": "s24_ym3012"
+      },
+      {
+        "file": "rtl/audio/s24_ym3012.sv",
+        "module": "s24_ym3012_sample_hold"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "fx68k"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "nDecoder3"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "irdDecode"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "excUnit"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "dataIo"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "uaddrDecode"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "onehotEncoder4"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "pren"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "sequencer"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "busArbiter"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "busControl"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "uRom"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "nanoRom"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "microToNanoAddr"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68k.sv",
+        "module": "fx68kTop"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "fx68kAlu"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluCorf"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluShifter"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "aluGetOp"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "rowDecoder"
+      },
+      {
+        "file": "rtl/cpu/fx68k/fx68kAlu.sv",
+        "module": "ccrTable"
+      },
+      {
+        "file": "rtl/cpu/fx68k/uaddrPla.sv",
+        "module": "pla_lined"
+      },
+      {
+        "file": "rtl/cpu/s24_a_opcache.sv",
+        "module": "s24_a_opcache"
+      },
+      {
+        "file": "rtl/cpu/s24_b_opcache.sv",
+        "module": "s24_b_opcache"
+      },
+      {
+        "file": "rtl/cpu/s24_fd1094.sv",
+        "module": "s24_fd1094_key_ram"
+      },
+      {
+        "file": "rtl/cpu/s24_fd1094.sv",
+        "module": "s24_fd1094"
+      },
+      {
+        "file": "rtl/cpu/s24_fd1094_decrypt.sv",
+        "module": "s24_fd1094_decrypt"
+      },
+      {
+        "file": "rtl/crt_adjust.sv",
+        "module": "crt_adjust"
+      },
+      {
+        "file": "rtl/fdc/s24_fdc.sv",
+        "module": "s24_fdc"
+      },
+      {
+        "file": "rtl/io/s24_analog.sv",
+        "module": "s24_upd4701"
+      },
+      {
+        "file": "rtl/io/s24_analog.sv",
+        "module": "s24_msm6253"
+      },
+      {
+        "file": "rtl/io/s24_inputs.sv",
+        "module": "s24_inputs"
+      },
+      {
+        "file": "rtl/io/s24_io_5296.sv",
+        "module": "s24_io_5296"
+      },
+      {
+        "file": "rtl/io/s24_io_5296.sv",
+        "module": "s24_mahjong_mux"
+      },
+      {
+        "file": "rtl/io/s24_switches.sv",
+        "module": "s24_switches"
+      },
+      {
+        "file": "rtl/io/s24_wheel_input.sv",
+        "module": "s24_wheel_input"
+      },
+      {
+        "file": "rtl/mem/s24_rom_loader.sv",
+        "module": "s24_rom_loader"
+      },
+      {
+        "file": "rtl/mem/s24_sdram_cdc.sv",
+        "module": "s24_sdram_cdc"
+      },
+      {
+        "file": "rtl/mem/sdram.sv",
+        "module": "sdram"
+      },
+      {
+        "file": "rtl/prot/s24_magic_latch.sv",
+        "module": "s24_magic_latch"
+      },
+      {
+        "file": "rtl/prot/s24_romboard_epld.sv",
+        "module": "s24_romboard_epld"
+      },
+      {
+        "file": "rtl/s24_board_arbiter.sv",
+        "module": "s24_board_arbiter"
+      },
+      {
+        "file": "rtl/s24_clock_enables.sv",
+        "module": "s24_clock_enables"
+      },
+      {
+        "file": "rtl/s24_core.sv",
+        "module": "s24_core"
+      },
+      {
+        "file": "rtl/s24_cpu_bus.sv",
+        "module": "s24_cpu_bus"
+      },
+      {
+        "file": "rtl/s24_irq.sv",
+        "module": "s24_irq"
+      },
+      {
+        "file": "rtl/video/s24_mixer.sv",
+        "module": "s24_mixer"
+      },
+      {
+        "file": "rtl/video/s24_palette.sv",
+        "module": "s24_palette"
+      },
+      {
+        "file": "rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": "rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "rtl/video/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "rtl/video/s24_tile.sv",
+        "module": "s24_char_video_ram"
+      },
+      {
+        "file": "rtl/video/s24_tile.sv",
+        "module": "s24_tile"
+      },
+      {
+        "file": "rtl/video/s24_video_timing.sv",
+        "module": "s24_video_timing"
+      },
+      {
+        "file": "sys/alsa.sv",
+        "module": "alsa"
+      },
+      {
+        "file": "sys/audio_out.sv",
+        "module": "audio_out"
+      },
+      {
+        "file": "sys/audio_out.sv",
+        "module": "aud_mix_top"
+      },
+      {
+        "file": "sys/ddr_svc.sv",
+        "module": "ddr_svc"
+      },
+      {
+        "file": "sys/f2sdram_safe_terminator.sv",
+        "module": "f2sdram_safe_terminator"
+      },
+      {
+        "file": "sys/gamma_corr.sv",
+        "module": "gamma_corr"
+      },
+      {
+        "file": "sys/gamma_corr.sv",
+        "module": "gamma_fast"
+      },
+      {
+        "file": "sys/hps_io.sv",
+        "module": "hps_io"
+      },
+      {
+        "file": "sys/hps_io.sv",
+        "module": "ps2_device"
+      },
+      {
+        "file": "sys/hps_io.sv",
+        "module": "video_calc"
+      },
+      {
+        "file": "sys/hps_io.sv",
+        "module": "confstr_rom"
+      },
+      {
+        "file": "sys/hq2x.sv",
+        "module": "Hq2x"
+      },
+      {
+        "file": "sys/hq2x.sv",
+        "module": "hq2x_in"
+      },
+      {
+        "file": "sys/hq2x.sv",
+        "module": "hq2x_buf"
+      },
+      {
+        "file": "sys/hq2x.sv",
+        "module": "DiffCheck"
+      },
+      {
+        "file": "sys/hq2x.sv",
+        "module": "Blend"
+      },
+      {
+        "file": "sys/ltc2308.sv",
+        "module": "ltc2308"
+      },
+      {
+        "file": "sys/ltc2308.sv",
+        "module": "ltc2308_tape"
+      },
+      {
+        "file": "sys/math.sv",
+        "module": "sys_udiv"
+      },
+      {
+        "file": "sys/math.sv",
+        "module": "sys_umul"
+      },
+      {
+        "file": "sys/math.sv",
+        "module": "sys_umuldiv"
+      },
+      {
+        "file": "sys/mcp23009.sv",
+        "module": "mcp23009"
+      },
+      {
+        "file": "sys/mt32pi.sv",
+        "module": "mt32pi"
+      },
+      {
+        "file": "sys/sd_card.sv",
+        "module": "sd_card"
+      },
+      {
+        "file": "sys/shadowmask.sv",
+        "module": "shadowmask"
+      },
+      {
+        "file": "sys/sysmem.sv",
+        "module": "sysmem_lite"
+      },
+      {
+        "file": "sys/sysmem.sv",
+        "module": "sysmem_HPS_fpga_interfaces"
+      },
+      {
+        "file": "sys/vga_out.sv",
+        "module": "vga_out"
+      },
+      {
+        "file": "sys/video_cleaner.sv",
+        "module": "video_cleaner"
+      },
+      {
+        "file": "sys/video_cleaner.sv",
+        "module": "s_fix"
+      },
+      {
+        "file": "sys/video_freak.sv",
+        "module": "video_freak"
+      },
+      {
+        "file": "sys/video_freak.sv",
+        "module": "video_scale_int"
+      },
+      {
+        "file": "sys/video_freezer.sv",
+        "module": "video_freezer"
+      },
+      {
+        "file": "sys/video_freezer.sv",
+        "module": "sync_lock"
+      },
+      {
+        "file": "sys/video_mixer.sv",
+        "module": "video_mixer"
+      },
+      {
+        "file": "sys/yc_out.sv",
+        "module": "yc_out"
+      },
+      {
+        "file": "verif/jt51_boot_stub.sv",
+        "module": "jt51"
+      },
+      {
+        "file": "verif/tb_a_opcache.sv",
+        "module": "tb_a_opcache"
+      },
+      {
+        "file": "verif/tb_analog.sv",
+        "module": "tb_analog"
+      },
+      {
+        "file": "verif/tb_b_opcache.sv",
+        "module": "tb_b_opcache"
+      },
+      {
+        "file": "verif/tb_board_arbiter.sv",
+        "module": "tb_board_arbiter"
+      },
+      {
+        "file": "verif/tb_char_video_ram.sv",
+        "module": "tb_char_video_ram"
+      },
+      {
+        "file": "verif/tb_clock_enables.sv",
+        "module": "tb_clock_enables"
+      },
+      {
+        "file": "verif/tb_core_dual_bus.sv",
+        "module": "tb_core_dual_bus"
+      },
+      {
+        "file": "verif/tb_core_smoke.sv",
+        "module": "tb_core_smoke"
+      },
+      {
+        "file": "verif/tb_cpu_bus.sv",
+        "module": "tb_cpu_bus"
+      },
+      {
+        "file": "verif/tb_dcclub_boot.sv",
+        "module": "tb_dcclub_boot"
+      },
+      {
+        "file": "verif/tb_fd1094.sv",
+        "module": "tb_fd1094"
+      },
+      {
+        "file": "verif/tb_fd1094_cache_race.sv",
+        "module": "tb_fd1094_cache_race"
+      },
+      {
+        "file": "verif/tb_fd1094_upstream_compare.sv",
+        "module": "tb_fd1094_upstream_compare"
+      },
+      {
+        "file": "verif/tb_fdc.sv",
+        "module": "tb_fdc"
+      },
+      {
+        "file": "verif/tb_flicker_blend.sv",
+        "module": "tb_flicker_blend"
+      },
+      {
+        "file": "verif/tb_gground_boot.sv",
+        "module": "tb_gground_boot"
+      },
+      {
+        "file": "verif/tb_gground_boot.sv",
+        "module": "tb_gground_boot"
+      },
+      {
+        "file": "verif/tb_inputs.sv",
+        "module": "tb_inputs"
+      },
+      {
+        "file": "verif/tb_io_5296.sv",
+        "module": "tb_io_5296"
+      },
+      {
+        "file": "verif/tb_irq.sv",
+        "module": "tb_irq"
+      },
+      {
+        "file": "verif/tb_jt51_channel.sv",
+        "module": "tb_jt51_channel"
+      },
+      {
+        "file": "verif/tb_jt51_timers.sv",
+        "module": "tb_jt51_timers"
+      },
+      {
+        "file": "verif/tb_jt51_tone.sv",
+        "module": "tb_jt51_tone"
+      },
+      {
+        "file": "verif/tb_loader.sv",
+        "module": "tb_loader"
+      },
+      {
+        "file": "verif/tb_magic_latch.sv",
+        "module": "tb_magic_latch"
+      },
+      {
+        "file": "verif/tb_mixer.sv",
+        "module": "tb_mixer"
+      },
+      {
+        "file": "verif/tb_palette.sv",
+        "module": "tb_palette"
+      },
+      {
+        "file": "verif/tb_romboard_epld.sv",
+        "module": "tb_romboard_epld"
+      },
+      {
+        "file": "verif/tb_romboard_mapper.sv",
+        "module": "tb_romboard_mapper"
+      },
+      {
+        "file": "verif/tb_sdram.sv",
+        "module": "tb_sdram"
+      },
+      {
+        "file": "verif/tb_sdram_cdc.sv",
+        "module": "tb_sdram_cdc"
+      },
+      {
+        "file": "verif/tb_siliconre_3155242.sv",
+        "module": "tb_siliconre_3155242"
+      },
+      {
+        "file": "verif/tb_sprite.sv",
+        "module": "tb_sprite"
+      },
+      {
+        "file": "verif/tb_sprite_bank_ownership.sv",
+        "module": "tb_sprite_bank_ownership"
+      },
+      {
+        "file": "verif/tb_sprite_crkdown_list.sv",
+        "module": "tb_sprite_crkdown_list"
+      },
+      {
+        "file": "verif/tb_sprite_crkdown_pattern.sv",
+        "module": "tb_sprite_crkdown_pattern"
+      },
+      {
+        "file": "verif/tb_sprite_crkdown_real.sv",
+        "module": "tb_sprite_crkdown_real"
+      },
+      {
+        "file": "verif/tb_sprite_crkdown_seam.sv",
+        "module": "tb_sprite_crkdown_seam"
+      },
+      {
+        "file": "verif/tb_sprite_crkdown_seam_full.sv",
+        "module": "tb_sprite_crkdown_seam_full"
+      },
+      {
+        "file": "verif/tb_sprite_ghost.sv",
+        "module": "tb_sprite_ghost"
+      },
+      {
+        "file": "verif/tb_sprite_mame_line.sv",
+        "module": "tb_sprite_mame_line"
+      },
+      {
+        "file": "verif/tb_sprite_overflow.sv",
+        "module": "tb_sprite_overflow"
+      },
+      {
+        "file": "verif/tb_sspirits_long_list.sv",
+        "module": "tb_sspirits_long_list"
+      },
+      {
+        "file": "verif/tb_switches.sv",
+        "module": "tb_switches"
+      },
+      {
+        "file": "verif/tb_tile.sv",
+        "module": "tb_tile"
+      },
+      {
+        "file": "verif/tb_tile_ownership.sv",
+        "module": "tb_tile_ownership"
+      },
+      {
+        "file": "verif/tb_video_timing.sv",
+        "module": "tb_video_timing"
+      },
+      {
+        "file": "verif/tb_video_timing_sync.sv",
+        "module": "tb_video_timing_sync"
+      },
+      {
+        "file": "verif/tb_ym3012.sv",
+        "module": "tb_ym3012"
+      },
+      {
+        "file": "verif/tb_ym_write.sv",
+        "module": "jt51"
+      },
+      {
+        "file": "verif/tb_ym_write.sv",
+        "module": "tb_ym_write"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51.v",
+        "module": "jt51"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_acc.v",
+        "module": "jt51_acc"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_csr_ch.v",
+        "module": "jt51_csr_ch"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_csr_op.v",
+        "module": "jt51_csr_op"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_eg.v",
+        "module": "jt51_eg"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_exp2lin.v",
+        "module": "jt51_exp2lin"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_exprom.v",
+        "module": "jt51_exprom"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_kon.v",
+        "module": "jt51_kon"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_lfo.v",
+        "module": "jt51_lfo"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_lin2exp.v",
+        "module": "jt51_lin2exp"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_mmr.v",
+        "module": "jt51_mmr"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_mod.v",
+        "module": "jt51_mod"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_noise.v",
+        "module": "is"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_noise.v",
+        "module": "jt51_noise"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_noise_lfsr.v",
+        "module": "jt51_noise_lfsr"
+      },
+      {
+        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_op.v",
+        "module": "jt51_op"
+      }
+    ]
+  },
+  "mame_shortname_candidate": "bnzabrosj",
+  "mra": [
+    {
+      "file": ".build/all-mra-audit/Bonanza Bros (Japan, Floppy DS3-5000-07b Based).mra",
+      "rbf": "s24",
+      "setname": "bnzabrosj"
+    },
+    {
+      "file": ".build/all-mra-audit/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
+      "rbf": "s24",
+      "setname": "bnzabros"
+    },
+    {
+      "file": ".build/all-mra-audit/Crack Down (Japan, Floppy Based, FD1094 317-0058-04b Rev A).mra",
+      "rbf": "s24",
+      "setname": "crkdownj"
+    },
+    {
+      "file": ".build/all-mra-audit/Crack Down (US, Floppy Based, FD1094 317-0058-04d).mra",
+      "rbf": "s24",
+      "setname": "crkdownu"
+    },
+    {
+      "file": ".build/all-mra-audit/Crack Down (World, Floppy Based, FD1094 317-0058-04c).mra",
+      "rbf": "s24",
+      "setname": "crkdown"
+    },
+    {
+      "file": ".build/all-mra-audit/Dynamic Country Club (Japan, ROM Based).mra",
+      "rbf": "s24",
+      "setname": "dcclubj"
+    },
+    {
+      "file": ".build/all-mra-audit/Dynamic Country Club (US, Floppy Based, FD1094 317-0058-09d).mra",
+      "rbf": "s24",
+      "setname": "dcclubfd"
+    },
+    {
+      "file": ".build/all-mra-audit/Dynamic Country Club (World, ROM Based).mra",
+      "rbf": "s24",
+      "setname": "dcclub"
+    },
+    {
+      "file": ".build/all-mra-audit/Gain Ground (Japan, 2 Players, Floppy Based, FD1094 317-0058-03b).mra",
+      "rbf": "s24",
+      "setname": "ggroundj"
+    },
+    {
+      "file": ".build/all-mra-audit/Gain Ground (World, 3 Players, Floppy Based, FD1094 317-0058-03d Rev A).mra",
+      "rbf": "s24",
+      "setname": "gground"
+    },
+    {
+      "file": ".build/all-mra-audit/Hot Rod (Japan, 4 Players, Floppy Based, Rev B).mra",
+      "rbf": "s24",
+      "setname": "hotrodja"
+    },
+    {
+      "file": ".build/all-mra-audit/Hot Rod (Japan, 4 Players, Floppy Based, Rev C).mra",
+      "rbf": "s24",
+      "setname": "hotrodj"
+    },
+    {
+      "file": ".build/all-mra-audit/Hot Rod (World, 3 Players, Turbo set 1, Floppy Based).mra",
+      "rbf": "s24",
+      "setname": "hotrod"
+    },
+    {
+      "file": ".build/all-mra-audit/Hot Rod (World, 3 Players, Turbo set 2, Floppy Based).mra",
+      "rbf": "s24",
+      "setname": "hotroda"
+    },
+    {
+      "file": ".build/all-mra-audit/Jumbo Ozaki Super Masters Golf (Japan, Floppy Based, FD1094 317-0058-05b).mra",
+      "rbf": "s24",
+      "setname": "sgmastj"
+    },
+    {
+      "file": ".build/all-mra-audit/Jumbo Ozaki Super Masters Golf (World, Floppy Based, FD1094 317-0058-05c).mra",
+      "rbf": "s24",
+      "setname": "sgmastc"
+    },
+    {
+      "file": ".build/all-mra-audit/Quiz Ghost Hunter (Japan, ROM Based).mra",
+      "rbf": "s24",
+      "setname": "qgh"
+    },
+    {
+      "file": ".build/all-mra-audit/Quiz Mekurumeku Story (Japan, ROM Based).mra",
+      "rbf": "s24",
+      "setname": "quizmeku"
+    },
+    {
+      "file": ".build/all-mra-audit/Quiz Rouka Ni Tattenasai (Japan, ROM Based).mra",
+      "rbf": "s24",
+      "setname": "qrouka"
+    },
+    {
+      "file": ".build/all-mra-audit/Quiz Syukudai wo Wasuremashita (Japan, Floppy Based).mra",
+      "rbf": "s24",
+      "setname": "qsww"
+    },
+    {
+      "file": ".build/all-mra-audit/Rough Racer (Japan, Floppy Based, FD1094 317-0058-06b).mra",
+      "rbf": "s24",
+      "setname": "roughrac"
+    },
+    {
+      "file": ".build/all-mra-audit/Scramble Spirits (Japan, Floppy Based).mra",
+      "rbf": "s24",
+      "setname": "sspiritj"
+    },
+    {
+      "file": ".build/all-mra-audit/Scramble Spirits (World, Floppy Based).mra",
+      "rbf": "s24",
+      "setname": "sspirits"
+    },
+    {
+      "file": ".build/all-mra-audit/Super Masters Golf (World-, Floppy Based, FD1094 317-0058-05d-).mra",
+      "rbf": "s24",
+      "setname": "sgmast"
+    },
+    {
+      "file": ".build/all-mra-audit/Tokoro San no MahMahjan (Japan, ROM Based).mra",
+      "rbf": "s24",
+      "setname": "mahmajn"
+    },
+    {
+      "file": ".build/all-mra-audit/Tokoro San no MahMahjan 2 (Japan, ROM Based).mra",
+      "rbf": "s24",
+      "setname": "mahmajn2"
+    },
+    {
+      "file": ".claude/worktrees/agent-aa01b012bc64cf823/releases/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "bnzabros"
+    },
+    {
+      "file": ".claude/worktrees/agent-aa01b012bc64cf823/releases/Crack Down (World, Floppy Based, FD1094 317-0058-04c).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "crkdown"
+    },
+    {
+      "file": ".codex-mister-build/mra-audit/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "bnzabros"
+    },
+    {
+      "file": ".codex-mister-build/mra-audit/Crack Down (World, Floppy Based, FD1094 317-0058-04c).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "crkdown"
+    },
+    {
+      "file": ".codex-mister-build/mra-audit/Gain Ground (World, 3 Players, Floppy Based, FD1094 317-0058-03d Rev A).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "gground"
+    },
+    {
+      "file": ".codex-mister-build/mra-audit/Hot Rod (World, 3 Players, Turbo set 1, Floppy Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "hotrod"
+    },
+    {
+      "file": ".codex-mister-build/mra-audit/Rough Racer (Japan, Floppy Based, FD1094 317-0058-06b).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "roughrac"
+    },
+    {
+      "file": ".codex-mister-build/mra-audit/Scramble Spirits (World, Floppy Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "sspirits"
+    },
+    {
+      "file": "artifacts/mra-ux-audit/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "bnzabros"
+    },
+    {
+      "file": "artifacts/mra-ux-audit/Crack Down (World, Floppy Based, FD1094 317-0058-04c).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "crkdown"
+    },
+    {
+      "file": "artifacts/mra-ux-audit/Gain Ground (World, 3 Players, Floppy Based, FD1094 317-0058-03d Rev A).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "gground"
+    },
+    {
+      "file": "artifacts/mra-ux-audit/Hot Rod (World, 3 Players, Turbo set 1, Floppy Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "hotrod"
+    },
+    {
+      "file": "artifacts/mra-ux-audit/Rough Racer (Japan, Floppy Based, FD1094 317-0058-06b).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "roughrac"
+    },
+    {
+      "file": "artifacts/mra-ux-audit/Scramble Spirits (World, Floppy Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "sspirits"
+    },
+    {
+      "file": "mra/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "bnzabros"
+    },
+    {
+      "file": "mra/Crack Down (World, Floppy Based, FD1094 317-0058-04c).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "crkdown"
+    },
+    {
+      "file": "mra/Gain Ground (World, 3 Players, Floppy Based, FD1094 317-0058-03d Rev A).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "gground"
+    },
+    {
+      "file": "mra/Hot Rod (World, 3 Players, Turbo set 1, Floppy Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "hotrod"
+    },
+    {
+      "file": "mra/Hot Rod.mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "hotrod"
+    },
+    {
+      "file": "mra/Rough Racer (Japan, Floppy Based, FD1094 317-0058-06b).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "roughrac"
+    },
+    {
+      "file": "mra/Scramble Spirits (World, Floppy Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "sspirits"
+    },
+    {
+      "file": "release_mister/_Arcade/Bonanza Bros (Japan, Floppy DS3-5000-07b Based).mra",
+      "rbf": "s24",
+      "setname": "bnzabrosj"
+    },
+    {
+      "file": "release_mister/_Arcade/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
+      "rbf": "s24",
+      "setname": "bnzabros"
+    },
+    {
+      "file": "release_mister/_Arcade/Crack Down (Japan, Floppy Based, FD1094 317-0058-04b Rev A).mra",
+      "rbf": "s24",
+      "setname": "crkdownj"
+    }
+  ],
+  "quartus": {
+    "qpf_files": [
+      "Arcade-SegaSystem24.qpf",
+      ".claude/worktrees/agent-aa01b012bc64cf823/Arcade-SegaSystem24.qpf"
+    ],
+    "qsf_files": [
+      "Arcade-SegaSystem24.qsf",
+      ".claude/worktrees/agent-aa01b012bc64cf823/Arcade-SegaSystem24.qsf"
+    ],
+    "revision_candidate": "Arcade-SegaSystem24",
+    "sdc_files": [
+      "Arcade-SegaSystem24.sdc",
+      ".claude/worktrees/agent-aa01b012bc64cf823/Arcade-SegaSystem24.sdc",
+      ".claude/worktrees/agent-aa01b012bc64cf823/sys/sys_top.sdc",
+      "sys/sys_top.sdc"
+    ],
+    "top_candidate": "sys_top"
+  },
+  "rbf_files": [
+    ".build/rbf-backup/Arcade-SegaSystem24-preFix.rbf",
+    ".build/rbf-backup/s24-preFix.rbf",
+    ".build/rbf-backup/s24-sdramconstrained.rbf",
+    ".claude/worktrees/agent-aa01b012bc64cf823/releases/Arcade-SegaSystem24_20260806.rbf",
+    ".codex-mister-build/preserved/20260807-175320-296/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260808-095959-500/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260808-220539-089/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260809-085955-230/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260809-120525-133/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260809-174956-494/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260809-230007-165/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260810-095326-685/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260810-124541-653/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260810-130348-901/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260810-190955-759/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260812-082614-163/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260812-090710-192/001-Arcade-SegaSystem24.rbf",
+    "output_files/Arcade-SegaSystem24.rbf",
+    "output_files/segas24_20260806.rbf",
+    "release_mister/_Arcade/s24.rbf",
+    "releases/Arcade-SegaSystem24_20260806.rbf",
+    "releases/Arcade-SegaSystem24_20260809.rbf",
+    "releases/Arcade-SegaSystem24_20260810.rbf",
+    "releases/Arcade-SegaSystem24_20260811.rbf",
+    "releases/Arcade-SegaSystem24_20260812.rbf"
+  ],
+  "recommendations": [],
+  "root": "C:\\Users\\meath\\OneDrive\\Documents\\Sega System 24",
+  "schema": "mister-discovery-v4",
+  "tools": {
+    "mame_exe": {
+      "exists": true,
+      "mtime_ns": 1785347926000000000,
+      "requested": "D:\\arcade\\ai\\mameexe\\mame.exe",
+      "resolved": "D:\\Arcade\\AI\\mameexe\\mame.exe",
+      "sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+      "size": 316431360,
+      "version": "0.289 (mame0289)",
+      "version_flag": "-version"
+    },
+    "quartus_sh": {
+      "exists": true,
+      "mtime_ns": 1500518970000000000,
+      "requested": "D:\\Q17\\quartus\\bin64\\quartus_sh.exe",
+      "resolved": "D:\\Q17\\quartus\\bin64\\quartus_sh.exe",
+      "sha256": "360039b0b0f2870a6b098dcb4baeefc040af9285162018882b8030334fa9c21b",
+      "size": 43520,
+      "version": "Quartus Prime Shell",
+      "version_flag": "--version"
+    },
+    "verilator": {
+      "exists": true,
+      "mtime_ns": 1783029826000000000,
+      "requested": "C:\\msys64\\ucrt64\\bin\\verilator",
+      "resolved": "C:\\msys64\\ucrt64\\bin\\verilator",
+      "sha256": "fb2cc573b1055cf096c90e1efc9966fe56bdb4b265c83590cf2a49f7a0defcdf",
+      "size": 32093
+    }
+  }
+}

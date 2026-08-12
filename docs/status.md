@@ -17,7 +17,7 @@ verification matrix. See `docs/game-coverage.md` for the exact scope.
 | 315-5292 tiles | Four-layer double-buffer renderer; MAME address mirrors, 128 KB character store, measured sync windows, documented invalid 512-scanline synchronization mode, special-pair priority routing, palette-aware pen-zero backdrop, and descriptor-driven framebuffer flip path are source-integrated |
 | 315-5293/5295 sprites | MAME-audited linked list, inclusive/reverse-Y clipping, flips, widened large-sprite addressing, zoom, all-pen indirect colors, shadow pen, newest-entry overflow retention, and one candidate per priority group are source-integrated |
 | 315-5294 mixer / palette | Register priorities, opaque tile backdrop, shadow composition, cross-group sprite fallback, and exact 315-5242 shadow/highlight rounding are source-integrated |
-| YM2151 / YM3012 / DAC | Real JT51 digital tone regression passes through an explicit YM3012-compatible 10-bit mantissa/3-bit exponent reconstruction and sample/hold boundary, with stereo energy and the 48 kHz native PCM capture path integrated; MAME sample alignment and YM3012/cabinet analogue filter/amplifier response remain pending |
+| YM2151 / YM3012 / DAC | Production IKAOPM die-derived YM2151 passes synchronized bus, Timer A status/IRQ, and stereo tone regressions using its recommended YM3012-lossy outputs with independent channel sample holds; MAME sample alignment and cabinet analogue filter/amplifier response remain pending |
 | 315-5296 I/O | Digital ports, CNT2/CKOT divider modes, and counters integrated; generic, Hot Rod, and golf maps follow MAME; CNT1 pulses CPU B reset when releasing HALT |
 | 834-6510 analog board | uPD4701 read-latch and MSM6253 models pass deterministic regression with descriptor-gated `0xC00000` mirrors; hardware control testing pending |
 | IRQ/timer controller | HSync/8 MHz timer modes, per-CPU masks, and MAME raster levels implemented; sprite/VBlank assertions use the registered 423->0 and 383->384 boundaries |
@@ -330,14 +330,14 @@ sprite-memory population, FDC timing, ROM-board/EPLD, analogue, video
 orientation/flip, and CPU/protection profiles. This schema is enforced by the
 MRA/profile validators and is never selected by a set-name conditional.
 
-The core now exports a board-domain `audio_event_t` stream for JT51 register
+The core now exports a board-domain `audio_event_t` stream for IKAOPM register
 writes, YM IRQ edges, serial/sample-boundary events, and port-H R-2R changes.
 The visual RTL producer writes `rtl_audio_events.jsonl` and a 48 kHz stereo
 PCM/WAV capture, while the MAME Lua producer writes comparable YM
 register-write events and the lockstep runner records a MAME WAV receipt.
-The production path now reconstructs the YM3012-compatible 10-bit
-mantissa/3-bit exponent digital word and holds it at the JT51 sample boundary
-before PCM mixing. These artifacts and the focused tone regression still do
+The production path holds IKAOPM's recommended YM3012-lossy output at each
+channel's independent sample boundary before PCM mixing. These artifacts and
+the focused tone regression still do
 not prove MAME sample alignment, the analogue filter/amplifier response, or
 PCB-level audio timing.
 

@@ -32,13 +32,11 @@ Sources are ordered by authority for this implementation.
    The vendored rtl/cpu/fx68k copy retains the synthesizable CPU and the
    local changes needed for packed Verilator save-state structs, instruction
    acceptance tagging, and System 24 bus timing.
-5. JT51 synthesizable YM2151: https://github.com/jotego/jt51
-   The local copy is based on JT51 master snapshot
-   985a573dcfc1ff135553a39f7eae21d18ba57cbe. Its channel register path now
-   uses the upstream jt51_reg_ch organization. The local integration keeps
-   the System 24 bus/timing adaptations and applies the upstream wider
-   accumulator saturation, qualified timer-overflow flag, and envelope-rate
-   behavior, with focused channel, tone, and timer regressions under verif/.
+5. IKAOPM die-shot-derived YM2151: https://github.com/ika-musume/IKAOPM
+   The local copy is pinned to commit
+   08a5b40ed14418319287df450f7d4a523ddeed5e and retains its BSD-2-Clause
+   license. The System 24 adapter owns synchronized bus retirement, reset,
+   IRQ polarity, and independent left/right sample holding.
 6. Jotego core collection and its licensed reusable modules:
    https://github.com/jotego/jtcores
    The current master snapshot used for source comparison is

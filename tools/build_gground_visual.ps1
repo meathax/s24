@@ -33,7 +33,7 @@ $repoSources = @(
     'rtl/s24_pkg.sv','rtl/s24_clock_enables.sv','rtl/s24_board_arbiter.sv',
     'rtl/s24_cpu_bus.sv',
     'rtl/io/s24_io_5296.sv','rtl/io/s24_inputs.sv','rtl/io/s24_analog.sv',
-    'rtl/audio/s24_ym3012.sv',
+    'rtl/audio/s24_opm.sv','rtl/audio/ikaopm/IKAOPM.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v',
     'rtl/prot/s24_magic_latch.sv','rtl/prot/s24_romboard_epld.sv','rtl/fdc/s24_fdc.sv','rtl/s24_irq.sv',
     'rtl/video/s24_video_timing.sv','rtl/video/s24_palette.sv',
     'rtl/video/s24_tile.sv','rtl/video/s24_sprite.sv',
@@ -43,27 +43,12 @@ $repoSources = @(
     'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_a_opcache.sv','rtl/cpu/s24_b_opcache.sv','rtl/s24_core.sv',
     'verif/tb_gground_boot.sv'
 )
-$jt51Sources = @(
-    'rtl/audio/jt51/jt51_acc.v','rtl/audio/jt51/jt51_eg.v',
-    'rtl/audio/jt51/jt51_exp2lin.v','rtl/audio/jt51/jt51_exprom.v',
-    'rtl/audio/jt51/jt51_kon.v','rtl/audio/jt51/jt51_lfo.v',
-    'rtl/audio/jt51/jt51_lin2exp.v','rtl/audio/jt51/jt51_mmr.v',
-    'rtl/audio/jt51/jt51_mod.v','rtl/audio/jt51/jt51_noise_lfsr.v',
-    'rtl/audio/jt51/jt51_noise.v','rtl/audio/jt51/jt51_op.v',
-    'rtl/audio/jt51/jt51_pg.v','rtl/audio/jt51/jt51_phinc_rom.v',
-    'rtl/audio/jt51/jt51_phrom.v','rtl/audio/jt51/jt51_pm.v',
-    'rtl/audio/jt51/jt51_reg.v','rtl/audio/jt51/jt51_sh.v',
-    'rtl/audio/jt51/jt51_timers.v','rtl/audio/jt51/jt51_reg_ch.v',
-    'rtl/audio/jt51/jt51_csr_op.v','rtl/audio/jt51/jt51.v'
-)
-if($RealAudio) { $repoSources += $jt51Sources }
-else { $repoSources += 'verif/jt51_boot_stub.sv' }
 $exe = Join-Path $ModelDirectory 'Vtb_gground_boot.exe'
 $signaturePath = Join-Path $ModelDirectory 'build.signature'
 $verilatorVersion = & verilator-safe --version
 $signatureParts = @(
     $verilatorVersion, $sdlCflags, $sdlLibs,
-    "tb_gground_boot|S24_VISUAL|timing|savable|packed-fx68k-structs|real-audio=$RealAudio|threads=$ModelThreads|OPT_FAST=O3|OPT_SLOW=O2|OPT_GLOBAL=O2|march=native|mtune=native|fomit-frame-pointer|ABI=0"
+    "tb_gground_boot|S24_VISUAL|timing|savable|packed-fx68k-structs|ikaopm-audio|threads=$ModelThreads|OPT_FAST=O3|OPT_SLOW=O2|OPT_GLOBAL=O2|march=native|mtune=native|fomit-frame-pointer|ABI=0"
 ) + (@($repoSources + 'verif/s24_visual_main.cpp' | ForEach-Object {
     $file = Join-Path $repoRoot $_
     "$_|$(Get-Sha256Hex $file)"

@@ -60,7 +60,7 @@ local function append_trace(cpu, rw, address, data, mask)
         "{\"frame\":%d,\"cpu\":%d,\"event\":\"bus\",\"rw\":\"%s\"," ..
         "\"address\":%d,\"data\":%d,\"lanes\":%d,\"device\":%d,\"pc\":%d}\n",
         trace_frame, cpu, rw, address, data, lanes, device, pc))
-    -- MAME's YM window is the authoritative register-write producer.  JT51
+    -- MAME's YM window is the authoritative register-write producer. IKAOPM
     -- serial samples/timer edges are emitted by the RTL event boundary; this
     -- event keeps the cross-domain comparison explicit without pretending a
     -- Lua memory tap can observe the analogue YM3012 pins.

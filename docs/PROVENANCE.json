@@ -1,0 +1,22 @@
+{
+  "schema_version": 4,
+  "donors": [
+    {
+      "id": "D001",
+      "name": "IKAOPM",
+      "url": "https://github.com/ika-musume/IKAOPM",
+      "revision": "08a5b40ed14418319287df450f7d4a523ddeed5e",
+      "license": "BSD-2-Clause",
+      "role": "production YM2151 RTL"
+    }
+  ],
+  "reused_files": [
+    {
+      "donor_id": "D001",
+      "upstream": "src/IKAOPM.v, src/IKAOPM.qip, src/IKAOPM_modules/*.v",
+      "local": "rtl/audio/ikaopm/",
+      "revision": "08a5b40ed14418319287df450f7d4a523ddeed5e",
+      "local_changes": "none"
+    }
+  ]
+}

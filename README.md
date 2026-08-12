@@ -98,8 +98,8 @@ profile is tracked for source completeness only.
 | Priority mixer | Sega 315-5294 priority and display control |
 | Palette/DAC stage | Sega 315-5242 palette, shadow/highlight, and DAC behavior |
 | I/O controller | Sega 315-5296 digital I/O, counters, timers, and board controls |
-| Sound generator | YM2151-compatible JT51, including timer interrupts |
-| Audio output | 8-bit mono R-2R DAC model and System 24 audio mixing |
+| Sound generator | [IKAOPM](https://github.com/ika-musume/IKAOPM), a cycle-accurate die-shot-derived YM2151 implementation, clocked at 4 MHz with timer interrupts |
+| Audio output | IKAOPM's YM3012-lossy stereo outputs, 8-bit mono R-2R DAC model, and System 24 audio mixing |
 | Analog daughterboard | uPD4701 quadrature counters and MSM6253 ADC models where populated |
 | ROM-board EPLD | EPM5032 ROM banking with documented 2M/4M/8M jumper profiles, visible FRC counter, documented modulo modes, MODE-qualified `/INT3`, and MAME-compatible FRC event timing |
 | Storage hardware | System 24 floppy controller, floppy index timing, writable overlay, and ROM-board banking |
@@ -111,8 +111,8 @@ profile is tracked for source completeness only.
   files, verification, and documentation.
 - **Jorge Cwik** — [FX68K](https://github.com/ijor/fx68k), the cycle-accurate
   68000-compatible CPU core.
-- **Jose Tejada Gómez (jotego)** — [JT51](https://github.com/jotego/jt51),
-  the synthesizable YM2151-compatible sound core.
+- **Sehyeon Kim (Raki)** — [IKAOPM](https://github.com/ika-musume/IKAOPM),
+  the BSD-2-Clause, die-shot-derived YM2151 implementation.
 - **Till Harbaum, Alexey Melnikov (Sorgelig), and the MiSTer-devel project** —
   the [MiSTer framework](https://github.com/MiSTer-devel/Template_MiSTer),
   including `hps_io`, `sys_top`, video support, and SDRAM/HPS integration.
@@ -144,7 +144,7 @@ The original core RTL and documentation are released under the GNU General
 Public License version 3.0. See [`LICENSE`](LICENSE).
 
 Vendored components retain their own upstream copyright notices and license
-terms: FX68K and JT51 are GPL-licensed, the MiSTer framework is GPL-licensed,
+terms: FX68K is GPL-licensed, IKAOPM is BSD-2-Clause, the MiSTer framework is GPL-licensed,
 and Intel/Altera-generated programming and simulation files remain subject to
 their vendor terms. This repository does not relicense third-party material.
 

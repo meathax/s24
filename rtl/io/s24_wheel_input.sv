@@ -62,6 +62,9 @@ module s24_wheel_input (
     logic [8:0] speed_scaled;
     logic [3:0] sensitivity;
     logic [18:0] rough_product;
+    // Register the base rate before the sensitivity multiply so the
+    // descriptor/profile path has a timing boundary before rough_step.
+    logic [10:0] rough_rate_q;
     logic [10:0] rough_rate;
     logic [14:0] rough_rate_scaled;
     logic [14:0] rough_sum;
@@ -75,7 +78,7 @@ module s24_wheel_input (
     // width explicit in Quartus/SystemVerilog instead of relying on context
     // sizing for the 8x and 14-count cases.
     assign speed_scaled = {3'd0,speed_base} * {5'd0,sensitivity};
-    assign rough_rate_scaled = {4'd0,rough_rate} * {11'd0,sensitivity};
+    assign rough_rate_scaled = {4'd0,rough_rate_q} * {11'd0,sensitivity};
     assign rough_sum = {7'd0,rough_accum} + rough_rate_scaled;
     always_comb begin
         stick_abs = stick_x[7] ? (~stick_x + 8'd1) : stick_x;
@@ -128,9 +131,11 @@ module s24_wheel_input (
         if (reset) begin
             stick_toggle <= 1'b0;
             stick_active <= 1'b0;
+            rough_rate_q <= 11'd0;
             rough_accum <= 8'd0;
             rough_step <= 7'd0;
         end else if (tick) begin
+            rough_rate_q <= rough_rate;
             if(stick_active) begin
                 if(stick_abs<=deadzone_exit) stick_active<=1'b0;
             end else if(stick_abs>=deadzone_enter) begin
@@ -148,6 +153,8 @@ module s24_wheel_input (
                 if (stick_enable && steering_step != 8'sd0)
                     stick_toggle <= ~stick_toggle;
             end
+        end else begin
+            rough_rate_q <= rough_rate;
         end
     end
 

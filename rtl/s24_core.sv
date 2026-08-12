@@ -323,29 +323,19 @@ module s24_core #(
         .din(bus_dout[7:0]),.an0(8'hff),.an1(8'hff),
         .an2(8'hff),.an3(8'hff),.dout(adc1_dout));
 
-    logic ym_wr, ym_write_pending, ym_addr_q;
+    logic ym_write_pending, ym_write_accepted, ym_addr_q;
     logic [7:0] ym_data_q;
     logic [7:0] ym_dout;
-    logic ym_irq_n,ym_half,ym_sample,ym_irq_q;
-    // JT51's xleft/xright outputs are its exact internal linear accumulator.
-    // The external YM3012 quantizes the 10-bit mantissa/3-bit exponent word,
-    // so route that diagnostic through the explicit digital DAC model before
-    // mixing it with the port-H R-2R channel.
+    logic ym_irq_n,ym_irq_q;
     logic signed [15:0] ym_l,ym_r;
-    logic signed [15:0] ym_exact_l,ym_exact_r;
-    always_ff @(posedge clk) if (reset) ym_half<=0; else if (ce4) ym_half<=~ym_half;
-    jt51 ym(
-        // CNT2 drives the YM2151 active-low /IC reset pin. System 24 boot
-        // writes CNT=04 to release it; invert that pin for JT51's active-high
-        // reset input. MAME ymopm.cpp likewise documents reset_w as active LOW.
-        .rst(reset | ~io_cnt[2]),.clk(clk),.cen(ce4),.cen_p1(ce4 & ym_half),
-        .cs_n(~ym_wr),.wr_n(~ym_wr),.a0(ym_addr_q),.din(ym_data_q),
-        .dout(ym_dout),.ct1(),.ct2(),.irq_n(ym_irq_n),.sample(ym_sample),
-        .left(),.right(),.xleft(ym_exact_l),.xright(ym_exact_r));
-    s24_ym3012_sample_hold ym3012(
-        .clk(clk),.reset(reset),.sample(ym_sample),
-        .linear_left(ym_exact_l),.linear_right(ym_exact_r),
-        .audio_left(ym_l),.audio_right(ym_r));
+    s24_opm ym(
+        .clk(clk),.reset(reset),.ce_4m(ce4),
+        // CNT2 is wired to the physical YM2151 active-low /IC pin. System 24
+        // writes CNT=04 to release the chip.
+        .chip_reset_n(io_cnt[2] & ~reset),
+        .write_valid(ym_write_pending),.write_a0(ym_addr_q),
+        .write_data(ym_data_q),.write_accepted(ym_write_accepted),
+        .status(ym_dout),.irq_n(ym_irq_n),.audio_l(ym_l),.audio_r(ym_r));
 
     logic irq_rd_a,irq_rd_b,irq_wr;
     logic irq_read_pending;
@@ -968,11 +958,6 @@ module s24_core #(
         end
     end
 
-    // JT51 samples writes only on cen_p1. Hold the CPU payload until that
-    // exact enable instead of presenting a one-clk pulse that is usually
-    // invisible to the chip.
-    assign ym_wr = ym_write_pending && ce4 && ym_half;
-
     always_ff @(posedge clk) begin
         bus_ack<=0;io_rd<=0;io_wr<=0;irq_rd_a<=0;irq_rd_b<=0;irq_wr<=0;
         magic_wr<=0;tile_wr<=0;mixer_wr<=0;palette_wr<=0;fdc_rd<=0;fdc_wr<=0;
@@ -987,7 +972,7 @@ module s24_core #(
             irq_read_pending<=0;
             upd_read_pending<=0;upd_read_select<=0;
         end else begin
-            if (ym_wr)
+            if (ym_write_accepted)
                 ym_write_pending <= 1'b0;
             case(xs)
             X_IDLE: if(bus_req) begin

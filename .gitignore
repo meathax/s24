@@ -65,3 +65,17 @@
 !/releases/Hot Rod (World, 3 Players, Turbo).mra
 !/releases/Rough Racer.mra
 !/releases/Scramble Spirits.mra
+
+# MISTER-FPGA-AUTOPILOT-V4 START
+.mister/runs/*
+!.mister/runs/.gitkeep
+.mister/cache/*
+!.mister/cache/.gitkeep
+.mister/reports/*
+!.mister/reports/.gitkeep
+.mister/state.json
+.mister/release/
+.mister/provenance/licenses/*
+!.mister/provenance/licenses/.gitkeep
+.mister/donors/
+# MISTER-FPGA-AUTOPILOT-V4 END

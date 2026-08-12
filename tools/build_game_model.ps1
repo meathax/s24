@@ -37,7 +37,7 @@ $sources = @(
     'rtl/io/s24_io_5296.sv',
     'rtl/io/s24_inputs.sv',
     'rtl/io/s24_analog.sv',
-    'rtl/audio/s24_ym3012.sv',
+    'rtl/audio/s24_opm.sv','rtl/audio/ikaopm/IKAOPM.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v','rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v',
     'rtl/prot/s24_magic_latch.sv',
     'rtl/prot/s24_romboard_epld.sv',
     'rtl/fdc/s24_fdc.sv',
@@ -52,7 +52,6 @@ $sources = @(
     'rtl/cpu/fx68k/fx68k.sv',
     'rtl/cpu/s24_fd1094_decrypt.sv',
     'rtl/cpu/s24_fd1094.sv','rtl/cpu/s24_a_opcache.sv','rtl/cpu/s24_b_opcache.sv',
-    'verif/jt51_boot_stub.sv',
     'rtl/s24_core.sv',
     'verif/tb_gground_boot.sv'
 )

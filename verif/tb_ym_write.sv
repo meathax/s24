@@ -2,72 +2,6 @@
 
 import s24_pkg::*;
 
-// JT51 bus-boundary regression.  This stub checks the pins presented to the
-// real core while leaving synthesis RTL untouched.
-module jt51(
-    input  logic               rst,
-    input  logic               clk,
-    input  logic               cen,
-    input  logic               cen_p1,
-    input  logic               cs_n,
-    input  logic               wr_n,
-    input  logic               a0,
-    input  logic [7:0]         din,
-    output logic [7:0]         dout,
-    output logic               ct1,
-    output logic               ct2,
-    output logic               irq_n,
-    output logic               sample,
-    output logic signed [15:0] left,
-    output logic signed [15:0] right,
-    output logic signed [15:0] xleft,
-    output logic signed [15:0] xright
-);
-    integer strobe_count = 0;
-    logic expected_a0 [0:2];
-    logic [7:0] expected_data [0:2];
-
-    assign dout   = 8'h00;
-    assign ct1    = 1'b0;
-    assign ct2    = 1'b0;
-    assign irq_n  = 1'b1;
-    assign sample = 1'b0;
-    assign left   = '0;
-    assign right  = '0;
-    assign xleft  = '0;
-    assign xright = '0;
-
-    initial begin
-        expected_a0[0] = 1'b0;
-        expected_a0[1] = 1'b1;
-        expected_a0[2] = 1'b0;
-        expected_data[0] = 8'h14;
-        expected_data[1] = 8'h7f;
-        expected_data[2] = 8'ha5;
-    end
-
-    always_ff @(posedge clk) begin
-        if (!rst) begin
-            if (cs_n != wr_n)
-                $fatal(1, "JT51 cs_n/wr_n disagreement");
-            if (!cs_n) begin
-                if (!cen_p1)
-                    $fatal(1, "JT51 write was not aligned to cen_p1");
-                if (!cen)
-                    $fatal(1, "JT51 write occurred without cen");
-                if (strobe_count >= 3)
-                    $fatal(1, "extra JT51 write strobe");
-                if (a0 !== expected_a0[strobe_count] ||
-                    din !== expected_data[strobe_count])
-                    $fatal(1,
-                           "JT51 payload %0d mismatch: got a0=%b data=%02h",
-                           strobe_count, a0, din);
-                strobe_count <= strobe_count + 1;
-            end
-        end
-    end
-endmodule
-
 module tb_ym_write;
     logic clk = 0;
     logic reset = 1;
@@ -87,6 +21,10 @@ module tb_ym_write;
     logic [7:0] bus_data_drive;
     logic [1:0] bus_be_drive;
     logic [8:0] spinner0_drive = '0;
+    integer ym_accept_count = 0;
+
+    always_ff @(posedge clk)
+        if (dut.ym_write_accepted) ym_accept_count <= ym_accept_count + 1;
 
     always #5 clk = ~clk;
 
@@ -211,25 +149,25 @@ module tb_ym_write;
         cpu_local_read(24'h800040,2'b11,16'hffff); // explicit IOD stub
 
         // CNT is register 0e in the 315-5296 I/O block, hence byte address
-        // $80001c. CNT2 drives the YM2151 active-low /IC pin, while JT51's
-        // reset input is active high. System 24 writes CNT=04 to release YM.
+        // $80001c. CNT2 drives the YM2151 active-low /IC pin. System 24
+        // writes CNT=04 to release YM.
         cpu_local_write(24'h80001c, 8'h04);
         if (!dut.io_cnt[2])
             $fatal(1, "I/O CNT2 release pin did not go high");
-        if (dut.ym.rst)
-            $fatal(1, "JT51 remained reset after CNT2 release");
+        if (!dut.ym.chip_reset_n)
+            $fatal(1, "IKAOPM remained reset after CNT2 release");
         cpu_local_write(24'h80001c, 8'h00);
         if (dut.io_cnt[2])
             $fatal(1, "I/O CNT2 reset pin did not go low");
-        if (!dut.ym.rst)
-            $fatal(1, "JT51 reset was not asserted after CNT2 cleared");
+        if (dut.ym.chip_reset_n)
+            $fatal(1, "IKAOPM reset was not asserted after CNT2 cleared");
         cpu_local_write(24'h80001c, 8'h04);
-        if (dut.ym.rst)
-            $fatal(1, "JT51 failed to leave reset after CNT2 re-release");
+        if (!dut.ym.chip_reset_n)
+            $fatal(1, "IKAOPM failed to leave reset after CNT2 re-release");
         repeat (4) @(posedge clk);
 
-        // Start at different points in the divided-enable sequence.  The core
-        // must retain each payload until the next JT51 sampling opportunity.
+        // Start at different points in the divided-enable sequence. The core
+        // must retain each payload through IKAOPM's synchronized phi1 queue.
         cpu_ym_write(1'b0, 8'h14);
         repeat (1) @(posedge clk);
         cpu_ym_write(1'b1, 8'h7f);
@@ -237,13 +175,12 @@ module tb_ym_write;
         cpu_ym_write(1'b0, 8'ha5);
         repeat (32) @(posedge clk);
 
-        if (dut.ym.strobe_count != 3)
-            $fatal(1, "expected 3 JT51 strobes, got %0d",
-                   dut.ym.strobe_count);
+        if (ym_accept_count != 3)
+            $fatal(1, "expected 3 IKAOPM accepted writes, got %0d",ym_accept_count);
         if (dut.ym_write_pending)
             $fatal(1, "YM write remained pending after final strobe");
-        if (dut.ym_wr)
-            $fatal(1, "YM write strobe remained asserted");
+        if (dut.ym.write_active || dut.ym.write_waiting)
+            $fatal(1, "YM adapter remained active after final write");
 
         // Port H feeds an unsigned 8-bit R-2R DAC.  MAME routes it at 0.50
         // to both speakers, matching the per-channel YM route gain.
@@ -257,7 +194,7 @@ module tb_ym_write;
         if (audio_l !== 16'h3f80 || audio_r !== 16'h3f80)
             $fatal(1,"DAC full-scale mix mismatch %04h/%04h",audio_l,audio_r);
 
-        $display("PASS tb_ym_write: open-bus reads, JT51 writes and stereo DAC routing");
+        $display("PASS tb_ym_write: open-bus reads, IKAOPM writes and stereo DAC routing");
         $finish;
     end
 endmodule

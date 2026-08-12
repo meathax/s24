@@ -187,7 +187,7 @@ def create_preflight(game: gen_mra.Game, session: pathlib.Path,
             "digital_inputs": "neutral-v1",
             "analog": analog,
             "reset": "cold power-on",
-            "sound": "enabled on both sides (RTL JT51 boot model limitation recorded)",
+            "sound": "enabled on both sides with production IKAOPM RTL",
         },
         "video": {
             "rtl_native": [496, 384], "mame_raw_visible_expected": [496, 384],
