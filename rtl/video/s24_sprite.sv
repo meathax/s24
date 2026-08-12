@@ -4,6 +4,40 @@
 // indirect palette tables, and 4-bpp tile data all share the 256 KiB sprite
 // RAM and are fetched through aligned 128-bit bursts.
 
+// One radix-4 restoring-divider step.  The sprite Y mapper divides an 18-bit
+// numerator by a 9-bit zoom step.  At every step remainder<divisor, so after
+// shifting in two dividend bits the trial remainder is below 4*divisor and a
+// two-bit quotient digit (0..3) is exact.
+module s24_sprite_ydiv_radix4_step (
+	input  logic [17:0] dividend,
+	input  logic [17:0] quotient,
+	input  logic [18:0] remainder,
+	input  logic [8:0]  divisor,
+	output logic [17:0] next_quotient,
+	output logic [18:0] next_remainder
+);
+	logic [18:0] shifted_remainder;
+	logic [18:0] divisor_x2,divisor_x3;
+
+	always_comb begin
+		shifted_remainder={remainder[16:0],dividend[17:16]};
+		divisor_x2={9'd0,divisor,1'b0};
+		divisor_x3={10'd0,divisor}+divisor_x2;
+		next_quotient={quotient[15:0],2'b00};
+		next_remainder=shifted_remainder;
+		if(shifted_remainder>=divisor_x3) begin
+			next_remainder=shifted_remainder-divisor_x3;
+			next_quotient[1:0]=2'd3;
+		end else if(shifted_remainder>=divisor_x2) begin
+			next_remainder=shifted_remainder-divisor_x2;
+			next_quotient[1:0]=2'd2;
+		end else if(shifted_remainder>={10'd0,divisor}) begin
+			next_remainder=shifted_remainder-{10'd0,divisor};
+			next_quotient[1:0]=2'd1;
+		end
+	end
+endmodule
+
 // Quartus 17 does not reliably infer the sprite line buffers from a
 // three-port array (display read/clear plus renderer read/write).  Keep the
 // behavioural model for Verilator, but map the FPGA implementation directly
@@ -712,7 +746,6 @@ module s24_sprite (
     logic [8:0] ydiv_divisor;
     logic [10:0] ydiv_total_rows;
     logic [4:0] ydiv_count;
-    logic [18:0] ydiv_shifted_remainder;
     logic [17:0] ydiv_next_quotient;
     logic signed [9:0] ydiv_adjust_value;
     logic [11:0] descriptor_target_offset;
@@ -797,6 +830,12 @@ module s24_sprite (
     assign stack_scan_slot=stack_head+scan_pos[STACK_BITS-1:0];
     assign active_append_pos=(active_count<ACTIVE_COUNT_LIMIT)
                            ? active_count : ACTIVE_COUNT_LIMIT-1'b1;
+	s24_sprite_ydiv_radix4_step ydiv_step (
+		.dividend(ydiv_dividend),.quotient(ydiv_quotient),
+		.remainder(ydiv_remainder),.divisor(ydiv_divisor),
+		.next_quotient(ydiv_next_quotient),
+		.next_remainder(ydiv_next_remainder)
+	);
     // Packed descriptor RAM supplies two logical entries per clock whenever
     // the ring cursor is physically even.  An odd head peels one upper-half
     // entry, then resumes paired scanning at the next even physical slot.
@@ -1134,15 +1173,6 @@ module s24_sprite (
         descriptor_target_offset=offset12($signed({4'd0,target_y})
                                           - descriptor_origin_y);
 
-        ydiv_shifted_remainder={ydiv_remainder[17:0],
-                                ydiv_dividend[17]};
-        ydiv_next_remainder=ydiv_shifted_remainder;
-        ydiv_next_quotient={ydiv_quotient[16:0],1'b0};
-        if(ydiv_shifted_remainder>={10'd0,ydiv_divisor}) begin
-            ydiv_next_remainder=ydiv_shifted_remainder
-                                - {10'd0,ydiv_divisor};
-            ydiv_next_quotient[0]=1'b1;
-        end
         // N = 64*d+31 = q*s+r. Therefore the selected source row starts at
         // d + floor((63-r)/64), with accumulator (63-r) modulo 64.
         ydiv_adjust_value=10'sd63
@@ -2041,7 +2071,7 @@ module s24_sprite (
                         ydiv_quotient<=0;ydiv_remainder<=0;
                         ydiv_divisor<=active_setup_zoomy_step;
                         ydiv_total_rows<=active_setup_total_rows;
-                        ydiv_count<=5'd18;state<=S_YDIV;
+                        ydiv_count<=5'd9;state<=S_YDIV;
                     end
                 end
                 S_RENDER_SETUP: begin
@@ -2080,7 +2110,7 @@ module s24_sprite (
                         end else begin
                             // Exact bounded division for arbitrary zoom:
                             // r=floor((64*(target-origin)+31)/step).
-                            // An 18-cycle restoring divider is much smaller
+                            // A 9-cycle radix-4 restoring divider is much smaller
                             // than a combinational divider and replaces an
                             // unbounded source-row walk. The final remainder
                             // reconstructs both row origin and accumulator,
@@ -2090,12 +2120,12 @@ module s24_sprite (
                             ydiv_quotient<=0;ydiv_remainder<=0;
                             ydiv_divisor<=descriptor_zoomy_step;
                             ydiv_total_rows<=descriptor_total_rows;
-                            ydiv_count<=5'd18;state<=S_YDIV;
+                            ydiv_count<=5'd9;state<=S_YDIV;
                         end
                     end
                 end
                 S_YDIV: begin
-                    ydiv_dividend<={ydiv_dividend[16:0],1'b0};
+                    ydiv_dividend<={ydiv_dividend[15:0],2'b00};
                     ydiv_remainder<=ydiv_next_remainder;
                     ydiv_quotient<=ydiv_next_quotient;
                     if(ydiv_count==1) begin
@@ -2304,7 +2334,7 @@ module s24_sprite (
                             ydiv_quotient<=0;ydiv_remainder<=0;
                             ydiv_divisor<=active_setup_zoomy_step;
                             ydiv_total_rows<=active_setup_total_rows;
-                            ydiv_count<=5'd18;state<=S_YDIV;
+                            ydiv_count<=5'd9;state<=S_YDIV;
                         end
                     end
                 end
@@ -2353,6 +2383,14 @@ module s24_sprite (
         if(state==S_IDLE)
             assert(bank_filling=='0)
                 else $fatal(1,"sprite bank ownership leaked into idle");
+		// The arithmetic bench proves the shared radix-4 step exhaustively;
+		// sprite scenarios prove that the live controller maintains its input
+		// invariant and uses exactly the bounded nine-cycle schedule.
+		if(state==S_YDIV) begin
+			assert(ydiv_count>=5'd1 && ydiv_count<=5'd9);
+			assert(ydiv_divisor!=9'd0);
+			assert(ydiv_remainder<{10'd0,ydiv_divisor});
+		end
     end
 `endif
 endmodule

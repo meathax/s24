@@ -28,16 +28,11 @@ $sources = foreach($sourceCopy in $sourceCopies) {
     $destination
 }
 
-$pkg = 'C:/msys64/ucrt64/bin/pkg-config.exe'
-$sdlCflags = (& $pkg --cflags sdl2) -replace '-Dmain=SDL_main', ''
-$sdlLibs = (& $pkg --libs sdl2) -replace '-lmingw32', '' `
-    -replace '-mwindows', '' -replace '-lSDL2main', ''
 $arguments = @(
     '--cc', '--exe', '--build', '--savable',
     '-O3', '--top-module', 'tb_tile_ownership',
     '--Mdir', $ModelDirectory,
-    '-CFLAGS', "-O3 -march=native -D_GLIBCXX_USE_CXX11_ABI=0 -DSDL_MAIN_HANDLED $sdlCflags",
-    '-LDFLAGS', $sdlLibs,
+    '-CFLAGS', '-O3 -march=native -D_GLIBCXX_USE_CXX11_ABI=0',
     '-MAKEFLAGS',
     'CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe',
     '--threads', '1', '--build-jobs', '4', '--verilate-jobs', '1'

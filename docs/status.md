@@ -372,3 +372,24 @@ The clock-domain regression is now runnable through
 `tools/build_clock_enables_test.ps1` and `tools/run_clock_enables_test.ps1`.
 It passes exact 16/8/4 MHz enable counts, non-overlapping CPU phases, and
 CPU-only pause/resume behavior over the one-millisecond deterministic window.
+
+## V24 throughput pass — 2026-08-12
+
+The arbitrary-zoom sprite Y mapper now uses an exact radix-4 restoring step,
+reducing its bounded divide from 18 to 9 renderer clocks.  The same
+synthesizable step used by `s24_sprite` passes every valid mapper numerator for
+all divisors 2 through 256 (1,044,480 quotient/remainder comparisons).  The
+Crack Down sprite-list regression still renders all 64 expected lines, and the
+Scramble Spirits 3,547-descriptor stress case still retains 48 active entries.
+The common 1:1 path and reverse-list/priority ordering are unchanged.
+
+The focused tile ownership harness is now strictly headless and no longer
+links or creates an SDL window; its 744-clock ownership/cache regression passes.
+CPU-A and CPU-B opcode-cache state, bypass, tag and write-snoop regressions also
+pass unchanged.  Existing synthesis reports identify the sprite block and its
+asynchronous 256-entry burst-cache tag store as the next measured resource
+target, but converting that tag store requires a registered lookup/bypass
+contract and was deliberately not stacked into this functional change.
+
+No Quartus compilation, timing closure, hardware test or RBF build was run for
+this pass.
