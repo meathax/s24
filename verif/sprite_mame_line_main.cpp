@@ -1,4 +1,3 @@
-#include <SDL.h>
 #include <verilated.h>
 #include <verilated_save.h>
 
@@ -14,13 +13,6 @@ double sc_time_stamp() { return 0.0; }
 int main(int argc,char** argv) {
 	VerilatedContext context;
 	context.commandArgs(argc,argv);
-	SDL_SetMainReady();
-	if(SDL_Init(SDL_INIT_VIDEO)!=0) return 2;
-	SDL_Window* window=SDL_CreateWindow(
-		"System 24 Scramble Spirits raster deadline regression",
-		SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,640,360,SDL_WINDOW_SHOWN);
-	if(!window) return 3;
-
 	std::string save_path;
 	for(int i=1;i<argc;i++) {
 		std::string arg(argv[i]);
@@ -28,15 +20,8 @@ int main(int argc,char** argv) {
 	}
 
 	Vtb_sprite_mame_line model{&context};
-	SDL_Event event;
 	int result=0;
 	while(!context.gotFinish()) {
-		while(SDL_PollEvent(&event)) {
-			if(event.type==SDL_QUIT) {
-				result=4;
-				context.gotFinish(true);
-			}
-		}
 		model.clk=!model.clk;
 		model.eval();
 		context.timeInc(1);
@@ -55,8 +40,5 @@ int main(int argc,char** argv) {
 	}
 	if(model.test_failed) result=result?result:10;
 	model.final();
-	SDL_Delay(750);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
 	return result;
 }

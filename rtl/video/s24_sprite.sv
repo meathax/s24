@@ -422,6 +422,7 @@ module s24_sprite (
     localparam int STACK_DEPTH = 4096;
     localparam int STACK_BITS = 12;
     localparam int ACTIVE_BITS = 10;
+    localparam logic [STACK_BITS:0] ACTIVE_COUNT_LIMIT = (1 << ACTIVE_BITS);
     localparam logic [STACK_BITS:0] STACK_COUNT_LIMIT = 13'd4096;
     localparam logic [STACK_BITS:0] STACK_LAST = 13'd4095;
 
@@ -716,6 +717,7 @@ module s24_sprite (
     logic signed [9:0] ydiv_adjust_value;
     logic [11:0] descriptor_target_offset;
     logic [STACK_BITS:0] scan_pos,active_count;
+    logic [STACK_BITS:0] active_append_pos;
     logic [STACK_BITS-1:0] stack_scan_slot;
     logic [STACK_BITS-2:0] descriptor_read_pair;
     logic [15:0] scan_w1,scan_w4,scan1_w1,scan1_w4;
@@ -793,6 +795,8 @@ module s24_sprite (
                             ? stack_count[STACK_BITS-1:0] : stack_head;
     assign frame_boundary=ce_pixel && hcount==10'd655 && vcount==10'd383;
     assign stack_scan_slot=stack_head+scan_pos[STACK_BITS-1:0];
+    assign active_append_pos=(active_count<ACTIVE_COUNT_LIMIT)
+                           ? active_count : ACTIVE_COUNT_LIMIT-1'b1;
     // Packed descriptor RAM supplies two logical entries per clock whenever
     // the ring cursor is physically even.  An odd head peels one upper-half
     // entry, then resumes paired scanning at the next even physical slot.
@@ -1497,6 +1501,10 @@ module s24_sprite (
             active_cache_write_data={scan_quad_pending_descriptor[0],
                                      scan_quad_pending_clip[0]};
         end
+        // Continue scanning after the fixed-size active cache fills, but do
+        // not alias its next logical entry back onto address zero.
+        if(active_count>=ACTIVE_COUNT_LIMIT)
+            active_cache_write_enable=1'b0;
     end
 
     always_ff @(posedge clk) begin
@@ -1882,7 +1890,8 @@ module s24_sprite (
                 S_SCAN: begin
                     if(scan_quad_valid) begin
                         if(scan_quad_active_count!=0) begin
-                            active_count<=active_count+1'b1;
+                            if(active_count<ACTIVE_COUNT_LIMIT)
+                                active_count<=active_count+1'b1;
                             scan_quad_pending_count<=scan_quad_active_count-1'b1;
                             scan_quad_last<=(scan_next_pos>=stack_count);
                             scan_quad_pending_descriptor[0]<=scan_quad_batch_pending_descriptor[0];
@@ -1894,7 +1903,7 @@ module s24_sprite (
                             if(scan_quad_active_count>1)
                                 state<=S_SCAN_QUAD_DRAIN;
                             else if(scan_next_pos>=stack_count) begin
-                                render_pos<=active_count;
+                                render_pos<=active_append_pos;
                                 state<=S_RENDER_PREFETCH;
                             end else begin
                                 scan_pos<=scan_next_pos;
@@ -1915,7 +1924,8 @@ module s24_sprite (
                     end else if(scan_active && scan1_active) begin
                         scan_second_descriptor<=scan_descriptor1;
                         scan_second_clip<=scan_clip1;
-                        active_count<=active_count+1'b1;
+                        if(active_count<ACTIVE_COUNT_LIMIT)
+                            active_count<=active_count+1'b1;
                         // The active descriptor cache has one write port. Only
                         // both descriptors are active need this second cycle;
                         // sparse long lists still approach two descriptors
@@ -1924,11 +1934,12 @@ module s24_sprite (
                         state<=S_SCAN_SECOND;
                     end else begin
                         if(scan_active || scan1_active) begin
-                            active_count<=active_count+1'b1;
+                            if(active_count<ACTIVE_COUNT_LIMIT)
+                                active_count<=active_count+1'b1;
                         end
                         if(scan_next_pos>=stack_count) begin
                             if(scan_active || scan1_active) begin
-                                render_pos<=active_count;
+                                render_pos<=active_append_pos;
                                 state<=S_RENDER_PREFETCH;
                             end else if(active_count!=0) begin
                                 render_pos<=active_count-1'b1;
@@ -1945,9 +1956,10 @@ module s24_sprite (
                     end
                 end
                 S_SCAN_SECOND: begin
-                    active_count<=active_count+1'b1;
+                    if(active_count<ACTIVE_COUNT_LIMIT)
+                        active_count<=active_count+1'b1;
                     if(scan_second_last) begin
-                        render_pos<=active_count;
+                        render_pos<=active_append_pos;
                         state<=S_RENDER_PREFETCH;
                     end else begin
                         scan_pos<=scan_next_pos;
@@ -1955,7 +1967,8 @@ module s24_sprite (
                     end
                 end
                 S_SCAN_QUAD_DRAIN: begin
-                    active_count<=active_count+1'b1;
+                    if(active_count<ACTIVE_COUNT_LIMIT)
+                        active_count<=active_count+1'b1;
                     if(scan_quad_pending_count>1) begin
                         scan_quad_pending_count<=scan_quad_pending_count-1'b1;
                         scan_quad_pending_descriptor[0]<=scan_quad_pending_descriptor[1];
@@ -1965,7 +1978,7 @@ module s24_sprite (
                     end else begin
                         scan_quad_pending_count<=0;
                         if(scan_quad_last) begin
-                            render_pos<=active_count;
+                            render_pos<=active_append_pos;
                             state<=S_RENDER_PREFETCH;
                         end else begin
                             scan_pos<=scan_next_pos;

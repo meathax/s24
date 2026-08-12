@@ -14,6 +14,7 @@ module tb_sprite_bank_ownership;
     logic [10:0] rank0,rank1,rank2,rank3;
     logic mem_req;
     logic [26:4] mem_addr;
+    integer idle_offset;
 
     always #5 clk=~clk;
 
@@ -119,7 +120,41 @@ module tb_sprite_bank_ownership;
         assert(!dut.bank_filling[2] && dut.line_valid[2])
             else $fatal(1,"same-frame fill did not become display-ready");
 
-        $display("PASS sprite bank ownership, frame-epoch retirement, and normal completion");
+        // A boundary can arrive at any producer phase.  Exercise a bounded
+        // set of late returns to S_IDLE and require the pending refresh to be
+        // consumed on the first idle clock, independent of the offset.
+        for(idle_offset=0;idle_offset<32;idle_offset=idle_offset+1) begin
+            @(negedge clk);
+            dut.state=dut.S_DATA_WAIT;
+            dut.list_cache_valid=1;
+            dut.cache_refresh_pending=0;
+            hcount=10'd655;vcount=10'd383;ce_pixel=1;
+            @(posedge clk); #1;
+            ce_pixel=0;
+            repeat(idle_offset) @(posedge clk);
+            assert(dut.cache_refresh_pending)
+                else $fatal(1,"frame refresh lost at idle offset %0d",idle_offset);
+            @(negedge clk);
+            dut.state=dut.S_IDLE;
+            @(posedge clk); #1;
+            assert(dut.state==dut.S_LIST_REQ && !dut.list_cache_valid)
+                else $fatal(1,"late S_IDLE did not recover at offset %0d",idle_offset);
+        end
+
+        // The 1024-entry active RAM must saturate rather than silently
+        // wrapping the 1025th descriptor over entry zero.
+        @(negedge clk);
+        dut.active_count=13'd1024;
+        dut.state=dut.S_SCAN_SECOND;
+        dut.scan_second_last=1;
+        #1;
+        assert(!dut.active_cache_write_enable)
+            else $fatal(1,"full active cache wrapped a write to address zero");
+        @(posedge clk); #1;
+        assert(dut.active_count==13'd1024 && dut.render_pos==13'd1023)
+            else $fatal(1,"active cache did not saturate safely");
+
+        $display("PASS sprite bank ownership, late-boundary recovery, and active-cache saturation");
         $finish;
     end
 endmodule

@@ -23,21 +23,12 @@ $sources=@(
 	@('verif/tb_sprite_mame_line.sv','tb_sprite_mame_line.sv'),
 	@('verif/sprite_mame_line_main.cpp','sprite_mame_line_main.cpp')
 )|ForEach-Object{$dest=$modelRoot+'/'+$_[1];Copy-Item -LiteralPath $_[0] -Destination $dest -Force;$dest}
-$pkg='C:/msys64/ucrt64/bin/pkg-config.exe'
-$cf=(& $pkg --cflags sdl2)-replace'-Dmain=SDL_main',''
-$lf=(& $pkg --libs sdl2)-replace'-lmingw32',''-replace'-mwindows',''-replace'-lSDL2main',''
-$guard=Join-Path $ModelDirectory 'sdl_verilator_guard.exe'
-& 'C:/msys64/ucrt64/bin/g++.exe' 'verif/sdl_verilator_guard.cpp' '-DSDL_MAIN_HANDLED' `
-	($cf-split'\s+'|Where-Object{$_}) ($lf-split'\s+'|Where-Object{$_}) '-o' $guard
-if($LASTEXITCODE-ne 0){exit $LASTEXITCODE}
-$gp=Start-Process -FilePath $guard -PassThru
-Start-Sleep -Milliseconds 300
 $args=@('--cc','--exe','--build','--savable','--assert','-O3','--top-module',
 	'tb_sprite_mame_line','--Mdir',$ModelDirectory,'--Wno-fatal','-CFLAGS',
-	"-O3 -march=native -D_GLIBCXX_USE_CXX11_ABI=0 -DSDL_MAIN_HANDLED $cf",'-LDFLAGS',$lf,
+	'-O3 -march=native -D_GLIBCXX_USE_CXX11_ABI=0',
 	'-MAKEFLAGS','CXX=C:/msys64/ucrt64/bin/g++.exe LINK=C:/msys64/ucrt64/bin/g++.exe AR=C:/msys64/ucrt64/bin/ar.exe SHELL=C:/msys64/usr/bin/sh.exe',
 	'--threads','1','--build-jobs','4','--verilate-jobs','1')+$sources
-try{& $vs @args;$buildExit=$LASTEXITCODE}finally{if($gp-and-not $gp.HasExited){Stop-Process -Id $gp.Id}}
+& $vs @args;$buildExit=$LASTEXITCODE
 if($buildExit-ne 0){exit $buildExit}
 & $vs sim (Join-Path $ModelDirectory 'Vtb_sprite_mame_line.exe') `
 	"+MEM_LATENCY=$MemoryLatency" "+CACHE_ENTRIES=$CacheEntries" "+SAVE=$Checkpoint"
