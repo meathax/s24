@@ -1,0 +1,13 @@
+crkdown reset-barrier clean assertions=on
+crkdown MIXER write cpu=0 addr=404018 reg=12 data=0000 be=01 A=000428:13fc B=000000:0000
+crkdown IRQ write cpu=0 addr=a00004 reg=2 data=0808 be=01 timer=000 mode=0 allowb=00
+crkdown IRQ write cpu=0 addr=a00006 reg=3 data=0000 be=01 timer=000 mode=0 allowb=00
+crkdown milestone target=8 clocks=100000 Ainsn=2513 Binsn=0 boot=90 rom=0 floppy=0 media=0/0 p4=0/0 fdcbytes=0 tracks=0 checksum=811c9dc5 lasttrack=00000000 writes=828 fwwrites=0 palette=0 tilewr=0 mixerwr=1 charwr=0 spritewr=0 tilereq=0 spritereq=1 cpuB=0 release=0 dec=0/0 visible=0 tilepx=0 spritepx=0 mixedpx=0 blankpx=0 unknownpx=0 frames=0/10 attract=0/120 changes=0 framepx=0 code=0 A=000492:51cb B=000000:0000 fdstate=00 slow=0 raster=501,48
+crkdown mixer regs: 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+crkdown tile controls: h=0000/0000/0000/0000 v=0000/0000/0000/0000
+crkdown irq timer: data=000 value=000 mode=0 allow_a=08 allow_b=00 pend_a=0 pend_b=0 vblank=0 sprite=0 frc_a=0 frc_b=0
+PASS tb_gground_boot crkdown game milestone 8
+- verif\tb_gground_boot.sv:1301: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 1ms; walltime 1.816 s; speed 550.956 us/s
+- Verilator: cpu 0.344 s on 1 threads; allocated 16 MB

@@ -1,0 +1,246 @@
+crkdown reset-barrier clean assertions=on
+crkdown MIXER write cpu=0 addr=404018 reg=12 data=0000 be=01 A=000428:13fc B=000000:0000
+crkdown IRQ write cpu=0 addr=a00004 reg=2 data=0808 be=01 timer=000 mode=0 allowb=00
+crkdown IRQ write cpu=0 addr=a00006 reg=3 data=0000 be=01 timer=000 mode=0 allowb=00
+crkdown progress clocks=50000000/720000000 target=1 Ainsn=1308118 Binsn=0 media=0/0 p4=0/0 bytes=0 tracks=0 checksum=811c9dc5 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=298,388
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=1 phi2=0 b_phi1=1 b_phi2=0 b_pc=000000
+crkdown first TILE cpu=0 addr=200000 data=0000 be=11
+crkdown first CHAR cpu=0 addr=280000 data=0000 be=11
+crkdown first PALETTE cpu=0 addr=400000 data=0000 be=11
+crkdown first SPRITE cpu=0 addr=600000 data=0000 be=11
+crkdown progress clocks=100000000/720000000 target=1 Ainsn=2619211 Binsn=0 media=0/0 p4=0/0 bytes=0 tracks=0 checksum=811c9dc5 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=629,354
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=0 b_phi1=0 b_phi2=0 b_pc=000000
+crkdown progress clocks=150000000/720000000 target=1 Ainsn=3898045 Binsn=0 media=0/0 p4=0/0 bytes=0 tracks=0 checksum=811c9dc5 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=303,321
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=1 b_phi1=0 b_phi2=1 b_pc=000000
+crkdown MIXER write cpu=0 addr=40401a reg=13 data=0101 be=01 A=0005c6:13fc B=000000:0000
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=ff00 be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=0bf5 be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=783f be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=5d4f be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=425f be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=276f be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=0c7f be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=f9bd be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=decd be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=c3dd be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=a8ed be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=8dfd be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=730d be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=581d be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=3d2d be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=223d be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=074d be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=0237 be=01 timer=000 mode=0 allowb=00
+crkdown MIXER write cpu=0 addr=40401a reg=13 data=0000 be=01 A=000622:13fc B=000000:0000
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=ffff be=01 timer=000 mode=0 allowb=00
+crkdown IRQ  read cpu=0 addr=a00004 reg=2 data=e164 be=01 timer=000 mode=0 allowb=00
+crkdown progress clocks=200000000/720000000 target=1 Ainsn=5014992 Binsn=0 media=0/0 p4=0/0 bytes=0 tracks=0 checksum=811c9dc5 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=634,287
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=1 phi2=0 b_phi1=1 b_phi2=0 b_pc=000000
+crkdown FDC command=96 side/track=0/1 position=0 span=0 A=001664:1b40
+crkdown FDC side/track=0/1 image=2097152 D0=00000096 D1=00000080 D2=00002cff D4=00000080 D6=00000000 D7=00000002 A0=ffffc000 A1=fffffc00
+crkdown FDC transfer=1 bytes=11520 checksum=6c2b50a5 side/track=0/1
+crkdown progress clocks=250000000/720000000 target=1 Ainsn=5990348 Binsn=0 media=11520/11520 p4=5824/5824 bytes=11520 tracks=1 checksum=6c2b50a5 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=309,254
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=0 b_phi1=0 b_phi2=0 b_pc=000000
+crkdown FDC command=96 side/track=0/66 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/66 image=2097152 D0=00000096 D1=00000402 D2=00002cff D4=00000402 D6=00822600 D7=00000084 A0=ffffc000 A1=00f00000
+crkdown FDC transfer=2 bytes=11520 checksum=ef16470d side/track=0/66
+crkdown FDC command=9e side/track=1/66 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/66 image=2097152 D0=0000009e D1=00037900 D2=00032cff D4=00037bfe D6=00000000 D7=00000085 A0=ffffc000 A1=00f082fe
+crkdown FDC transfer=3 bytes=11520 checksum=e024bbc9 side/track=1/66
+crkdown FDC command=96 side/track=0/67 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/67 image=2097152 D0=00000096 D1=00034c00 D2=00032cff D4=00037bfe D6=00000000 D7=00000086 A0=ffffc000 A1=00f0affe
+crkdown FDC transfer=4 bytes=11520 checksum=7525e786 side/track=0/67
+crkdown FDC command=9e side/track=1/67 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/67 image=2097152 D0=0000009e D1=00031f00 D2=00032cff D4=00037bfe D6=00000000 D7=00000087 A0=ffffc000 A1=00f0dcfe
+crkdown FDC transfer=5 bytes=11520 checksum=aa5175db side/track=1/67
+crkdown FDC command=96 side/track=0/68 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/68 image=2097152 D0=00000096 D1=0002f200 D2=00022cff D4=00037bfe D6=00000000 D7=00000088 A0=ffffc000 A1=00f109fe
+crkdown FDC transfer=6 bytes=11520 checksum=32386c67 side/track=0/68
+crkdown FDC command=9e side/track=1/68 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/68 image=2097152 D0=0000009e D1=0002c500 D2=00022cff D4=00037bfe D6=00000000 D7=00000089 A0=ffffc000 A1=00f136fe
+crkdown FDC transfer=7 bytes=11520 checksum=d19139ae side/track=1/68
+crkdown FDC command=96 side/track=0/69 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/69 image=2097152 D0=00000096 D1=00029800 D2=00022cff D4=00037bfe D6=00000000 D7=0000008a A0=ffffc000 A1=00f163fe
+crkdown progress clocks=300000000/720000000 target=1 Ainsn=6751304 Binsn=0 media=91048/91048 p4=45588/45588 bytes=91048 tracks=7 checksum=0867e236 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=639,220
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=1 b_phi1=0 b_phi2=1 b_pc=000000
+crkdown FDC transfer=8 bytes=11520 checksum=08003e0a side/track=0/69
+crkdown FDC command=9e side/track=1/69 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/69 image=2097152 D0=0000009e D1=00026b00 D2=00022cff D4=00037bfe D6=00000000 D7=0000008b A0=ffffc000 A1=00f190fe
+crkdown FDC transfer=9 bytes=11520 checksum=75be5fe4 side/track=1/69
+crkdown FDC command=96 side/track=0/70 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/70 image=2097152 D0=00000096 D1=00023e00 D2=00022cff D4=00037bfe D6=00000000 D7=0000008c A0=ffffc000 A1=00f1bdfe
+crkdown FDC transfer=10 bytes=11520 checksum=f82e6673 side/track=0/70
+crkdown FDC command=9e side/track=1/70 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/70 image=2097152 D0=0000009e D1=00021100 D2=00022cff D4=00037bfe D6=00000000 D7=0000008d A0=ffffc000 A1=00f1eafe
+crkdown FDC transfer=11 bytes=11520 checksum=c76214ab side/track=1/70
+crkdown FDC command=96 side/track=0/71 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/71 image=2097152 D0=00000096 D1=0001e400 D2=00012cff D4=00037bfe D6=00000000 D7=0000008e A0=ffffc000 A1=00f217fe
+crkdown FDC transfer=12 bytes=11520 checksum=a7986fb1 side/track=0/71
+crkdown FDC command=9e side/track=1/71 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/71 image=2097152 D0=0000009e D1=0001b700 D2=00012cff D4=00037bfe D6=00000000 D7=0000008f A0=ffffc000 A1=00f244fe
+crkdown FDC transfer=13 bytes=11520 checksum=da81bf3d side/track=1/71
+crkdown FDC command=96 side/track=0/72 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/72 image=2097152 D0=00000096 D1=00018a00 D2=00012cff D4=00037bfe D6=00000000 D7=00000090 A0=ffffc000 A1=00f271fe
+crkdown FDC transfer=14 bytes=11520 checksum=52d662b6 side/track=0/72
+crkdown FDC command=9e side/track=1/72 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/72 image=2097152 D0=0000009e D1=00015d00 D2=00012cff D4=00037bfe D6=00000000 D7=00000091 A0=ffffc000 A1=00f29efe
+crkdown progress clocks=350000000/720000000 target=1 Ainsn=7517324 Binsn=0 media=166576/166576 p4=83352/83352 bytes=166576 tracks=14 checksum=aefe87e1 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=314,187
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=1 bus_cpu=0 bus_ack=1 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=1 phi2=0 b_phi1=1 b_phi2=0 b_pc=000000
+crkdown FDC transfer=15 bytes=11520 checksum=72629150 side/track=1/72
+crkdown FDC command=96 side/track=0/73 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/73 image=2097152 D0=00000096 D1=00013000 D2=00012cff D4=00037bfe D6=00000000 D7=00000092 A0=ffffc000 A1=00f2cbfe
+crkdown FDC transfer=16 bytes=11520 checksum=fbfac7ee side/track=0/73
+crkdown FDC command=9e side/track=1/73 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/73 image=2097152 D0=0000009e D1=00010300 D2=00012cff D4=00037bfe D6=00000000 D7=00000093 A0=ffffc000 A1=00f2f8fe
+crkdown FDC transfer=17 bytes=11520 checksum=26561ba2 side/track=1/73
+crkdown FDC command=96 side/track=0/74 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/74 image=2097152 D0=00000096 D1=0000d600 D2=00002cff D4=00037bfe D6=00000000 D7=00000094 A0=ffffc000 A1=00f325fe
+crkdown FDC transfer=18 bytes=11520 checksum=cfa0dfe5 side/track=0/74
+crkdown FDC command=9e side/track=1/74 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/74 image=2097152 D0=0000009e D1=0000a900 D2=00002cff D4=00037bfe D6=00000000 D7=00000095 A0=ffffc000 A1=00f352fe
+crkdown FDC transfer=19 bytes=11520 checksum=50339ee5 side/track=1/74
+crkdown FDC command=96 side/track=0/75 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/75 image=2097152 D0=00000096 D1=00007c00 D2=00002cff D4=00037bfe D6=00000000 D7=00000096 A0=ffffc000 A1=00f37ffe
+crkdown FDC transfer=20 bytes=11520 checksum=4ba106c5 side/track=0/75
+crkdown FDC command=9e side/track=1/75 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/75 image=2097152 D0=0000009e D1=00004f00 D2=00002cff D4=00037bfe D6=00000000 D7=00000097 A0=ffffc000 A1=00f3acfe
+crkdown FDC transfer=21 bytes=11520 checksum=4ba106c5 side/track=1/75
+crkdown FDC command=96 side/track=0/76 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/76 image=2097152 D0=00000096 D1=00002200 D2=00002cff D4=00037bfe D6=00000000 D7=00000098 A0=ffffc000 A1=00f3d9fe
+crkdown progress clocks=400000000/720000000 target=1 Ainsn=8283343 Binsn=0 media=242104/242104 p4=121116/121116 bytes=242104 tracks=21 checksum=195ffadd release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=645,153
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=0 b_phi1=0 b_phi2=0 b_pc=000000
+crkdown FDC transfer=22 bytes=11520 checksum=3630b541 side/track=0/76
+crkdown FDC command=9e side/track=1/76 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/76 image=2097152 D0=0000009e D1=0000ab00 D2=00002cff D4=0000b600 D6=00000000 D7=00000099 A0=ffffc000 A1=00fd8b00
+crkdown FDC transfer=23 bytes=11520 checksum=c4da7d93 side/track=1/76
+crkdown FDC command=96 side/track=0/77 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/77 image=2097152 D0=00000096 D1=00007e00 D2=00002cff D4=0000b600 D6=00000000 D7=0000009a A0=ffffc000 A1=00fdb800
+crkdown FDC transfer=24 bytes=11520 checksum=e6a3cf33 side/track=0/77
+crkdown FDC command=9e side/track=1/77 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/77 image=2097152 D0=0000009e D1=00005100 D2=00002cff D4=0000b600 D6=00000000 D7=0000009b A0=ffffc000 A1=00fde500
+crkdown FDC transfer=25 bytes=11520 checksum=5cf65023 side/track=1/77
+crkdown FDC command=96 side/track=0/78 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/78 image=2097152 D0=00000096 D1=00002400 D2=00002cff D4=0000b600 D6=00000000 D7=0000009c A0=ffffc000 A1=00fe1200
+crkdown FDC transfer=26 bytes=11520 checksum=ff7d9b00 side/track=0/78
+crkdown FDC command=9e side/track=1/78 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/78 image=2097152 D0=0000009e D1=00008700 D2=00002cff D4=00009000 D6=00000000 D7=0000009d A0=ffffc000 A1=000809c0
+crkdown FDC transfer=27 bytes=11520 checksum=ed439911 side/track=1/78
+crkdown FDC command=96 side/track=0/79 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/79 image=2097152 D0=00000096 D1=00005a00 D2=00002cff D4=00009000 D6=00000000 D7=0000009e A0=ffffc000 A1=000836c0
+crkdown progress clocks=450000000/720000000 target=1 Ainsn=9045780 Binsn=0 media=320054/320054 p4=160091/160091 bytes=320054 tracks=27 checksum=69526ae7 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=319,120
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=1 b_phi1=0 b_phi2=1 b_pc=000000
+crkdown FDC transfer=28 bytes=11520 checksum=58e31e01 side/track=0/79
+crkdown FDC command=9e side/track=1/79 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/79 image=2097152 D0=0000009e D1=00002d00 D2=00002cff D4=00009000 D6=00000000 D7=0000009f A0=ffffc000 A1=000863c0
+crkdown FDC transfer=29 bytes=11520 checksum=39f254e5 side/track=1/79
+crkdown FDC command=9e side/track=1/63 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/63 image=2097152 D0=0000009e D1=00000020 D2=00002cff D4=00000020 D6=007d0700 D7=0000007f A0=ffffd000 A1=ffff8e00
+crkdown FDC transfer=30 bytes=11520 checksum=a2b7f270 side/track=1/63
+crkdown FDC command=96 side/track=0/32 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/32 image=2097152 D0=00000096 D1=00001000 D2=00002cff D4=00001000 D6=003e1a00 D7=00000040 A0=ffffd000 A1=fffede00
+crkdown progress clocks=500000000/720000000 target=1 Ainsn=9985399 Binsn=0 media=348706/348706 p4=174481/174481 bytes=348706 tracks=30 checksum=10322e88 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=650,86
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=1 phi2=0 b_phi1=1 b_phi2=0 b_pc=000000
+crkdown FDC transfer=31 bytes=11520 checksum=896f6150 side/track=0/32
+crkdown MIXER write cpu=0 addr=40401a reg=13 data=0101 be=01 A=08014c:13c0 B=000000:0000
+crkdown MIXER write cpu=0 addr=40401a reg=13 data=0000 be=01 A=0801f0:13c0 B=000000:0000
+crkdown FDC command=9e side/track=1/32 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/32 image=2097152 D0=0000009e D1=0000ed00 D2=00002cff D4=0000f000 D6=00000000 D7=00000041 A0=ffffd000 A1=00281300
+crkdown FDC transfer=32 bytes=11520 checksum=bd33144c side/track=1/32
+crkdown FDC command=96 side/track=0/33 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/33 image=2097152 D0=00000096 D1=0000c000 D2=00002cff D4=0000f000 D6=00000000 D7=00000042 A0=ffffd000 A1=00284000
+crkdown FDC transfer=33 bytes=11520 checksum=37a8ba30 side/track=0/33
+crkdown FDC command=9e side/track=1/33 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/33 image=2097152 D0=0000009e D1=00009300 D2=00002cff D4=0000f000 D6=00000000 D7=00000043 A0=ffffd000 A1=00286d00
+crkdown FDC transfer=34 bytes=11520 checksum=bec94a44 side/track=1/33
+crkdown FDC command=96 side/track=0/34 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/34 image=2097152 D0=00000096 D1=00006600 D2=00002cff D4=0000f000 D6=00000000 D7=00000044 A0=ffffd000 A1=00289a00
+crkdown FDC transfer=35 bytes=11520 checksum=99e4e196 side/track=0/34
+crkdown FDC command=9e side/track=1/34 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/34 image=2097152 D0=0000009e D1=00003900 D2=00002cff D4=0000f000 D6=00000000 D7=00000045 A0=ffffd000 A1=0028c700
+crkdown FDC transfer=36 bytes=11520 checksum=bf25290a side/track=1/34
+crkdown FDC command=96 side/track=0/35 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/35 image=2097152 D0=00000096 D1=00000c00 D2=00002cff D4=0000f000 D6=00000000 D7=00000046 A0=ffffd000 A1=0028f400
+crkdown progress clocks=550000000/720000000 target=1 Ainsn=10748045 Binsn=0 media=424962/424962 p4=212609/212609 bytes=424962 tracks=36 checksum=48024d5d release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=325,53
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=0 b_phi1=0 b_phi2=0 b_pc=000000
+crkdown FDC transfer=37 bytes=11520 checksum=124e4913 side/track=0/35
+crkdown FDC command=9e side/track=1/63 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/63 image=2097152 D0=0000009e D1=00000120 D2=00002cff D4=00000120 D6=007d0800 D7=0000007f A0=ffffd000 A1=ffff8e20
+crkdown FDC transfer=38 bytes=11520 checksum=a2b7f270 side/track=1/63
+crkdown FDC command=96 side/track=0/1 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/1 image=2097152 D0=00000096 D1=00014cc0 D2=00012cff D4=00014cc0 D6=00000080 D7=00000002 A0=ffffd000 A1=0060a000
+crkdown FDC transfer=39 bytes=11520 checksum=6c2b50a5 side/track=0/1
+crkdown FDC command=9e side/track=1/1 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/1 image=2097152 D0=0000009e D1=00012040 D2=00012cff D4=00014cc0 D6=00000000 D7=00000003 A0=ffffd000 A1=0060cc80
+crkdown FDC transfer=40 bytes=11520 checksum=d2e22ea1 side/track=1/1
+crkdown FDC command=96 side/track=0/2 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/2 image=2097152 D0=00000096 D1=0000f340 D2=00002cff D4=00014cc0 D6=00000000 D7=00000004 A0=ffffd000 A1=0060f980
+crkdown FDC transfer=41 bytes=11520 checksum=e16b8119 side/track=0/2
+crkdown FDC command=9e side/track=1/2 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/2 image=2097152 D0=0000009e D1=0000c640 D2=00002cff D4=00014cc0 D6=00000000 D7=00000005 A0=ffffd000 A1=00612680
+crkdown FDC transfer=42 bytes=11520 checksum=b7ba4a1b side/track=1/2
+crkdown FDC command=96 side/track=0/3 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/3 image=2097152 D0=00000096 D1=00009940 D2=00002cff D4=00014cc0 D6=00000000 D7=00000006 A0=ffffd000 A1=00615380
+crkdown FDC transfer=43 bytes=11520 checksum=a4f3a61e side/track=0/3
+crkdown FDC command=9e side/track=1/3 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/3 image=2097152 D0=0000009e D1=00006c40 D2=00002cff D4=00014cc0 D6=00000000 D7=00000007 A0=ffffd000 A1=00618080
+crkdown progress clocks=600000000/720000000 target=1 Ainsn=11508524 Binsn=0 media=504254/504254 p4=252411/252411 bytes=504254 tracks=43 checksum=79aa4ab7 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=655,19
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=1 b_phi1=0 b_phi2=1 b_pc=000000
+crkdown FDC transfer=44 bytes=11520 checksum=7638f566 side/track=1/3
+crkdown FDC command=96 side/track=0/4 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/4 image=2097152 D0=00000096 D1=00003f40 D2=00002cff D4=00014cc0 D6=00000000 D7=00000008 A0=ffffd000 A1=0061ad80
+crkdown FDC transfer=45 bytes=11520 checksum=285e3188 side/track=0/4
+crkdown FDC command=9e side/track=1/4 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/4 image=2097152 D0=0000009e D1=00001240 D2=00002cff D4=00014cc0 D6=00000000 D7=00000009 A0=ffffd000 A1=0061da80
+crkdown FDC transfer=46 bytes=11520 checksum=a5765e4d side/track=1/4
+crkdown FDC command=96 side/track=0/15 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/15 image=2097152 D0=00000096 D1=00001300 D2=00002cff D4=00001300 D6=001c0300 D7=0000001e A0=ffffd000 A1=00208000
+crkdown FDC transfer=47 bytes=11520 checksum=bc90d5cd side/track=0/15
+crkdown FDC command=9e side/track=1/18 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/18 image=2097152 D0=0000009e D1=00000d00 D2=00002cff D4=00000d00 D6=00230a20 D7=00000025 A0=ffffd000 A1=00209300
+crkdown FDC transfer=48 bytes=11520 checksum=e58b14d9 side/track=1/18
+crkdown FDC command=96 side/track=0/19 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/19 image=2097152 D0=00000096 D1=00000a10 D2=00002cff D4=00001ff0 D6=00000000 D7=00000026 A0=ffffd000 A1=0020b5f0
+crkdown FDC transfer=49 bytes=11520 checksum=7b806e74 side/track=0/19
+crkdown FDC command=96 side/track=0/13 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/13 image=2097152 D0=00000096 D1=00006200 D2=00002cff D4=00006200 D6=00180940 D7=0000001a A0=ffffd000 A1=00fcb100
+crkdown FDC transfer=50 bytes=11520 checksum=2a64f278 side/track=0/13
+crkdown FDC command=9e side/track=1/13 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/13 image=2097152 D0=0000009e D1=00003e40 D2=00002cff D4=00006200 D6=00000000 D7=0000001b A0=ffffd000 A1=00fcd4c0
+crkdown progress clocks=650000000/720000000 target=1 Ainsn=12267219 Binsn=0 media=585484/585484 p4=293254/293254 bytes=585484 tracks=50 checksum=590318e1 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=330,410
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=1 phi2=0 b_phi1=1 b_phi2=0 b_pc=000000
+crkdown FDC transfer=51 bytes=11520 checksum=017a312c side/track=1/13
+crkdown FDC command=96 side/track=0/14 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/14 image=2097152 D0=00000096 D1=00001140 D2=00002cff D4=00006200 D6=00000000 D7=0000001c A0=ffffd000 A1=00fd01c0
+crkdown FDC transfer=52 bytes=11520 checksum=1aeda370 side/track=0/14
+crkdown FDC command=96 side/track=0/54 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/54 image=2097152 D0=00000096 D1=000068a0 D2=00002cff D4=000068a0 D6=006a1e00 D7=0000006c A0=ffffd000 A1=00fd1300
+crkdown FDC transfer=53 bytes=11520 checksum=c8e81d1b side/track=0/54
+crkdown FDC command=9e side/track=1/54 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/54 image=2097152 D0=0000009e D1=000059a0 D2=00002cff D4=000068a0 D6=00000000 D7=0000006d A0=ffffd000 A1=00fd2200
+crkdown FDC transfer=54 bytes=11520 checksum=d667a49a side/track=1/54
+crkdown FDC command=96 side/track=0/55 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/55 image=2097152 D0=00000096 D1=00002ca0 D2=00002cff D4=000068a0 D6=00000000 D7=0000006e A0=ffffd000 A1=00fd4f00
+crkdown FDC transfer=55 bytes=11520 checksum=56adc542 side/track=0/55
+crkdown FDC command=9e side/track=1/65 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=1/65 image=2097152 D0=0000009e D1=000000e0 D2=00002cff D4=000000e0 D6=00810300 D7=00000083 A0=ffffd000 A1=00fd7ba0
+crkdown FDC transfer=56 bytes=11520 checksum=94bd331e side/track=1/65
+crkdown MIXER write cpu=0 addr=40401a reg=13 data=0101 be=01 A=080210:13c0 B=000000:0000
+crkdown MIXER write cpu=0 addr=40401a reg=13 data=0000 be=01 A=08023c:13c0 B=000000:0000
+crkdown FDC command=96 side/track=0/0 position=11519 span=0 A=001664:1b40
+crkdown FDC side/track=0/0 image=2097152 D0=00000096 D1=000000a8 D2=00002cff D4=000000e0 D6=00000000 D7=00000000 A0=ffffd000 A1=ffffb000
+crkdown FDC transfer=57 bytes=11520 checksum=32ae2a8e side/track=0/0
+crkdown FDC command=9e side/track=1/0 position=11519 span=0 A=0016de:1b40
+crkdown FDC side/track=1/0 image=2097152 D0=0000009e D1=0000000e D2=00002cff D4=000000e0 D6=00000000 D7=00000001 A0=ffffd000 A1=ffffb000
+crkdown progress clocks=700000000/720000000 target=1 Ainsn=13052316 Binsn=0 media=665490/665490 p4=333385/333385 bytes=665490 tracks=57 checksum=e08f7535 release=0 frames=0 attract=0/120 changes=0 last=0 unknown=0 cap=0 raster=5,377
+crkdown cpuB-diag fstate=0 busy=0 done=0 b_as_n=1 b_dtack_n=1 bus_req=0 bus_cpu=0 bus_ack=0 b_mem_req=0 b_mem_ack=0 bc_hit=0 bc_fill=0 bc_snoop=0 bc_window=0 bc_q_valid=1 io_cnt1=0 sub_reset=0 sub_reset_count=0 gslow=0 gslow_count=0 phi1=0 phi2=0 b_phi1=0 b_phi2=0 b_pc=000000
+crkdown FDC transfer=58 bytes=11520 checksum=32ae2a8e side/track=1/0
+crkdown CNT1 release #1 at clocks=701544209
+crkdown milestone target=1 clocks=701544272 Ainsn=13079513 Binsn=1 boot=287520 rom=0 floppy=334720 media=668160/668160 p4=334720/334720 fdcbytes=668160 tracks=58 checksum=cdacc2b2 lasttrack=32ae2a8e writes=3203996 fwwrites=0 palette=18432 tilewr=87720 mixerwr=7 charwr=201600 spritewr=347328 tilereq=0 spritereq=47 cpuB=1 release=1 dec=0/0 visible=0 tilepx=21 spritepx=0 mixedpx=0 blankpx=0 unknownpx=0 frames=0/10 attract=0/120 changes=0 framepx=0 code=0 A=0808d8:7000 B=000000:0000 fdstate=00 slow=0 raster=458,313
+crkdown mixer regs: 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+crkdown tile controls: h=0000/0000/0000/0000 v=0000/0000/0000/0000
+crkdown irq timer: data=000 value=000 mode=0 allow_a=08 allow_b=00 pend_a=0 pend_b=0 vblank=0 sprite=0 frc_a=0 frc_b=0
+PASS tb_gground_boot crkdown game milestone 1
+- verif\tb_gground_boot.sv:1295: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 7s; walltime 1235.709 s; speed 5.677 ms/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 16 MB

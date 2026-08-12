@@ -42,6 +42,12 @@ module tb_sprite_mame_line(input logic clk,output logic test_failed);
 			rtl_cache_index=tag[7:0]^{2'b00,tag[13:8]};
 		end
 	endfunction
+	function automatic [13:0] rtl_cache_reconstruct(
+		input logic [7:0] index,input logic [5:0] tag_high);
+		begin
+			rtl_cache_reconstruct={tag_high,index^{2'b00,tag_high}};
+		end
+	endfunction
 
 	initial begin
 		// Every pair below collided in the former low-byte-only cache. Keep the
@@ -51,6 +57,10 @@ module tb_sprite_mame_line(input logic clk,output logic test_failed);
 			assert(rtl_cache_index(i[13:0])!=
 			       rtl_cache_index(i[13:0]+14'h0100))
 				else $fatal(1,"sprite cache alias contract index=%0d",i);
+		for(i=0;i<16384;i=i+1)
+			assert(rtl_cache_reconstruct(rtl_cache_index(i[13:0]),i[13:8])==
+			       i[13:0])
+				else $fatal(1,"sprite cache tag reconstruction tag=%0h",i);
 		if(!$value$plusargs("SPRITE_HEX=%s",sprite_hex_path))
 			sprite_hex_path=".build/mame-sspirits-sprite1200.hex";
 		if(!$value$plusargs("MEM_LATENCY=%d",mem_latency)) mem_latency=13;
@@ -184,7 +194,8 @@ module tb_sprite_mame_line(input logic clk,output logic test_failed);
 								test_failed<=1;
 								$display("FAIL sprite burst cache had no valid snoop target");
 							end else begin
-								cache_invalidate_tag<=dut.burst_cache_tag[snoop_pick];
+								cache_invalidate_tag<=rtl_cache_reconstruct(
+									snoop_pick[7:0],dut.burst_cache_tag[snoop_pick]);
 								cache_invalidate<=1;
 								snoop_check_pending<=1;
 							end

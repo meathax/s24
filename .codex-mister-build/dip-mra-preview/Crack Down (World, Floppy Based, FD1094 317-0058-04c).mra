@@ -1,0 +1,50 @@
+<misterromdescription>
+  <name>Crack Down (World, Floppy Based, FD1094 317-0058-04c)</name>
+  <homebrew>no</homebrew>
+  <bootleg>no</bootleg>
+  <mameversion>0288</mameversion>
+  <setname>crkdown</setname>
+  <year>1989</year>
+  <manufacturer>Sega</manufacturer>
+  <rbf>Arcade-SegaSystem24</rbf>
+  <resolution>15kHz</resolution>
+  <rotation>horizontal</rotation>
+  <joystick>8-way</joystick>
+  <buttons default="A,B,Start,Select,R,L,Y" names="Attack,Smart Bomb,-,-,-,-,Start,Coin,Service,Test,Pause"/>
+  <switches default="FF FF">
+    <dip bits="0" name="SW1:1 Coin A Rate 1/4" ids="On,Off"/>
+    <dip bits="1" name="SW1:2 Coin A Rate 2/4" ids="On,Off"/>
+    <dip bits="2" name="SW1:3 Coin A Rate 3/4" ids="On,Off"/>
+    <dip bits="3" name="SW1:4 Coin A Rate 4/4" ids="On,Off"/>
+    <dip bits="4" name="SW1:5 Coin B Rate 1/4" ids="On,Off"/>
+    <dip bits="5" name="SW1:6 Coin B Rate 2/4" ids="On,Off"/>
+    <dip bits="6" name="SW1:7 Coin B Rate 3/4" ids="On,Off"/>
+    <dip bits="7" name="SW1:8 Coin B Rate 4/4" ids="On,Off"/>
+    <dip bits="8" name="SW2:1 Unused 1" ids="On,Off"/>
+    <dip bits="9" name="SW2:2 Unused 2" ids="On,Off"/>
+    <dip bits="10" name="SW2:3 Unused 3" ids="On,Off"/>
+    <dip bits="11" name="SW2:4 Unused 4" ids="On,Off"/>
+    <dip bits="12" name="SW2:5 Unused 5" ids="On,Off"/>
+    <dip bits="13" name="SW2:6 Unused 6" ids="On,Off"/>
+    <dip bits="14" name="SW2:7 Coin Chute" ids="On,Off"/>
+    <dip bits="15" name="SW2:8 Flip Screen" ids="On,Off"/>
+  </switches>
+  <rom index="1" zip="crkdown.zip" md5="none">
+    <interleave output="16">
+      <part name="epr-12187.ic2" crc="e83783f3" map="01"/>
+      <part name="epr-12186.ic1" crc="ce76319d" map="10"/>
+    </interleave>
+  </rom>
+  <rom index="3" zip="crkdown.zip" md5="none">
+    <part name="ds3-5000-04c.img" crc="7d97ba5e"/>
+    <part repeat="253952">00</part>
+  </rom>
+  <nvram index="8" size="2097152"/>
+  <rom index="4" zip="crkdown.zip" md5="none">
+    <part name="317-0058-04c.key" crc="16e978cc"/>
+  </rom>
+  <rom index="0">
+    <part>0500002D00000000</part>
+  </rom>
+  <mratimestamp>20260808</mratimestamp>
+</misterromdescription>

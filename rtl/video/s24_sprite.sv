@@ -461,9 +461,9 @@ module s24_sprite (
     localparam logic [STACK_BITS:0] STACK_LAST = 13'd4095;
 
 	localparam int BURST_CACHE_ENTRIES=256;
-	// Keep the asynchronous tag probe in fabric; only the wide data payload
-	// consumes the four spare M10Ks budgeted for this cache.
-	(* ramstyle="logic" *) logic [13:0] burst_cache_tag [0:BURST_CACHE_ENTRIES-1];
+	// Keep the asynchronous high-tag probe in fabric; only the wide data
+	// payload consumes the four spare M10Ks budgeted for this cache.
+	(* ramstyle="logic" *) logic [5:0] burst_cache_tag [0:BURST_CACHE_ENTRIES-1];
 	(* ramstyle="logic" *) logic burst_cache_valid [0:BURST_CACHE_ENTRIES-1];
 	logic [13:0] burst_request_tag,burst_lookup_tag;
 	logic [7:0] burst_request_index,burst_lookup_index;
@@ -481,11 +481,12 @@ module s24_sprite (
 	// with the low byte aliases those adjacent banks onto one cache entry and
 	// can turn a heavily reused gameplay row into all misses. Fold the upper
 	// tag bits into the existing eight-bit index; this preserves capacity and
-	// M10K usage while retaining the complete tag for exact hit validation.
+	// M10K usage. Since index=L XOR {00,H}, the stored H and selected index
+	// uniquely identify L, so comparing H is still an exact full-tag match.
 	assign burst_request_index=burst_cache_index(burst_request_tag);
 	assign burst_lookup_index=burst_cache_index(burst_lookup_tag);
 	assign burst_cache_hit=burst_cache_valid[burst_request_index] &&
-		burst_cache_tag[burst_request_index]==burst_request_tag;
+		burst_cache_tag[burst_request_index]==burst_request_tag[13:8];
 	assign read_ack=mem_ack || cache_ack_pending;
 	assign read_data=cache_ack_pending ? burst_cache_q : mem_data;
 	assign burst_cache_fill=mem_req && mem_ack;
@@ -495,7 +496,7 @@ module s24_sprite (
 		.read_data(burst_cache_q),.write_addr(burst_lookup_index),
 		.write_data(mem_data),.write_enable(burst_cache_fill));
 
-	// Valid/tag storage is deliberately separate from the M10K data array.
+	// Valid/high-tag storage is deliberately separate from the M10K data array.
 	// Invalidation wins a same-burst fill, so a read racing a completed CPU
 	// store can never resurrect the older SDRAM contents.
 	always_ff @(posedge clk) begin
@@ -505,7 +506,7 @@ module s24_sprite (
 				burst_cache_valid[burst_cache_init]<=1'b0;
 		end else begin
 			if(burst_cache_fill) begin
-				burst_cache_tag[burst_lookup_index]<=burst_lookup_tag;
+				burst_cache_tag[burst_lookup_index]<=burst_lookup_tag[13:8];
 				burst_cache_valid[burst_lookup_index]<=1'b1;
 			end
 			if(cache_invalidate)
@@ -705,11 +706,11 @@ module s24_sprite (
     logic [10:0] source_row,source_column,total_rows,total_columns;
     logic signed [12:0] dest_y,dest_x;
     logic flipx,flipy;
-    logic [7:0] size_x_tiles,size_y_tiles;
+    logic [7:0] size_x_tiles;
     // Sprite dimensions are powers of two. Keep the encoded width exponent
     // and the vertical reverse mask beside the dimensions so the address
     // path does not rebuild a subtractor from the live render state.
-    logic [2:0] size_x_shift;
+    logic [2:0] size_x_shift,size_y_shift;
     logic [7:0] size_y_mask;
     logic [16:0] wanted_word;
     logic [3:0] wanted_nibble;
@@ -1014,7 +1015,9 @@ module s24_sprite (
         palette_cache_hit=palette_cache_valid[palette_cache_index] &&
                           palette_cache_tags[palette_cache_index]==palette_base;
         tile_base={d2[12:0],4'b0};
-        total_rows={size_y_tiles,3'b0};
+        // The height is a power of two. Retain its exponent instead of
+        // carrying an equivalent one-hot byte through the render path.
+        total_rows=11'd8 << size_y_shift;
         total_columns={size_x_tiles,3'b0};
 
         tile_y=source_row[10:3];
@@ -1588,7 +1591,7 @@ module s24_sprite (
             scan_quad_pending_clip[1]<=0;
             scan_quad_pending_clip[2]<=0;
             dest_y<=0;dest_x<=0;flipx<=0;flipy<=0;size_x_tiles<=1;
-            size_y_tiles<=1;size_x_shift<=0;size_y_mask<=0;
+            size_x_shift<=0;size_y_shift<=0;size_y_mask<=0;
         end else begin
             // Toggle the frame epoch at the last visible-line boundary even
             // if the renderer is still busy there. Defer list-cache refresh
@@ -2027,8 +2030,8 @@ module s24_sprite (
                     flipx<=render_w5[15];
                     flipy<=render_w4[15];
                     size_x_tiles<=8'd1<<render_w5[14:12];
-                    size_y_tiles<=8'd1<<render_w4[14:12];
                     size_x_shift<=render_w5[14:12];
+                    size_y_shift<=render_w4[14:12];
                     size_y_mask<=(8'd1<<render_w4[14:12])-8'd1;
                     if(!render_w0[13]) begin
                         zoomx_step<=(render_w1[7:0]==0)?9'h040:
@@ -2290,8 +2293,8 @@ module s24_sprite (
                         flipx<=render_w5[15];
                         flipy<=render_w4[15];
                         size_x_tiles<=8'd1<<render_w5[14:12];
-                        size_y_tiles<=8'd1<<render_w4[14:12];
                         size_x_shift<=render_w5[14:12];
+                        size_y_shift<=render_w4[14:12];
                         size_y_mask<=(8'd1<<render_w4[14:12])-8'd1;
                         if(!render_w0[13]) begin
                             zoomx_step<=(render_w1[7:0]==0)?9'h040:

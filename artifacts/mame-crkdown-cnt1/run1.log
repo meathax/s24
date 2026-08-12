@@ -1,0 +1,11 @@
+Getting list of Win32_PNPEntity devices failed. Error: 0x80041003
+XInput device detection failed. XInput won't be used. Error: 0x80041003
+S24MAME crkdown-io-write cpu=:maincpu time=0.000007000 pc=000410 addr=80001c data=0404 mask=00ff
+S24MAME crkdown-io-write cpu=:maincpu time=0.000009000 pc=000418 addr=800006 data=0000 mask=00ff
+S24MAME crkdown-io-write cpu=:maincpu time=0.000011000 pc=000420 addr=80001e data=8888 mask=00ff
+S24MAME crkdown-high-write cpu=:maincpu time=0.000021000 pc=000448 addr=a00004 data=0808 mask=00ff
+S24MAME crkdown-high-write cpu=:maincpu time=0.000023000 pc=000450 addr=a00006 data=0000 mask=00ff
+S24MAME crkdown-check frame=1 time=0.019024 mainpc=000490 subpc=000000
+S24MAME crkdown-check frame=121 time=2.105104 mainpc=0004ac subpc=000000
+S24MAME crkdown-check frame=241 time=4.191184 mainpc=0017de subpc=000000
+Average speed: 2346.46% (4 seconds)

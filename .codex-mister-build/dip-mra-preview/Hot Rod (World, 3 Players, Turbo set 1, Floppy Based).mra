@@ -1,0 +1,47 @@
+<misterromdescription>
+  <name>Hot Rod (World, 3 Players, Turbo set 1, Floppy Based)</name>
+  <homebrew>no</homebrew>
+  <bootleg>no</bootleg>
+  <mameversion>0288</mameversion>
+  <setname>hotrod</setname>
+  <year>1988</year>
+  <manufacturer>Sega</manufacturer>
+  <rbf>Arcade-SegaSystem24</rbf>
+  <resolution>15kHz</resolution>
+  <rotation>horizontal</rotation>
+  <joystick>Steering Wheel / Accelerator</joystick>
+  <buttons default="A,Start,Select,R,L,Y" names="Accelerator,-,-,-,-,-,Start,Coin,Service,Test,Pause"/>
+  <switches default="FF FF">
+    <dip bits="0" name="SW1:1 Coin A Rate 1/4" ids="On,Off"/>
+    <dip bits="1" name="SW1:2 Coin A Rate 2/4" ids="On,Off"/>
+    <dip bits="2" name="SW1:3 Coin A Rate 3/4" ids="On,Off"/>
+    <dip bits="3" name="SW1:4 Coin A Rate 4/4" ids="On,Off"/>
+    <dip bits="4" name="SW1:5 Coin B Rate 1/4" ids="On,Off"/>
+    <dip bits="5" name="SW1:6 Coin B Rate 2/4" ids="On,Off"/>
+    <dip bits="6" name="SW1:7 Coin B Rate 3/4" ids="On,Off"/>
+    <dip bits="7" name="SW1:8 Coin B Rate 4/4" ids="On,Off"/>
+    <dip bits="8" name="SW2:1 Unused 1" ids="On,Off"/>
+    <dip bits="9" name="SW2:2 Unused 2" ids="On,Off"/>
+    <dip bits="10" name="SW2:3 Unused 3" ids="On,Off"/>
+    <dip bits="11" name="SW2:4 Unused 4" ids="On,Off"/>
+    <dip bits="12" name="SW2:5 Unused 5" ids="On,Off"/>
+    <dip bits="13" name="SW2:6 Start Credit" ids="On,Off"/>
+    <dip bits="14" name="SW2:7 Coin Chute" ids="On,Off"/>
+    <dip bits="15" name="SW2:8 Flip Screen" ids="On,Off"/>
+  </switches>
+  <rom index="1" zip="hotrod.zip" md5="none">
+    <interleave output="16">
+      <part name="epr-11339.ic2" crc="75130e73" map="01"/>
+      <part name="epr-11338.ic1" crc="7d4a7ff3" map="10"/>
+    </interleave>
+  </rom>
+  <rom index="3" zip="hotrod.zip" md5="none">
+    <part name="ds3-5000-01d_3p_turbo.img" crc="842006fd"/>
+    <part repeat="172032">00</part>
+  </rom>
+  <nvram index="8" size="2097152"/>
+  <rom index="0">
+    <part>5900002F00000000</part>
+  </rom>
+  <mratimestamp>20260808</mratimestamp>
+</misterromdescription>

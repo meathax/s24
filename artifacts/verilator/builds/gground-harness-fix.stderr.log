@@ -1,0 +1,217 @@
+%Warning-PINMISSING: verif\tb_gground_boot.sv:905:53: Instance has missing pin: 'floppy_written'
+  905 |     s24_core #(.A_OPCACHE_ENABLE(A_OPCACHE_ENABLE)) dut(
+      |                                                     ^~~
+                     rtl\s24_core.sv:45:25: ... Location of port declaration
+   45 |     output logic        floppy_written,
+      |                         ^~~~~~~~~~~~~~
+                     ... For warning description see https://verilator.org/warn/PINMISSING?v=5.050
+                     ... Use "/* verilator lint_off PINMISSING */" and lint_on around source to disable this message.
+%Warning-TIMESCALEMOD: rtl\s24_pkg.sv:1:9: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    1 | package s24_pkg;
+      |         ^~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+                       ... For warning description see https://verilator.org/warn/TIMESCALEMOD?v=5.050
+                       ... Use "/* verilator lint_off TIMESCALEMOD */" and lint_on around source to disable this message.
+%Warning-TIMESCALEMOD: rtl\s24_clock_enables.sv:6:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    6 | module s24_clock_enables #(
+      |        ^~~~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl\s24_board_arbiter.sv:12:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+   12 | module s24_board_arbiter (
+      |        ^~~~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl\s24_cpu_bus.sv:5:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    5 | module s24_cpu_bus (
+      |        ^~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/io\s24_io_5296.sv:2:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    2 | module s24_io_5296 (
+      |        ^~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/io\s24_io_5296.sv:87:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+   87 | module s24_mahjong_mux (
+      |        ^~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/io\s24_inputs.sv:3:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    3 | module s24_inputs (
+      |        ^~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/io\s24_analog.sv:4:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    4 | module s24_upd4701 (
+      |        ^~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/io\s24_analog.sv:39:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+   39 | module s24_msm6253 (
+      |        ^~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/prot\s24_magic_latch.sv:3:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    3 | module s24_magic_latch (
+      |        ^~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/fdc\s24_fdc.sv:4:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    4 | module s24_fdc (
+      |        ^~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl\s24_irq.sv:4:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    4 | module s24_irq (
+      |        ^~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_video_timing.sv:1:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    1 | module s24_video_timing (
+      |        ^~~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_palette.sv:2:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    2 | module s24_palette (
+      |        ^~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_tile.sv:7:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    7 | module s24_char_video_ram (
+      |        ^~~~~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_tile.sv:88:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+   88 | module s24_tile (
+      |        ^~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_sprite.sv:11:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+   11 | module s24_sprite_line_ram #(
+      |        ^~~~~~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_sprite.sv:82:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+   82 | module s24_sprite_burst_cache_ram (
+      |        ^~~~~~~~~~~~~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_sprite.sv:131:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+  131 | module s24_sprite_pair_ram #(
+      |        ^~~~~~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_sprite.sv:280:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+  280 | module s24_sprite_active_ram #(
+      |        ^~~~~~~~~~~~~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_sprite.sv:388:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+  388 | module s24_sprite (
+      |        ^~~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-TIMESCALEMOD: rtl/video\s24_mixer.sv:4:8: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    4 | module s24_mixer (
+      |        ^~~~~~~~~
+                       rtl/cpu/fx68k\fx68kAlu.sv:31:8: ... Location of module with timescale
+   31 | module fx68kAlu ( input clk, pwrUp, enT1, enT3, enT4,
+      |        ^~~~~~~~
+%Warning-SELRANGE: rtl/video\s24_sprite.sv:166:26: Selection index out of range: 48:33 outside 37:0
+                                                 : ... note: In instance 'tb_gground_boot.dut.sprite.clip_stack_ram2'
+  166 |                 pack_word[48:33]=value[95:80];
+      |                          ^
+                   ... For warning description see https://verilator.org/warn/SELRANGE?v=5.050
+                   ... Use "/* verilator lint_off SELRANGE */" and lint_on around source to disable this message.
+%Warning-SELRANGE: rtl/video\s24_sprite.sv:166:39: Selection index out of range: 95:80 outside 80:0
+                                                 : ... note: In instance 'tb_gground_boot.dut.sprite.clip_stack_ram2'
+  166 |                 pack_word[48:33]=value[95:80];
+      |                                       ^
+%Warning-SELRANGE: rtl/video\s24_sprite.sv:167:26: Selection index out of range: 64:49 outside 37:0
+                                                 : ... note: In instance 'tb_gground_boot.dut.sprite.clip_stack_ram2'
+  167 |                 pack_word[64:49]=value[47:32];    
+      |                          ^
+%Warning-SELRANGE: rtl/video\s24_sprite.sv:168:26: Selection index out of range: 80:65 outside 37:0
+                                                 : ... note: In instance 'tb_gground_boot.dut.sprite.clip_stack_ram2'
+  168 |                 pack_word[80:65]=value[63:48];    
+      |                          ^
+%Warning-SELRANGE: rtl/video\s24_sprite.sv:191:28: Selection index out of range: 95:80 outside 80:0
+                                                 : ... note: In instance 'tb_gground_boot.dut.sprite.clip_stack_ram2'
+  191 |                 unpack_word[95:80]=value[48:33];
+      |                            ^
+%Warning-SELRANGE: rtl/video\s24_sprite.sv:191:41: Selection index out of range: 48:33 outside 37:0
+                                                 : ... note: In instance 'tb_gground_boot.dut.sprite.clip_stack_ram2'
+  191 |                 unpack_word[95:80]=value[48:33];
+      |                                         ^
+%Warning-SELRANGE: rtl/video\s24_sprite.sv:192:41: Selection index out of range: 64:49 outside 37:0
+                                                 : ... note: In instance 'tb_gground_boot.dut.sprite.clip_stack_ram2'
+  192 |                 unpack_word[47:32]=value[64:49];    
+      |                                         ^
+%Warning-SELRANGE: rtl/video\s24_sprite.sv:193:41: Selection index out of range: 80:65 outside 37:0
+                                                 : ... note: In instance 'tb_gground_boot.dut.sprite.clip_stack_ram2'
+  193 |                 unpack_word[63:48]=value[80:65];    
+      |                                         ^
+%Warning-UNOPTFLAT: rtl/cpu/fx68k\fx68k.sv:302:12: Signal unoptimizable: Circular combinational logic: 'tb_gground_boot.dut.cpu_b.Irdecod'
+  302 |  s_irdecod Irdecod;
+      |            ^~~~~~~
+                    ... For warning description see https://verilator.org/warn/UNOPTFLAT?v=5.050
+                    ... Use "/* verilator lint_off UNOPTFLAT */" and lint_on around source to disable this message.
+                    rtl/cpu/fx68k\fx68k.sv:302:12:      Example path: tb_gground_boot.dut.cpu_b.Irdecod
+                    rtl/cpu/fx68k\fx68k.sv:996:2:      Example path: ALWAYS
+                    rtl/cpu/fx68k\fx68k.sv:302:12:      Example path: tb_gground_boot.dut.cpu_b.Irdecod
+%Warning-UNOPTFLAT: rtl/cpu/fx68k\fx68k.sv:300:10: Signal unoptimizable: Circular combinational logic: 'tb_gground_boot.dut.cpu_b.Nanod'
+  300 |  s_nanod Nanod;
+      |          ^~~~~
+                    rtl/cpu/fx68k\fx68k.sv:300:10:      Example path: tb_gground_boot.dut.cpu_b.Nanod
+                    rtl/cpu/fx68k\fx68k.sv:820:22:      Example path: ASSIGNW
+                    rtl/cpu/fx68k\fx68k.sv:300:10:      Example path: tb_gground_boot.dut.cpu_b.Nanod
+%Warning-UNOPTFLAT: rtl/cpu/fx68k\fx68k.sv:916:7: Signal unoptimizable: Circular combinational logic: 'tb_gground_boot.dut.cpu_b.nDecoder.isPcRel'
+  916 |  wire isPcRel = Irdecod.isPcRel & !Nanod.rz;
+      |       ^~~~~~~
+                    rtl/cpu/fx68k\fx68k.sv:916:7:      Example path: tb_gground_boot.dut.cpu_b.nDecoder.isPcRel
+                    rtl/cpu/fx68k\fx68k.sv:926:22:      Example path: ASSIGNW
+                    rtl/cpu/fx68k\fx68k.sv:300:10:      Example path: tb_gground_boot.dut.cpu_b.Nanod
+                    rtl/cpu/fx68k\fx68k.sv:820:22:      Example path: ASSIGNW
+                    rtl/cpu/fx68k\fx68k.sv:300:10:      Example path: tb_gground_boot.dut.cpu_b.Nanod
+C:\msys64\ucrt64\share\verilator/include/verilated.cpp:78:10: warning: 'STDOUT_FILENO' redefined
+   78 | # define STDOUT_FILENO _fileno(stdout)
+      |          ^~~~~~~~~~~~~
+In file included from C:/msys64/ucrt64/include/locale.h:12,
+                 from C:/msys64/ucrt64/include/c++/16.1.0/clocale:47,
+                 from C:/msys64/ucrt64/include/c++/16.1.0/x86_64-w64-mingw32/bits/c++locale.h:41,
+                 from C:/msys64/ucrt64/include/c++/16.1.0/bits/localefwd.h:42,
+                 from C:/msys64/ucrt64/include/c++/16.1.0/string:48,
+                 from C:\msys64\ucrt64\share\verilator/include/verilatedos.h:653,
+                 from C:\msys64\ucrt64\share\verilator/include/verilated.cpp:51:
+C:/msys64/ucrt64/include/stdio.h:75:9: note: this is the location of the previous definition
+   75 | #define STDOUT_FILENO   1
+      |         ^~~~~~~~~~~~~
+C:\msys64\ucrt64\share\verilator/include/verilated.cpp:79:10: warning: 'STDERR_FILENO' redefined
+   79 | # define STDERR_FILENO _fileno(stderr)
+      |          ^~~~~~~~~~~~~
+C:/msys64/ucrt64/include/stdio.h:76:9: note: this is the location of the previous definition
+   76 | #define STDERR_FILENO   2
+      |         ^~~~~~~~~~~~~

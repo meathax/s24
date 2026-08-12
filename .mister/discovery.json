@@ -18,27 +18,43 @@
     ".codex-mister-build/analog_obj_codex/Vtb_analog_classes.mk",
     ".tmp_verilator/coredual_guard/Vtb_core_dual_bus.mk",
     ".tmp_verilator/coredual_guard/Vtb_core_dual_bus_classes.mk",
+    ".tmp_verilator/dip_baseline_20260812/Vtb_switches.mk",
+    ".tmp_verilator/dip_baseline_20260812/Vtb_switches_classes.mk",
     ".tmp_verilator/s24_jt51_tone_20260802/Vtb_jt51_tone.mk",
     ".tmp_verilator/s24_jt51_tone_20260802/Vtb_jt51_tone_classes.mk",
     ".tmp_verilator/s24_obj_tb_sprite_ramfix/Vtb_sprite.mk",
     ".tmp_verilator/s24_obj_tb_sprite_ramfix/Vtb_sprite_classes.mk",
+    ".tmp_verilator/sprite_ydiv_r4_baseline/Vtb_sprite_crkdown_list.mk",
+    ".tmp_verilator/sprite_ydiv_r4_baseline/Vtb_sprite_crkdown_list_classes.mk",
     ".tmp_verilator/sspirits_long_list/Vtb_sspirits_long_list.mk",
     ".tmp_verilator/sspirits_long_list/Vtb_sspirits_long_list_classes.mk",
     ".tmp_verilator/tb_video_rows_a/Vtb_video_timing.mk",
     ".tmp_verilator/tb_video_rows_a/Vtb_video_timing_classes.mk",
+    "artifacts/verilator/bank_hard/Vtb_sprite_bank_ownership.mk",
+    "artifacts/verilator/bank_hard/Vtb_sprite_bank_ownership_classes.mk",
     "artifacts/verilator/builds/io_5296/Vtb_io_5296.mk",
     "artifacts/verilator/builds/io_5296/Vtb_io_5296_classes.mk",
     "artifacts/verilator/crkdown_hand/headless_model/Vtb_sprite_crkdown_list.mk",
     "artifacts/verilator/crkdown_hand/headless_model/Vtb_sprite_crkdown_list_classes.mk",
     "artifacts/verilator/crkdown_hand/model/Vtb_sprite_crkdown_list.mk",
     "artifacts/verilator/crkdown_hand/model/Vtb_sprite_crkdown_list_classes.mk",
+    "artifacts/verilator/fdc_prefetch/Vtb_fdc.mk",
+    "artifacts/verilator/fdc_prefetch/Vtb_fdc_classes.mk",
+    "artifacts/verilator/long_hard/Vtb_sspirits_long_list.mk",
+    "artifacts/verilator/long_hard/Vtb_sspirits_long_list_classes.mk",
     "artifacts/verilator/s24_obj_analog_sensitivity/Vtb_analog.mk",
     "artifacts/verilator/s24_obj_analog_sensitivity/Vtb_analog_classes.mk",
+    "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/Vtb_sprite_bank_ownership.mk",
+    "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/Vtb_sprite_bank_ownership_classes.mk",
+    "artifacts/verilator/s24_obj_sspirits_long_list_hardening/Vtb_sspirits_long_list.mk",
+    "artifacts/verilator/s24_obj_sspirits_long_list_hardening/Vtb_sspirits_long_list_classes.mk",
+    "artifacts/verilator/sprite_bank_headless_baseline/Vtb_sprite_bank_ownership.mk",
+    "artifacts/verilator/sprite_bank_headless_baseline/Vtb_sprite_bank_ownership_classes.mk",
     "artifacts/verilator/video_timing_sync_20260811/Vtb_video_timing_sync.mk",
     "artifacts/verilator/video_timing_sync_20260811/Vtb_video_timing_sync_classes.mk",
     "clean.bat"
   ],
-  "created_utc": "2026-08-11T23:58:10Z",
+  "created_utc": "2026-08-12T05:48:50Z",
   "hdl": {
     "files": [
       ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
@@ -157,23 +173,46 @@
       ".codex-mister-build/analog_obj_codex/s24_pkg.sv",
       ".codex-mister-build/analog_obj_codex/s24_wheel_input.sv",
       ".codex-mister-build/analog_obj_codex/tb_analog.sv",
+      ".mister/donors/IKAOPM/src/IKAOPM_tb.sv",
       ".tmp_verilator/sprite_audit/s24_pkg.sv",
       ".tmp_verilator/sprite_audit/s24_sprite.sv",
       ".tmp_verilator/sprite_audit/tb_sprite.sv",
+      ".tmp_verilator/sprite_ydiv_r4_baseline/s24_pkg.sv",
+      ".tmp_verilator/sprite_ydiv_r4_baseline/s24_sprite.sv",
+      ".tmp_verilator/sprite_ydiv_r4_baseline/tb_sprite_crkdown_list.sv",
       "Arcade-SegaSystem24.sv",
+      "artifacts/verilator/bank_hard/s24_pkg.sv",
+      "artifacts/verilator/bank_hard/s24_sprite.sv",
+      "artifacts/verilator/bank_hard/tb_sprite_bank_ownership.sv",
       "artifacts/verilator/crkdown_hand/headless_model/s24_pkg.sv",
       "artifacts/verilator/crkdown_hand/headless_model/s24_sprite.sv",
       "artifacts/verilator/crkdown_hand/headless_model/tb_sprite_crkdown_list.sv",
       "artifacts/verilator/crkdown_hand/model/s24_pkg.sv",
       "artifacts/verilator/crkdown_hand/model/s24_sprite.sv",
       "artifacts/verilator/crkdown_hand/model/tb_sprite_crkdown_list.sv",
+      "artifacts/verilator/fdc_prefetch/s24_fdc.sv",
+      "artifacts/verilator/fdc_prefetch/tb_fdc.sv",
+      "artifacts/verilator/long_hard/s24_pkg.sv",
+      "artifacts/verilator/long_hard/s24_sprite.sv",
+      "artifacts/verilator/long_hard/tb_sspirits_long_list.sv",
       "artifacts/verilator/s24_obj_analog_sensitivity/s24_analog.sv",
       "artifacts/verilator/s24_obj_analog_sensitivity/s24_pkg.sv",
       "artifacts/verilator/s24_obj_analog_sensitivity/s24_wheel_input.sv",
       "artifacts/verilator/s24_obj_analog_sensitivity/tb_analog.sv",
+      "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/s24_pkg.sv",
+      "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/s24_sprite.sv",
+      "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/tb_sprite_bank_ownership.sv",
+      "artifacts/verilator/s24_obj_sspirits_long_list_hardening/s24_pkg.sv",
+      "artifacts/verilator/s24_obj_sspirits_long_list_hardening/s24_sprite.sv",
+      "artifacts/verilator/s24_obj_sspirits_long_list_hardening/tb_sspirits_long_list.sv",
+      "artifacts/verilator/sprite_bank_headless_baseline/s24_pkg.sv",
+      "artifacts/verilator/sprite_bank_headless_baseline/s24_sprite.sv",
+      "artifacts/verilator/sprite_bank_headless_baseline/tb_sprite_bank_ownership.sv",
       "artifacts/verilator/sprite_bank_ownership/s24_pkg.sv",
       "artifacts/verilator/sprite_bank_ownership/s24_sprite.sv",
       "artifacts/verilator/sprite_bank_ownership/tb_sprite_bank_ownership.sv",
+      "rtl/audio/s24_audio_lpf.sv",
+      "rtl/audio/s24_opm.sv",
       "rtl/audio/s24_ym3012.sv",
       "rtl/cpu/fx68k/fx68k.sv",
       "rtl/cpu/fx68k/fx68kAlu.sv",
@@ -187,6 +226,7 @@
       "rtl/io/s24_analog.sv",
       "rtl/io/s24_inputs.sv",
       "rtl/io/s24_io_5296.sv",
+      "rtl/io/s24_pedal_merge.sv",
       "rtl/io/s24_switches.sv",
       "rtl/io/s24_wheel_input.sv",
       "rtl/mem/s24_rom_loader.sv",
@@ -228,6 +268,7 @@
       "verif/jt51_boot_stub.sv",
       "verif/tb_a_opcache.sv",
       "verif/tb_analog.sv",
+      "verif/tb_audio_lpf.sv",
       "verif/tb_b_opcache.sv",
       "verif/tb_board_arbiter.sv",
       "verif/tb_char_video_ram.sv",
@@ -242,6 +283,8 @@
       "verif/tb_fdc.sv",
       "verif/tb_flicker_blend.sv",
       "verif/tb_gground_boot.sv",
+      "verif/tb_ikaopm_timer.sv",
+      "verif/tb_ikaopm_tone.sv",
       "verif/tb_inputs.sv",
       "verif/tb_io_5296.sv",
       "verif/tb_irq.sv",
@@ -267,6 +310,7 @@
       "verif/tb_sprite_ghost.sv",
       "verif/tb_sprite_mame_line.sv",
       "verif/tb_sprite_overflow.sv",
+      "verif/tb_sprite_ydiv.sv",
       "verif/tb_sspirits_long_list.sv",
       "verif/tb_switches.sv",
       "verif/tb_tile.sv",
@@ -324,7 +368,29 @@
       ".claude/worktrees/agent-aa01b012bc64cf823/verif/upstream/jtcores_s16/jts16_fd1094_ctrl.v",
       ".claude/worktrees/agent-aa01b012bc64cf823/verif/upstream/jtcores_s16/jts16_fd1094_dec.v",
       ".claude/worktrees/agent-aa01b012bc64cf823/verif/upstream/jtcores_s18/jts18_colmix.v",
+      ".mister/donors/IKAOPM/src/IKAOPM.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_acc.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_eg.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_lfo.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_noise.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_op.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_pg.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_primitives.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_reg.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_timer.v",
+      ".mister/donors/IKAOPM/src/IKAOPM_modules/IKAOPM_timinggen.v",
       "build_id.v",
+      "rtl/audio/ikaopm/IKAOPM.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v",
+      "rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v",
       "rtl/audio/jt51/jt51.v",
       "rtl/audio/jt51/jt51_acc.v",
       "rtl/audio/jt51/jt51_csr_ch.v",
@@ -1121,6 +1187,14 @@
         "module": "tb_analog"
       },
       {
+        "file": ".mister/donors/IKAOPM/src/IKAOPM_tb.sv",
+        "module": "IKAOPM_tb"
+      },
+      {
+        "file": ".mister/donors/IKAOPM/src/IKAOPM_tb.sv",
+        "module": "YM3012"
+      },
+      {
         "file": ".tmp_verilator/sprite_audit/s24_sprite.sv",
         "module": "s24_sprite_line_ram"
       },
@@ -1141,8 +1215,56 @@
         "module": "tb_sprite"
       },
       {
+        "file": ".tmp_verilator/sprite_ydiv_r4_baseline/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": ".tmp_verilator/sprite_ydiv_r4_baseline/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": ".tmp_verilator/sprite_ydiv_r4_baseline/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": ".tmp_verilator/sprite_ydiv_r4_baseline/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": ".tmp_verilator/sprite_ydiv_r4_baseline/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": ".tmp_verilator/sprite_ydiv_r4_baseline/tb_sprite_crkdown_list.sv",
+        "module": "tb_sprite_crkdown_list"
+      },
+      {
         "file": "Arcade-SegaSystem24.sv",
         "module": "emu"
+      },
+      {
+        "file": "artifacts/verilator/bank_hard/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "artifacts/verilator/bank_hard/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": "artifacts/verilator/bank_hard/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "artifacts/verilator/bank_hard/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "artifacts/verilator/bank_hard/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "artifacts/verilator/bank_hard/tb_sprite_bank_ownership.sv",
+        "module": "tb_sprite_bank_ownership"
       },
       {
         "file": "artifacts/verilator/crkdown_hand/headless_model/s24_sprite.sv",
@@ -1189,6 +1311,38 @@
         "module": "tb_sprite_crkdown_list"
       },
       {
+        "file": "artifacts/verilator/fdc_prefetch/s24_fdc.sv",
+        "module": "s24_fdc"
+      },
+      {
+        "file": "artifacts/verilator/fdc_prefetch/tb_fdc.sv",
+        "module": "tb_fdc"
+      },
+      {
+        "file": "artifacts/verilator/long_hard/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "artifacts/verilator/long_hard/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": "artifacts/verilator/long_hard/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "artifacts/verilator/long_hard/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "artifacts/verilator/long_hard/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "artifacts/verilator/long_hard/tb_sspirits_long_list.sv",
+        "module": "tb_sspirits_long_list"
+      },
+      {
         "file": "artifacts/verilator/s24_obj_analog_sensitivity/s24_analog.sv",
         "module": "s24_upd4701"
       },
@@ -1203,6 +1357,78 @@
       {
         "file": "artifacts/verilator/s24_obj_analog_sensitivity/tb_analog.sv",
         "module": "tb_analog"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sprite_bank_ownership_hardening/tb_sprite_bank_ownership.sv",
+        "module": "tb_sprite_bank_ownership"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sspirits_long_list_hardening/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sspirits_long_list_hardening/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sspirits_long_list_hardening/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sspirits_long_list_hardening/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sspirits_long_list_hardening/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "artifacts/verilator/s24_obj_sspirits_long_list_hardening/tb_sspirits_long_list.sv",
+        "module": "tb_sspirits_long_list"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_headless_baseline/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_headless_baseline/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_headless_baseline/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_headless_baseline/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_headless_baseline/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": "artifacts/verilator/sprite_bank_headless_baseline/tb_sprite_bank_ownership.sv",
+        "module": "tb_sprite_bank_ownership"
       },
       {
         "file": "artifacts/verilator/sprite_bank_ownership/s24_sprite.sv",
@@ -1223,6 +1449,14 @@
       {
         "file": "artifacts/verilator/sprite_bank_ownership/tb_sprite_bank_ownership.sv",
         "module": "tb_sprite_bank_ownership"
+      },
+      {
+        "file": "rtl/audio/s24_audio_lpf.sv",
+        "module": "s24_audio_lpf"
+      },
+      {
+        "file": "rtl/audio/s24_opm.sv",
+        "module": "s24_opm"
       },
       {
         "file": "rtl/audio/s24_ym3012.sv",
@@ -1369,6 +1603,10 @@
         "module": "s24_mahjong_mux"
       },
       {
+        "file": "rtl/io/s24_pedal_merge.sv",
+        "module": "s24_pedal_merge"
+      },
+      {
         "file": "rtl/io/s24_switches.sv",
         "module": "s24_switches"
       },
@@ -1423,6 +1661,10 @@
       {
         "file": "rtl/video/s24_palette.sv",
         "module": "s24_palette"
+      },
+      {
+        "file": "rtl/video/s24_sprite.sv",
+        "module": "s24_sprite_ydiv_radix4_step"
       },
       {
         "file": "rtl/video/s24_sprite.sv",
@@ -1613,6 +1855,10 @@
         "module": "tb_analog"
       },
       {
+        "file": "verif/tb_audio_lpf.sv",
+        "module": "tb_audio_lpf"
+      },
+      {
         "file": "verif/tb_b_opcache.sv",
         "module": "tb_b_opcache"
       },
@@ -1671,6 +1917,14 @@
       {
         "file": "verif/tb_gground_boot.sv",
         "module": "tb_gground_boot"
+      },
+      {
+        "file": "verif/tb_ikaopm_timer.sv",
+        "module": "tb_ikaopm_timer"
+      },
+      {
+        "file": "verif/tb_ikaopm_tone.sv",
+        "module": "tb_ikaopm_tone"
       },
       {
         "file": "verif/tb_inputs.sv",
@@ -1759,118 +2013,6 @@
       {
         "file": "verif/tb_sprite_crkdown_seam_full.sv",
         "module": "tb_sprite_crkdown_seam_full"
-      },
-      {
-        "file": "verif/tb_sprite_ghost.sv",
-        "module": "tb_sprite_ghost"
-      },
-      {
-        "file": "verif/tb_sprite_mame_line.sv",
-        "module": "tb_sprite_mame_line"
-      },
-      {
-        "file": "verif/tb_sprite_overflow.sv",
-        "module": "tb_sprite_overflow"
-      },
-      {
-        "file": "verif/tb_sspirits_long_list.sv",
-        "module": "tb_sspirits_long_list"
-      },
-      {
-        "file": "verif/tb_switches.sv",
-        "module": "tb_switches"
-      },
-      {
-        "file": "verif/tb_tile.sv",
-        "module": "tb_tile"
-      },
-      {
-        "file": "verif/tb_tile_ownership.sv",
-        "module": "tb_tile_ownership"
-      },
-      {
-        "file": "verif/tb_video_timing.sv",
-        "module": "tb_video_timing"
-      },
-      {
-        "file": "verif/tb_video_timing_sync.sv",
-        "module": "tb_video_timing_sync"
-      },
-      {
-        "file": "verif/tb_ym3012.sv",
-        "module": "tb_ym3012"
-      },
-      {
-        "file": "verif/tb_ym_write.sv",
-        "module": "jt51"
-      },
-      {
-        "file": "verif/tb_ym_write.sv",
-        "module": "tb_ym_write"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51.v",
-        "module": "jt51"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_acc.v",
-        "module": "jt51_acc"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_csr_ch.v",
-        "module": "jt51_csr_ch"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_csr_op.v",
-        "module": "jt51_csr_op"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_eg.v",
-        "module": "jt51_eg"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_exp2lin.v",
-        "module": "jt51_exp2lin"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_exprom.v",
-        "module": "jt51_exprom"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_kon.v",
-        "module": "jt51_kon"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_lfo.v",
-        "module": "jt51_lfo"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_lin2exp.v",
-        "module": "jt51_lin2exp"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_mmr.v",
-        "module": "jt51_mmr"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_mod.v",
-        "module": "jt51_mod"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_noise.v",
-        "module": "is"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_noise.v",
-        "module": "jt51_noise"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_noise_lfsr.v",
-        "module": "jt51_noise_lfsr"
-      },
-      {
-        "file": ".claude/worktrees/agent-aa01b012bc64cf823/rtl/audio/jt51/jt51_op.v",
-        "module": "jt51_op"
       }
     ]
   },
@@ -2017,6 +2159,36 @@
       "setname": "crkdown"
     },
     {
+      "file": ".codex-mister-build/dip-mra-preview/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "bnzabros"
+    },
+    {
+      "file": ".codex-mister-build/dip-mra-preview/Crack Down (World, Floppy Based, FD1094 317-0058-04c).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "crkdown"
+    },
+    {
+      "file": ".codex-mister-build/dip-mra-preview/Gain Ground (World, 3 Players, Floppy Based, FD1094 317-0058-03d Rev A).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "gground"
+    },
+    {
+      "file": ".codex-mister-build/dip-mra-preview/Hot Rod (World, 3 Players, Turbo set 1, Floppy Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "hotrod"
+    },
+    {
+      "file": ".codex-mister-build/dip-mra-preview/Rough Racer (Japan, Floppy Based, FD1094 317-0058-06b).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "roughrac"
+    },
+    {
+      "file": ".codex-mister-build/dip-mra-preview/Scramble Spirits (World, Floppy Based).mra",
+      "rbf": "Arcade-SegaSystem24",
+      "setname": "sspirits"
+    },
+    {
       "file": ".codex-mister-build/mra-audit/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
       "rbf": "Arcade-SegaSystem24",
       "setname": "bnzabros"
@@ -2095,36 +2267,6 @@
       "file": "mra/Hot Rod (World, 3 Players, Turbo set 1, Floppy Based).mra",
       "rbf": "Arcade-SegaSystem24",
       "setname": "hotrod"
-    },
-    {
-      "file": "mra/Hot Rod.mra",
-      "rbf": "Arcade-SegaSystem24",
-      "setname": "hotrod"
-    },
-    {
-      "file": "mra/Rough Racer (Japan, Floppy Based, FD1094 317-0058-06b).mra",
-      "rbf": "Arcade-SegaSystem24",
-      "setname": "roughrac"
-    },
-    {
-      "file": "mra/Scramble Spirits (World, Floppy Based).mra",
-      "rbf": "Arcade-SegaSystem24",
-      "setname": "sspirits"
-    },
-    {
-      "file": "release_mister/_Arcade/Bonanza Bros (Japan, Floppy DS3-5000-07b Based).mra",
-      "rbf": "s24",
-      "setname": "bnzabrosj"
-    },
-    {
-      "file": "release_mister/_Arcade/Bonanza Bros (US, Floppy DS3-5000-07d- Based).mra",
-      "rbf": "s24",
-      "setname": "bnzabros"
-    },
-    {
-      "file": "release_mister/_Arcade/Crack Down (Japan, Floppy Based, FD1094 317-0058-04b Rev A).mra",
-      "rbf": "s24",
-      "setname": "crkdownj"
     }
   ],
   "quartus": {
@@ -2163,7 +2305,8 @@
     ".codex-mister-build/preserved/20260810-190955-759/001-Arcade-SegaSystem24.rbf",
     ".codex-mister-build/preserved/20260812-082614-163/001-Arcade-SegaSystem24.rbf",
     ".codex-mister-build/preserved/20260812-090710-192/001-Arcade-SegaSystem24.rbf",
-    "output_files/Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260812-104612-729/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260812-151211-425/001-Arcade-SegaSystem24.rbf",
     "output_files/segas24_20260806.rbf",
     "release_mister/_Arcade/s24.rbf",
     "releases/Arcade-SegaSystem24_20260806.rbf",
