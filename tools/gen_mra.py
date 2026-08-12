@@ -146,8 +146,8 @@ MRA_CONTROL_PROFILES = {
     ),
     MRA_CONTROL_HOTROD: MraControls(
         "Steering Wheel / Accelerator",
-        ("-", "-", "-", "-", "-", "-", "Start", "Coin", "Service", "Test", "Pause"),
-        ("Start", "Select", "R", "L", "Y"),
+        ("Accelerator", "-", "-", "-", "-", "-", "Start", "Coin", "Service", "Test", "Pause"),
+        ("A", "Start", "Select", "R", "L", "Y"),
     ),
     MRA_CONTROL_ROUGHRAC: MraControls(
         "Steering Wheel",

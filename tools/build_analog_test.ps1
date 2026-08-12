@@ -15,6 +15,7 @@ $copies = @(
     @('rtl/s24_pkg.sv','s24_pkg.sv'),
     @('rtl/io/s24_analog.sv','s24_analog.sv'),
     @('rtl/io/s24_wheel_input.sv','s24_wheel_input.sv'),
+    @('rtl/io/s24_pedal_merge.sv','s24_pedal_merge.sv'),
     @('verif/tb_analog.sv','tb_analog.sv'),
     @('verif/analog_main.cpp','analog_main.cpp')
 )

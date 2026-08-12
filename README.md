@@ -29,14 +29,18 @@ implementation is still being validated against original hardware; see
 | Scaling | Normal, vertical integer, horizontal-and-vertical integer |
 | Scandoubler Fx | None, CRT 25%, CRT 50%, CRT 75% |
 | Projector Flicker Fix | Bonanza Bros-only option that blends the verified projector translucency effect |
-| Steering Sensitivity | Hot Rod and Rough Racer left-stick steering level 1–8 |
+| Analog Steering Speed | Wheel titles only: 100% (default), 25%, 50%, 75%, 125%, 150%, or 175% |
+| Steering Response | Wheel titles only: Normal (default), Fine, or Fast stick response |
 | CRT Adjust | Enable, horizontal size, horizontal position, and vertical shift |
 | Reset | Reset the emulated board |
 
 The core preserves the native System 24 medium-resolution raster and applies
-MiSTer's gamma table without retiming it. Hot Rod and Rough Racer also have
-game-specific steering curves and centre deadzones; physical spinner devices
-bypass the stick curve.
+MiSTer's gamma table without retiming it. Hot Rod and Rough Racer use
+game-specific base steering curves, rates, and centre deadzones; physical
+spinner devices bypass the stick curve unchanged. Hot Rod's digital accelerator is
+logical Button 1 (default **A**) and can be remapped through MiSTer.
+Steering speed and response affect only the synthetic analog-stick wheel;
+D-pad steering and native spinner devices retain their fixed hardware mapping.
 
 ## PCB Accuracy
 

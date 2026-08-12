@@ -10,7 +10,7 @@
   <resolution>15kHz</resolution>
   <rotation>horizontal</rotation>
   <joystick>Steering Wheel / Accelerator</joystick>
-  <buttons default="Start,Select,R,L,Y" names="-,-,-,-,-,-,Start,Coin,Service,Test,Pause"/>
+  <buttons default="A,Start,Select,R,L,Y" names="Accelerator,-,-,-,-,-,Start,Coin,Service,Test,Pause"/>
   <switches default="FF FF"/>
   <rom index="1" zip="hotrod.zip" md5="none">
     <interleave output="16">

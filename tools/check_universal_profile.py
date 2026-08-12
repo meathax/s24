@@ -22,6 +22,7 @@ REQUIRED_RTL = frozenset((
     "rtl/audio/s24_opm.sv",
     "rtl/audio/ikaopm/IKAOPM.qip",
     "rtl/io/s24_wheel_input.sv",
+    "rtl/io/s24_pedal_merge.sv",
     "rtl/prot/s24_magic_latch.sv",
     "rtl/prot/s24_romboard_epld.sv",
     "rtl/fdc/s24_fdc.sv",
@@ -61,6 +62,8 @@ REQUIRED_FIX_CONTRACTS = {
     ),
     "Arcade-SegaSystem24.sv": (
         '"P1,CRT Adjust;"',
+        '"H0O[22:20],Analog Steering Speed,100%,25%,50%,75%,125%,150%,175%;"',
+        '"H0O[24:23],Steering Response,Normal,Fine,Fast;"',
         ".status_menumask({13'd0,~descriptor.video_profile[0],~status[101],~wheel_controls})",
         ".flip(descriptor.video_profile[1] | video_flip)",
     ),
@@ -176,12 +179,50 @@ def validate_mras(mra_dir: pathlib.Path) -> None:
                 buttons.attrib.get("default") != expected_defaults):
             raise ValueError(f"{path}: stale button metadata")
 
+    # The supported Japan clone is curated outside the parent-only release
+    # matrix. It must retain the parent's hardware descriptor and controls.
+    japan_path = mra_dir / "Hot Rod (Japan, 4 Players).mra"
+    japan_root = ET.parse(japan_path).getroot()
+    if required_text(japan_root.find("setname"), "setname", japan_path) != "hotrodj":
+        raise ValueError(f"{japan_path}: stale setname")
+    if required_text(japan_root.find("parent"), "parent", japan_path) != "hotrod":
+        raise ValueError(f"{japan_path}: stale parent")
+    hotrod = expected["hotrod"]
+    japan_descriptor = bytes.fromhex(required_text(
+        japan_root.find("./rom[@index='0']/part"), "descriptor", japan_path
+    ))
+    if japan_descriptor != gen_mra.descriptor_bytes(hotrod):
+        raise ValueError(f"{japan_path}: stale Hot Rod descriptor")
+    hotrod_controls = gen_mra.mra_controls_for(hotrod)
+    if required_text(japan_root.find("joystick"), "joystick", japan_path) != \
+            hotrod_controls.joystick:
+        raise ValueError(f"{japan_path}: stale Hot Rod joystick metadata")
+    japan_buttons = japan_root.find("buttons")
+    if japan_buttons is None or (
+            japan_buttons.attrib.get("names") != ",".join(hotrod_controls.names) or
+            japan_buttons.attrib.get("default") != ",".join(hotrod_controls.defaults)):
+        raise ValueError(f"{japan_path}: stale Hot Rod button metadata")
+
 
 def validate_single_build(repo: pathlib.Path) -> None:
     qip = (repo / "files.qip").read_text(encoding="utf-8")
     missing_rtl = sorted(path for path in REQUIRED_RTL if path not in qip)
     if missing_rtl:
         raise ValueError(f"files.qip omits universal RTL: {missing_rtl}")
+
+    forbidden_controls = {
+        "Arcade-SegaSystem24.sv": ("Steering Sensitivity", "status[19:17]",
+                                    "stick_sensitivity"),
+        "rtl/io/s24_wheel_input.sv": ("stick_sensitivity",),
+    }
+    for relative_path, forbidden_fragments in forbidden_controls.items():
+        source = (repo / relative_path).read_text(encoding="utf-8")
+        present = [fragment for fragment in forbidden_fragments
+                   if fragment in source]
+        if present:
+            raise ValueError(
+                f"{relative_path}: removed steering controls returned: {present}"
+            )
 
     for relative_path, required_fragments in REQUIRED_FIX_CONTRACTS.items():
         source = (repo / relative_path).read_text(encoding="utf-8")
