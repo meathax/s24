@@ -1,9 +1,9 @@
 {
     "schemaVersion":  3,
-    "pid":  18664,
+    "pid":  41744,
     "stage":  "compile",
-    "started":  "2026-08-12T15:25:52.2369963+10:00",
-    "workerStarted":  "2026-08-12T15:25:52.2201675+10:00",
+    "started":  "2026-08-12T19:57:51.5831575+10:00",
+    "workerStarted":  "2026-08-12T19:57:51.5700846+10:00",
     "projectRoot":  "X:\\",
     "qpfPath":  "X:\\Arcade-SegaSystem24.qpf",
     "projectName":  "Arcade-SegaSystem24",
@@ -21,12 +21,12 @@
                       "-c",
                       "Arcade-SegaSystem24"
                   ],
-    "runDirectory":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-152551-376-compile",
-    "logPath":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-152551-376-compile\\quartus.log",
-    "exitCodePath":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-152551-376-compile\\exitcode.txt",
-    "resultPath":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-152551-376-compile\\result.json",
-    "inputManifestPath":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-152551-376-compile\\inputs.json",
-    "inputFingerprint":  "7153e0290e7ecc28505e69f66195f92801600dac710df2c6b37950723fb6960d",
+    "runDirectory":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-195750-724-compile",
+    "logPath":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-195750-724-compile\\quartus.log",
+    "exitCodePath":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-195750-724-compile\\exitcode.txt",
+    "resultPath":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-195750-724-compile\\result.json",
+    "inputManifestPath":  "X:\\.codex-mister-build\\Arcade-SegaSystem24\\20260812-195750-724-compile\\inputs.json",
+    "inputFingerprint":  "9998dff07a2d3d1378e82541983fe997cef7f4f55c3e151c8f429cb8844f6a41",
     "gitHead":  "unavailable",
     "gitStatus":  [
                       "unavailable"

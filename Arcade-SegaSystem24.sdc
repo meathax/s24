@@ -164,6 +164,36 @@ if {[get_collection_size $s24_cdc_payload_dst] > 0} {
     set_multicycle_path -setup -end 2 -to $s24_cdc_payload_dst
     set_multicycle_path -hold  -end 1 -to $s24_cdc_payload_dst
 } else {
-    post_message -type critical_warning \
+        post_message -type critical_warning \
         "s24_sdram_cdc payload collection is empty; check hierarchy names"
+}
+
+# Synthetic wheel input is evaluated by combinational shaping logic but its
+# architectural state (analog_step/analog_remainder) is only captured when
+# the explicit wheel_tick enable is asserted.  Arcade-SegaSystem24.sv sets
+# WHEEL_TICK_PERIOD to 840293 clk_sys cycles (~57.5 Hz), so the HPS joystick
+# registers are stable for vastly longer than one clk_sys period before the
+# destination capture.  The path is therefore a bounded multicycle path, not
+# a false/asynchronous path.  Keep the scope to the four connected HPS
+# channels and the tick-gated wheel state registers; every continuously
+# clocked wheel path remains single-cycle.  The matching hold adjustment
+# preserves the original hold edge while setup moves to the next edge.
+set s24_wheel_src [get_registers -nowarn \
+    {*hps_io:hps|joystick_l_analog_0[*] \
+     *hps_io:hps|joystick_l_analog_1[*] \
+     *hps_io:hps|joystick_l_analog_2[*] \
+     *hps_io:hps|joystick_l_analog_3[*]}]
+set s24_wheel_dst [get_registers -nowarn {
+    *|wheel0|analog_step[*] *|wheel0|analog_remainder[*] *|wheel0|stick_toggle *|wheel0|stick_active
+    *|wheel1|analog_step[*] *|wheel1|analog_remainder[*] *|wheel1|stick_toggle *|wheel1|stick_active
+    *|wheel2|analog_step[*] *|wheel2|analog_remainder[*] *|wheel2|stick_toggle *|wheel2|stick_active
+    *|wheel3|analog_step[*] *|wheel3|analog_remainder[*] *|wheel3|stick_toggle *|wheel3|stick_active
+}]
+if {[get_collection_size $s24_wheel_src] > 0 && \
+    [get_collection_size $s24_wheel_dst] > 0} {
+    set_multicycle_path -setup -end 2 -from $s24_wheel_src -to $s24_wheel_dst
+    set_multicycle_path -hold  -end 1 -from $s24_wheel_src -to $s24_wheel_dst
+} else {
+    post_message -type critical_warning \
+        "Wheel analog multicycle collections are empty; wheel paths left single-cycle"
 }

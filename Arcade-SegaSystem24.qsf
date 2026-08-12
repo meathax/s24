@@ -6,7 +6,8 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name LAST_QUARTUS_VERSION "17.0.2 Lite Edition"
 set_global_assignment -name GENERATE_RBF_FILE ON
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
-# SEED 2, not 4 or 1. History:
+# SEED 2. This is the documented placement that closes the current CDC hold
+# path while retaining positive core setup timing. History:
 #  - Widening the sprite descriptor caches (rtl/video/s24_sprite.sv,
 #    tile_base/palette_base carried through instead of zero-filled) turned a
 #    synthesis-collapsed constant-zero adder operand into a genuine live one

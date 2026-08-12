@@ -1,0 +1,1328 @@
+Info: *******************************************************************
+Info: Running Quartus Prime TimeQuest Timing Analyzer
+    Info: Version 17.0.2 Build 602 07/19/2017 SJ Lite Edition
+    Info: Copyright (C) 2017  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel MegaCore Function License Agreement, or other 
+    Info: applicable license agreement, including, without limitation, 
+    Info: that your use is for the sole purpose of programming logic 
+    Info: devices manufactured by Intel and sold by Intel or its 
+    Info: authorized distributors.  Please refer to the applicable 
+    Info: agreement for further details.
+    Info: Processing started: Wed Aug 12 19:07:52 2026
+Info: Command: quartus_sta -t X:\.codex-mister-build\critical_setup.tcl
+Info (293032): Detected changes in source files.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_hdmi.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_hdmi/pll_hdmi_0002.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_audio.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_audio/pll_audio_0002.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_cfg/pll_cfg.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_cfg/pll_cfg_hdmi.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_cfg/altera_pll_reconfig_top.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_cfg/altera_pll_reconfig_core.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/sys_top.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/sys_top.sdc.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/ascal.vhd.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/pll_hdmi_adj.vhd.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/math.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/hq2x.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/scandoubler.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/scanlines.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/shadowmask.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/video_cleaner.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/gamma_corr.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/video_mixer.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/video_freak.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/video_freezer.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/arcade_video.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/osd.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/vga_out.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/yc_out.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/i2c.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/alsa.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/i2s.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/spdif.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/audio_out.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/iir_filter.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/ltc2308.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/sigma_delta_dac.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/mt32pi.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/mcp23009.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/f2sdram_safe_terminator.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/ddr_svc.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/sysmem.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/sd_card.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/sys/hps_io.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/Arcade-SegaSystem24.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/s24_pkg.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/s24_clock_enables.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/s24_board_arbiter.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/s24_core.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/s24_cpu_bus.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/io/s24_io_5296.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/io/s24_inputs.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/io/s24_analog.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/s24_opm.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/s24_audio_lpf.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/io/s24_switches.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/io/s24_wheel_input.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/io/s24_pedal_merge.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/prot/s24_magic_latch.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/prot/s24_romboard_epld.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/fdc/s24_fdc.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/s24_irq.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/video/s24_video_timing.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/crt_adjust.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/video/s24_palette.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/video/s24_tile.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/video/s24_sprite.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/video/s24_mixer.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/mem/s24_rom_loader.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/mem/s24_sdram_cdc.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/mem/sdram.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/cpu/fx68k/fx68kAlu.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/cpu/fx68k/uaddrPla.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/cpu/fx68k/fx68k.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/cpu/s24_fd1094_decrypt.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/cpu/s24_fd1094.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/cpu/s24_a_opcache.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/cpu/s24_b_opcache.sv.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/pll/synthesis/pll.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/rtl/pll/synthesis/submodules/pll_pll_inst.v.
+    Info (293033): A new file was added to the project: C:/Users/meath/OneDrive/Documents/Sega System 24/Arcade-SegaSystem24.sdc.
+    Info (293027): Source file: /sys/pll_hdmi.v has changed.
+    Info (293027): Source file: /sys/pll_hdmi/pll_hdmi_0002.v has changed.
+    Info (293027): Source file: /sys/pll_audio.v has changed.
+    Info (293027): Source file: /sys/pll_audio/pll_audio_0002.v has changed.
+    Info (293027): Source file: /sys/pll_cfg/pll_cfg.v has changed.
+    Info (293027): Source file: /sys/pll_cfg/pll_cfg_hdmi.v has changed.
+    Info (293027): Source file: /sys/pll_cfg/altera_pll_reconfig_top.v has changed.
+    Info (293027): Source file: /sys/pll_cfg/altera_pll_reconfig_core.v has changed.
+    Info (293027): Source file: /sys/sys_top.v has changed.
+    Info (293027): Source file: /sys/sys_top.sdc has changed.
+    Info (293027): Source file: /sys/ascal.vhd has changed.
+    Info (293027): Source file: /sys/pll_hdmi_adj.vhd has changed.
+    Info (293027): Source file: /sys/math.sv has changed.
+    Info (293027): Source file: /sys/hq2x.sv has changed.
+    Info (293027): Source file: /sys/scandoubler.v has changed.
+    Info (293027): Source file: /sys/scanlines.v has changed.
+    Info (293027): Source file: /sys/shadowmask.sv has changed.
+    Info (293027): Source file: /sys/video_cleaner.sv has changed.
+    Info (293027): Source file: /sys/gamma_corr.sv has changed.
+    Info (293027): Source file: /sys/video_mixer.sv has changed.
+    Info (293027): Source file: /sys/video_freak.sv has changed.
+    Info (293027): Source file: /sys/video_freezer.sv has changed.
+    Info (293027): Source file: /sys/arcade_video.v has changed.
+    Info (293027): Source file: /sys/osd.v has changed.
+    Info (293027): Source file: /sys/vga_out.sv has changed.
+    Info (293027): Source file: /sys/yc_out.sv has changed.
+    Info (293027): Source file: /sys/i2c.v has changed.
+    Info (293027): Source file: /sys/alsa.sv has changed.
+    Info (293027): Source file: /sys/i2s.v has changed.
+    Info (293027): Source file: /sys/spdif.v has changed.
+    Info (293027): Source file: /sys/audio_out.sv has changed.
+    Info (293027): Source file: /sys/iir_filter.v has changed.
+    Info (293027): Source file: /sys/ltc2308.sv has changed.
+    Info (293027): Source file: /sys/sigma_delta_dac.v has changed.
+    Info (293027): Source file: /sys/mt32pi.sv has changed.
+    Info (293027): Source file: /sys/mcp23009.sv has changed.
+    Info (293027): Source file: /sys/f2sdram_safe_terminator.sv has changed.
+    Info (293027): Source file: /sys/ddr_svc.sv has changed.
+    Info (293027): Source file: /sys/sysmem.sv has changed.
+    Info (293027): Source file: /sys/sd_card.sv has changed.
+    Info (293027): Source file: /sys/hps_io.sv has changed.
+    Info (293027): Source file: /Arcade-SegaSystem24.sv has changed.
+    Info (293027): Source file: /rtl/s24_pkg.sv has changed.
+    Info (293027): Source file: /rtl/s24_clock_enables.sv has changed.
+    Info (293027): Source file: /rtl/s24_board_arbiter.sv has changed.
+    Info (293027): Source file: /rtl/s24_core.sv has changed.
+    Info (293027): Source file: /rtl/s24_cpu_bus.sv has changed.
+    Info (293027): Source file: /rtl/io/s24_io_5296.sv has changed.
+    Info (293027): Source file: /rtl/io/s24_inputs.sv has changed.
+    Info (293027): Source file: /rtl/io/s24_analog.sv has changed.
+    Info (293027): Source file: /rtl/audio/s24_opm.sv has changed.
+    Info (293027): Source file: /rtl/audio/s24_audio_lpf.sv has changed.
+    Info (293027): Source file: /rtl/io/s24_switches.sv has changed.
+    Info (293027): Source file: /rtl/io/s24_wheel_input.sv has changed.
+    Info (293027): Source file: /rtl/io/s24_pedal_merge.sv has changed.
+    Info (293027): Source file: /rtl/prot/s24_magic_latch.sv has changed.
+    Info (293027): Source file: /rtl/prot/s24_romboard_epld.sv has changed.
+    Info (293027): Source file: /rtl/fdc/s24_fdc.sv has changed.
+    Info (293027): Source file: /rtl/s24_irq.sv has changed.
+    Info (293027): Source file: /rtl/video/s24_video_timing.sv has changed.
+    Info (293027): Source file: /rtl/crt_adjust.sv has changed.
+    Info (293027): Source file: /rtl/video/s24_palette.sv has changed.
+    Info (293027): Source file: /rtl/video/s24_tile.sv has changed.
+    Info (293027): Source file: /rtl/video/s24_sprite.sv has changed.
+    Info (293027): Source file: /rtl/video/s24_mixer.sv has changed.
+    Info (293027): Source file: /rtl/mem/s24_rom_loader.sv has changed.
+    Info (293027): Source file: /rtl/mem/s24_sdram_cdc.sv has changed.
+    Info (293027): Source file: /rtl/mem/sdram.sv has changed.
+    Info (293027): Source file: /rtl/cpu/fx68k/fx68kAlu.sv has changed.
+    Info (293027): Source file: /rtl/cpu/fx68k/uaddrPla.sv has changed.
+    Info (293027): Source file: /rtl/cpu/fx68k/fx68k.sv has changed.
+    Info (293027): Source file: /rtl/cpu/s24_fd1094_decrypt.sv has changed.
+    Info (293027): Source file: /rtl/cpu/s24_fd1094.sv has changed.
+    Info (293027): Source file: /rtl/cpu/s24_a_opcache.sv has changed.
+    Info (293027): Source file: /rtl/cpu/s24_b_opcache.sv has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v has changed.
+    Info (293027): Source file: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v has changed.
+    Info (293027): Source file: /rtl/pll/synthesis/pll.v has changed.
+    Info (293027): Source file: /rtl/pll/synthesis/submodules/pll_pll_inst.v has changed.
+    Info (293027): Source file: /Arcade-SegaSystem24.sdc has changed.
+Info (20032): Parallel compilation is enabled and will use up to 8 processors
+Info (21077): Low junction temperature is -40 degrees C
+Info (21077): High junction temperature is 100 degrees C
+Info (332164): Evaluating HDL-embedded SDC commands
+    Info (332165): Entity altera_std_synchronizer
+        Info (332166): set_false_path -to [get_keepers {*altera_std_synchronizer:*|din_s1}]
+Info (332104): Reading SDC File: 'sys/sys_top.sdc'
+Info (332110): Deriving PLL clocks
+    Info (332110): create_generated_clock -source {pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|counter[0].output_counter|vco0ph[0]} -divide_by 3 -duty_cycle 50.00 -name {pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|counter[0].output_counter|divclk} {pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|counter[0].output_counter|divclk}
+    Info (332110): create_generated_clock -source {pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|fpll_0|fpll|refclkin} -divide_by 512 -multiply_by 4563 -duty_cycle 50.00 -name {pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|fpll_0|fpll|vcoph[0]} {pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|fpll_0|fpll|vcoph[0]}
+    Info (332110): create_generated_clock -source {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin} -divide_by 512 -multiply_by 4279 -duty_cycle 50.00 -name {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]} {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]}
+    Info (332110): create_generated_clock -source {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]} -divide_by 17 -duty_cycle 50.00 -name {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk} {pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk}
+    Info (332110): create_generated_clock -source {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin} -divide_by 8 -multiply_by 201 -duty_cycle 50.00 -name {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]} {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]}
+    Info (332110): create_generated_clock -source {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]} -divide_by 13 -duty_cycle 50.00 -name {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk} {emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk}
+    Info (332110): create_generated_clock -source {emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]} -divide_by 26 -duty_cycle 50.00 -name {emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk} {emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk}
+    Info (332110): create_generated_clock -source {emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]} -divide_by 13 -phase 180.00 -duty_cycle 50.00 -name {emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk} {emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk}
+Info (332151): Clock uncertainty is not calculated until you update the timing netlist.
+Info (332104): Reading SDC File: 'Arcade-SegaSystem24.sdc'
+Info (332151): Clock uncertainty is not calculated until you update the timing netlist.
+Info (332097): The following timing edges are non-unate.  TimeQuest will assume pos-unate behavior for these edges in the clock network.
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama0~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama100~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama101~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama102~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama103~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama104~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama105~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama106~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama107~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama108~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama109~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama10~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama110~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama111~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama112~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama113~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama114~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama115~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama116~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama117~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama118~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama119~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama11~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama120~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama121~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama122~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama123~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama124~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama125~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama126~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama127~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama12~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama13~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama14~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama15~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama16~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama17~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama18~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama19~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama1~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama20~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama21~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama22~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama23~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama24~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama25~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama26~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama27~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama28~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama29~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama2~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama30~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama31~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama32~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama33~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama34~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama35~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama36~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama37~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama38~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama39~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama3~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama40~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama41~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama42~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama43~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama44~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama45~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama46~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama47~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama48~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama49~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama4~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama50~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama51~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama52~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama53~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama54~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama55~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama56~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama57~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama58~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama59~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama5~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama60~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama61~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama62~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama63~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama64~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama65~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama66~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama67~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama68~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama69~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama6~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama70~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama71~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama72~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama73~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama74~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama75~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama76~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama77~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama78~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama79~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama7~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama80~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama81~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama82~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama83~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama84~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama85~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama86~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama87~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama88~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama89~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama8~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama90~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama91~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama92~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama93~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama94~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama95~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama96~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama97~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama98~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama99~MEMORYREGOUT
+    Info (332098): From: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~CLKMUX_0  to: emu:emu|s24_core:core|s24_sprite:sprite|altdpram:palette_cache_data_rtl_0|dpram_eno1:auto_generated|lutrama9~MEMORYREGOUT
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: emu|pll_i|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  from: refclkin  to: fbclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_audio|pll_audio_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): Cell: pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|counter[0].output_counter  from: vco0ph[0]  to: divclk
+    Info (332098): Cell: pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|fpll_0|REFCLK_SELECT  from: clkin[0]  to: clkout
+    Info (332098): Cell: pll_hdmi|pll_hdmi_inst|altera_pll_i|cyclonev_pll|fpll_0|fpll  from: refclkin  to: fbclk
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_762
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_827
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|cmd_port_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_920
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_7
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_6
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_5
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|rd_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_4
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_0  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_3
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_1  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_2
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_2  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_1
+    Info (332098): From: sysmem|fpga_interfaces|f2sdram|wr_clk_3  to: sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces|f2sdram~FF_0
+Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in TimeQuest to see clock uncertainties.
+Info (332115): Report Timing: Found 10 setup paths (10 violated).  Worst case slack is -4.228
+    Info (332115): -setup
+    Info (332115): -npaths 10
+    Info (332115): -detail full_path
+    Info (332115): -stdout
+Info (332115): Path #1: Setup slack is -4.228 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[3]
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[3]|ena
+    Info (332115):     32.613      0.666 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[3]
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[3]|clk
+    Info (332115):     27.855      0.500 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[3]
+    Info (332115):     28.815      0.960           clock pessimism removed
+    Info (332115):     28.385     -0.430           clock uncertainty
+    Info (332115):     28.385      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[3]
+    Info (332115): Data Arrival Time  :    32.613
+    Info (332115): Data Required Time :    28.385
+    Info (332115): Slack              :    -4.228 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #2: Setup slack is -4.228 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[1]~DUPLICATE
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[1]~DUPLICATE|ena
+    Info (332115):     32.611      0.664 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[1]~DUPLICATE
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[1]~DUPLICATE|clk
+    Info (332115):     27.853      0.498 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[1]~DUPLICATE
+    Info (332115):     28.813      0.960           clock pessimism removed
+    Info (332115):     28.383     -0.430           clock uncertainty
+    Info (332115):     28.383      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[1]~DUPLICATE
+    Info (332115): Data Arrival Time  :    32.611
+    Info (332115): Data Required Time :    28.383
+    Info (332115): Slack              :    -4.228 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #3: Setup slack is -4.228 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[2]~DUPLICATE
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[2]~DUPLICATE|ena
+    Info (332115):     32.613      0.666 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[2]~DUPLICATE
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[2]~DUPLICATE|clk
+    Info (332115):     27.855      0.500 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[2]~DUPLICATE
+    Info (332115):     28.815      0.960           clock pessimism removed
+    Info (332115):     28.385     -0.430           clock uncertainty
+    Info (332115):     28.385      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[2]~DUPLICATE
+    Info (332115): Data Arrival Time  :    32.613
+    Info (332115): Data Required Time :    28.385
+    Info (332115): Slack              :    -4.228 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #4: Setup slack is -4.228 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[0]~DUPLICATE
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[0]~DUPLICATE|ena
+    Info (332115):     32.611      0.664 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[0]~DUPLICATE
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[0]~DUPLICATE|clk
+    Info (332115):     27.853      0.498 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[0]~DUPLICATE
+    Info (332115):     28.813      0.960           clock pessimism removed
+    Info (332115):     28.383     -0.430           clock uncertainty
+    Info (332115):     28.383      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[0]~DUPLICATE
+    Info (332115): Data Arrival Time  :    32.611
+    Info (332115): Data Required Time :    28.383
+    Info (332115): Slack              :    -4.228 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #5: Setup slack is -4.226 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[4]
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[4]|ena
+    Info (332115):     32.615      0.668 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[4]
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[4]|clk
+    Info (332115):     27.859      0.504 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[4]
+    Info (332115):     28.819      0.960           clock pessimism removed
+    Info (332115):     28.389     -0.430           clock uncertainty
+    Info (332115):     28.389      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[4]
+    Info (332115): Data Arrival Time  :    32.615
+    Info (332115): Data Required Time :    28.389
+    Info (332115): Slack              :    -4.226 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #6: Setup slack is -4.226 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[0]
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[0]|ena
+    Info (332115):     32.615      0.668 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[0]
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[0]|clk
+    Info (332115):     27.859      0.504 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[0]
+    Info (332115):     28.819      0.960           clock pessimism removed
+    Info (332115):     28.389     -0.430           clock uncertainty
+    Info (332115):     28.389      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[0]
+    Info (332115): Data Arrival Time  :    32.615
+    Info (332115): Data Required Time :    28.389
+    Info (332115): Slack              :    -4.226 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #7: Setup slack is -4.226 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[1]
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[1]|ena
+    Info (332115):     32.615      0.668 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[1]
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[1]|clk
+    Info (332115):     27.859      0.504 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[1]
+    Info (332115):     28.819      0.960           clock pessimism removed
+    Info (332115):     28.389     -0.430           clock uncertainty
+    Info (332115):     28.389      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[1]
+    Info (332115): Data Arrival Time  :    32.615
+    Info (332115): Data Required Time :    28.389
+    Info (332115): Slack              :    -4.226 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #8: Setup slack is -4.225 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[2]
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[2]|ena
+    Info (332115):     32.613      0.666 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[2]
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[2]|clk
+    Info (332115):     27.858      0.503 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[2]
+    Info (332115):     28.818      0.960           clock pessimism removed
+    Info (332115):     28.388     -0.430           clock uncertainty
+    Info (332115):     28.388      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[2]
+    Info (332115): Data Arrival Time  :    32.613
+    Info (332115): Data Required Time :    28.388
+    Info (332115): Slack              :    -4.225 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #9: Setup slack is -4.225 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[5]
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.556      0.745 FR  CELL  emu|wheel2|Add0~17|cout
+    Info (332115):      9.556      0.000 RR    IC  emu|wheel2|Add0~9|cin
+    Info (332115):      9.898      0.342 RF  CELL  emu|wheel2|Add0~9|sumout
+    Info (332115):     10.745      0.847 FF    IC  emu|wheel2|LessThan1~2|dataf
+    Info (332115):     10.836      0.091 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.740      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.836      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.202      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.088      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.934      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.234      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.962      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.874      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.218      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.696      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.942      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.511      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.696      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.732      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.753      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.191      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.552      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.955      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.553      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.642      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.159      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.891      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.891      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.297      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.835      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.553      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.553      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.956      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.156      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.235      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.572      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.380      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.627      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.988      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.497      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.589      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.947      0.358 RR    IC  emu|wheel2|analog_step[5]|ena
+    Info (332115):     32.613      0.666 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[5]
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[5]|clk
+    Info (332115):     27.858      0.503 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[5]
+    Info (332115):     28.818      0.960           clock pessimism removed
+    Info (332115):     28.388     -0.430           clock uncertainty
+    Info (332115):     28.388      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[5]
+    Info (332115): Data Arrival Time  :    32.613
+    Info (332115): Data Required Time :    28.388
+    Info (332115): Slack              :    -4.225 (VIOLATED)
+    Info (332115): ===================================================================
+Info (332115): Path #10: Setup slack is -4.187 (VIOLATED)
+    Info (332115): ===================================================================
+    Info (332115): From Node    : emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115): To Node      : emu:emu|s24_wheel_input:wheel2|analog_step[3]
+    Info (332115): Launch Clock : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Latch Clock  : emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115): Data Arrival Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):      0.000      0.000           launch edge time
+    Info (332115):      0.000      0.000           source latency
+    Info (332115):      0.000      0.000           FPGA_CLK2_50
+    Info (332115):      0.000      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):      0.761      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):      2.096      1.335 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):      2.429      0.333 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):      2.429      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):      2.614      0.185 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):      2.614      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):      4.359      1.745 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):      5.397      1.038 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):      5.701      0.304 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):      7.961      2.260 RR    IC  emu|hps|joystick_l_analog_2[1]|clk
+    Info (332115):      8.539      0.578 RR  CELL  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000     uTco  emu:emu|hps_io:hps|joystick_l_analog_2[1]
+    Info (332115):      8.539      0.000 FF  CELL  emu|hps|joystick_l_analog_2[1]|q
+    Info (332115):      8.811      0.272 FF    IC  emu|wheel2|Add0~17|datad
+    Info (332115):      9.723      0.912 FF  CELL  emu|wheel2|Add0~17|sumout
+    Info (332115):     10.564      0.841 FF    IC  emu|wheel2|LessThan1~2|datae
+    Info (332115):     10.795      0.231 FR  CELL  emu|wheel2|LessThan1~2|combout
+    Info (332115):     11.699      0.904 RR    IC  emu|wheel2|effective_raw~10|dataf
+    Info (332115):     11.795      0.096 RF  CELL  emu|wheel2|effective_raw~10|combout
+    Info (332115):     12.161      0.366 FF    IC  emu|wheel2|Add2~17|datac
+    Info (332115):     13.047      0.886 FF  CELL  emu|wheel2|Add2~17|sumout
+    Info (332115):     13.893      0.846 FF    IC  emu|wheel2|Add4~32|datae
+    Info (332115):     14.193      0.300 FF  CELL  emu|wheel2|Add4~32|combout
+    Info (332115):     14.921      0.728 FF    IC  emu|wheel2|Add4~17|datad
+    Info (332115):     15.833      0.912 FF  CELL  emu|wheel2|Add4~17|sumout
+    Info (332115):     16.177      0.344 FF    IC  emu|wheel2|LessThan2~4|datac
+    Info (332115):     16.655      0.478 FF  CELL  emu|wheel2|LessThan2~4|combout
+    Info (332115):     16.901      0.246 FF    IC  emu|wheel2|effective[1]~4|datad
+    Info (332115):     17.470      0.569 FF  CELL  emu|wheel2|effective[1]~4|combout
+    Info (332115):     18.655      1.185 FF    IC  emu|wheel2|Mult1~mac|ay[1]
+    Info (332115):     21.691      3.036 FF  CELL  emu|wheel2|Mult1~mac|resulta[12]
+    Info (332115):     22.712      1.021 FF    IC  emu|wheel2|speed_base[1]~0|datad
+    Info (332115):     23.150      0.438 FR  CELL  emu|wheel2|speed_base[1]~0|combout
+    Info (332115):     23.511      0.361 RR    IC  emu|wheel2|speed_base[1]~3|datac
+    Info (332115):     23.914      0.403 RR  CELL  emu|wheel2|speed_base[1]~3|combout
+    Info (332115):     24.512      0.598 RR    IC  emu|wheel2|analog_source[10]~0|dataf
+    Info (332115):     24.601      0.089 RR  CELL  emu|wheel2|analog_source[10]~0|combout
+    Info (332115):     25.118      0.517 RR    IC  emu|wheel2|Add9~13|datad
+    Info (332115):     25.850      0.732 RR  CELL  emu|wheel2|Add9~13|cout
+    Info (332115):     25.850      0.000 RR    IC  emu|wheel2|Add9~9|cin
+    Info (332115):     26.256      0.406 RR  CELL  emu|wheel2|Add9~9|sumout
+    Info (332115):     26.794      0.538 RR    IC  emu|wheel2|Add11~5|datad
+    Info (332115):     27.512      0.718 RR  CELL  emu|wheel2|Add11~5|cout
+    Info (332115):     27.512      0.000 RR    IC  emu|wheel2|Add11~9|cin
+    Info (332115):     27.915      0.403 RF  CELL  emu|wheel2|Add11~9|sumout
+    Info (332115):     29.115      1.200 FF    IC  emu|wheel2|Selector11~3|dataf
+    Info (332115):     29.194      0.079 FF  CELL  emu|wheel2|Selector11~3|combout
+    Info (332115):     29.531      0.337 FF    IC  emu|wheel2|Add12~13|datad
+    Info (332115):     30.339      0.808 FR  CELL  emu|wheel2|Add12~13|sumout
+    Info (332115):     30.586      0.247 RR    IC  emu|wheel2|analog_step[5]~7|datad
+    Info (332115):     30.947      0.361 RF  CELL  emu|wheel2|analog_step[5]~7|combout
+    Info (332115):     31.456      0.509 FF    IC  emu|wheel2|analog_step[5]~1|dataf
+    Info (332115):     31.548      0.092 FR  CELL  emu|wheel2|analog_step[5]~1|combout
+    Info (332115):     31.906      0.358 RR    IC  emu|wheel2|analog_step[3]|ena
+    Info (332115):     32.572      0.666 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[3]
+    Info (332115): Data Required Path:
+    Info (332115): Total (ns)  Incr (ns)     Type  Element
+    Info (332115): ==========  ========= ==  ====  ===================================
+    Info (332115):     20.696     20.696           latch edge time
+    Info (332115):     20.696      0.000           source latency
+    Info (332115):     20.696      0.000           FPGA_CLK2_50
+    Info (332115):     20.696      0.000 RR    IC  FPGA_CLK2_50~input|i
+    Info (332115):     21.457      0.761 RR  CELL  FPGA_CLK2_50~input|o
+    Info (332115):     22.628      1.171 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkin[0]
+    Info (332115):     22.936      0.308 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT|clkout
+    Info (332115):     22.936      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|refclkin
+    Info (332115):     22.785     -0.151 RR  COMP  emu|pll_i|pll_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]
+    Info (332115):     22.785      0.000 RR    IC  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|vco0ph[0]
+    Info (332115):     24.251      1.466 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk
+    Info (332115):     25.158      0.907 RR    IC  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|inclk
+    Info (332115):     25.437      0.279 RR  CELL  emu|pll_i|pll_inst|altera_pll_i|outclk_wire[1]~CLKENA0|outclk
+    Info (332115):     27.355      1.918 RR    IC  emu|wheel2|analog_step[3]|clk
+    Info (332115):     27.855      0.500 RR  CELL  emu:emu|s24_wheel_input:wheel2|analog_step[3]
+    Info (332115):     28.815      0.960           clock pessimism removed
+    Info (332115):     28.385     -0.430           clock uncertainty
+    Info (332115):     28.385      0.000     uTsu  emu:emu|s24_wheel_input:wheel2|analog_step[3]
+    Info (332115): Data Arrival Time  :    32.572
+    Info (332115): Data Required Time :    28.385
+    Info (332115): Slack              :    -4.187 (VIOLATED)
+    Info (332115): ===================================================================
+Info (23030): Evaluation of Tcl script X:\.codex-mister-build\critical_setup.tcl was successful
+Info: Quartus Prime TimeQuest Timing Analyzer was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 5543 megabytes
+    Info: Processing ended: Wed Aug 12 19:07:57 2026
+    Info: Elapsed time: 00:00:05
+    Info: Total CPU time (on all processors): 00:00:05

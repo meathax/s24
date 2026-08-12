@@ -22,6 +22,26 @@ module s24_wheel_input (
     localparam logic [7:0] ROUGH_ENTER  = 8'd16;
     localparam logic [7:0] ROUGH_EXIT   = 8'd10;
 
+    // Exact threshold form of floor(value^2/1024) +
+    // floor(value^2/4096) + 1, saturated at 14.
+    function automatic [5:0] standard_speed_base(input logic [7:0] value);
+        begin
+            if(value==0)        standard_speed_base=6'd0;
+            else if(value<32)   standard_speed_base=6'd1;
+            else if(value<46)   standard_speed_base=6'd2;
+            else if(value<56)   standard_speed_base=6'd3;
+            else if(value<64)   standard_speed_base=6'd4;
+            else if(value<72)   standard_speed_base=6'd6;
+            else if(value<79)   standard_speed_base=6'd7;
+            else if(value<85)   standard_speed_base=6'd8;
+            else if(value<91)   standard_speed_base=6'd9;
+            else if(value<96)   standard_speed_base=6'd11;
+            else if(value<102)  standard_speed_base=6'd12;
+            else if(value<107)  standard_speed_base=6'd13;
+            else                standard_speed_base=6'd14;
+        end
+    endfunction
+
     logic [7:0] stick_abs,deadzone_enter,deadzone_exit;
     logic stick_active,motion_active;
     logic [7:0] effective_raw,effective;
@@ -36,6 +56,7 @@ module s24_wheel_input (
     logic [1:0] response_select;
     logic [13:0] analog_source;
     logic [15:0] analog_scaled;
+    logic [7:0] normal_product;
     logic [16:0] analog_sum;
     logic [10:0] analog_remainder;
     logic [6:0] analog_step;
@@ -87,6 +108,11 @@ module s24_wheel_input (
         else speed_base=curve_scaled[5:0];
         speed_mag = speed_base<=6'd5 ? {2'd0,speed_base}
                                      : {2'd0,speed_base-1'b1};
+        // In the standard profile analog_source is speed_mag << 9 and the
+        // factor case below only multiplies it by 1..7.  Compute the small
+        // exact product first so Quartus does not build a wide mux of
+        // parallel shifted adders on the stick_x -> analog_step path.
+        normal_product = speed_mag[4:0] * speed_factor;
 
         // Preserve the old Q8 numerator. The common Q11 accumulator and
         // default factor four reproduce its previous Q9 half-rate cadence.
@@ -95,20 +121,27 @@ module s24_wheel_input (
 
         analog_source = analogue_profile==ANALOGUE_ROUGHRAC
                       ? {3'd0,rough_rate_q} : {speed_mag[4:0],9'd0};
-        // Exact quarter factors k=1..7 using shifts/adds only.
-        case(speed_factor)
-            3'd1: analog_scaled={2'd0,analog_source};
-            3'd2: analog_scaled={1'd0,analog_source,1'd0};
-            3'd3: analog_scaled={2'd0,analog_source}+
-                                {1'd0,analog_source,1'd0};
-            3'd5: analog_scaled={2'd0,analog_source}+{analog_source,2'd0};
-            3'd6: analog_scaled={1'd0,analog_source,1'd0}+
-                                {analog_source,2'd0};
-            3'd7: analog_scaled={2'd0,analog_source}+
-                                {1'd0,analog_source,1'd0}+
-                                {analog_source,2'd0};
-            default: analog_scaled={analog_source,2'd0};
-        endcase
+        if(analogue_profile==ANALOGUE_ROUGHRAC) begin
+            // Rough Racer keeps the original Q11 source and exact factors.
+            // Exact quarter factors k=1..7 using shifts/adds only.
+            case(speed_factor)
+                3'd1: analog_scaled={2'd0,analog_source};
+                3'd2: analog_scaled={1'd0,analog_source,1'd0};
+                3'd3: analog_scaled={2'd0,analog_source}+
+                                    {1'd0,analog_source,1'd0};
+                3'd5: analog_scaled={2'd0,analog_source}+{analog_source,2'd0};
+                3'd6: analog_scaled={1'd0,analog_source,1'd0}+
+                                    {analog_source,2'd0};
+                3'd7: analog_scaled={2'd0,analog_source}+
+                                    {1'd0,analog_source,1'd0}+
+                                    {analog_source,2'd0};
+                default: analog_scaled={analog_source,2'd0};
+            endcase
+        end else begin
+            // speed_mag is at most 13, so normal_product is at most 91 and
+            // its nine-bit shift is exactly the former analog_scaled value.
+            analog_scaled={normal_product[6:0],9'd0};
+        end
         analog_sum={6'd0,analog_remainder}+{1'b0,analog_scaled};
 
         steering_step=0;

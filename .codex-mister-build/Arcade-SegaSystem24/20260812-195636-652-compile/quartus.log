@@ -1,0 +1,5 @@
+﻿=== Codex MiSTer Quartus worker started 2026-08-12T19:56:37.8364586+10:00 ===
+Working directory: X:\
+Executable: D:\Q17\quartus\bin64\quartus_sh.exe
+Arguments: --flow compile Arcade-SegaSystem24 -c Arcade-SegaSystem24
+

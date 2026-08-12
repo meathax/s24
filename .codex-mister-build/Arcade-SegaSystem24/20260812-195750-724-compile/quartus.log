@@ -1,0 +1,886 @@
+﻿=== Codex MiSTer Quartus worker started 2026-08-12T19:57:51.8674082+10:00 ===
+Working directory: X:\
+Executable: D:\Q17\quartus\bin64\quartus_sh.exe
+Arguments: --flow compile Arcade-SegaSystem24 -c Arcade-SegaSystem24
+
+Info: *******************************************************************
+Info: Running Quartus Prime Shell
+    Info: Version 17.0.2 Build 602 07/19/2017 SJ Lite Edition
+    Info: Copyright (C) 2017  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel MegaCore Function License Agreement, or other 
+    Info: applicable license agreement, including, without limitation, 
+    Info: that your use is for the sole purpose of programming logic 
+    Info: devices manufactured by Intel and sold by Intel or its 
+    Info: authorized distributors.  Please refer to the applicable 
+    Info: agreement for further details.
+    Info: Processing started: Wed Aug 12 19:57:52 2026
+Info: Command: quartus_sh --flow compile Arcade-SegaSystem24 -c Arcade-SegaSystem24
+Info: Quartus(args): compile Arcade-SegaSystem24 -c Arcade-SegaSystem24
+Info: Project Name = X:/Arcade-SegaSystem24
+Info: Revision Name = Arcade-SegaSystem24
+Info: *******************************************************************
+Info: Running Quartus Prime Shell
+    Info: Version 17.0.2 Build 602 07/19/2017 SJ Lite Edition
+    Info: Processing started: Wed Aug 12 19:57:52 2026
+Info: Command: quartus_sh -t sys/build_id.tcl compile Arcade-SegaSystem24 Arcade-SegaSystem24
+Info: Quartus(args): compile Arcade-SegaSystem24 Arcade-SegaSystem24
+Info (23030): Evaluation of Tcl script sys/build_id.tcl was successful
+Info: Quartus Prime Shell was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 4760 megabytes
+    Info: Processing ended: Wed Aug 12 19:57:52 2026
+    Info: Elapsed time: 00:00:00
+    Info: Total CPU time (on all processors): 00:00:00
+Info: *******************************************************************
+Info: Running Quartus Prime Analysis & Synthesis
+    Info: Version 17.0.2 Build 602 07/19/2017 SJ Lite Edition
+    Info: Processing started: Wed Aug 12 19:57:53 2026
+Info: Command: quartus_map --read_settings_files=on --write_settings_files=off Arcade-SegaSystem24 -c Arcade-SegaSystem24
+Info (20032): Parallel compilation is enabled and will use up to 8 processors
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/pll_hdmi.v
+    Info (12023): Found entity 1: pll_hdmi File: /sys/pll_hdmi.v Line: 8
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/pll_hdmi/pll_hdmi_0002.v
+    Info (12023): Found entity 1: pll_hdmi_0002 File: /sys/pll_hdmi/pll_hdmi_0002.v Line: 2
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/pll_audio.v
+    Info (12023): Found entity 1: pll_audio File: /sys/pll_audio.v Line: 8
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/pll_audio/pll_audio_0002.v
+    Info (12023): Found entity 1: pll_audio_0002 File: /sys/pll_audio/pll_audio_0002.v Line: 2
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/pll_cfg/pll_cfg.v
+    Info (12023): Found entity 1: pll_cfg File: /sys/pll_cfg/pll_cfg.v Line: 8
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/pll_cfg/pll_cfg_hdmi.v
+    Info (12023): Found entity 1: pll_cfg_hdmi File: /sys/pll_cfg/pll_cfg_hdmi.v Line: 16
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/pll_cfg/altera_pll_reconfig_top.v
+    Info (12023): Found entity 1: altera_pll_reconfig_top File: /sys/pll_cfg/altera_pll_reconfig_top.v Line: 16
+Info (12021): Found 3 design units, including 3 entities, in source file /sys/sys_top.v
+    Info (12023): Found entity 1: sys_top File: /sys/sys_top.v Line: 22
+    Info (12023): Found entity 2: sync_fix File: /sys/sys_top.v Line: 1924
+    Info (12023): Found entity 3: csync File: /sys/sys_top.v Line: 1956
+Info (12021): Found 2 design units, including 1 entities, in source file /sys/ascal.vhd
+    Info (12022): Found design unit 1: ascal-rtl File: /sys/ascal.vhd Line: 269
+    Info (12023): Found entity 1: ascal File: /sys/ascal.vhd Line: 114
+Info (12021): Found 2 design units, including 1 entities, in source file /sys/pll_hdmi_adj.vhd
+    Info (12022): Found design unit 1: pll_hdmi_adj-rtl File: /sys/pll_hdmi_adj.vhd Line: 53
+    Info (12023): Found entity 1: pll_hdmi_adj File: /sys/pll_hdmi_adj.vhd Line: 21
+Info (12021): Found 3 design units, including 3 entities, in source file /sys/math.sv
+    Info (12023): Found entity 1: sys_udiv File: /sys/math.sv Line: 3
+    Info (12023): Found entity 2: sys_umul File: /sys/math.sv Line: 46
+    Info (12023): Found entity 3: sys_umuldiv File: /sys/math.sv Line: 85
+Info (12021): Found 5 design units, including 5 entities, in source file /sys/hq2x.sv
+    Info (12023): Found entity 1: Hq2x File: /sys/hq2x.sv Line: 13
+    Info (12023): Found entity 2: hq2x_in File: /sys/hq2x.sv Line: 226
+    Info (12023): Found entity 3: hq2x_buf File: /sys/hq2x.sv Line: 250
+    Info (12023): Found entity 4: DiffCheck File: /sys/hq2x.sv Line: 271
+    Info (12023): Found entity 5: Blend File: /sys/hq2x.sv Line: 298
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/scandoubler.v
+    Info (12023): Found entity 1: scandoubler File: /sys/scandoubler.v Line: 22
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/scanlines.v
+    Info (12023): Found entity 1: scanlines File: /sys/scanlines.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/shadowmask.sv
+    Info (12023): Found entity 1: shadowmask File: /sys/shadowmask.sv Line: 1
+Info (12021): Found 2 design units, including 2 entities, in source file /sys/video_cleaner.sv
+    Info (12023): Found entity 1: video_cleaner File: /sys/video_cleaner.sv Line: 12
+    Info (12023): Found entity 2: s_fix File: /sys/video_cleaner.sv Line: 81
+Info (12021): Found 2 design units, including 2 entities, in source file /sys/gamma_corr.sv
+    Info (12023): Found entity 1: gamma_corr File: /sys/gamma_corr.sv Line: 1
+    Info (12023): Found entity 2: gamma_fast File: /sys/gamma_corr.sv Line: 62
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/video_mixer.sv
+    Info (12023): Found entity 1: video_mixer File: /sys/video_mixer.sv Line: 19
+Info (12021): Found 2 design units, including 2 entities, in source file /sys/video_freak.sv
+    Info (12023): Found entity 1: video_freak File: /sys/video_freak.sv Line: 16
+    Info (12023): Found entity 2: video_scale_int File: /sys/video_freak.sv Line: 141
+Info (12021): Found 2 design units, including 2 entities, in source file /sys/video_freezer.sv
+    Info (12023): Found entity 1: video_freezer File: /sys/video_freezer.sv Line: 21
+    Info (12023): Found entity 2: sync_lock File: /sys/video_freezer.sv Line: 80
+Info (12021): Found 2 design units, including 2 entities, in source file /sys/arcade_video.v
+    Info (12023): Found entity 1: arcade_video File: /sys/arcade_video.v Line: 29
+    Info (12023): Found entity 2: screen_rotate File: /sys/arcade_video.v Line: 168
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/osd.v
+    Info (12023): Found entity 1: osd File: /sys/osd.v Line: 4
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/vga_out.sv
+    Info (12023): Found entity 1: vga_out File: /sys/vga_out.sv Line: 2
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/yc_out.sv
+    Info (12023): Found entity 1: yc_out File: /sys/yc_out.sv Line: 27
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/i2c.v
+    Info (12023): Found entity 1: i2c File: /sys/i2c.v Line: 2
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/alsa.sv
+    Info (12023): Found entity 1: alsa File: /sys/alsa.sv Line: 22
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/i2s.v
+    Info (12023): Found entity 1: i2s File: /sys/i2s.v Line: 2
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/spdif.v
+    Info (12023): Found entity 1: spdif File: /sys/spdif.v Line: 33
+Info (12021): Found 2 design units, including 2 entities, in source file /sys/audio_out.sv
+    Info (12023): Found entity 1: audio_out File: /sys/audio_out.sv Line: 22
+    Info (12023): Found entity 2: aud_mix_top File: /sys/audio_out.sv Line: 282
+Info (12021): Found 3 design units, including 3 entities, in source file /sys/iir_filter.v
+    Info (12023): Found entity 1: IIR_filter File: /sys/iir_filter.v Line: 22
+    Info (12023): Found entity 2: iir_filter_tap File: /sys/iir_filter.v Line: 148
+    Info (12023): Found entity 3: DC_blocker File: /sys/iir_filter.v Line: 189
+Info (12021): Found 2 design units, including 2 entities, in source file /sys/ltc2308.sv
+    Info (12023): Found entity 1: ltc2308 File: /sys/ltc2308.sv Line: 28
+    Info (12023): Found entity 2: ltc2308_tape File: /sys/ltc2308.sv Line: 105
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/sigma_delta_dac.v
+    Info (12023): Found entity 1: sigma_delta_dac File: /sys/sigma_delta_dac.v Line: 6
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/mt32pi.sv
+    Info (12023): Found entity 1: mt32pi File: /sys/mt32pi.sv Line: 8
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/mcp23009.sv
+    Info (12023): Found entity 1: mcp23009 File: /sys/mcp23009.sv Line: 5
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/f2sdram_safe_terminator.sv
+    Info (12023): Found entity 1: f2sdram_safe_terminator File: /sys/f2sdram_safe_terminator.sv Line: 55
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/ddr_svc.sv
+    Info (12023): Found entity 1: ddr_svc File: /sys/ddr_svc.sv Line: 23
+Info (12021): Found 2 design units, including 2 entities, in source file /sys/sysmem.sv
+    Info (12023): Found entity 1: sysmem_lite File: /sys/sysmem.sv Line: 2
+    Info (12023): Found entity 2: sysmem_HPS_fpga_interfaces File: /sys/sysmem.sv Line: 241
+Info (12021): Found 1 design units, including 1 entities, in source file /sys/sd_card.sv
+    Info (12023): Found entity 1: sd_card File: /sys/sd_card.sv Line: 28
+Info (12021): Found 4 design units, including 4 entities, in source file /sys/hps_io.sv
+    Info (12023): Found entity 1: hps_io File: /sys/hps_io.sv Line: 35
+    Info (12023): Found entity 2: ps2_device File: /sys/hps_io.sv Line: 711
+    Info (12023): Found entity 3: video_calc File: /sys/hps_io.sv Line: 854
+    Info (12023): Found entity 4: confstr_rom File: /sys/hps_io.sv Line: 1022
+Info (12021): Found 1 design units, including 1 entities, in source file /arcade-segasystem24.sv
+    Info (12023): Found entity 1: emu File: /Arcade-SegaSystem24.sv Line: 1
+Info (12021): Found 1 design units, including 0 entities, in source file /rtl/s24_pkg.sv
+    Info (12022): Found design unit 1: s24_pkg (SystemVerilog) File: /rtl/s24_pkg.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/s24_clock_enables.sv
+    Info (12023): Found entity 1: s24_clock_enables File: /rtl/s24_clock_enables.sv Line: 6
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/s24_board_arbiter.sv
+    Info (12023): Found entity 1: s24_board_arbiter File: /rtl/s24_board_arbiter.sv Line: 12
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/s24_core.sv
+    Info (12023): Found entity 1: s24_core File: /rtl/s24_core.sv Line: 3
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/s24_cpu_bus.sv
+    Info (12023): Found entity 1: s24_cpu_bus File: /rtl/s24_cpu_bus.sv Line: 5
+Info (12021): Found 2 design units, including 2 entities, in source file /rtl/io/s24_io_5296.sv
+    Info (12023): Found entity 1: s24_io_5296 File: /rtl/io/s24_io_5296.sv Line: 2
+    Info (12023): Found entity 2: s24_mahjong_mux File: /rtl/io/s24_io_5296.sv Line: 131
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/io/s24_inputs.sv
+    Info (12023): Found entity 1: s24_inputs File: /rtl/io/s24_inputs.sv Line: 3
+Info (12021): Found 2 design units, including 2 entities, in source file /rtl/io/s24_analog.sv
+    Info (12023): Found entity 1: s24_upd4701 File: /rtl/io/s24_analog.sv Line: 4
+    Info (12023): Found entity 2: s24_msm6253 File: /rtl/io/s24_analog.sv Line: 49
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/s24_opm.sv
+    Info (12023): Found entity 1: s24_opm File: /rtl/audio/s24_opm.sv Line: 2
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/s24_audio_lpf.sv
+    Info (12023): Found entity 1: s24_audio_lpf File: /rtl/audio/s24_audio_lpf.sv Line: 4
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/io/s24_switches.sv
+    Info (12023): Found entity 1: s24_switches File: /rtl/io/s24_switches.sv Line: 3
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/io/s24_wheel_input.sv
+    Info (12023): Found entity 1: s24_wheel_input File: /rtl/io/s24_wheel_input.sv Line: 6
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/io/s24_pedal_merge.sv
+    Info (12023): Found entity 1: s24_pedal_merge File: /rtl/io/s24_pedal_merge.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/prot/s24_magic_latch.sv
+    Info (12023): Found entity 1: s24_magic_latch File: /rtl/prot/s24_magic_latch.sv Line: 3
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/prot/s24_romboard_epld.sv
+    Info (12023): Found entity 1: s24_romboard_epld File: /rtl/prot/s24_romboard_epld.sv Line: 12
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/fdc/s24_fdc.sv
+    Info (12023): Found entity 1: s24_fdc File: /rtl/fdc/s24_fdc.sv Line: 4
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/s24_irq.sv
+    Info (12023): Found entity 1: s24_irq File: /rtl/s24_irq.sv Line: 4
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/video/s24_video_timing.sv
+    Info (12023): Found entity 1: s24_video_timing File: /rtl/video/s24_video_timing.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/crt_adjust.sv
+    Info (12023): Found entity 1: crt_adjust File: /rtl/crt_adjust.sv Line: 100
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/video/s24_palette.sv
+    Info (12023): Found entity 1: s24_palette File: /rtl/video/s24_palette.sv Line: 3
+Info (12021): Found 2 design units, including 2 entities, in source file /rtl/video/s24_tile.sv
+    Info (12023): Found entity 1: s24_char_video_ram File: /rtl/video/s24_tile.sv Line: 7
+    Info (12023): Found entity 2: s24_tile File: /rtl/video/s24_tile.sv Line: 88
+Info (12021): Found 6 design units, including 6 entities, in source file /rtl/video/s24_sprite.sv
+    Info (12023): Found entity 1: s24_sprite_ydiv_radix4_step File: /rtl/video/s24_sprite.sv Line: 11
+    Info (12023): Found entity 2: s24_sprite_line_ram File: /rtl/video/s24_sprite.sv Line: 45
+    Info (12023): Found entity 3: s24_sprite_burst_cache_ram File: /rtl/video/s24_sprite.sv Line: 116
+    Info (12023): Found entity 4: s24_sprite_pair_ram File: /rtl/video/s24_sprite.sv Line: 165
+    Info (12023): Found entity 5: s24_sprite_active_ram File: /rtl/video/s24_sprite.sv Line: 314
+    Info (12023): Found entity 6: s24_sprite File: /rtl/video/s24_sprite.sv Line: 422
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/video/s24_mixer.sv
+    Info (12023): Found entity 1: s24_mixer File: /rtl/video/s24_mixer.sv Line: 4
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/mem/s24_rom_loader.sv
+    Info (12023): Found entity 1: s24_rom_loader File: /rtl/mem/s24_rom_loader.sv Line: 8
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/mem/s24_sdram_cdc.sv
+    Info (12023): Found entity 1: s24_sdram_cdc File: /rtl/mem/s24_sdram_cdc.sv Line: 12
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/mem/sdram.sv
+    Info (12023): Found entity 1: sdram File: /rtl/mem/sdram.sv Line: 40
+Info (12021): Found 6 design units, including 6 entities, in source file /rtl/cpu/fx68k/fx68kalu.sv
+    Info (12023): Found entity 1: fx68kAlu File: /rtl/cpu/fx68k/fx68kAlu.sv Line: 31
+    Info (12023): Found entity 2: aluCorf File: /rtl/cpu/fx68k/fx68kAlu.sv Line: 463
+    Info (12023): Found entity 3: aluShifter File: /rtl/cpu/fx68k/fx68kAlu.sv Line: 498
+    Info (12023): Found entity 4: aluGetOp File: /rtl/cpu/fx68k/fx68kAlu.sv Line: 533
+    Info (12023): Found entity 5: rowDecoder File: /rtl/cpu/fx68k/fx68kAlu.sv Line: 640
+    Info (12023): Found entity 6: ccrTable File: /rtl/cpu/fx68k/fx68kAlu.sv Line: 774
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/cpu/fx68k/uaddrpla.sv
+    Info (12023): Found entity 1: pla_lined File: /rtl/cpu/fx68k/uaddrPla.sv Line: 41
+Info (12021): Found 14 design units, including 14 entities, in source file /rtl/cpu/fx68k/fx68k.sv
+    Info (12023): Found entity 1: fx68k File: /rtl/cpu/fx68k/fx68k.sv Line: 136
+    Info (12023): Found entity 2: nDecoder3 File: /rtl/cpu/fx68k/fx68k.sv Line: 686
+    Info (12023): Found entity 3: irdDecode File: /rtl/cpu/fx68k/fx68k.sv Line: 973
+    Info (12023): Found entity 4: excUnit File: /rtl/cpu/fx68k/fx68k.sv Line: 1185
+    Info (12023): Found entity 5: dataIo File: /rtl/cpu/fx68k/fx68k.sv Line: 1739
+    Info (12023): Found entity 6: uaddrDecode File: /rtl/cpu/fx68k/fx68k.sv Line: 1839
+    Info (12023): Found entity 7: onehotEncoder4 File: /rtl/cpu/fx68k/fx68k.sv Line: 1924
+    Info (12023): Found entity 8: pren File: /rtl/cpu/fx68k/fx68k.sv Line: 1951
+    Info (12023): Found entity 9: sequencer File: /rtl/cpu/fx68k/fx68k.sv Line: 1975
+    Info (12023): Found entity 10: busArbiter File: /rtl/cpu/fx68k/fx68k.sv Line: 2231
+    Info (12023): Found entity 11: busControl File: /rtl/cpu/fx68k/fx68k.sv Line: 2315
+    Info (12023): Found entity 12: uRom File: /rtl/cpu/fx68k/fx68k.sv Line: 2512
+    Info (12023): Found entity 13: nanoRom File: /rtl/cpu/fx68k/fx68k.sv Line: 2553
+    Info (12023): Found entity 14: microToNanoAddr File: /rtl/cpu/fx68k/fx68k.sv Line: 2587
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/cpu/s24_fd1094_decrypt.sv
+    Info (12023): Found entity 1: s24_fd1094_decrypt File: /rtl/cpu/s24_fd1094_decrypt.sv Line: 4
+Info (12021): Found 2 design units, including 2 entities, in source file /rtl/cpu/s24_fd1094.sv
+    Info (12023): Found entity 1: s24_fd1094_key_ram File: /rtl/cpu/s24_fd1094.sv Line: 4
+    Info (12023): Found entity 2: s24_fd1094 File: /rtl/cpu/s24_fd1094.sv Line: 78
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/cpu/s24_a_opcache.sv
+    Info (12023): Found entity 1: s24_a_opcache File: /rtl/cpu/s24_a_opcache.sv Line: 14
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/cpu/s24_b_opcache.sv
+    Info (12023): Found entity 1: s24_b_opcache File: /rtl/cpu/s24_b_opcache.sv Line: 46
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/ikaopm/ikaopm.v
+    Info (12023): Found entity 1: IKAOPM File: /rtl/audio/ikaopm/IKAOPM.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_acc.v
+    Info (12023): Found entity 1: IKAOPM_acc File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_acc.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_eg.v
+    Info (12023): Found entity 1: IKAOPM_eg File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_eg.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_lfo.v
+    Info (12023): Found entity 1: IKAOPM_lfo File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_lfo.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_noise.v
+    Info (12023): Found entity 1: IKAOPM_noise File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_noise.v Line: 1
+Info (12021): Found 3 design units, including 3 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_op.v
+    Info (12023): Found entity 1: IKAOPM_op File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v Line: 1
+    Info (12023): Found entity 2: op_submdl_logsinrom File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v Line: 559
+    Info (12023): Found entity 3: op_submdl_exprom File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_op.v Line: 613
+Info (12021): Found 2 design units, including 2 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_pg.v
+    Info (12023): Found entity 1: IKAOPM_pg File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v Line: 1
+    Info (12023): Found entity 2: pg_submdl_fnumrom File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_pg.v Line: 797
+Info (12021): Found 7 design units, including 7 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_primitives.v
+    Info (12023): Found entity 1: primitive_srlatch File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v Line: 2
+    Info (12023): Found entity 2: primitive_dlatch File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v Line: 20
+    Info (12023): Found entity 3: primitive_syncsrlatch File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v Line: 34
+    Info (12023): Found entity 4: primitive_syncdlatch File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v Line: 58
+    Info (12023): Found entity 5: primitive_counter File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v Line: 78
+    Info (12023): Found entity 6: primitive_sr File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v Line: 153
+    Info (12023): Found entity 7: primitive_sr_bram File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_primitives.v Line: 187
+Info (12021): Found 2 design units, including 2 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_reg.v
+    Info (12023): Found entity 1: IKAOPM_reg File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v Line: 1
+    Info (12023): Found entity 2: reg_submdl_loreg_decoder File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_reg.v Line: 784
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_timer.v
+    Info (12023): Found entity 1: IKAOPM_timer File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timer.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/audio/ikaopm/ikaopm_modules/ikaopm_timinggen.v
+    Info (12023): Found entity 1: IKAOPM_timinggen File: /rtl/audio/ikaopm/IKAOPM_modules/IKAOPM_timinggen.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/pll/synthesis/pll.v
+    Info (12023): Found entity 1: pll File: /rtl/pll/synthesis/pll.v Line: 6
+Info (12021): Found 1 design units, including 1 entities, in source file /rtl/pll/synthesis/submodules/pll_pll_inst.v
+    Info (12023): Found entity 1: pll_pll_inst File: /rtl/pll/synthesis/submodules/pll_pll_inst.v Line: 2
+Info (12127): Elaborating entity "sys_top" for the top level hierarchy
+Warning (10030): Net "adc_bus[3]" at sys_top.v(127) has no driver or initial value, using a default initial value '0' File: /sys/sys_top.v Line: 127
+Warning (10030): Net "adc_bus[1..0]" at sys_top.v(127) has no driver or initial value, using a default initial value '0' File: /sys/sys_top.v Line: 127
+Info (12128): Elaborating entity "mcp23009" for hierarchy "mcp23009:mcp23009" File: /sys/sys_top.v Line: 176
+Info (12128): Elaborating entity "i2c" for hierarchy "mcp23009:mcp23009|i2c:i2c" File: /sys/mcp23009.sv Line: 41
+Info (12128): Elaborating entity "sysmem_lite" for hierarchy "sysmem_lite:sysmem" File: /sys/sys_top.v Line: 652
+Info (12128): Elaborating entity "f2sdram_safe_terminator" for hierarchy "sysmem_lite:sysmem|f2sdram_safe_terminator:f2sdram_safe_terminator_ram1" File: /sys/sysmem.sv Line: 91
+Info (12128): Elaborating entity "f2sdram_safe_terminator" for hierarchy "sysmem_lite:sysmem|f2sdram_safe_terminator:f2sdram_safe_terminator_vbuf" File: /sys/sysmem.sv Line: 183
+Info (12128): Elaborating entity "sysmem_HPS_fpga_interfaces" for hierarchy "sysmem_lite:sysmem|sysmem_HPS_fpga_interfaces:fpga_interfaces" File: /sys/sysmem.sv Line: 223
+Info (12128): Elaborating entity "ddr_svc" for hierarchy "ddr_svc:ddr_svc" File: /sys/sys_top.v Line: 699
+Info (12128): Elaborating entity "ascal" for hierarchy "ascal:ascal" File: /sys/sys_top.v Line: 867
+Info (19000): Inferred 9 megafunctions from design logic
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:i_mem[0].r[7]__1" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 9
+        Info (286033): Parameter NUMWORDS_A set to 512
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 9
+        Info (286033): Parameter NUMWORDS_B set to 512
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+        Info (286033): Parameter RDCONTROL_REG_B set to CLOCK0
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:o_line0[0].r[7]__2" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 11
+        Info (286033): Parameter NUMWORDS_A set to 2048
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 11
+        Info (286033): Parameter NUMWORDS_B set to 2048
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:o_line1[0].r[7]__3" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 11
+        Info (286033): Parameter NUMWORDS_A set to 2048
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 11
+        Info (286033): Parameter NUMWORDS_B set to 2048
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:o_line2[0].r[7]__4" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 11
+        Info (286033): Parameter NUMWORDS_A set to 2048
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 11
+        Info (286033): Parameter NUMWORDS_B set to 2048
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:o_line3[0].r[7]__5" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 11
+        Info (286033): Parameter NUMWORDS_A set to 2048
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 11
+        Info (286033): Parameter NUMWORDS_B set to 2048
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:o_linf0[0].r[7]__6" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 8
+        Info (286033): Parameter NUMWORDS_A set to 256
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 8
+        Info (286033): Parameter NUMWORDS_B set to 256
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:o_linf1[0].r[7]__7" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 8
+        Info (286033): Parameter NUMWORDS_A set to 256
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 8
+        Info (286033): Parameter NUMWORDS_B set to 256
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:o_linf2[0].r[7]__8" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 8
+        Info (286033): Parameter NUMWORDS_A set to 256
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 8
+        Info (286033): Parameter NUMWORDS_B set to 256
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "ascal:ascal|altsyncram:o_linf3[0].r[7]__9" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 24
+        Info (286033): Parameter WIDTHAD_A set to 8
+        Info (286033): Parameter NUMWORDS_A set to 256
+        Info (286033): Parameter WIDTH_B set to 24
+        Info (286033): Parameter WIDTHAD_B set to 8
+        Info (286033): Parameter NUMWORDS_B set to 256
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter READ_DURING_WRITE_MODE_MIXED_PORTS set to OLD_DATA
+Info (12128): Elaborating entity "altsyncram" for hierarchy "ascal:ascal|altsyncram:i_mem[0].r[7]__1"
+Info (12130): Elaborated megafunction instantiation "ascal:ascal|altsyncram:i_mem[0].r[7]__1"
+Info (12133): Instantiated megafunction "ascal:ascal|altsyncram:i_mem[0].r[7]__1" with the following parameter:
+    Info (12134): Parameter "OPERATION_MODE" = "DUAL_PORT"
+    Info (12134): Parameter "WIDTH_A" = "24"
+    Info (12134): Parameter "WIDTHAD_A" = "9"
+    Info (12134): Parameter "NUMWORDS_A" = "512"
+    Info (12134): Parameter "WIDTH_B" = "24"
+    Info (12134): Parameter "WIDTHAD_B" = "9"
+    Info (12134): Parameter "NUMWORDS_B" = "512"
+    Info (12134): Parameter "ADDRESS_ACLR_A" = "NONE"
+    Info (12134): Parameter "OUTDATA_REG_B" = "UNREGISTERED"
+    Info (12134): Parameter "ADDRESS_ACLR_B" = "NONE"
+    Info (12134): Parameter "OUTDATA_ACLR_B" = "NONE"
+    Info (12134): Parameter "ADDRESS_REG_B" = "CLOCK0"
+    Info (12134): Parameter "INDATA_ACLR_A" = "NONE"
+    Info (12134): Parameter "WRCONTROL_ACLR_A" = "NONE"
+    Info (12134): Parameter "READ_DURING_WRITE_MODE_MIXED_PORTS" = "OLD_DATA"
+    Info (12134): Parameter "RDCONTROL_REG_B" = "CLOCK0"
+Info (12021): Found 1 design units, including 1 entities, in source file db/altsyncram_a3q1.tdf
+    Info (12023): Found entity 1: altsyncram_a3q1 File: X:/db/altsyncram_a3q1.tdf Line: 28
+Info (12128): Elaborating entity "altsyncram_a3q1" for hierarchy "ascal:ascal|altsyncram:i_mem[0].r[7]__1|altsyncram_a3q1:auto_generated" File: d:/q17/quartus/libraries/megafunctions/altsyncram.tdf Line: 792
+Info (12128): Elaborating entity "altsyncram" for hierarchy "ascal:ascal|altsyncram:o_line0[0].r[7]__2"
+Info (12130): Elaborated megafunction instantiation "ascal:ascal|altsyncram:o_line0[0].r[7]__2"
+Info (12133): Instantiated megafunction "ascal:ascal|altsyncram:o_line0[0].r[7]__2" with the following parameter:
+    Info (12134): Parameter "OPERATION_MODE" = "DUAL_PORT"
+    Info (12134): Parameter "WIDTH_A" = "24"
+    Info (12134): Parameter "WIDTHAD_A" = "11"
+    Info (12134): Parameter "NUMWORDS_A" = "2048"
+    Info (12134): Parameter "WIDTH_B" = "24"
+    Info (12134): Parameter "WIDTHAD_B" = "11"
+    Info (12134): Parameter "NUMWORDS_B" = "2048"
+    Info (12134): Parameter "ADDRESS_ACLR_A" = "NONE"
+    Info (12134): Parameter "OUTDATA_REG_B" = "UNREGISTERED"
+    Info (12134): Parameter "ADDRESS_ACLR_B" = "NONE"
+    Info (12134): Parameter "OUTDATA_ACLR_B" = "NONE"
+    Info (12134): Parameter "ADDRESS_REG_B" = "CLOCK0"
+    Info (12134): Parameter "INDATA_ACLR_A" = "NONE"
+    Info (12134): Parameter "WRCONTROL_ACLR_A" = "NONE"
+    Info (12134): Parameter "READ_DURING_WRITE_MODE_MIXED_PORTS" = "OLD_DATA"
+Info (12021): Found 1 design units, including 1 entities, in source file db/altsyncram_ccn1.tdf
+    Info (12023): Found entity 1: altsyncram_ccn1 File: X:/db/altsyncram_ccn1.tdf Line: 28
+Info (12128): Elaborating entity "altsyncram_ccn1" for hierarchy "ascal:ascal|altsyncram:o_line0[0].r[7]__2|altsyncram_ccn1:auto_generated" File: d:/q17/quartus/libraries/megafunctions/altsyncram.tdf Line: 792
+Info (12128): Elaborating entity "altsyncram" for hierarchy "ascal:ascal|altsyncram:o_linf0[0].r[7]__6"
+Info (12130): Elaborated megafunction instantiation "ascal:ascal|altsyncram:o_linf0[0].r[7]__6"
+Info (12133): Instantiated megafunction "ascal:ascal|altsyncram:o_linf0[0].r[7]__6" with the following parameter:
+    Info (12134): Parameter "OPERATION_MODE" = "DUAL_PORT"
+    Info (12134): Parameter "WIDTH_A" = "24"
+    Info (12134): Parameter "WIDTHAD_A" = "8"
+    Info (12134): Parameter "NUMWORDS_A" = "256"
+    Info (12134): Parameter "WIDTH_B" = "24"
+    Info (12134): Parameter "WIDTHAD_B" = "8"
+    Info (12134): Parameter "NUMWORDS_B" = "256"
+    Info (12134): Parameter "ADDRESS_ACLR_A" = "NONE"
+    Info (12134): Parameter "OUTDATA_REG_B" = "UNREGISTERED"
+    Info (12134): Parameter "ADDRESS_ACLR_B" = "NONE"
+    Info (12134): Parameter "OUTDATA_ACLR_B" = "NONE"
+    Info (12134): Parameter "ADDRESS_REG_B" = "CLOCK0"
+    Info (12134): Parameter "INDATA_ACLR_A" = "NONE"
+    Info (12134): Parameter "WRCONTROL_ACLR_A" = "NONE"
+    Info (12134): Parameter "READ_DURING_WRITE_MODE_MIXED_PORTS" = "OLD_DATA"
+Info (12021): Found 1 design units, including 1 entities, in source file db/altsyncram_m6n1.tdf
+    Info (12023): Found entity 1: altsyncram_m6n1 File: X:/db/altsyncram_m6n1.tdf Line: 28
+Info (12128): Elaborating entity "altsyncram_m6n1" for hierarchy "ascal:ascal|altsyncram:o_linf0[0].r[7]__6|altsyncram_m6n1:auto_generated" File: d:/q17/quartus/libraries/megafunctions/altsyncram.tdf Line: 792
+Info (12128): Elaborating entity "sys_umuldiv" for hierarchy "sys_umuldiv:ar_muldiv" File: /sys/sys_top.v Line: 928
+Info (12128): Elaborating entity "sys_umul" for hierarchy "sys_umuldiv:ar_muldiv|sys_umul:umul" File: /sys/math.sv Line: 105
+Info (12128): Elaborating entity "sys_udiv" for hierarchy "sys_umuldiv:ar_muldiv|sys_udiv:udiv" File: /sys/math.sv Line: 107
+Info (12128): Elaborating entity "pll_hdmi_adj" for hierarchy "pll_hdmi_adj:pll_hdmi_adj" File: /sys/sys_top.v Line: 1053
+Info (12128): Elaborating entity "pll_hdmi" for hierarchy "pll_hdmi:pll_hdmi" File: /sys/sys_top.v Line: 1087
+Info (12128): Elaborating entity "pll_hdmi_0002" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst" File: /sys/pll_hdmi.v Line: 23
+Info (12128): Elaborating entity "altera_pll" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: /sys/pll_hdmi/pll_hdmi_0002.v Line: 239
+Info (10008): Verilog HDL or VHDL information: EDA Netlist Writer cannot regroup multidimensional array "wire_to_nowhere_64" into its bus
+Info (12130): Elaborated megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: /sys/pll_hdmi/pll_hdmi_0002.v Line: 239
+Info (12133): Instantiated megafunction "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" with the following parameter: File: /sys/pll_hdmi/pll_hdmi_0002.v Line: 239
+    Info (12134): Parameter "fractional_vco_multiplier" = "true"
+    Info (12134): Parameter "reference_clock_frequency" = "50.0 MHz"
+    Info (12134): Parameter "pll_fractional_cout" = "32"
+    Info (12134): Parameter "pll_dsm_out_sel" = "1st_order"
+    Info (12134): Parameter "operation_mode" = "direct"
+    Info (12134): Parameter "number_of_clocks" = "1"
+    Info (12134): Parameter "output_clock_frequency0" = "148.500000 MHz"
+    Info (12134): Parameter "phase_shift0" = "0 ps"
+    Info (12134): Parameter "duty_cycle0" = "50"
+    Info (12134): Parameter "output_clock_frequency1" = "0 MHz"
+    Info (12134): Parameter "phase_shift1" = "0 ps"
+    Info (12134): Parameter "duty_cycle1" = "50"
+    Info (12134): Parameter "output_clock_frequency2" = "0 MHz"
+    Info (12134): Parameter "phase_shift2" = "0 ps"
+    Info (12134): Parameter "duty_cycle2" = "50"
+    Info (12134): Parameter "output_clock_frequency3" = "0 MHz"
+    Info (12134): Parameter "phase_shift3" = "0 ps"
+    Info (12134): Parameter "duty_cycle3" = "50"
+    Info (12134): Parameter "output_clock_frequency4" = "0 MHz"
+    Info (12134): Parameter "phase_shift4" = "0 ps"
+    Info (12134): Parameter "duty_cycle4" = "50"
+    Info (12134): Parameter "output_clock_frequency5" = "0 MHz"
+    Info (12134): Parameter "phase_shift5" = "0 ps"
+    Info (12134): Parameter "duty_cycle5" = "50"
+    Info (12134): Parameter "output_clock_frequency6" = "0 MHz"
+    Info (12134): Parameter "phase_shift6" = "0 ps"
+    Info (12134): Parameter "duty_cycle6" = "50"
+    Info (12134): Parameter "output_clock_frequency7" = "0 MHz"
+    Info (12134): Parameter "phase_shift7" = "0 ps"
+    Info (12134): Parameter "duty_cycle7" = "50"
+    Info (12134): Parameter "output_clock_frequency8" = "0 MHz"
+    Info (12134): Parameter "phase_shift8" = "0 ps"
+    Info (12134): Parameter "duty_cycle8" = "50"
+    Info (12134): Parameter "output_clock_frequency9" = "0 MHz"
+    Info (12134): Parameter "phase_shift9" = "0 ps"
+    Info (12134): Parameter "duty_cycle9" = "50"
+    Info (12134): Parameter "output_clock_frequency10" = "0 MHz"
+    Info (12134): Parameter "phase_shift10" = "0 ps"
+    Info (12134): Parameter "duty_cycle10" = "50"
+    Info (12134): Parameter "output_clock_frequency11" = "0 MHz"
+    Info (12134): Parameter "phase_shift11" = "0 ps"
+    Info (12134): Parameter "duty_cycle11" = "50"
+    Info (12134): Parameter "output_clock_frequency12" = "0 MHz"
+    Info (12134): Parameter "phase_shift12" = "0 ps"
+    Info (12134): Parameter "duty_cycle12" = "50"
+    Info (12134): Parameter "output_clock_frequency13" = "0 MHz"
+    Info (12134): Parameter "phase_shift13" = "0 ps"
+    Info (12134): Parameter "duty_cycle13" = "50"
+    Info (12134): Parameter "output_clock_frequency14" = "0 MHz"
+    Info (12134): Parameter "phase_shift14" = "0 ps"
+    Info (12134): Parameter "duty_cycle14" = "50"
+    Info (12134): Parameter "output_clock_frequency15" = "0 MHz"
+    Info (12134): Parameter "phase_shift15" = "0 ps"
+    Info (12134): Parameter "duty_cycle15" = "50"
+    Info (12134): Parameter "output_clock_frequency16" = "0 MHz"
+    Info (12134): Parameter "phase_shift16" = "0 ps"
+    Info (12134): Parameter "duty_cycle16" = "50"
+    Info (12134): Parameter "output_clock_frequency17" = "0 MHz"
+    Info (12134): Parameter "phase_shift17" = "0 ps"
+    Info (12134): Parameter "duty_cycle17" = "50"
+    Info (12134): Parameter "pll_type" = "Cyclone V"
+    Info (12134): Parameter "pll_subtype" = "Reconfigurable"
+    Info (12134): Parameter "m_cnt_hi_div" = "4"
+    Info (12134): Parameter "m_cnt_lo_div" = "4"
+    Info (12134): Parameter "n_cnt_hi_div" = "256"
+    Info (12134): Parameter "n_cnt_lo_div" = "256"
+    Info (12134): Parameter "m_cnt_bypass_en" = "false"
+    Info (12134): Parameter "n_cnt_bypass_en" = "true"
+    Info (12134): Parameter "m_cnt_odd_div_duty_en" = "false"
+    Info (12134): Parameter "n_cnt_odd_div_duty_en" = "false"
+    Info (12134): Parameter "c_cnt_hi_div0" = "2"
+    Info (12134): Parameter "c_cnt_lo_div0" = "1"
+    Info (12134): Parameter "c_cnt_prst0" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst0" = "0"
+    Info (12134): Parameter "c_cnt_in_src0" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en0" = "false"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en0" = "true"
+    Info (12134): Parameter "c_cnt_hi_div1" = "1"
+    Info (12134): Parameter "c_cnt_lo_div1" = "1"
+    Info (12134): Parameter "c_cnt_prst1" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst1" = "0"
+    Info (12134): Parameter "c_cnt_in_src1" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en1" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en1" = "false"
+    Info (12134): Parameter "c_cnt_hi_div2" = "1"
+    Info (12134): Parameter "c_cnt_lo_div2" = "1"
+    Info (12134): Parameter "c_cnt_prst2" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst2" = "0"
+    Info (12134): Parameter "c_cnt_in_src2" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en2" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en2" = "false"
+    Info (12134): Parameter "c_cnt_hi_div3" = "1"
+    Info (12134): Parameter "c_cnt_lo_div3" = "1"
+    Info (12134): Parameter "c_cnt_prst3" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst3" = "0"
+    Info (12134): Parameter "c_cnt_in_src3" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en3" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en3" = "false"
+    Info (12134): Parameter "c_cnt_hi_div4" = "1"
+    Info (12134): Parameter "c_cnt_lo_div4" = "1"
+    Info (12134): Parameter "c_cnt_prst4" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst4" = "0"
+    Info (12134): Parameter "c_cnt_in_src4" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en4" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en4" = "false"
+    Info (12134): Parameter "c_cnt_hi_div5" = "1"
+    Info (12134): Parameter "c_cnt_lo_div5" = "1"
+    Info (12134): Parameter "c_cnt_prst5" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst5" = "0"
+    Info (12134): Parameter "c_cnt_in_src5" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en5" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en5" = "false"
+    Info (12134): Parameter "c_cnt_hi_div6" = "1"
+    Info (12134): Parameter "c_cnt_lo_div6" = "1"
+    Info (12134): Parameter "c_cnt_prst6" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst6" = "0"
+    Info (12134): Parameter "c_cnt_in_src6" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en6" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en6" = "false"
+    Info (12134): Parameter "c_cnt_hi_div7" = "1"
+    Info (12134): Parameter "c_cnt_lo_div7" = "1"
+    Info (12134): Parameter "c_cnt_prst7" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst7" = "0"
+    Info (12134): Parameter "c_cnt_in_src7" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en7" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en7" = "false"
+    Info (12134): Parameter "c_cnt_hi_div8" = "1"
+    Info (12134): Parameter "c_cnt_lo_div8" = "1"
+    Info (12134): Parameter "c_cnt_prst8" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst8" = "0"
+    Info (12134): Parameter "c_cnt_in_src8" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en8" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en8" = "false"
+    Info (12134): Parameter "c_cnt_hi_div9" = "1"
+    Info (12134): Parameter "c_cnt_lo_div9" = "1"
+    Info (12134): Parameter "c_cnt_prst9" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst9" = "0"
+    Info (12134): Parameter "c_cnt_in_src9" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en9" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en9" = "false"
+    Info (12134): Parameter "c_cnt_hi_div10" = "1"
+    Info (12134): Parameter "c_cnt_lo_div10" = "1"
+    Info (12134): Parameter "c_cnt_prst10" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst10" = "0"
+    Info (12134): Parameter "c_cnt_in_src10" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en10" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en10" = "false"
+    Info (12134): Parameter "c_cnt_hi_div11" = "1"
+    Info (12134): Parameter "c_cnt_lo_div11" = "1"
+    Info (12134): Parameter "c_cnt_prst11" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst11" = "0"
+    Info (12134): Parameter "c_cnt_in_src11" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en11" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en11" = "false"
+    Info (12134): Parameter "c_cnt_hi_div12" = "1"
+    Info (12134): Parameter "c_cnt_lo_div12" = "1"
+    Info (12134): Parameter "c_cnt_prst12" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst12" = "0"
+    Info (12134): Parameter "c_cnt_in_src12" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en12" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en12" = "false"
+    Info (12134): Parameter "c_cnt_hi_div13" = "1"
+    Info (12134): Parameter "c_cnt_lo_div13" = "1"
+    Info (12134): Parameter "c_cnt_prst13" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst13" = "0"
+    Info (12134): Parameter "c_cnt_in_src13" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en13" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en13" = "false"
+    Info (12134): Parameter "c_cnt_hi_div14" = "1"
+    Info (12134): Parameter "c_cnt_lo_div14" = "1"
+    Info (12134): Parameter "c_cnt_prst14" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst14" = "0"
+    Info (12134): Parameter "c_cnt_in_src14" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en14" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en14" = "false"
+    Info (12134): Parameter "c_cnt_hi_div15" = "1"
+    Info (12134): Parameter "c_cnt_lo_div15" = "1"
+    Info (12134): Parameter "c_cnt_prst15" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst15" = "0"
+    Info (12134): Parameter "c_cnt_in_src15" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en15" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en15" = "false"
+    Info (12134): Parameter "c_cnt_hi_div16" = "1"
+    Info (12134): Parameter "c_cnt_lo_div16" = "1"
+    Info (12134): Parameter "c_cnt_prst16" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst16" = "0"
+    Info (12134): Parameter "c_cnt_in_src16" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en16" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en16" = "false"
+    Info (12134): Parameter "c_cnt_hi_div17" = "1"
+    Info (12134): Parameter "c_cnt_lo_div17" = "1"
+    Info (12134): Parameter "c_cnt_prst17" = "1"
+    Info (12134): Parameter "c_cnt_ph_mux_prst17" = "0"
+    Info (12134): Parameter "c_cnt_in_src17" = "ph_mux_clk"
+    Info (12134): Parameter "c_cnt_bypass_en17" = "true"
+    Info (12134): Parameter "c_cnt_odd_div_duty_en17" = "false"
+    Info (12134): Parameter "pll_vco_div" = "2"
+    Info (12134): Parameter "pll_cp_current" = "20"
+    Info (12134): Parameter "pll_bwctrl" = "4000"
+    Info (12134): Parameter "pll_output_clk_frequency" = "445.499999 MHz"
+    Info (12134): Parameter "pll_fractional_division" = "3908420153"
+    Info (12134): Parameter "mimic_fbclk_type" = "none"
+    Info (12134): Parameter "pll_fbclk_mux_1" = "glb"
+    Info (12134): Parameter "pll_fbclk_mux_2" = "m_cnt"
+    Info (12134): Parameter "pll_m_cnt_in_src" = "ph_mux_clk"
+    Info (12134): Parameter "pll_slf_rst" = "true"
+Info (12128): Elaborating entity "dps_extra_kick" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|dps_extra_kick:dps_extra_inst" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 769
+Info (12131): Elaborated megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|dps_extra_kick:dps_extra_inst", which is child of megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 769
+Info (12128): Elaborating entity "dprio_init" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|dprio_init:dprio_init_inst" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 784
+Info (12131): Elaborated megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|dprio_init:dprio_init_inst", which is child of megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 784
+Info (12128): Elaborating entity "altera_pll_dps_lcell_comb" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_0" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 1961
+Info (12131): Elaborated megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_0", which is child of megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 1961
+Info (12128): Elaborating entity "altera_pll_dps_lcell_comb" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_1" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 1972
+Info (12131): Elaborated megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_1", which is child of megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 1972
+Info (12128): Elaborating entity "altera_pll_dps_lcell_comb" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_2" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 1983
+Info (12131): Elaborated megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_2", which is child of megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 1983
+Info (12128): Elaborating entity "altera_pll_dps_lcell_comb" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_3" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 1994
+Info (12131): Elaborated megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_3", which is child of megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 1994
+Info (12128): Elaborating entity "altera_pll_dps_lcell_comb" for hierarchy "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_4" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 2005
+Info (12131): Elaborated megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i|altera_pll_dps_lcell_comb:lcell_cntsel_int_4", which is child of megafunction instantiation "pll_hdmi:pll_hdmi|pll_hdmi_0002:pll_hdmi_inst|altera_pll:altera_pll_i" File: d:/q17/quartus/libraries/megafunctions/altera_pll.v Line: 2005
+Info (12128): Elaborating entity "pll_cfg_hdmi" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi" File: /sys/sys_top.v Line: 1122
+Info (12128): Elaborating entity "altera_std_synchronizer" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|altera_std_synchronizer:altera_std_synchronizer_inst" File: /sys/pll_cfg/pll_cfg_hdmi.v Line: 270
+Info (12130): Elaborated megafunction instantiation "pll_cfg_hdmi:pll_cfg_hdmi|altera_std_synchronizer:altera_std_synchronizer_inst" File: /sys/pll_cfg/pll_cfg_hdmi.v Line: 270
+Info (12133): Instantiated megafunction "pll_cfg_hdmi:pll_cfg_hdmi|altera_std_synchronizer:altera_std_synchronizer_inst" with the following parameter: File: /sys/pll_cfg/pll_cfg_hdmi.v Line: 270
+    Info (12134): Parameter "depth" = "3"
+Info (12128): Elaborating entity "dyn_phase_shift" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|dyn_phase_shift:dyn_phase_shift_inst" File: /sys/pll_cfg/pll_cfg_hdmi.v Line: 1170
+Info (12128): Elaborating entity "generic_lcell_comb" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|dyn_phase_shift:dyn_phase_shift_inst|generic_lcell_comb:lcell_cnt_sel_0" File: /sys/pll_cfg/altera_pll_reconfig_core.v Line: 2060
+Info (12128): Elaborating entity "generic_lcell_comb" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|dyn_phase_shift:dyn_phase_shift_inst|generic_lcell_comb:lcell_cnt_sel_1" File: /sys/pll_cfg/altera_pll_reconfig_core.v Line: 2071
+Info (12128): Elaborating entity "generic_lcell_comb" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|dyn_phase_shift:dyn_phase_shift_inst|generic_lcell_comb:lcell_cnt_sel_2" File: /sys/pll_cfg/altera_pll_reconfig_core.v Line: 2082
+Info (12128): Elaborating entity "generic_lcell_comb" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|dyn_phase_shift:dyn_phase_shift_inst|generic_lcell_comb:lcell_cnt_sel_3" File: /sys/pll_cfg/altera_pll_reconfig_core.v Line: 2093
+Info (12128): Elaborating entity "generic_lcell_comb" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|dyn_phase_shift:dyn_phase_shift_inst|generic_lcell_comb:lcell_cnt_sel_4" File: /sys/pll_cfg/altera_pll_reconfig_core.v Line: 2104
+Info (12128): Elaborating entity "self_reset" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|self_reset:self_reset_inst" File: /sys/pll_cfg/pll_cfg_hdmi.v Line: 1174
+Info (12128): Elaborating entity "dprio_mux" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|dprio_mux:dprio_mux_inst" File: /sys/pll_cfg/pll_cfg_hdmi.v Line: 1213
+Info (12128): Elaborating entity "fpll_dprio_init" for hierarchy "pll_cfg_hdmi:pll_cfg_hdmi|fpll_dprio_init:fpll_dprio_init_inst" File: /sys/pll_cfg/pll_cfg_hdmi.v Line: 1232
+Info (12128): Elaborating entity "shadowmask" for hierarchy "shadowmask:HDMI_shadowmask" File: /sys/sys_top.v Line: 1216
+Info (12128): Elaborating entity "osd" for hierarchy "osd:hdmi_osd" File: /sys/sys_top.v Line: 1240
+Info (12128): Elaborating entity "csync" for hierarchy "csync:csync_hdmi" File: /sys/sys_top.v Line: 1243
+Info (12128): Elaborating entity "altddio_out" for hierarchy "altddio_out:hdmiclk_ddr" File: /sys/sys_top.v Line: 1336
+Info (12130): Elaborated megafunction instantiation "altddio_out:hdmiclk_ddr" File: /sys/sys_top.v Line: 1336
+Info (12133): Instantiated megafunction "altddio_out:hdmiclk_ddr" with the following parameter: File: /sys/sys_top.v Line: 1336
+    Info (12134): Parameter "extend_oe_disable" = "OFF"
+    Info (12134): Parameter "intended_device_family" = "Cyclone V"
+    Info (12134): Parameter "invert_output" = "OFF"
+    Info (12134): Parameter "lpm_hint" = "UNUSED"
+    Info (12134): Parameter "lpm_type" = "altddio_out"
+    Info (12134): Parameter "oe_reg" = "UNREGISTERED"
+    Info (12134): Parameter "power_up_high" = "OFF"
+    Info (12134): Parameter "width" = "1"
+Info (12021): Found 1 design units, including 1 entities, in source file db/ddio_out_b2j.tdf
+    Info (12023): Found entity 1: ddio_out_b2j File: X:/db/ddio_out_b2j.tdf Line: 28
+Info (12128): Elaborating entity "ddio_out_b2j" for hierarchy "altddio_out:hdmiclk_ddr|ddio_out_b2j:auto_generated" File: d:/q17/quartus/libraries/megafunctions/altddio_out.tdf Line: 101
+Info (12128): Elaborating entity "altddio_out" for hierarchy "altddio_out:vgaclk_ddr" File: /sys/sys_top.v Line: 1417
+Info (12130): Elaborated megafunction instantiation "altddio_out:vgaclk_ddr" File: /sys/sys_top.v Line: 1417
+Info (12133): Instantiated megafunction "altddio_out:vgaclk_ddr" with the following parameter: File: /sys/sys_top.v Line: 1417
+    Info (12134): Parameter "extend_oe_disable" = "OFF"
+    Info (12134): Parameter "intended_device_family" = "Cyclone V"
+    Info (12134): Parameter "invert_output" = "OFF"
+    Info (12134): Parameter "lpm_hint" = "UNUSED"
+    Info (12134): Parameter "lpm_type" = "altddio_out"
+    Info (12134): Parameter "oe_reg" = "UNREGISTERED"
+    Info (12134): Parameter "power_up_high" = "OFF"
+    Info (12134): Parameter "width" = "1"
+Info (12021): Found 1 design units, including 1 entities, in source file db/ddio_out_1oj.tdf
+    Info (12023): Found entity 1: ddio_out_1oj File: X:/db/ddio_out_1oj.tdf Line: 30
+Info (12128): Elaborating entity "ddio_out_1oj" for hierarchy "altddio_out:vgaclk_ddr|ddio_out_1oj:auto_generated" File: d:/q17/quartus/libraries/megafunctions/altddio_out.tdf Line: 101
+Info (12128): Elaborating entity "scanlines" for hierarchy "scanlines:VGA_scanlines" File: /sys/sys_top.v Line: 1438
+Info (12128): Elaborating entity "vga_out" for hierarchy "vga_out:vga_scaler_out" File: /sys/sys_top.v Line: 1526
+Info (12128): Elaborating entity "pll_audio" for hierarchy "pll_audio:pll_audio" File: /sys/sys_top.v Line: 1616
+Info (12128): Elaborating entity "pll_audio_0002" for hierarchy "pll_audio:pll_audio|pll_audio_0002:pll_audio_inst" File: /sys/pll_audio.v Line: 19
+Info (12128): Elaborating entity "altera_pll" for hierarchy "pll_audio:pll_audio|pll_audio_0002:pll_audio_inst|altera_pll:altera_pll_i" File: /sys/pll_audio/pll_audio_0002.v Line: 85
+Info (10008): Verilog HDL or VHDL information: EDA Netlist Writer cannot regroup multidimensional array "wire_to_nowhere_64" into its bus
+Info (12130): Elaborated megafunction instantiation "pll_audio:pll_audio|pll_audio_0002:pll_audio_inst|altera_pll:altera_pll_i" File: /sys/pll_audio/pll_audio_0002.v Line: 85
+Info (12133): Instantiated megafunction "pll_audio:pll_audio|pll_audio_0002:pll_audio_inst|altera_pll:altera_pll_i" with the following parameter: File: /sys/pll_audio/pll_audio_0002.v Line: 85
+    Info (12134): Parameter "fractional_vco_multiplier" = "true"
+    Info (12134): Parameter "reference_clock_frequency" = "50.0 MHz"
+    Info (12134): Parameter "operation_mode" = "direct"
+    Info (12134): Parameter "number_of_clocks" = "1"
+    Info (12134): Parameter "output_clock_frequency0" = "24.576000 MHz"
+    Info (12134): Parameter "phase_shift0" = "0 ps"
+    Info (12134): Parameter "duty_cycle0" = "50"
+    Info (12134): Parameter "output_clock_frequency1" = "0 MHz"
+    Info (12134): Parameter "phase_shift1" = "0 ps"
+    Info (12134): Parameter "duty_cycle1" = "50"
+    Info (12134): Parameter "output_clock_frequency2" = "0 MHz"
+    Info (12134): Parameter "phase_shift2" = "0 ps"
+    Info (12134): Parameter "duty_cycle2" = "50"
+    Info (12134): Parameter "output_clock_frequency3" = "0 MHz"
+    Info (12134): Parameter "phase_shift3" = "0 ps"
+    Info (12134): Parameter "duty_cycle3" = "50"
+    Info (12134): Parameter "output_clock_frequency4" = "0 MHz"
+    Info (12134): Parameter "phase_shift4" = "0 ps"
+    Info (12134): Parameter "duty_cycle4" = "50"
+    Info (12134): Parameter "output_clock_frequency5" = "0 MHz"
+    Info (12134): Parameter "phase_shift5" = "0 ps"
+    Info (12134): Parameter "duty_cycle5" = "50"
+    Info (12134): Parameter "output_clock_frequency6" = "0 MHz"
+    Info (12134): Parameter "phase_shift6" = "0 ps"
+    Info (12134): Parameter "duty_cycle6" = "50"
+    Info (12134): Parameter "output_clock_frequency7" = "0 MHz"
+    Info (12134): Parameter "phase_shift7" = "0 ps"
+    Info (12134): Parameter "duty_cycle7" = "50"
+    Info (12134): Parameter "output_clock_frequency8" = "0 MHz"
+    Info (12134): Parameter "phase_shift8" = "0 ps"
+    Info (12134): Parameter "duty_cycle8" = "50"
+    Info (12134): Parameter "output_clock_frequency9" = "0 MHz"
+    Info (12134): Parameter "phase_shift9" = "0 ps"
+    Info (12134): Parameter "duty_cycle9" = "50"
+    Info (12134): Parameter "output_clock_frequency10" = "0 MHz"
+    Info (12134): Parameter "phase_shift10" = "0 ps"
+    Info (12134): Parameter "duty_cycle10" = "50"
+    Info (12134): Parameter "output_clock_frequency11" = "0 MHz"
+    Info (12134): Parameter "phase_shift11" = "0 ps"
+    Info (12134): Parameter "duty_cycle11" = "50"
+    Info (12134): Parameter "output_clock_frequency12" = "0 MHz"
+    Info (12134): Parameter "phase_shift12" = "0 ps"
+    Info (12134): Parameter "duty_cycle12" = "50"
+    Info (12134): Parameter "output_clock_frequency13" = "0 MHz"
+    Info (12134): Parameter "phase_shift13" = "0 ps"
+    Info (12134): Parameter "duty_cycle13" = "50"
+    Info (12134): Parameter "output_clock_frequency14" = "0 MHz"
+    Info (12134): Parameter "phase_shift14" = "0 ps"
+    Info (12134): Parameter "duty_cycle14" = "50"
+    Info (12134): Parameter "output_clock_frequency15" = "0 MHz"
+    Info (12134): Parameter "phase_shift15" = "0 ps"
+    Info (12134): Parameter "duty_cycle15" = "50"
+    Info (12134): Parameter "output_clock_frequency16" = "0 MHz"
+    Info (12134): Parameter "phase_shift16" = "0 ps"
+    Info (12134): Parameter "duty_cycle16" = "50"
+    Info (12134): Parameter "output_clock_frequency17" = "0 MHz"
+    Info (12134): Parameter "phase_shift17" = "0 ps"
+    Info (12134): Parameter "duty_cycle17" = "50"
+    Info (12134): Parameter "pll_type" = "General"
+    Info (12134): Parameter "pll_subtype" = "General"
+Info (12128): Elaborating entity "audio_out" for hierarchy "audio_out:audio_out" File: /sys/sys_top.v Line: 1658
+Info (12128): Elaborating entity "i2s" for hierarchy "audio_out:audio_out|i2s:i2s" File: /sys/audio_out.sv Line: 109
+Info (12128): Elaborating entity "spdif" for hierarchy "audio_out:audio_out|spdif:toslink" File: /sys/audio_out.sv Line: 121
+Info (12128): Elaborating entity "sigma_delta_dac" for hierarchy "audio_out:audio_out|sigma_delta_dac:sd_l" File: /sys/audio_out.sv Line: 129
+Info (12128): Elaborating entity "IIR_filter" for hierarchy "audio_out:audio_out|IIR_filter:IIR_filter" File: /sys/audio_out.sv Line: 222
+Info (12128): Elaborating entity "iir_filter_tap" for hierarchy "audio_out:audio_out|IIR_filter:IIR_filter|iir_filter_tap:iir_tap_0" File: /sys/iir_filter.v Line: 82
+Info (12128): Elaborating entity "DC_blocker" for hierarchy "audio_out:audio_out|DC_blocker:dcb_l" File: /sys/audio_out.sv Line: 233
+Info (12128): Elaborating entity "aud_mix_top" for hierarchy "audio_out:audio_out|aud_mix_top:audmix_l" File: /sys/audio_out.sv Line: 261
+Info (12128): Elaborating entity "sync_fix" for hierarchy "sync_fix:sync_v" File: /sys/sys_top.v Line: 1749
+Info (12128): Elaborating entity "emu" for hierarchy "emu:emu" File: /sys/sys_top.v Line: 1918
+Info (12128): Elaborating entity "pll" for hierarchy "emu:emu|pll:pll_i" File: /Arcade-SegaSystem24.sv Line: 88
+Info (12128): Elaborating entity "pll_pll_inst" for hierarchy "emu:emu|pll:pll_i|pll_pll_inst:pll_inst" File: /rtl/pll/synthesis/pll.v Line: 24
+Info (12128): Elaborating entity "altera_pll" for hierarchy "emu:emu|pll:pll_i|pll_pll_inst:pll_inst|altera_pll:altera_pll_i" File: /rtl/pll/synthesis/submodules/pll_pll_inst.v Line: 94
+Info (10008): Verilog HDL or VHDL information: EDA Netlist Writer cannot regroup multidimensional array "wire_to_nowhere_64" into its bus
+Info (12130): Elaborated megafunction instantiation "emu:emu|pll:pll_i|pll_pll_inst:pll_inst|altera_pll:altera_pll_i" File: /rtl/pll/synthesis/submodules/pll_pll_inst.v Line: 94
+Info (12133): Instantiated megafunction "emu:emu|pll:pll_i|pll_pll_inst:pll_inst|altera_pll:altera_pll_i" with the following parameter: File: /rtl/pll/synthesis/submodules/pll_pll_inst.v Line: 94
+    Info (12134): Parameter "fractional_vco_multiplier" = "false"
+    Info (12134): Parameter "reference_clock_frequency" = "50.0 MHz"
+    Info (12134): Parameter "operation_mode" = "direct"
+    Info (12134): Parameter "number_of_clocks" = "4"
+    Info (12134): Parameter "output_clock_frequency0" = "96.634615 MHz"
+    Info (12134): Parameter "phase_shift0" = "0 ps"
+    Info (12134): Parameter "duty_cycle0" = "50"
+    Info (12134): Parameter "output_clock_frequency1" = "48.317307 MHz"
+    Info (12134): Parameter "phase_shift1" = "0 ps"
+    Info (12134): Parameter "duty_cycle1" = "50"
+    Info (12134): Parameter "output_clock_frequency2" = "96.634615 MHz"
+    Info (12134): Parameter "phase_shift2" = "5174 ps"
+    Info (12134): Parameter "duty_cycle2" = "50"
+    Info (12134): Parameter "output_clock_frequency3" = "24.158653 MHz"
+    Info (12134): Parameter "phase_shift3" = "0 ps"
+    Info (12134): Parameter "duty_cycle3" = "50"
+    Info (12134): Parameter "output_clock_frequency4" = "0 MHz"
+    Info (12134): Parameter "phase_shift4" = "0 ps"
+    Info (12134): Parameter "duty_cycle4" = "50"
+    Info (12134): Parameter "output_clock_frequency5" = "0 MHz"
+    Info (12134): Parameter "phase_shift5" = "0 ps"
+    Info (12134): Parameter "duty_cycle5" = "50"
+    Info (12134): Parameter "output_clock_frequency6" = "0 MHz"
+    Info (12134): Parameter "phase_shift6" = "0 ps"
+    Info (12134): Parameter "duty_cycle6" = "50"
+    Info (12134): Parameter "output_clock_frequency7" = "0 MHz"
+    Info (12134): Parameter "phase_shift7" = "0 ps"
+    Info (12134): Parameter "duty_cycle7" = "50"
+    Info (12134): Parameter "output_clock_frequency8" = "0 MHz"
