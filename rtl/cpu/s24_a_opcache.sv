@@ -9,8 +9,8 @@
 //
 // The lower half of CPU-A's window is immutable boot ROM.  The upper half is
 // shared Work-A RAM, so accepted writes from either CPU invalidate by physical
-// address.  A conservative whole-word line invalidation is sufficient because
-// each cache entry holds exactly one 16-bit word.
+// address.  Four independently valid words share each tag; a write
+// conservatively invalidates the whole four-word line.
 module s24_a_opcache (
     input  logic        clk,
     input  logic        reset,
@@ -30,12 +30,14 @@ module s24_a_opcache (
 );
     import s24_pkg::*;
 
-    localparam int INDEX_BITS = 11;
-    localparam int LINES = 1 << INDEX_BITS;
-    localparam int TAG_BITS = 9; // valid + logical byte address [19:12]
+    localparam int SET_BITS = 9;
+    localparam int LINE_WORD_BITS = 2;
+    localparam int SETS = 1 << SET_BITS;
+    localparam int WORDS = SETS << LINE_WORD_BITS;
+    localparam int TAG_BITS = 12; // logical byte address [19:12] + 4 word valids
 
-    logic [INDEX_BITS:0] sweep_count;
-    wire sweeping = !sweep_count[INDEX_BITS];
+    logic [SET_BITS:0] sweep_count;
+    wire sweeping = !sweep_count[SET_BITS];
     always_ff @(posedge clk) begin
         if (reset) sweep_count <= '0;
         else if (sweeping) sweep_count <= sweep_count + 1'b1;
@@ -47,23 +49,27 @@ module s24_a_opcache (
         snoop_phys[26:18] == SDR_WORKA_BASE[26:18];
     wire snoop_hits_window = snoop && snoop_in_worka;
 
-    logic [TAG_BITS-1:0] tag_ram [0:LINES-1];
-    logic [15:0] data_ram [0:LINES-1];
+    logic [TAG_BITS-1:0] tag_ram [0:SETS-1];
+    logic [15:0] data_ram [0:WORDS-1];
     logic tag_we;
-    logic [INDEX_BITS-1:0] tag_waddr;
+    logic [SET_BITS-1:0] tag_waddr;
     logic [TAG_BITS-1:0] tag_wdata;
 
     always_comb begin
         tag_we = 1'b1;
         if (sweeping) begin
-            tag_waddr = sweep_count[INDEX_BITS-1:0];
+            tag_waddr = sweep_count[SET_BITS-1:0];
             tag_wdata = '0;
         end else if (snoop_hits_window) begin
-            tag_waddr = snoop_phys[11:1];
+            tag_waddr = snoop_phys[11:3];
             tag_wdata = '0;
         end else if (fill) begin
-            tag_waddr = fill_address[11:1];
-            tag_wdata = {1'b1,fill_address[19:12]};
+            tag_waddr = fill_address[11:3];
+            tag_wdata = {fill_address[19:12],4'b0000};
+            if (q_valid_r && q_index == fill_address[11:3] &&
+                tag_q[TAG_BITS-1:4] == fill_address[19:12])
+                tag_wdata[3:0] = tag_q[3:0];
+            tag_wdata[{2'b00,fill_address[2:1]}] = 1'b1;
         end else begin
             tag_we = 1'b0;
             tag_waddr = '0;
@@ -76,28 +82,29 @@ module s24_a_opcache (
     logic [15:0] data_q;
     always_ff @(posedge clk) begin
         if (tag_we) tag_ram[tag_waddr] <= tag_wdata;
-        tag_q <= tag_ram[address[11:1]];
+        tag_q <= tag_ram[address[11:3]];
     end
     always_ff @(posedge clk) begin
         if (data_we) data_ram[fill_address[11:1]] <= fill_data;
         data_q <= data_ram[address[11:1]];
     end
 
-    logic [11:1] q_index;
+    logic [11:3] q_index;
     logic q_valid_r;
     always_ff @(posedge clk) begin
         if (reset) begin
             q_index <= '0;
             q_valid_r <= 1'b0;
         end else begin
-            q_index <= address[11:1];
+            q_index <= address[11:3];
             q_valid_r <= 1'b1;
         end
     end
 
     assign lookup_q_valid = q_valid_r && !sweeping &&
-                            q_index == address[11:1];
-    assign hit = lookup_q_valid && fetch_window && tag_q[TAG_BITS-1] &&
-                 tag_q[7:0] == address[19:12];
+                            q_index == address[11:3];
+    assign hit = lookup_q_valid && fetch_window &&
+                 tag_q[{2'b00,address[2:1]}] &&
+                 tag_q[TAG_BITS-1:4] == address[19:12];
     assign hit_data = data_q;
 endmodule

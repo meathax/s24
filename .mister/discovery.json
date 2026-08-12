@@ -14,8 +14,12 @@
     ".build/s24_obj_gground_visual/Vtb_gground_boot_classes.mk",
     ".build/s24_obj_sprite_focus2/Vtb_sprite.mk",
     ".build/s24_obj_sprite_focus2/Vtb_sprite_classes.mk",
+    ".codex-mister-build/analog_obj_after/Vtb_analog.mk",
+    ".codex-mister-build/analog_obj_after/Vtb_analog_classes.mk",
     ".codex-mister-build/analog_obj_codex/Vtb_analog.mk",
     ".codex-mister-build/analog_obj_codex/Vtb_analog_classes.mk",
+    ".codex-mister-build/opt-baseline-ydiv/Vtb_sprite_ydiv.mk",
+    ".codex-mister-build/opt-baseline-ydiv/Vtb_sprite_ydiv_classes.mk",
     ".tmp_verilator/coredual_guard/Vtb_core_dual_bus.mk",
     ".tmp_verilator/coredual_guard/Vtb_core_dual_bus_classes.mk",
     ".tmp_verilator/dip_baseline_20260812/Vtb_switches.mk",
@@ -54,7 +58,7 @@
     "artifacts/verilator/video_timing_sync_20260811/Vtb_video_timing_sync_classes.mk",
     "clean.bat"
   ],
-  "created_utc": "2026-08-12T05:48:50Z",
+  "created_utc": "2026-08-12T10:23:03Z",
   "hdl": {
     "files": [
       ".build/models/sspirits_audit_current/src/rtl/cpu/fx68k/fx68k.sv",
@@ -169,10 +173,18 @@
       ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_tile.sv",
       ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_video_timing.sv",
       ".claude/worktrees/agent-aa01b012bc64cf823/verif/tb_ym_write.sv",
+      ".codex-mister-build/analog_obj_after/s24_analog.sv",
+      ".codex-mister-build/analog_obj_after/s24_pedal_merge.sv",
+      ".codex-mister-build/analog_obj_after/s24_pkg.sv",
+      ".codex-mister-build/analog_obj_after/s24_wheel_input.sv",
+      ".codex-mister-build/analog_obj_after/tb_analog.sv",
       ".codex-mister-build/analog_obj_codex/s24_analog.sv",
       ".codex-mister-build/analog_obj_codex/s24_pkg.sv",
       ".codex-mister-build/analog_obj_codex/s24_wheel_input.sv",
       ".codex-mister-build/analog_obj_codex/tb_analog.sv",
+      ".codex-mister-build/opt-baseline-ydiv/s24_pkg.sv",
+      ".codex-mister-build/opt-baseline-ydiv/s24_sprite.sv",
+      ".codex-mister-build/opt-baseline-ydiv/tb_sprite_ydiv.sv",
       ".mister/donors/IKAOPM/src/IKAOPM_tb.sv",
       ".tmp_verilator/sprite_audit/s24_pkg.sv",
       ".tmp_verilator/sprite_audit/s24_sprite.sv",
@@ -1171,6 +1183,26 @@
         "module": "tb_ym_write"
       },
       {
+        "file": ".codex-mister-build/analog_obj_after/s24_analog.sv",
+        "module": "s24_upd4701"
+      },
+      {
+        "file": ".codex-mister-build/analog_obj_after/s24_analog.sv",
+        "module": "s24_msm6253"
+      },
+      {
+        "file": ".codex-mister-build/analog_obj_after/s24_pedal_merge.sv",
+        "module": "s24_pedal_merge"
+      },
+      {
+        "file": ".codex-mister-build/analog_obj_after/s24_wheel_input.sv",
+        "module": "s24_wheel_input"
+      },
+      {
+        "file": ".codex-mister-build/analog_obj_after/tb_analog.sv",
+        "module": "tb_analog"
+      },
+      {
         "file": ".codex-mister-build/analog_obj_codex/s24_analog.sv",
         "module": "s24_upd4701"
       },
@@ -1185,6 +1217,34 @@
       {
         "file": ".codex-mister-build/analog_obj_codex/tb_analog.sv",
         "module": "tb_analog"
+      },
+      {
+        "file": ".codex-mister-build/opt-baseline-ydiv/s24_sprite.sv",
+        "module": "s24_sprite_ydiv_radix4_step"
+      },
+      {
+        "file": ".codex-mister-build/opt-baseline-ydiv/s24_sprite.sv",
+        "module": "s24_sprite_line_ram"
+      },
+      {
+        "file": ".codex-mister-build/opt-baseline-ydiv/s24_sprite.sv",
+        "module": "s24_sprite_burst_cache_ram"
+      },
+      {
+        "file": ".codex-mister-build/opt-baseline-ydiv/s24_sprite.sv",
+        "module": "s24_sprite_pair_ram"
+      },
+      {
+        "file": ".codex-mister-build/opt-baseline-ydiv/s24_sprite.sv",
+        "module": "s24_sprite_active_ram"
+      },
+      {
+        "file": ".codex-mister-build/opt-baseline-ydiv/s24_sprite.sv",
+        "module": "s24_sprite"
+      },
+      {
+        "file": ".codex-mister-build/opt-baseline-ydiv/tb_sprite_ydiv.sv",
+        "module": "tb_sprite_ydiv"
       },
       {
         "file": ".mister/donors/IKAOPM/src/IKAOPM_tb.sv",
@@ -1981,38 +2041,6 @@
       {
         "file": "verif/tb_sdram_cdc.sv",
         "module": "tb_sdram_cdc"
-      },
-      {
-        "file": "verif/tb_siliconre_3155242.sv",
-        "module": "tb_siliconre_3155242"
-      },
-      {
-        "file": "verif/tb_sprite.sv",
-        "module": "tb_sprite"
-      },
-      {
-        "file": "verif/tb_sprite_bank_ownership.sv",
-        "module": "tb_sprite_bank_ownership"
-      },
-      {
-        "file": "verif/tb_sprite_crkdown_list.sv",
-        "module": "tb_sprite_crkdown_list"
-      },
-      {
-        "file": "verif/tb_sprite_crkdown_pattern.sv",
-        "module": "tb_sprite_crkdown_pattern"
-      },
-      {
-        "file": "verif/tb_sprite_crkdown_real.sv",
-        "module": "tb_sprite_crkdown_real"
-      },
-      {
-        "file": "verif/tb_sprite_crkdown_seam.sv",
-        "module": "tb_sprite_crkdown_seam"
-      },
-      {
-        "file": "verif/tb_sprite_crkdown_seam_full.sv",
-        "module": "tb_sprite_crkdown_seam_full"
       }
     ]
   },
@@ -2307,6 +2335,10 @@
     ".codex-mister-build/preserved/20260812-090710-192/001-Arcade-SegaSystem24.rbf",
     ".codex-mister-build/preserved/20260812-104612-729/001-Arcade-SegaSystem24.rbf",
     ".codex-mister-build/preserved/20260812-151211-425/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260812-191239-720/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260812-192835-446/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260812-194230-989/001-Arcade-SegaSystem24.rbf",
+    ".codex-mister-build/preserved/20260812-195635-786/001-Arcade-SegaSystem24.rbf",
     "output_files/segas24_20260806.rbf",
     "release_mister/_Arcade/s24.rbf",
     "releases/Arcade-SegaSystem24_20260806.rbf",

@@ -69,3 +69,79 @@ module s24_palette (
         end
     end
 endmodule
+
+// One physical 8Kx16 palette copy. Both RAM ports belong to video on ce_pixel;
+// port B serves one CPU access in the intervening clk cycles. This keeps CPU
+// traffic structurally disjoint from video reads, so mixed-port OLD_DATA
+// behavior is preserved without a same-edge CPU/video collision.
+module s24_palette_ram (
+    input  logic        clk,
+    input  logic        reset,
+    input  logic        ce_pixel,
+    input  logic [13:0] mixed,
+    input  logic [13:0] mixed_alt,
+    input  logic        blend,
+    input  logic        display_blank,
+    output logic [15:0] video_word,
+    output logic [15:0] video_word_alt,
+    output logic        shadow_bank,
+    output logic        shadow_bank_alt,
+    output logic        blend_q,
+    output logic        display_blank_q,
+
+    input  logic        cpu_req,
+    input  logic        cpu_write,
+    input  logic [12:0] cpu_addr,
+    input  logic [15:0] cpu_wdata,
+    input  logic [1:0]  cpu_be,
+    output logic [15:0] cpu_rdata,
+    output logic        cpu_done
+);
+    (* ramstyle="M10K, no_rw_check" *) logic [15:0] mem [0:8191];
+    logic cpu_busy;
+    integer palette_init;
+
+    initial begin
+        // Quartus 17 rejects a single elaboration loop above 5000 iterations.
+        for (palette_init=0; palette_init<4096; palette_init=palette_init+1)
+            mem[palette_init] = 16'h0000;
+        for (palette_init=4096; palette_init<8192; palette_init=palette_init+1)
+            mem[palette_init] = 16'h0000;
+    end
+
+    // Read-only port A: primary video lookup.
+    always_ff @(posedge clk) begin
+        if (ce_pixel)
+            video_word <= mem[mixed[12:0]];
+    end
+
+    // Port B: alternate video lookup has priority on every pixel edge; CPU
+    // accesses are accepted only in a gap. Byte writes retain the untouched
+    // lane, matching the physical palette's UDS/LDS behavior.
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            cpu_done <= 1'b0;
+            cpu_busy <= 1'b0;
+        end else begin
+            cpu_done <= 1'b0;
+            if (!cpu_req)
+                cpu_busy <= 1'b0;
+
+            if (ce_pixel) begin
+                video_word_alt <= mem[mixed_alt[12:0]];
+                shadow_bank <= mixed[13];
+                shadow_bank_alt <= mixed_alt[13];
+                blend_q <= blend;
+                display_blank_q <= display_blank;
+            end else if (cpu_req && !cpu_busy) begin
+                cpu_rdata <= mem[cpu_addr];
+                if (cpu_write && cpu_be[0])
+                    mem[cpu_addr][7:0] <= cpu_wdata[7:0];
+                if (cpu_write && cpu_be[1])
+                    mem[cpu_addr][15:8] <= cpu_wdata[15:8];
+                cpu_done <= 1'b1;
+                cpu_busy <= 1'b1;
+            end
+        end
+    end
+endmodule

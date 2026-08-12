@@ -201,6 +201,32 @@ module tb_core_dual_bus;
         wait(!dut.b_dtack_n);
         idle_cpu_cycles();
 
+        // Palette cycles wait for a non-ce16 scheduler slot. Writes preserve
+        // byte lanes and the following CPU read returns the merged word.
+        @(negedge clk);
+        a_addr=24'h400246>>1;a_dout=16'h1234;a_rw_n=0;
+        a_as_n=0;a_uds_n=0;a_lds_n=0;
+        wait(!dut.a_dtack_n);#1;
+        if(dut.palette_mem.mem[13'h0123]!==16'h1234)
+            $fatal(1,"palette full write=%h",dut.palette_mem.mem[13'h0123]);
+        idle_cpu_cycles();
+
+        @(negedge clk);
+        a_addr=24'h400246>>1;a_dout=16'hab00;a_rw_n=0;
+        a_as_n=0;a_uds_n=0;a_lds_n=1;
+        wait(!dut.a_dtack_n);#1;
+        if(dut.palette_mem.mem[13'h0123]!==16'hab34)
+            $fatal(1,"palette upper-lane write=%h",dut.palette_mem.mem[13'h0123]);
+        idle_cpu_cycles();
+
+        @(negedge clk);
+        a_addr=24'h400246>>1;a_rw_n=1;
+        a_as_n=0;a_uds_n=0;a_lds_n=0;
+        wait(!dut.a_dtack_n);#1;
+        if(dut.a_din!==16'hab34)
+            $fatal(1,"palette scheduled read=%h expected=ab34",dut.a_din);
+        idle_cpu_cycles();
+
         $display("PASS tb_core_dual_bus parallel memory, shared serialization and A-bus contention");
         $finish;
     end

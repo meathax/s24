@@ -51,11 +51,21 @@ module tb_a_opcache;
         repeat(3) @(posedge clk);
         reset=0;
         // Wait for the fail-closed valid sweep to retire.
-        repeat(2050) @(posedge clk);
+        repeat(514) @(posedge clk);
 
         lookup(24'h001234,0,16'h0000);
         cache_fill(24'h001234,16'h4e71);
         lookup(24'h001234,1,16'h4e71);
+
+        // All four words in a set retain independent validity and data.
+        cache_fill(24'h001230,16'h1111);
+        cache_fill(24'h001232,16'h2222);
+        cache_fill(24'h001234,16'h3333);
+        cache_fill(24'h001236,16'h4444);
+        lookup(24'h001230,1,16'h1111);
+        lookup(24'h001232,1,16'h2222);
+        lookup(24'h001234,1,16'h3333);
+        lookup(24'h001236,1,16'h4444);
 
         // Data-space reads never hit even when the word is resident.
         fetch_window=0;
@@ -72,6 +82,30 @@ module tb_a_opcache;
         @(posedge clk);
         #1 snoop=0;
         lookup(24'h081234,0,16'h0000);
+
+        // A physical write invalidates every cached word sharing that line.
+        cache_fill(24'h081230,16'h5678);
+        cache_fill(24'h081232,16'h9abc);
+        snoop_phys=SDR_WORKA_BASE+27'h0001234;
+        snoop=1;
+        @(posedge clk);
+        #1 snoop=0;
+        lookup(24'h081230,0,16'h0000);
+        lookup(24'h081232,0,16'h0000);
+
+        // Snoop priority must drop a simultaneous fill, never a write
+        // invalidation that could otherwise leave stale executable data.
+        address=23'h040918;
+        fill_address=23'h040918;
+        fill_data=16'hdead;
+        snoop_phys=SDR_WORKA_BASE+27'h0001230;
+        fill=1;
+        snoop=1;
+        @(posedge clk);
+        #1 fill=0;
+        snoop=0;
+        repeat(2) @(posedge clk);
+        lookup(24'h081230,0,16'h0000);
 
         // Work-B has no CPU-A logical alias and must not evict the same index.
         cache_fill(24'h081234,16'habcd);

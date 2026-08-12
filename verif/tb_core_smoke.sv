@@ -130,8 +130,7 @@ module tb_core_smoke;
         // entry zero is writable, so replacing the mixed index with zero is
         // not itself a black-output guarantee.
         @(negedge clk);
-        dut.palette_ram_lo[0] = 8'h0f;
-        dut.palette_ram_hi[0] = 8'h00;
+        dut.palette_mem.mem[0] = 16'h000f;
         dut.mixer.regs[13] = 16'h0001;
         repeat (3) @(posedge clk);
         #1;

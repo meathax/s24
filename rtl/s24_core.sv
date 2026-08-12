@@ -477,52 +477,29 @@ module s24_core #(
     // and remains a normal dynamic video control for the framebuffer path.
     assign video_flip = screen_flip;
 
-    // Keep the byte lanes separate so Quartus can infer byte-enabled true
-    // dual-port M10Ks: port A supplies the pixel stream while port B serves
-    // CPU reads and writes.
-    (* ramstyle="M10K, no_rw_check" *) logic [7:0] palette_ram_lo [0:8191];
-    (* ramstyle="M10K, no_rw_check" *) logic [7:0] palette_ram_hi [0:8191];
-    logic palette_wr;
+    typedef enum logic [3:0] {X_IDLE,X_WRITE,X_LOCAL,X_TILE,
+                              X_PALETTE,X_YM,X_FDC,X_WAIT} xstate_t;
+    xstate_t xs;
+
+    // One true-dual-port palette copy serves both video lookups on ce16;
+    // CPU accesses use port B only between pixel edges.
     logic [15:0] palette_word, palette_cpu_word, palette_word_alt;
     logic palette_shadow_bank, palette_display_blank, palette_shadow_bank_alt;
     logic [7:0] palette_red, palette_green, palette_blue;
     logic [7:0] palette_red_alt, palette_green_alt, palette_blue_alt;
-    logic palette_blend_q;
-    integer palette_init;
-    initial begin
-        // Quartus 17 rejects a single elaboration loop above 5000 iterations.
-        for (palette_init=0; palette_init<4096; palette_init=palette_init+1)
-            {palette_ram_hi[palette_init],palette_ram_lo[palette_init]} = 16'h0000;
-        for (palette_init=4096; palette_init<8192; palette_init=palette_init+1)
-            {palette_ram_hi[palette_init],palette_ram_lo[palette_init]} = 16'h0000;
-    end
-    always_ff @(posedge clk) begin
-        palette_word <= {palette_ram_hi[mixed[12:0]],
-                         palette_ram_lo[mixed[12:0]]};
-        palette_shadow_bank <= mixed[13];
-        // Second, independent read of the same palette for the "blinking
-        // layer absent" pixel. Quartus duplicates the M10K contents for the
-        // extra read port; the array is only 8192x16, so the cost is small
-        // and it avoids retiming the existing one-clock lookup.
-        palette_word_alt <= {palette_ram_hi[mixed_alt[12:0]],
-                             palette_ram_lo[mixed_alt[12:0]]};
-        palette_shadow_bank_alt <= mixed_alt[13];
-        // Blend only while a tilemap is actually blinking, so an unaffected
-        // scene keeps the exact original pixel rather than an average of two
-        // identical values (identical inputs already average to themselves,
-        // but this keeps the intent explicit and the mux cheap).
-        palette_blend_q <= flicker_blend && (tile_blink != 4'b0000);
-        // The palette lookup is synchronous, so delay the 315-5294 display
-        // blank by the same cycle.  Blanking the palette index alone is not
-        // sufficient because software can program palette entry zero.
-        palette_display_blank <= display_blank;
-        palette_cpu_word <= {palette_ram_hi[bus_addr[13:1]],
-                             palette_ram_lo[bus_addr[13:1]]};
-        if(palette_wr && bus_be[0])
-            palette_ram_lo[bus_addr[13:1]] <= bus_dout[7:0];
-        if(palette_wr && bus_be[1])
-            palette_ram_hi[bus_addr[13:1]] <= bus_dout[15:8];
-    end
+    logic palette_blend_q, palette_cpu_done, palette_wr;
+    // Preserve the accepted-write observability pulse used by boot regressions.
+    assign palette_wr = palette_cpu_done && !bus_rnw;
+    s24_palette_ram palette_mem(
+        .clk(clk),.reset(reset),.ce_pixel(ce16),.mixed(mixed),.mixed_alt(mixed_alt),
+        .blend(flicker_blend && (tile_blink != 4'b0000)),
+        .display_blank(display_blank),.video_word(palette_word),
+        .video_word_alt(palette_word_alt),.shadow_bank(palette_shadow_bank),
+        .shadow_bank_alt(palette_shadow_bank_alt),.blend_q(palette_blend_q),
+        .display_blank_q(palette_display_blank),
+        .cpu_req(xs==X_PALETTE),.cpu_write(!bus_rnw),
+        .cpu_addr(bus_addr[13:1]),.cpu_wdata(bus_dout),.cpu_be(bus_be),
+        .cpu_rdata(palette_cpu_word),.cpu_done(palette_cpu_done));
     s24_palette pal(.palette_word(palette_word),.shadow_bank(palette_shadow_bank),
                     .red(palette_red),.green(palette_green),.blue(palette_blue));
     s24_palette pal_alt(
@@ -747,9 +724,6 @@ module s24_core #(
         end
     end
 
-    typedef enum logic [3:0] {X_IDLE,X_WRITE,X_LOCAL,X_TILE,
-                              X_PALETTE,X_YM,X_FDC,X_WAIT} xstate_t;
-    xstate_t xs;
     // MAME's read_xy handler pulses CS low before selecting axis/byte and
     // reading the uPD4701A. Keep that edge tied to the accepted bus request;
     // X_LOCAL returns the now-latched payload on the following clock.
@@ -964,7 +938,7 @@ module s24_core #(
 
     always_ff @(posedge clk) begin
         bus_ack<=0;io_rd<=0;io_wr<=0;irq_rd_a<=0;irq_rd_b<=0;irq_wr<=0;
-        magic_wr<=0;tile_wr<=0;mixer_wr<=0;palette_wr<=0;fdc_rd<=0;fdc_wr<=0;
+        magic_wr<=0;tile_wr<=0;mixer_wr<=0;fdc_rd<=0;fdc_wr<=0;
         adc0_select<=0;adc1_select<=0;adc0_shift<=0;adc1_shift<=0;
         frc_mode_write<=0;frc_ack_write<=0;bc_snoop<=0;
         if(reset) begin
@@ -1019,8 +993,7 @@ module s24_core #(
                     if(!bus_rnw)tile_syncmode<=merge16(tile_syncmode,bus_dout,bus_be);
                     xs<=X_LOCAL;
                 end else if(bus_addr[23:21]==3'b010 && !bus_addr[14]) begin
-                    if(bus_rnw) xs<=X_PALETTE;
-                    else begin palette_wr<=1;xs<=X_LOCAL; end
+                    xs<=X_PALETTE;
                 end else if(bus_addr[23:21]==3'b010 && bus_addr[14]) begin
                     bus_din<=mixer_dout;if(!bus_rnw)mixer_wr<=1;xs<=X_LOCAL;
                 end else if((bus_addr[23:21]==3'b100)&&bus_addr[8:6]==0) begin
@@ -1124,7 +1097,9 @@ module s24_core #(
                 bus_ack<=1;xs<=X_WAIT;
             end
             X_TILE: begin bus_din<=tile_dout;bus_ack<=1;xs<=X_WAIT;end
-            X_PALETTE: begin bus_din<=palette_cpu_word;bus_ack<=1;xs<=X_WAIT;end
+            X_PALETTE: if(palette_cpu_done) begin
+                bus_din<=palette_cpu_word;bus_ack<=1;xs<=X_WAIT;
+            end
             X_YM: if(!ym_write_pending) begin bus_ack<=1;xs<=X_WAIT;end
             // segas24_state::fdc_r/status_r return a 16-bit 0x00xx value
             // when a floppy controller is populated.  With no media profile

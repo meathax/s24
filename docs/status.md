@@ -393,3 +393,28 @@ contract and was deliberately not stacked into this functional change.
 
 No Quartus compilation, timing closure, hardware test or RBF build was run for
 this pass.
+
+## V24 resource optimization pass — 2026-08-12
+
+CPU-A's 4 KiB plaintext opcode cache now uses 512 four-word sets instead of
+2,048 one-word sets.  The data capacity and registered hit timing are
+unchanged, while address tags are shared across four independently valid words
+and the fail-closed reset sweep drops from 2,048 to 512 clocks.  The focused
+cache regression passes neighbor retention, boot/work tagging, Work-A snoop
+invalidation, Work-B non-invalidation, and simultaneous snoop/fill priority.
+
+The palette is now scheduled through one 8,192x16 true-dual-port-shaped memory
+instead of three replicated read views.  Both native-video indices consume the
+two ports together on each 16 MHz pixel enable; serialized CPU reads and
+byte-lane writes use the intervening system clocks with video priority.  The
+focused scheduler regression passes exact paired lookup phase, shadow/blend/
+blank metadata, three- and four-clock pixel gaps, partial writes, old-data
+behavior, and CPU/video same-address deferral.  Mixer, flicker-blend and
+full-core dual-bus regressions also pass.
+
+The previous synthesis log showed six inferred 8,192x8 palette replicas.  The
+new structure is expected to remove approximately 32 M10Ks and 262,144
+duplicated memory bits, but a fresh Analysis & Synthesis report is still
+required to accept those resource numbers.  That measurement was queued behind
+an unrelated machine-wide Quartus owner; no Quartus stage or RBF build was
+started by this pass.
