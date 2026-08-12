@@ -10,7 +10,7 @@
   <resolution>15kHz</resolution>
   <rotation>horizontal</rotation>
   <joystick>Steering Wheel</joystick>
-  <buttons default="A,B,X,Start,Select,R,L,Y" names="Accelerate,Brake,Action,-,-,-,Start,Coin,Service,Test,Pause"/>
+  <buttons default="A,B,X,Start,Select,R,L,Y" names="Nitro,Accelerate,Action,-,-,-,Start,Coin,Service,Test,Pause"/>
   <switches default="FF FD"/>
   <rom index="1" zip="roughrac.zip" md5="none">
     <interleave output="16">
