@@ -45,6 +45,7 @@ module emu (
         "O[6],Pause,Off,On;",
         "O[16],Pause when OSD is open,Off,On;",
         "O[7],Service Mode,Off,On;",
+        "DIP;",
         "O[9:8],Rotation,Normal,Rotate 90 CCW,Rotate 90 CW;",
         "O[12:10],Scaling,Normal,V-Integer,HV-Integer;",
         "O[15:14],Scandoubler Fx,None,CRT 25%,CRT 50%,CRT 75%;",

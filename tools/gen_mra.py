@@ -19,6 +19,7 @@ import re
 import zipfile
 from dataclasses import dataclass, field
 from html import escape
+from types import MappingProxyType
 
 
 MAME_VERSION = "0288"
@@ -88,6 +89,66 @@ MRA_CONTROL_GOLF = "golf"
 MRA_CONTROL_GGROUND = "gground"
 MRA_CONTROL_CRKDOWN = "crkdown"
 MRA_CONTROL_BNZABROS = "bnzabros"
+
+# Physical System 24 DIP banks are transported by MiSTer as two active-low
+# bytes. Keep the presentation profiles immutable and separate from the
+# runtime descriptor: numeric 0 means physical On, while 1 means Off.
+COINAGE_DIP_LABELS = (
+    "Coin A Rate 1/4", "Coin A Rate 2/4",
+    "Coin A Rate 3/4", "Coin A Rate 4/4",
+    "Coin B Rate 1/4", "Coin B Rate 2/4",
+    "Coin B Rate 3/4", "Coin B Rate 4/4",
+)
+
+DIP_LABEL_PROFILES = MappingProxyType({
+    "bnzabros": COINAGE_DIP_LABELS + (
+        "Demo Sounds", "Start Credit", "Coin Chute", "Flip Screen",
+        "Difficulty 1/2", "Difficulty 2/2", "Lives 1/2", "Lives 2/2",
+    ),
+    "crkdown": COINAGE_DIP_LABELS + (
+        "Unused 1", "Unused 2", "Unused 3", "Unused 4",
+        "Unused 5", "Unused 6", "Coin Chute", "Flip Screen",
+    ),
+    "gground": COINAGE_DIP_LABELS + (
+        "Flip Screen", "Demo Sounds",
+        "Difficulty 1/3", "Difficulty 2/3", "Difficulty 3/3",
+        "Time Limit 1/2", "Time Limit 2/2", "Clock of Time Limit",
+    ),
+    "hotrod": COINAGE_DIP_LABELS + (
+        "Unused 1", "Unused 2", "Unused 3", "Unused 4", "Unused 5",
+        "Start Credit", "Coin Chute", "Flip Screen",
+    ),
+    "hotrodj": COINAGE_DIP_LABELS + (
+        "Unused 1", "Unused 2", "Start Credit", "Play Mode",
+        "Game Style", "Language", "Coin Chute", "Flip Screen",
+    ),
+    "roughrac": COINAGE_DIP_LABELS + (
+        "Start Credit", "Demo Sounds", "Flip Screen", "Game Instruction",
+        "Difficulty 1/2", "Difficulty 2/2", "Start Money", "Start Intro",
+    ),
+    "sspirits": COINAGE_DIP_LABELS + (
+        "Flip Screen", "Demo Sounds", "Lives 1/2", "Lives 2/2",
+        "Bonus Life 1/2", "Bonus Life 2/2",
+        "Difficulty 1/2", "Difficulty 2/2",
+    ),
+})
+
+# Clone assignment is explicit so a clone with a different physical SW2 bank
+# (Hot Rod Japan) cannot silently inherit the World labels.
+DIP_PROFILE_BY_SET = MappingProxyType({
+    "bnzabros": "bnzabros",
+    "crkdown": "crkdown",
+    "gground": "gground",
+    "ggroundj": "gground",
+    "hotrod": "hotrod",
+    "hotrodj": "hotrodj",
+    "roughrac": "roughrac",
+    "sspirits": "sspirits",
+})
+
+GENERIC_DIP_LABELS = COINAGE_DIP_LABELS + tuple(
+    f"Unused {position}" for position in range(1, 9)
+)
 
 
 @dataclass(frozen=True)
@@ -388,11 +449,43 @@ def mra_controls_for(
     return MRA_CONTROL_PROFILES[profile]
 
 
+def dip_labels_for_setname(setname: str, parent: str = "") -> tuple[str, ...]:
+    """Return physical one-bit DIP labels, with explicit clone overrides."""
+    profile = DIP_PROFILE_BY_SET.get(setname)
+    if profile is None and parent:
+        profile = DIP_PROFILE_BY_SET.get(parent)
+    if profile is None:
+        return GENERIC_DIP_LABELS
+    return DIP_LABEL_PROFILES[profile]
+
+
+def emit_switches(lines: list[str], game: Game) -> None:
+    lines.append(f'  <switches default="{game.dsw}">')
+    for bit, label in enumerate(dip_labels_for_setname(game.setname, game.parent)):
+        bank = "SW1" if bit < 8 else "SW2"
+        position = bit % 8 + 1
+        lines.append(
+            f'    <dip bits="{bit}" name="{bank}:{position} '
+            f'{escape(label)}" ids="On,Off"/>'
+        )
+    lines.append("  </switches>")
+
+
 def validate_game_contracts(games: tuple[Game, ...] = ALL_GAMES) -> None:
     """Reject descriptors that disagree with their media or feature family."""
     setnames = {game.setname for game in games}
     if len(setnames) != len(games):
         raise ValueError("duplicate System 24 setname")
+
+    for profile, labels in DIP_LABEL_PROFILES.items():
+        if len(labels) != 16:
+            raise ValueError(f"{profile}: expected exactly 16 DIP labels")
+        if len(set(labels)) != 16:
+            raise ValueError(f"{profile}: DIP labels must be unique")
+    if set(DIP_PROFILE_BY_SET) != {
+            "bnzabros", "crkdown", "gground", "ggroundj",
+            "hotrod", "hotrodj", "roughrac", "sspirits"}:
+        raise ValueError("release DIP profile assignment is incomplete")
 
     for game in games:
         if game.parent and game.parent not in setnames:
@@ -648,7 +741,9 @@ def generate(game: Game, out_dir: pathlib.Path) -> pathlib.Path:
         f"  <rotation>{game.rotation}</rotation>",
         f"  <joystick>{escape(controls.joystick)}</joystick>",
         f'  <buttons default="{button_defaults}" names="{button_names}"/>',
-        f'  <switches default="{game.dsw}"/>',
+    ))
+    emit_switches(lines, game)
+    lines.extend((
         # No "type=" attribute: "merged|nonmerged|split" is a copy-pasted
         # placeholder that the mra-tools-c parser accepts, stores, and never
         # acts on -- it shows up verbatim, unfilled, in real-world MRAs

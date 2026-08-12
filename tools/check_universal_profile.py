@@ -44,6 +44,14 @@ CURATED_MRA_FILENAMES = {
     "sspirits": "Scramble Spirits.mra",
 }
 
+CURATED_CLONE_MRA_FILENAMES = {
+    "ggroundj": (
+        "Gain Ground (Japan, 2 Players, Floppy Based, FD1094 317-0058-03b).mra",
+        "gground",
+    ),
+    "hotrodj": ("Hot Rod (Japan, 4 Players).mra", "hotrod"),
+}
+
 # Hardware contracts behind the three visible fixes that exposed stale RBF
 # packaging.  These checks deliberately name behavior, not commit hashes, so
 # they survive rebases while preventing a future manifest/profile cleanup from
@@ -61,6 +69,7 @@ REQUIRED_FIX_CONTRACTS = {
         "if (p2_pend)                 read_grant = 3'd2;",  # Crack Down hand
     ),
     "Arcade-SegaSystem24.sv": (
+        '"DIP;"',
         '"P1,CRT Adjust;"',
         '"H0O[22:20],Analog Steering Speed,100%,25%,50%,75%,125%,150%,175%;"',
         '"H0O[24:23],Steering Response,Normal,Fine,Fast;"',
@@ -102,11 +111,55 @@ def required_text(
     return node.text.strip()
 
 
+def validate_switches(
+    root: ET.Element,
+    path: pathlib.Path,
+    setname: str,
+    expected_default: str,
+    parent: str = "",
+) -> None:
+    switches = root.find("switches")
+    if switches is None or switches.attrib.get("default") != expected_default:
+        raise ValueError(f"{path}: stale DIP defaults")
+    dips = switches.findall("dip")
+    if len(dips) != 16:
+        raise ValueError(f"{path}: expected exactly 16 physical DIP entries")
+    expected_labels = gen_mra.dip_labels_for_setname(setname, parent)
+    actual_bits: list[int] = []
+    actual_names: list[str] = []
+    for dip in dips:
+        try:
+            bit = int(dip.attrib["bits"])
+        except (KeyError, ValueError) as error:
+            raise ValueError(f"{path}: invalid DIP bit metadata") from error
+        actual_bits.append(bit)
+        actual_names.append(dip.attrib.get("name", ""))
+        if dip.attrib.get("ids") != "On,Off":
+            raise ValueError(f"{path}: DIP bit {bit} must use ids On,Off")
+    if actual_bits != list(range(16)) or len(set(actual_bits)) != 16:
+        raise ValueError(f"{path}: DIP bits must be unique and ordered 0..15")
+    expected_names = [
+        f"SW{1 if bit < 8 else 2}:{bit % 8 + 1} {label}"
+        for bit, label in enumerate(expected_labels)
+    ]
+    if actual_names != expected_names:
+        raise ValueError(f"{path}: stale physical DIP labels/profile")
+
+
 def validate_mras(mra_dir: pathlib.Path) -> None:
     expected = {game.setname: game for game in gen_mra.GAMES}
     actual: dict[str, tuple[pathlib.Path, ET.Element]] = {}
     if set(CURATED_MRA_FILENAMES) != set(expected):
         raise ValueError("curated MRA filename map does not match GAMES")
+    expected_filenames = set(CURATED_MRA_FILENAMES.values()) | {
+        filename for filename, _parent in CURATED_CLONE_MRA_FILENAMES.values()
+    }
+    actual_filenames = {path.name for path in mra_dir.glob("*.mra")}
+    if actual_filenames != expected_filenames:
+        raise ValueError(
+            f"curated MRA inventory mismatch: expected={sorted(expected_filenames)}, "
+            f"actual={sorted(actual_filenames)}"
+        )
     for expected_setname, filename in CURATED_MRA_FILENAMES.items():
         path = mra_dir / filename
         if not path.is_file():
@@ -165,9 +218,7 @@ def validate_mras(mra_dir: pathlib.Path) -> None:
                 f"{path}: ROM indexes {sorted(indexes)} != "
                 f"{sorted(expected_indexes)}"
             )
-        switches = root.find("switches")
-        if switches is None or switches.attrib.get("default") != game.dsw:
-            raise ValueError(f"{path}: stale DIP defaults")
+        validate_switches(root, path, setname, game.dsw, game.parent)
         controls = gen_mra.mra_controls_for(game)
         if required_text(root.find("joystick"), "joystick", path) != controls.joystick:
             raise ValueError(f"{path}: stale joystick metadata")
@@ -179,29 +230,34 @@ def validate_mras(mra_dir: pathlib.Path) -> None:
                 buttons.attrib.get("default") != expected_defaults):
             raise ValueError(f"{path}: stale button metadata")
 
-    # The supported Japan clone is curated outside the parent-only release
-    # matrix. It must retain the parent's hardware descriptor and controls.
-    japan_path = mra_dir / "Hot Rod (Japan, 4 Players).mra"
-    japan_root = ET.parse(japan_path).getroot()
-    if required_text(japan_root.find("setname"), "setname", japan_path) != "hotrodj":
-        raise ValueError(f"{japan_path}: stale setname")
-    if required_text(japan_root.find("parent"), "parent", japan_path) != "hotrod":
-        raise ValueError(f"{japan_path}: stale parent")
-    hotrod = expected["hotrod"]
-    japan_descriptor = bytes.fromhex(required_text(
-        japan_root.find("./rom[@index='0']/part"), "descriptor", japan_path
-    ))
-    if japan_descriptor != gen_mra.descriptor_bytes(hotrod):
-        raise ValueError(f"{japan_path}: stale Hot Rod descriptor")
-    hotrod_controls = gen_mra.mra_controls_for(hotrod)
-    if required_text(japan_root.find("joystick"), "joystick", japan_path) != \
-            hotrod_controls.joystick:
-        raise ValueError(f"{japan_path}: stale Hot Rod joystick metadata")
-    japan_buttons = japan_root.find("buttons")
-    if japan_buttons is None or (
-            japan_buttons.attrib.get("names") != ",".join(hotrod_controls.names) or
-            japan_buttons.attrib.get("default") != ",".join(hotrod_controls.defaults)):
-        raise ValueError(f"{japan_path}: stale Hot Rod button metadata")
+    # Supported Japan clones are curated outside the parent-only generator
+    # matrix. They retain parent hardware descriptors/controls/defaults, while
+    # their DIP labels resolve through explicit clone metadata.
+    for clone, (filename, parent) in CURATED_CLONE_MRA_FILENAMES.items():
+        clone_path = mra_dir / filename
+        clone_root = ET.parse(clone_path).getroot()
+        if required_text(clone_root.find("setname"), "setname", clone_path) != clone:
+            raise ValueError(f"{clone_path}: stale setname")
+        if required_text(clone_root.find("parent"), "parent", clone_path) != parent:
+            raise ValueError(f"{clone_path}: stale parent")
+        parent_game = expected[parent]
+        clone_descriptor = bytes.fromhex(required_text(
+            clone_root.find("./rom[@index='0']/part"), "descriptor", clone_path
+        ))
+        if clone_descriptor != gen_mra.descriptor_bytes(parent_game):
+            raise ValueError(f"{clone_path}: stale {parent} descriptor")
+        controls = gen_mra.mra_controls_for(parent_game)
+        if required_text(clone_root.find("joystick"), "joystick", clone_path) != \
+                controls.joystick:
+            raise ValueError(f"{clone_path}: stale {parent} joystick metadata")
+        buttons = clone_root.find("buttons")
+        if buttons is None or (
+                buttons.attrib.get("names") != ",".join(controls.names) or
+                buttons.attrib.get("default") != ",".join(controls.defaults)):
+            raise ValueError(f"{clone_path}: stale {parent} button metadata")
+        validate_switches(
+            clone_root, clone_path, clone, parent_game.dsw, parent
+        )
 
 
 def validate_single_build(repo: pathlib.Path) -> None:

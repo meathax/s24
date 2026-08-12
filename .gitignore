@@ -56,12 +56,14 @@
 # /releases/ instead and are tracked normally.
 /mra/
 
-# Keep the six curated parent MRAs visible to Git. Clone experiments and local
-# generator output remain ignored here and under mra/ above.
+# Keep the eight curated release MRAs visible to Git. Other clone experiments
+# and local generator output remain ignored here and under mra/ above.
 /releases/*.mra
 !/releases/Bonanza Bros.mra
 !/releases/Crack Down.mra
+!/releases/Gain Ground (Japan, 2 Players, Floppy Based, FD1094 317-0058-03b).mra
 !/releases/Gain Ground.mra
+!/releases/Hot Rod (Japan, 4 Players).mra
 !/releases/Hot Rod (World, 3 Players, Turbo).mra
 !/releases/Rough Racer.mra
 !/releases/Scramble Spirits.mra

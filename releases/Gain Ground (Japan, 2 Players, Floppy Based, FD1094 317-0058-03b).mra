@@ -1,16 +1,17 @@
 <misterromdescription>
-  <name>Scramble Spirits (World, Floppy Based)</name>
+  <name>Gain Ground (Japan, 2 Players, Floppy Based, FD1094 317-0058-03b)</name>
   <homebrew>no</homebrew>
   <bootleg>no</bootleg>
   <mameversion>0288</mameversion>
-  <setname>sspirits</setname>
+  <setname>ggroundj</setname>
+  <parent>gground</parent>
   <year>1988</year>
   <manufacturer>Sega</manufacturer>
   <rbf>Arcade-SegaSystem24</rbf>
-  <resolution>15kHz</resolution>
   <rotation>vertical (ccw)</rotation>
+  <resolution>15kHz</resolution>
   <joystick>8-way</joystick>
-  <buttons default="A,B,Start,Select,R,L,Y" names="Fire,Formation,-,-,-,-,Start,Coin,Service,Test,Pause"/>
+  <buttons default="A,B,Start,Select,R,L,Y" names="Attack,Special,-,-,-,-,Start,Coin,Service,Test,Pause"/>
   <switches default="FF FD">
     <dip bits="0" name="SW1:1 Coin A Rate 1/4" ids="On,Off"/>
     <dip bits="1" name="SW1:2 Coin A Rate 2/4" ids="On,Off"/>
@@ -22,26 +23,29 @@
     <dip bits="7" name="SW1:8 Coin B Rate 4/4" ids="On,Off"/>
     <dip bits="8" name="SW2:1 Flip Screen" ids="On,Off"/>
     <dip bits="9" name="SW2:2 Demo Sounds" ids="On,Off"/>
-    <dip bits="10" name="SW2:3 Lives 1/2" ids="On,Off"/>
-    <dip bits="11" name="SW2:4 Lives 2/2" ids="On,Off"/>
-    <dip bits="12" name="SW2:5 Bonus Life 1/2" ids="On,Off"/>
-    <dip bits="13" name="SW2:6 Bonus Life 2/2" ids="On,Off"/>
-    <dip bits="14" name="SW2:7 Difficulty 1/2" ids="On,Off"/>
-    <dip bits="15" name="SW2:8 Difficulty 2/2" ids="On,Off"/>
+    <dip bits="10" name="SW2:3 Difficulty 1/3" ids="On,Off"/>
+    <dip bits="11" name="SW2:4 Difficulty 2/3" ids="On,Off"/>
+    <dip bits="12" name="SW2:5 Difficulty 3/3" ids="On,Off"/>
+    <dip bits="13" name="SW2:6 Time Limit 1/2" ids="On,Off"/>
+    <dip bits="14" name="SW2:7 Time Limit 2/2" ids="On,Off"/>
+    <dip bits="15" name="SW2:8 Clock of Time Limit" ids="On,Off"/>
   </switches>
-  <rom index="1" zip="sspirits.zip" md5="none">
+  <rom index="1" zip="gground.zip|ggroundj.zip" md5="none">
     <interleave output="16">
       <part name="epr-12187.ic2" crc="e83783f3" map="01"/>
       <part name="epr-12186.ic1" crc="ce76319d" map="10"/>
     </interleave>
   </rom>
-  <rom index="3" zip="sspirits.zip" md5="none">
-    <part name="ds3-5000-02-.img" crc="179b98e9"/>
+  <rom index="3" zip="gground.zip|ggroundj.zip" md5="none">
+    <part name="ds3-5000-03b.img" crc="7200dac9"/>
     <part repeat="253952">00</part>
   </rom>
   <nvram index="8" size="2097152"/>
-  <rom index="0">
-    <part>0100002D00000000</part>
+  <rom index="4" zip="gground.zip|ggroundj.zip" md5="none">
+    <part name="317-0058-03b.key" crc="84aecdba"/>
   </rom>
-  <mratimestamp>20260808</mratimestamp>
+  <rom index="0">
+    <part>0500002D01000000</part>
+  </rom>
+  <mratimestamp>20260806</mratimestamp>
 </misterromdescription>

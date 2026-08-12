@@ -25,6 +25,7 @@ implementation is still being validated against original hardware; see
 | Pause | On-screen pause toggle |
 | Pause when OSD is open | Automatically pause while the MiSTer menu is open |
 | Service Mode | Enter the game's service/test mode |
+| DIP Switches | Per-game physical SW1/SW2 switches, including coinage and gameplay settings |
 | Rotation | Normal, rotate 90° counter-clockwise, rotate 90° clockwise |
 | Scaling | Normal, vertical integer, horizontal-and-vertical integer |
 | Scandoubler Fx | None, CRT 25%, CRT 50%, CRT 75% |
