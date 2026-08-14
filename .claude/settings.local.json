@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "PowerShell(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:/Users/meath/.claude/skills/mister-rbf-build/scripts/quartus_flow.ps1\" -Action Discover -ProjectRoot \"C:/Users/meath/OneDrive/Documents/Sega System 24\" -Project \"Arcade-SegaSystem24\" -Revision \"rtl\")",
-      "PowerShell(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:/Users/meath/.claude/skills/mister-rbf-build/scripts/quartus_flow.ps1\" -Action Discover -ProjectRoot \"C:/Users/meath/OneDrive/Documents/Sega System 24\" -Project \"Arcade-SegaSystem24\")"
-    ]
-  }
-}

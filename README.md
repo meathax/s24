@@ -14,8 +14,7 @@ data. You must provide your own legally obtained dumps.
 | MiSTer target | MiSTer DE10-Nano / Cyclone V with one 128 MB SDRAM module |
 
 The active verification scope is the six MAME parent sets listed below. The
-implementation is still being validated against original hardware; see
-[`docs/status.md`](docs/status.md) for the current engineering status.
+implementation is still being validated against original hardware.
 
 ## Features in the OSD
 

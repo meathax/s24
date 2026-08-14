@@ -68,16 +68,21 @@
 !/releases/Rough Racer.mra
 !/releases/Scramble Spirits.mra
 
-# MISTER-FPGA-AUTOPILOT-V4 START
-.mister/runs/*
-!.mister/runs/.gitkeep
-.mister/cache/*
-!.mister/cache/.gitkeep
-.mister/reports/*
-!.mister/reports/.gitkeep
-.mister/state.json
-.mister/release/
-.mister/provenance/licenses/*
-!.mister/provenance/licenses/.gitkeep
-.mister/donors/
-# MISTER-FPGA-AUTOPILOT-V4 END
+# Local-only development material. The published repository follows the
+# Template_MiSTer layout: core source (rtl/, sys/, the Quartus project files,
+# files.qip), releases/, README.md and LICENSE. Everything below stays on the
+# development machine.
+/artifacts/
+/verif/
+/tools/
+/docs/
+/scenarios/
+/24/
+/.mister/
+/.mame_mcp/
+/.playwright-mcp/
+/.codex-mister-build/
+/.claude/
+/AGENTS.md
+/NOTES.md
+/core-debug.toml

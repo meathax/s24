@@ -1,9 +1,0 @@
-﻿=== Codex MiSTer Quartus worker started 2026-08-10T10:56:20.9953003+10:00 ===
-Working directory: Q:\
-Executable: D:\Q17\quartus\bin64\quartus_sh.exe
-Arguments: --flow compile Arcade-SegaSystem24 -c Arcade-SegaSystem24
-
-WORKER ERROR: Another Quartus/Qsys process became active before launch: quartus_sta (PID 27664)
-Another Quartus/Qsys process became active before launch: quartus_sta (PID 27664)
-
-=== Worker finished 2026-08-10T10:56:21.0943732+10:00; exit code 1 ===
